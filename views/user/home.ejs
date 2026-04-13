@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AJAX — Autumn/Winter 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+tailwind.config = {
+  theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-x:hidden}
+:root{--dark:#1C1C1C;--cream:#F5F0E8;--warm:#FAFAF8;--stone:#9B8E83;--mist:#EAE5DC;--bdr:rgba(28,28,28,0.1)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ccc}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:999;transition:background .5s,padding .4s,box-shadow .4s;padding:1.5rem 3rem}
+#navbar.scrolled{background:rgba(250,250,248,.96);backdrop-filter:blur(16px);padding:.9rem 3rem;box-shadow:0 1px 0 var(--bdr)}
+@media(max-width:767px){#navbar{padding:1.2rem 1.5rem}#navbar.scrolled{padding:.8rem 1.5rem}}
+.logo{font-family:'Playfair Display',serif;font-weight:400;font-size:1.45rem;letter-spacing:.42em;text-transform:uppercase;text-decoration:none;transition:color .4s}
+.nav-link{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;position:relative;padding-bottom:3px;transition:opacity .25s}
+.nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:currentColor;transition:width .4s cubic-bezier(.25,.1,.25,1)}
+.nav-link:hover::after{width:100%}.nav-link:hover{opacity:.6}
+.nav-icon{cursor:pointer;transition:transform .25s,opacity .25s;display:flex;align-items:center;justify-content:center;background:none;border:none;padding:6px}
+.nav-icon:hover{transform:scale(1.1);opacity:.55}
+
+/* MOBILE MENU */
+#mob-menu{display:none;position:fixed;inset:0;z-index:998;background:var(--warm);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem}
+#mob-menu.open{display:flex}
+#mob-close{position:absolute;top:1.5rem;right:1.75rem;background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--dark);opacity:.5;transition:opacity .2s}
+#mob-close:hover{opacity:1}
+.mob-link{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;color:var(--dark);text-decoration:none;transition:opacity .25s}
+.mob-link:hover{opacity:.35}
+
+/* HERO */
+.hero{position:relative;height:100svh;min-height:640px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1920&q=90&auto=format&fit=crop') center 25%/cover;animation:bgz 14s ease-out both}
+@keyframes bgz{from{transform:scale(1.1)}to{transform:scale(1)}}
+.hero-ov{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,.38) 0%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.52) 100%)}
+.hero-c{position:relative;z-index:2;text-align:center;color:#fff;padding:0 1.5rem}
+.h-eye{font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:1.5rem;animation:fu 1.2s cubic-bezier(.16,1,.3,1) .15s both}
+.h-title{font-family:'Playfair Display',serif;font-weight:400;font-style:italic;font-size:clamp(3rem,9vw,8.5rem);line-height:1;letter-spacing:-.01em;margin-bottom:2.5rem;animation:fu 1.2s cubic-bezier(.16,1,.3,1) .4s both}
+.h-title span{font-style:normal;display:block}
+.h-cta{animation:fu 1.2s cubic-bezier(.16,1,.3,1) .65s both}
+@keyframes fu{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.btn-w{display:inline-block;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.65);padding:.95rem 2.8rem;transition:background .35s,color .35s,border-color .35s}
+.btn-w:hover{background:#fff;color:var(--dark);border-color:#fff}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;color:rgba(255,255,255,.45);z-index:2;animation:fu 1s 1.3s both}
+.scroll-hint span{font-size:.5rem;letter-spacing:.3em;text-transform:uppercase}
+.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,rgba(255,255,255,.45),transparent);animation:sl 2s ease-in-out infinite}
+@keyframes sl{0%,100%{opacity:.4}50%{opacity:.85}}
+
+/* TICKER */
+.ticker{overflow:hidden;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:var(--cream);padding:.75rem 0}
+.ticker-t{display:flex;gap:3.5rem;animation:tk 28s linear infinite;width:max-content}
+@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.t-item{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--stone);white-space:nowrap;flex-shrink:0}
+
+/* SECTION UTILS */
+.sec-eye{font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem}
+.sec-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(1.9rem,3.5vw,2.8rem);line-height:1.15;color:var(--dark)}
+.btn-dark{display:inline-block;text-decoration:none;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dark);border:1px solid var(--dark);padding:.85rem 2.3rem;transition:background .35s,color .35s;cursor:pointer;background:none}
+.btn-dark:hover{background:var(--dark);color:#fff}
+
+/* CATEGORY GRID */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:340px 340px;gap:10px}
+.cat-left{grid-row:1/3}
+.cat-rt,.cat-rb{grid-column:2}
+@media(max-width:767px){
+  .cat-grid{grid-template-columns:1fr;grid-template-rows:auto}
+  .cat-left{grid-row:auto;height:360px}
+  .cat-rt,.cat-rb{grid-column:1;height:260px}
+}
+.cat-tile{position:relative;overflow:hidden;cursor:pointer;display:block;height:100%}
+.cat-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s cubic-bezier(.25,.1,.25,1)}
+.cat-tile:hover img{transform:scale(1.06)}
+.cat-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62) 0%,rgba(0,0,0,.04) 55%);transition:background .45s}
+.cat-tile:hover .cat-ov{background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 55%)}
+.cat-txt{position:absolute;bottom:0;left:0;right:0;padding:1.75rem 1.6rem;color:#fff}
+.cat-lbl{font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.5rem;display:block}
+.cat-name{font-family:'Playfair Display',serif;font-weight:400;font-size:2rem;line-height:1}
+.cat-rb .cat-name,.cat-rt .cat-name{font-size:1.55rem}
+.cat-arr{display:inline-flex;align-items:center;gap:6px;font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:.65rem;transition:gap .3s,color .3s}
+.cat-tile:hover .cat-arr{gap:12px;color:#fff}
+
+/* PRODUCT GRID */
+.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem}
+@media(max-width:1024px){.prod-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.prod-grid{gap:.7rem}}
+.p-card{cursor:pointer}
+.p-thumb{position:relative;overflow:hidden;background:var(--cream);aspect-ratio:3/4}
+.p-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.25,.1,.25,1)}
+.p-card:hover .p-thumb img{transform:scale(1.07)}
+.p-ov{position:absolute;inset:0;background:rgba(28,28,28,0);transition:background .4s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.3rem}
+.p-card:hover .p-ov{background:rgba(28,28,28,.07)}
+.p-qa{font-size:.53rem;letter-spacing:.18em;text-transform:uppercase;background:#fff;color:var(--dark);padding:.65rem 1.4rem;border:none;cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.p-card:hover .p-qa{opacity:1;transform:translateY(0)}
+.p-tag{position:absolute;top:.75rem;left:.75rem;font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;background:var(--dark);color:#fff;padding:.28rem .62rem}
+.p-info{padding:.8rem 0 0}
+.p-name{font-size:.76rem;font-weight:300;color:var(--dark);margin-bottom:.28rem;letter-spacing:.02em}
+.p-price{font-size:.76rem;color:var(--stone)}
+
+/* EDITORIAL */
+.ed-split{display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:767px){.ed-split{grid-template-columns:1fr}}
+.ed-img{overflow:hidden}
+.ed-img img{width:100%;height:100%;min-height:480px;object-fit:cover;display:block;filter:grayscale(100%);transition:transform 1s cubic-bezier(.25,.1,.25,1),filter .6s}
+.ed-img:hover img{transform:scale(1.04);filter:grayscale(15%)}
+.ed-txt{background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
+@media(max-width:1024px){.ed-txt{padding:3.5rem 2.5rem}}
+@media(max-width:767px){.ed-txt{padding:3rem 1.75rem}}
+.ed-q{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--stone);margin-bottom:1.5rem}
+.ed-rule{width:36px;height:1px;background:var(--stone);opacity:.45;margin-bottom:1.75rem}
+.ed-h{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2.2rem,3.5vw,3.4rem);line-height:1.1;margin-bottom:1.4rem}
+.ed-body{font-size:.8rem;font-weight:300;line-height:1.95;color:var(--stone);max-width:330px;margin-bottom:2.5rem}
+
+/* FEATURES STRIP */
+.feat-strip{background:var(--cream);padding:3.5rem 3rem}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;max-width:1320px;margin:0 auto;text-align:center}
+@media(max-width:640px){.feat-grid{grid-template-columns:1fr;gap:2rem}}
+.feat-icon{width:42px;height:42px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.feat-title{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:.5rem}
+.feat-desc{font-size:.72rem;font-weight:300;color:var(--stone);line-height:1.75}
+
+/* JOURNAL */
+.journal-grid{columns:4;column-gap:8px}
+@media(max-width:1024px){.journal-grid{columns:3}}
+@media(max-width:640px){.journal-grid{columns:2}}
+.j-item{break-inside:avoid;margin-bottom:8px;overflow:hidden;display:block;cursor:pointer}
+.j-item img{width:100%;display:block;transition:transform .7s cubic-bezier(.25,.1,.25,1),filter .4s;filter:brightness(.96)}
+.j-item:hover img{transform:scale(1.06);filter:brightness(1)}
+
+/* NEWSLETTER */
+.nl{background:var(--dark);padding:7rem 2rem}
+.nl-in{max-width:520px;margin:0 auto;text-align:center}
+.nl-eye{font-size:.54rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:1rem}
+.nl-h{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:400;color:#fff;line-height:1.15;margin-bottom:.9rem}
+.nl-sub{font-size:.78rem;font-weight:300;color:rgba(255,255,255,.42);line-height:1.8;margin-bottom:2.5rem}
+.nl-form{display:flex;max-width:400px;margin:0 auto}
+.nl-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-right:none;color:#fff;padding:.88rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.68rem;letter-spacing:.04em;outline:none;transition:border-color .3s}
+.nl-inp::placeholder{color:rgba(255,255,255,.28)}
+.nl-inp:focus{border-color:rgba(255,255,255,.5)}
+.nl-btn{background:#fff;color:var(--dark);border:1px solid #fff;font-family:'DM Sans',sans-serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;padding:.88rem 1.4rem;cursor:pointer;transition:background .3s;white-space:nowrap}
+.nl-btn:hover{background:var(--cream);border-color:var(--cream)}
+.nl-note{font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:1.2rem}
+
+/* FOOTER */
+footer{background:var(--warm);border-top:1px solid var(--bdr);padding:5rem 3rem 2.5rem}
+@media(max-width:640px){footer{padding:3.5rem 1.5rem 2rem}}
+.ft-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3.5rem}
+@media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem 2.5rem}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr 1fr;gap:1.75rem 1.25rem}}
+.ft-logo{font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:.35em;color:var(--dark);margin-bottom:.9rem;display:block;text-decoration:none}
+.ft-desc{font-size:.7rem;font-weight:300;line-height:1.9;color:var(--stone);max-width:195px;margin-bottom:1.4rem}
+.ft-socials{display:flex;gap:.75rem}
+.ft-soc{width:30px;height:30px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,background .3s;text-decoration:none;color:var(--stone)}
+.ft-soc:hover{border-color:var(--dark);background:var(--dark);color:#fff}
+.ft-col-h{font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1.15rem}
+.ft-link{display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.6rem;letter-spacing:.02em;transition:color .25s}
+.ft-link:hover{color:var(--dark)}
+.ft-bot{border-top:1px solid var(--bdr);padding-top:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
+.ft-copy{font-size:.58rem;color:var(--stone);letter-spacing:.07em}
+.ft-legal{display:flex;gap:1.4rem}
+.ft-legal a{font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+.ft-legal a:hover{color:var(--dark)}
+
+/* SCROLL REVEAL */
+.sr{opacity:0;transform:translateY(34px);transition:opacity .85s cubic-bezier(.16,1,.3,1),transform .85s cubic-bezier(.16,1,.3,1)}
+.sr.in{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+/* SECTION PADDING */
+.sec{padding:5.5rem 3rem;max-width:1320px;margin:0 auto}
+@media(max-width:767px){.sec{padding:3.5rem 1.25rem}}
+.sec-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem}
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div id="mob-menu">
+  <button id="mob-close">✕</button>
+  <a href="#" class="mob-link">Home</a>
+  <a href="#" class="mob-link">Men</a>
+  <a href="#" class="mob-link">Women</a>
+  <a href="#" class="mob-link">New Arrivals</a>
+  <a href="#" class="mob-link">Journal</a>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <a href="#" class="logo" id="logo" style="color:#fff">AJAX</a>
+
+    <div class="hidden md:flex items-center gap-10" id="nav-links">
+      <a href="#" class="nav-link" data-nav style="color:#fff">HOME</a>
+      <a href="#" class="nav-link" data-nav style="color:#fff">MEN</a>
+      <a href="#" class="nav-link" data-nav style="color:#fff">WOMEN</a>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button class="nav-icon" title="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Wishlist">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Cart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </button>
+      <button id="accountBtn" class="nav-icon hidden md:flex" title="Account">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </button>
+       <div id="accountDropdown" class="absolute right-0 mt-4 w-60 bg-white border border-[var(--bdr)] shadow-[0_12px_48px_rgba(28,28,28,0.08)] opacity-0 invisible translate-y-[-8px] transition-all duration-300 z-50 py-2">
+          <div class="px-5 py-4 border-b border-[var(--bdr)] mb-1">
+            <p class="text-[0.52rem] tracking-[0.25em] uppercase text-[var(--stone)] mb-1.5">Quick Access</p>
+            <p class="font-serif text-[1.15rem] text-[var(--dark)] leading-tight">My Account</p>
+          </div>
+          <a href="/profile" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Overview
+          </a>
+          <a href="/address" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Addresses
+          </a>
+          <a href="/orders" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            My Orders
+          </a>
+          <div class="h-px bg-[var(--bdr)] my-1.5"></div>
+      <button id="logoutBtn" style="all:unset; cursor:pointer; width:100%;">
+    <div class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[#B04040] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+    Sign out
+    </div>
+    </button>
+        </div>
+      </div>
+      <button id="ham" class="nav-icon md:hidden">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+          <line x1="0" y1="1"  x2="20" y2="1"  stroke="#fff" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="7"  x2="20" y2="7"  stroke="#fff" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="13" x2="20" y2="13" stroke="#fff" stroke-width="1.5" class="hl"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-ov"></div>
+  <div class="hero-c">
+    <p class="h-eye">New Collection — AW 2026</p>
+    <h1 class="h-title"><span>Autumn /</span>Winter 2026</h1>
+    <div class="h-cta"><a href="#" class="btn-w">Shop the Collection</a></div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-t">
+    <span class="t-item">Free Shipping on Orders Over ₹5,000</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">New Collection — Autumn / Winter 2026</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">Sustainably Crafted · Endlessly Refined</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">Complimentary Returns Within 30 Days</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">Free Shipping on Orders Over ₹5,000</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">New Collection — Autumn / Winter 2026</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">Sustainably Crafted · Endlessly Refined</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+    <span class="t-item">Complimentary Returns Within 30 Days</span>
+    <span class="t-item" style="opacity:.4">✦</span>
+  </div>
+</div>
+
+<!-- CATEGORY GRID -->
+<div class="sec">
+  <div class="sec-hdr sr">
+    <div>
+      <p class="sec-eye">Shop by Category</p>
+      <h2 class="sec-title">Explore the Range</h2>
+    </div>
+    <a href="#" class="btn-dark">View All</a>
+  </div>
+
+  <div class="cat-grid sr d1">
+    <!-- MEN large -->
+    <a href="#" class="cat-tile cat-left">
+      <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=800&q=85&auto=format&fit=crop" alt="Men" loading="lazy"/>
+      <div class="cat-ov"></div>
+      <div class="cat-txt">
+        <span class="cat-lbl">Explore Collection</span>
+        <div class="cat-name">Men</div>
+        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
+      </div>
+    </a>
+    <!-- WOMEN -->
+    <a href="#" class="cat-tile cat-rt">
+      <img src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=700&q=80&auto=format&fit=crop" alt="Women" loading="lazy"/>
+      <div class="cat-ov"></div>
+      <div class="cat-txt">
+        <span class="cat-lbl">Explore Collection</span>
+        <div class="cat-name">Women</div>
+        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
+      </div>
+    </a>
+    <!-- NEW ARRIVALS -->
+    <a href="#" class="cat-tile cat-rb">
+      <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&q=80&auto=format&fit=crop" alt="New Arrivals" loading="lazy"/>
+      <div class="cat-ov"></div>
+      <div class="cat-txt">
+        <span class="cat-lbl">Just Dropped</span>
+        <div class="cat-name">New Arrivals</div>
+        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- BEST SELLERS -->
+<div class="sec" style="padding-top:2rem">
+  <div class="sec-hdr sr">
+    <div>
+      <p class="sec-eye">Curated for You</p>
+      <h2 class="sec-title">Best Sellers</h2>
+    </div>
+    <a href="#" class="btn-dark hidden md:inline-block">View All</a>
+  </div>
+
+  <div class="prod-grid">
+    <div class="p-card sr d1">
+      <div class="p-thumb">
+        <span class="p-tag">New</span>
+        <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80&auto=format&fit=crop" alt="Tailored Wool Coat" loading="lazy"/>
+        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
+      </div>
+      <div class="p-info"><p class="p-name">Tailored Wool Overcoat</p><p class="p-price">₹12,500</p></div>
+    </div>
+    <div class="p-card sr d2">
+      <div class="p-thumb">
+        <span class="p-tag">Bestseller</span>
+        <img src="https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=600&q=80&auto=format&fit=crop" alt="Cashmere Turtleneck" loading="lazy"/>
+        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
+      </div>
+      <div class="p-info"><p class="p-name">Cashmere Turtleneck</p><p class="p-price">₹8,200</p></div>
+    </div>
+    <div class="p-card sr d3">
+      <div class="p-thumb">
+        <img src="https://images.unsplash.com/photo-1594938298603-c8148c4b8c5e?w=600&q=80&auto=format&fit=crop" alt="Slim Trousers" loading="lazy"/>
+        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
+      </div>
+      <div class="p-info"><p class="p-name">Slim Tailored Trousers</p><p class="p-price">₹6,400</p></div>
+    </div>
+    <div class="p-card sr d4">
+      <div class="p-thumb">
+        <span class="p-tag">Essential</span>
+        <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80&auto=format&fit=crop" alt="Linen Shirt" loading="lazy"/>
+        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
+      </div>
+      <div class="p-info"><p class="p-name">Oversized Linen Shirt</p><p class="p-price">₹4,900</p></div>
+    </div>
+  </div>
+
+  <div class="sr" style="text-align:center;margin-top:3rem">
+    <a href="#" class="btn-dark">View All Best Sellers</a>
+  </div>
+</div>
+
+<!-- EDITORIAL SPLIT -->
+<section style="margin:1rem 0">
+  <div class="ed-split">
+    <div class="ed-img sr">
+      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=85&auto=format&fit=crop" alt="Modern Essentials" loading="lazy"/>
+    </div>
+    <div class="ed-txt sr d2">
+      <p class="ed-q">"Wear less. Choose better."</p>
+      <div class="ed-rule"></div>
+      <h2 class="ed-h">Modern<br><em>Essentials</em></h2>
+      <p class="ed-body">Refined silhouettes built for the contemporary wardrobe. Each piece is designed with one intention — lasting elegance. No trend, no noise. Just considered clothing made to endure.</p>
+      <a href="#" class="btn-dark" style="align-self:flex-start">Explore Collection</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES STRIP -->
+<div class="feat-strip">
+  <div class="feat-grid sr">
+    <div>
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
+          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+      </div>
+      <p class="feat-title">Free Shipping</p>
+      <p class="feat-desc">Complimentary delivery on all orders above ₹5,000 across India.</p>
+    </div>
+    <div>
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
+          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </div>
+      <p class="feat-title">Easy Returns</p>
+      <p class="feat-desc">Hassle-free returns within 30 days of receiving your order.</p>
+    </div>
+    <div>
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <p class="feat-title">Quality Promise</p>
+      <p class="feat-desc">Every garment crafted from sustainably sourced, premium materials.</p>
+    </div>
+  </div>
+</div>
+
+<!-- VISUAL JOURNAL -->
+<div class="sec">
+  <div class="sec-hdr sr">
+    <div>
+      <p class="sec-eye">Inspiration</p>
+      <h2 class="sec-title">Visual Journal</h2>
+    </div>
+    <a href="#" style="font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-bottom:1px solid var(--bdr);padding-bottom:2px;transition:color .25s,border-color .25s" onmouseover="this.style.color='var(--dark)';this.style.borderColor='var(--dark)'" onmouseout="this.style.color='var(--stone)';this.style.borderColor='var(--bdr)'">Follow on Instagram</a>
+  </div>
+
+  <div class="journal-grid sr d1">
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:2/3"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1605289982774-9a6fef564df8?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:4/3"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
+    <div class="j-item"><img src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="nl">
+  <div class="nl-in sr">
+    <p class="nl-eye">Stay Connected</p>
+    <h2 class="nl-h">Join the <em>Circle</em></h2>
+    <p class="nl-sub">Early access to new drops, exclusive offers,<br>and editorial stories. No noise — only what matters.</p>
+    <div class="nl-form">
+      <input type="email" class="nl-inp" placeholder="Your email address"/>
+      <button class="nl-btn">Subscribe</button>
+    </div>
+    <p class="nl-note">No spam. Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-grid">
+    <div>
+      <a href="#" class="ft-logo">AJAX</a>
+      <p class="ft-desc">Modern luxury clothing for the conscious wardrobe. Minimal. Enduring. Refined.</p>
+      <div class="ft-socials">
+        <a href="#" class="ft-soc" title="Instagram">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="X">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.5 4.3 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="Pinterest">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.236 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.181-.78 1.172-4.97 1.172-4.97s-.299-.598-.299-1.482c0-1.388.806-2.428 1.808-2.428.852 0 1.265.64 1.265 1.408 0 .858-.546 2.14-.828 3.33-.236.995.499 1.806 1.476 1.806 1.771 0 3.135-1.867 3.135-4.56 0-2.385-1.715-4.052-4.163-4.052-2.838 0-4.503 2.128-4.503 4.328 0 .857.33 1.776.742 2.278a.3.3 0 0 1 .07.285c-.076.315-.245.993-.278 1.132-.045.183-.149.222-.344.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.22-5.19 6.22-1.013 0-1.966-.527-2.292-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <p class="ft-col-h">Shop</p>
+      <a href="#" class="ft-link">Men</a>
+      <a href="#" class="ft-link">Women</a>
+      <a href="#" class="ft-link">New Arrivals</a>
+      <a href="#" class="ft-link">Best Sellers</a>
+      <a href="#" class="ft-link">Sale</a>
+      <a href="#" class="ft-link">Gift Cards</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Help</p>
+      <a href="#" class="ft-link">Shipping & Returns</a>
+      <a href="#" class="ft-link">Size Guide</a>
+      <a href="#" class="ft-link">Care Guide</a>
+      <a href="#" class="ft-link">Contact Us</a>
+      <a href="#" class="ft-link">Track Order</a>
+      <a href="#" class="ft-link">FAQ</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Company</p>
+      <a href="#" class="ft-link">About AJAX</a>
+      <a href="#" class="ft-link">Sustainability</a>
+      <a href="#" class="ft-link">Careers</a>
+      <a href="#" class="ft-link">Press</a>
+      <a href="#" class="ft-link">Stores</a>
+      <a href="#" class="ft-link">Journal</a>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <p class="ft-copy">© 2026 AJAX. All rights reserved.</p>
+    <div class="ft-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Navbar scroll */
+const nb=document.getElementById('navbar'),lg=document.getElementById('logo');
+const navs=document.querySelectorAll('[data-nav]'),svgs=document.querySelectorAll('.ns'),hls=document.querySelectorAll('.hl');
+function setNav(dark){
+  const c=dark?'#1C1C1C':'#fff';
+  lg.style.color=c;
+  navs.forEach(e=>e.style.color=c);
+  svgs.forEach(s=>s.setAttribute('stroke',c));
+  hls.forEach(l=>l.setAttribute('stroke',c));
+  if(dark){nb.classList.add('scrolled')}else{nb.classList.remove('scrolled')}
+}
+window.addEventListener('scroll',()=>setNav(window.scrollY>70),{passive:true});
+setNav(false);
+
+/* Mobile menu */
+document.getElementById('ham').addEventListener('click',()=>document.getElementById('mob-menu').classList.add('open'));
+document.getElementById('mob-close').addEventListener('click',()=>document.getElementById('mob-menu').classList.remove('open'));
+
+/* Scroll reveal */
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:0.07,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+
+/* Account Dropdown */
+const accBtn=document.getElementById('accountBtn'),accDrop=document.getElementById('accountDropdown');
+if(accBtn&&accDrop){
+  accBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    accDrop.classList.toggle('opacity-0');
+    accDrop.classList.toggle('invisible');
+    accDrop.classList.toggle('translate-y-[-8px]');
+  });
+  document.addEventListener('click',e=>{
+    if(!accDrop.contains(e.target)&&!accBtn.contains(e.target)){
+      accDrop.classList.add('opacity-0','invisible','translate-y-[-8px]');
+    }
+  });
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById("logoutBtn").addEventListener("click", function () {
+
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You will be logged out",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#1C1C1C",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, logout"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/logout";
+    }
+  });
+
+});
+</script>
+
+<script>
+window.history.pushState(null, "", window.location.href);
+window.onpopstate = function () {
+  window.location.reload();
+};
+</script>
+    <script src="/js/user/home.js"></script>
+</body>
+</html>

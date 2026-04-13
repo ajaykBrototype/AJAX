@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Portal — AJAX</title>
+<meta name="description" content="Secure administrative portal for AJAX authorized personnel."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+  }
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#F5F0E8;color:#1C1C1C;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* ── FADE IN ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeIn .8s cubic-bezier(.16,1,.3,1) both}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}
+
+/* ── CARD ── */
+.login-card{background:#fff;width:100%;max-width:440px;padding:3.5rem 2.8rem;box-shadow:0 24px 64px rgba(28,28,28,0.06)}
+
+/* ── INPUTS ── */
+.field-label{font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:#555;margin-bottom:.75rem;display:block;font-weight:500}
+.field-input{width:100%;border:1px solid rgba(28,28,28,0.1);padding:1rem 1.1rem;font-size:.85rem;font-weight:300;outline:none;transition:border-color .25s,box-shadow .25s}
+.field-input:focus{border-color:#1C1C1C;box-shadow:0 0 0 3px rgba(28,28,28,0.03)}
+.field-input.error{border-color:#B04040}
+
+/* ── BUTTON ── */
+.btn-primary{width:100%;background:#111;color:#fff;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;padding:1.25rem;transition:background .3s,transform .2s;cursor:pointer;border:none;margin-top:1rem}
+.btn-primary:hover{background:#333;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+
+/* ── UTILS ── */
+.error-msg{font-size:.6rem;color:#B04040;margin-top:.4rem;display:none}
+.error-msg.show{display:block}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .login-card{padding:2.5rem 1.5rem;box-shadow:none}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="text-center mb-10 animate-in d1">
+    <h1 class="font-serif text-[2.2rem] md:text-[2.6rem] leading-[1.1] mb-2 tracking-[0.05em] uppercase">AJAX ADMIN<br>PORTAL</h1>
+    <p class="text-[0.52rem] tracking-[0.35em] text-[#9B8E83] uppercase">Secure access for authorized personnel only.</p>
+  </header>
+
+  <!-- ── LOGIN CARD ── -->
+  <main class="login-card animate-in d2">
+    <form id="adminLoginForm" novalidate>
+      
+      <div class="mb-8 overflow-hidden">
+        <label for="email" class="field-label">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="field-input" 
+          placeholder="admin@ajax.com"
+          autocomplete="email"
+        />
+        <p class="error-msg" id="err-email">Please enter a valid administrator email.</p>
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-4 relative">
+        <label for="password" class="field-label">Password</label>
+        <div class="relative">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="field-input pr-12" 
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button type="button" id="eye-toggle" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9B8E83] hover:text-[#111] transition-colors">
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p class="error-msg" id="err-password">Invalid password credentials.</p>
+      </div>
+
+      <!-- Forgot Password
+      <div class="text-right mb-10">
+        <a href="#" class="text-[0.55rem] tracking-[0.2em] font-medium text-[#B04040] uppercase border-b border-transparent hover:border-[#B04040] transition-all">Forgot Password?</a>
+      </div> -->
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-primary" id="submit-btn">
+        Sign in to dashboard
+      </button>
+
+    </form>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="mt-12 animate-in d3">
+    <p class="text-[0.55rem] tracking-[0.28em] text-[#9B8E83] uppercase">© 2026 AJAX. All rights reserved.</p>
+  </footer>
+
+  <script>
+
+      // ─── VALIDATION ───
+     
+document.addEventListener('DOMContentLoaded', () => {
+
+  const form = document.getElementById('adminLoginForm');
+  const emailInput = document.getElementById('email');
+  const passInput = document.getElementById('password');
+  const submitBtn = document.getElementById('submit-btn');
+  const eyeBtn = document.getElementById('eye-toggle');
+
+  // 👁 toggle
+  eyeBtn.addEventListener('click', () => {
+    passInput.type = passInput.type === 'password' ? 'text' : 'password';
+  });
+
+  // error handler
+  const showError = (field, show, message = "") => {
+    const input = document.getElementById(field);
+    const error = document.getElementById('err-' + field);
+
+    if (message) error.innerText = message;
+
+    if (show) {
+      input.classList.add('error');
+      error.classList.add('show');
+    } else {
+      input.classList.remove('error');
+      error.classList.remove('show');
+    }
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      submitBtn.innerText = "Signing in...";
+      submitBtn.disabled = true;
+
+      const res = await axios.post("/admin/login", {
+        email: emailInput.value,
+        password: passInput.value
+      });
+
+      window.location.href = res.data.redirect;
+
+    } catch (err) {
+      const errors = err.response?.data?.errors;
+
+      showError('email', false);
+      showError('password', false);
+
+      if (errors?.email) {
+        showError('email', true, errors.email[0]);
+      }
+
+      if (errors?.password) {
+        showError('password', true, errors.password[0]);
+      }
+
+      if (errors?.general) {
+        alert(errors.general[0]);
+      }
+
+      submitBtn.innerText = "Sign in to dashboard";
+      submitBtn.disabled = false;
+    }
+  });
+
+});
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 3s linear infinite; }
+  </style>
+  
+</body>
+</html>

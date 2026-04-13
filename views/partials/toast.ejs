@@ -1,0 +1,62 @@
+<!-- ══ GLOBAL TOAST COMPONENT ══ -->
+<div id="global-toast" class="global-toast">
+  <div class="toast-indicator" id="toast-indicator">
+    <!-- Icon injected via JS -->
+  </div>
+  <span id="global-toast-msg" class="toast-message"></span>
+</div>
+
+<style>
+  .global-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    z-index: 9999;
+    background: #1C1C1C; /* var(--dark) */
+    color: #fff;
+    padding: 0.85rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s;
+    opacity: 0;
+    white-space: nowrap;
+    box-shadow: 0 12px 48px rgba(28,28,28,0.15);
+    visibility: hidden;
+  }
+
+  .global-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Success Variant */
+  .global-toast.success .toast-indicator {
+    color: #5C8C6A; /* Fresh green */
+  }
+
+  /* Error Variant */
+  .global-toast.error .toast-indicator {
+    color: #B04040; /* Refined red */
+  }
+
+  /* Warning Variant */
+  .global-toast.warning .toast-indicator {
+    color: #C47A2A; /* Warm orange */
+  }
+
+  .toast-indicator svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+  }
+</style>
+
+<!-- Requires the external toast JS script to be loaded on pages that use this partial -->
+<script src="/js/utils/toast.js"></script>

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Edit Address — AJAX</title>
+<meta name="description" content="Edit your delivery address for your AJAX account."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-x:hidden}
+:root{--dark:#1C1C1C;--cream:#F5F0E8;--warm:#FAFAF8;--stone:#9B8E83;--mist:#EAE5DC;--bdr:rgba(28,28,28,0.1);--accent:#C9A96E}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ccc}
+
+/* ── NAVBAR ── */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:999;padding:.9rem 3rem;background:rgba(250,250,248,.97);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--bdr)}
+@media(max-width:767px){#navbar{padding:.8rem 1.25rem}}
+.logo{font-family:'Playfair Display',serif;font-weight:400;font-size:1.45rem;letter-spacing:.42em;text-transform:uppercase;text-decoration:none;color:var(--dark)}
+.nav-link{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;color:var(--dark);position:relative;padding-bottom:3px;transition:opacity .25s}
+.nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--dark);transition:width .4s cubic-bezier(.25,.1,.25,1)}
+.nav-link:hover::after{width:100%}.nav-link:hover{opacity:.55}
+.nav-icon{cursor:pointer;transition:transform .25s,opacity .25s;display:flex;align-items:center;justify-content:center;background:none;border:none;padding:6px;color:var(--dark);text-decoration:none}
+.nav-icon:hover{transform:scale(1.1);opacity:.5}
+
+/* ── MOBILE MENU ── */
+#mob-menu{display:none;position:fixed;inset:0;z-index:998;background:var(--warm);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem}
+#mob-menu.open{display:flex}
+#mob-close{position:absolute;top:1.5rem;right:1.75rem;background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--dark);opacity:.5;transition:opacity .2s}
+#mob-close:hover{opacity:1}
+.mob-link{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;color:var(--dark);text-decoration:none;transition:opacity .25s}
+.mob-link:hover{opacity:.35}
+
+/* ── PAGE FADE-IN ── */
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.page-in{animation:pageIn .7s cubic-bezier(.16,1,.3,1) both}
+.d1{animation-delay:.06s}.d2{animation-delay:.14s}.d3{animation-delay:.22s}.d4{animation-delay:.30s}.d5{animation-delay:.38s}
+
+/* ── SIDEBAR ── */
+.sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-left:2px solid transparent;transition:color .25s,border-color .25s,background .25s}
+.sidebar-link:hover{color:var(--dark);background:rgba(28,28,28,.03)}
+.sidebar-link.active{color:var(--dark);border-left-color:var(--dark);background:rgba(28,28,28,.04);font-weight:500}
+
+/* ── BUTTONS ── */
+.btn-dark{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:var(--dark);border:1px solid var(--dark);padding:.85rem 2rem;transition:background .3s,transform .2s;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;text-decoration:none}
+.btn-dark:hover{background:#333;transform:translateY(-1px)}
+.btn-dark:active{transform:translateY(0)}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dark);background:none;border:1px solid var(--bdr);padding:.85rem 2rem;transition:border-color .3s,transform .2s;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;text-decoration:none}
+.btn-ghost:hover{border-color:var(--dark);transform:translateY(-1px)}
+.btn-ghost:active{transform:translateY(0)}
+
+/* ── MOBILE SIDEBAR DRAWER ── */
+#sidebar-drawer{display:none;position:fixed;inset:0;z-index:997}
+#sidebar-drawer.open{display:block}
+.drawer-bg{position:absolute;inset:0;background:rgba(28,28,28,.4);backdrop-filter:blur(4px)}
+.drawer-panel{position:absolute;left:0;top:0;bottom:0;width:72vw;max-width:280px;background:#fff;padding:2rem 1.25rem;animation:drawerIn .35s cubic-bezier(.16,1,.3,1) both;border-right:1px solid var(--bdr)}
+@keyframes drawerIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+
+/* ── FORM FIELDS ── */
+.form-group{display:flex;flex-direction:column;gap:.45rem}
+.form-label{font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;color:var(--stone);font-weight:500;display:flex;align-items:center;gap:.4rem}
+.form-label .req{color:#B04040;font-size:.65rem}
+.form-input{width:100%;padding:.78rem 1rem;background:#fff;border:1px solid var(--bdr);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:300;outline:none;transition:border-color .25s,box-shadow .25s;-webkit-appearance:none;appearance:none}
+.form-input::placeholder{color:#C5BFBA}
+.form-input:focus{border-color:var(--dark);box-shadow:0 0 0 3px rgba(28,28,28,.05)}
+.form-input:hover:not(:focus){border-color:rgba(28,28,28,.25)}
+.form-textarea{resize:vertical;min-height:110px;line-height:1.7}
+
+/* ── FORM CARD ── */
+.form-card{background:#fff;border:1px solid var(--bdr);padding:2.5rem 2.5rem 2.8rem}
+@media(max-width:640px){.form-card{padding:1.75rem 1.25rem 2rem}}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{display:flex;align-items:center;gap:.5rem;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:1.6rem}
+.breadcrumb a{color:var(--stone);text-decoration:none;transition:color .2s}
+.breadcrumb a:hover{color:var(--dark)}
+.breadcrumb span{font-weight:500;color:var(--dark)}
+
+/* ── SECTION DIVIDER ── */
+.section-label{font-size:.52rem;letter-spacing:.32em;text-transform:uppercase;color:var(--stone);margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.65rem}
+.section-label::before{content:'';width:18px;height:1px;background:var(--stone)}
+
+/* ── GRID ── */
+.field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.field-grid-4{display:grid;grid-template-columns:1fr 1.1fr 1fr 1.2fr;gap:1.25rem}
+@media(max-width:820px){.field-grid-4{grid-template-columns:1fr 1fr;gap:1rem}}
+@media(max-width:540px){.field-grid-2,.field-grid-4{grid-template-columns:1fr}}
+
+/* ── VALIDATION ── */
+.field-error{font-size:.62rem;color:#B04040;letter-spacing:.04em;margin-top:.2rem;display:none}
+.form-input.error{border-color:#B04040;box-shadow:0 0 0 3px rgba(176,64,64,.06)}
+.form-input.success{border-color:#5C8C6A}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .main-pad{padding:2rem 1.25rem !important}
+  .page-title{font-size:1.9rem !important}
+  .btn-row{flex-direction:column-reverse !important}
+  .btn-row .btn-dark,.btn-row .btn-ghost{width:100%;justify-content:center}
+}
+
+/* ── FLOATING LABEL FX ── */
+.input-wrap{position:relative}
+
+/* ── ACCOUNT DROPDOWN ── */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 20px);
+  right: 0;
+  width: 240px;
+  background: #fff;
+  border: 1px solid var(--bdr);
+  box-shadow: 0 12px 48px rgba(28,28,28,0.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  z-index: 50;
+  padding: 0.5rem 0;
+}
+.dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.4rem;
+  font-size: 0.72rem;
+  font-weight: 300;
+  color: var(--dark);
+  text-decoration: none;
+  transition: background 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s, transform 0.25s;
+}
+.dropdown-item:hover {
+  background: var(--cream);
+  transform: translateX(3px);
+}
+.dropdown-divider {
+  height: 1px;
+  background: var(--bdr);
+  margin: 0.4rem 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ MOBILE MENU ══ -->
+<div id="mob-menu">
+  <button id="mob-close">✕</button>
+  <a href="/" class="mob-link">Home</a>
+  <a href="#" class="mob-link">Men</a>
+  <a href="#" class="mob-link">Women</a>
+  <a href="#" class="mob-link">New Arrivals</a>
+  <a href="#" class="mob-link">Journal</a>
+</div>
+
+<!-- ══ MOBILE SIDEBAR DRAWER ══ -->
+<div id="sidebar-drawer">
+  <div class="drawer-bg" id="drawer-bg"></div>
+  <div class="drawer-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
+      <span style="font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:var(--stone)">Account</span>
+      <button id="drawer-close" style="background:none;border:none;cursor:pointer;color:var(--stone);font-size:1.1rem">✕</button>
+    </div>
+    <a href="/profile" class="sidebar-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a href="/address" class="sidebar-link active" style="margin-top:.1rem">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Address
+    </a>
+    <a href="/orders" class="sidebar-link" style="margin-top:.1rem">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      My Orders
+    </a>
+    <a href="/wishlist" class="sidebar-link" style="margin-top:.1rem">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Wishlist
+    </a>
+    <a href="/wallet" class="sidebar-link" style="margin-top:.1rem">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Wallet
+    </a>
+    <div style="height:1px;background:var(--bdr);margin:1.5rem 0"></div>
+    <a href="/logout" class="sidebar-link" style="color:#B04040">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</div>
+
+<!-- ══ NAVBAR ══ -->
+<nav id="navbar">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <a href="/" class="logo">AJAX</a>
+
+    <div class="hidden md:flex items-center gap-10">
+      <a href="#" class="nav-link">MEN</a>
+      <a href="#" class="nav-link">WOMEN</a>
+      <a href="#" class="nav-link">KIDS</a>
+      <a href="#" class="nav-link">BEAUTY</a>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button class="nav-icon" title="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <a href="/wishlist" class="nav-icon hidden md:flex" title="Wishlist">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </a>
+      <a href="/cart" class="nav-icon hidden md:flex" title="Cart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </a>
+      <div class="relative hidden md:flex items-center">
+        <button id="accountBtn" class="nav-icon" title="Account">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <div id="accountDropdown" class="dropdown-menu">
+          <div style="padding:1rem 1.4rem;border-bottom:1px solid var(--bdr);margin-bottom:0.4rem">
+            <p style="font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--stone);margin-bottom:0.35rem">Quick Access</p>
+            <p style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--dark);line-height:1.2">My Account</p>
+          </div>
+          <a href="/profile" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Overview
+          </a>
+          <a href="/address" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Addresses
+          </a>
+          <a href="/orders" class="dropdown-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            My Orders
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item" style="color:#B04040">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </a>
+        </div>
+      </div>
+      <button id="ham" class="nav-icon md:hidden">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" stroke-width="1.5"/><line x1="0" y1="7" x2="20" y2="7" stroke="currentColor" stroke-width="1.5"/><line x1="0" y1="13" x2="20" y2="13" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button id="sidebar-toggle" class="nav-icon md:hidden" title="Account">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ PAGE BODY ══ -->
+<div style="padding-top:65px;min-height:100vh;">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
+
+    <!-- SIDEBAR (desktop) -->
+    <aside class="hidden md:block" style="width:220px;min-height:calc(100vh - 65px);border-right:1px solid var(--bdr);padding:3.5rem 0;flex-shrink:0;position:sticky;top:65px;">
+      <nav style="display:flex;flex-direction:column;gap:.1rem;">
+        <a href="/profile" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </a>
+        <a href="/address" class="sidebar-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Address
+        </a>
+        <a href="/orders" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          My Orders
+        </a>
+        <a href="/wishlist" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Wishlist
+        </a>
+        <a href="/wallet" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Wallet
+        </a>
+        <div style="height:1px;background:var(--bdr);margin:1.75rem 1rem"></div>
+        <a href="/logout" class="sidebar-link" style="color:#B04040">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-pad" style="flex:1;padding:3.5rem 3rem;min-width:0;">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb page-in d1">
+        <a href="/address">My Addresses</a>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Edit Address</span>
+      </div>
+
+      <!-- Page Header -->
+      <div class="page-in d2" style="margin-bottom:2.5rem;">
+        <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">Account Overview</p>
+        <h1 class="page-title" style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);line-height:1.1;color:var(--dark)">Edit Address</h1>
+      </div>
+
+      <!-- ── FORM CARD ── -->
+      <form id="editAddressForm" data-id="<%= address._id %>" novalidate>
+
+        <div class="form-card page-in d3">
+
+          <!-- Section: Shipping Information -->
+          <p class="section-label">Shipping Information</p>
+
+          <!-- Row 1: Full Name + Mobile -->
+          <div class="field-grid-2" style="margin-bottom:1.25rem;">
+            <div class="form-group">
+              <label for="name" class="form-label">
+                Full Name <span class="req">*</span>
+              </label>
+              <div class="input-wrap">
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="form-input"
+                  placeholder="Johnathan Doe"
+                  value="<%= address.name %>"
+                  autocomplete="name"
+                  maxlength="60"
+                />
+              </div>
+              <span class="field-error" id="err-name">Please enter your full name.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="phone" class="form-label">
+                Mobile Number <span class="req">*</span>
+              </label>
+              <div class="input-wrap">
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="form-input"
+                  placeholder="+91 98765 43210"
+                  value="<%= address.phone %>"
+                  autocomplete="tel"
+                  maxlength="20"
+                />
+              </div>
+              <span class="field-error" id="err-phone">Enter a valid mobile number.</span>
+            </div>
+          </div>
+
+          <!-- Row 2: Pincode / City / State / Country -->
+          <div class="field-grid-4" style="margin-bottom:1.25rem;">
+            <div class="form-group">
+              <label for="pincode" class="form-label">
+                Pincode <span class="req">*</span>
+              </label>
+              <input
+                type="text"
+                id="pincode"
+                name="pincode"
+                class="form-input"
+                placeholder="10001"
+                value="<%= address.pincode %>"
+                autocomplete="postal-code"
+                maxlength="10"
+                inputmode="numeric"
+              />
+              <span class="field-error" id="err-pincode">Enter a valid pincode.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="city" class="form-label">
+                City <span class="req">*</span>
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                class="form-input"
+                placeholder="New York"
+                value="<%= address.city %>"
+                autocomplete="address-level2"
+                maxlength="50"
+              />
+              <span class="field-error" id="err-city">Enter your city.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="state" class="form-label">
+                State <span class="req">*</span>
+              </label>
+              <input
+                type="text"
+                id="state"
+                name="state"
+                class="form-input"
+                placeholder="NY"
+                value="<%= address.state %>"
+                autocomplete="address-level1"
+                maxlength="50"
+              />
+              <span class="field-error" id="err-state">Enter your state.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="country" class="form-label">
+                Country <span class="req">*</span>
+              </label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                class="form-input"
+                placeholder="India"
+                value="<%= address.country %>"
+                autocomplete="country-name"
+                maxlength="50"
+              />
+              <span class="field-error" id="err-country">Enter your country.</span>
+            </div>
+<div class="form-group" style="margin-bottom:1.25rem;">
+            <label for="street" class="form-label">
+              Street / Road <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              id="street"
+              name="street"
+              value="<%=address.street%>"
+              class="form-input"
+              placeholder="e.g. MG Road, Connaught Place"
+              autocomplete="address-line1"
+              maxlength="150"
+            />
+            <span class="field-error" id="err-street">Please enter your street / road.</span>
+          </div>        
+          </div>
+
+          <!-- Row 3: Full Address Line -->
+          <div class="form-group" style="margin-bottom:2rem;">
+            <label for="addressLine" class="form-label">
+              House No., Building Name, Area, Street <span class="req">*</span>
+            </label>
+            <textarea
+              id="addressLine"
+              name="addressLine"
+              class="form-input form-textarea"
+              placeholder="e.g. Flat 4B, Sunrise Apartments, MG Road, Connaught Place..."
+              autocomplete="street-address"
+              maxlength="250"
+            ><%= address.area %></textarea>
+            <span class="field-error" id="err-addressLine">Please enter your detailed address.</span>
+          </div>
+
+        </div><!-- /form-card -->
+
+        <!-- ── ACTION BUTTONS ── -->
+        <div class="btn-row page-in d5" style="display:flex;align-items:center;justify-content:flex-end;gap:1rem;margin-top:2rem;flex-wrap:wrap;">
+          <a href="/address" class="btn-ghost">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Cancel
+          </a>
+          <button type="submit" class="btn-dark" id="submitBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+    </main>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer style="background:var(--warm);border-top:1px solid var(--bdr);padding:4rem 3rem 2rem;">
+  <div style="max-width:1320px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;" class="hidden md:grid">
+      <div>
+        <a href="/" style="font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:.35em;color:var(--dark);margin-bottom:.9rem;display:block;text-decoration:none">AJAX</a>
+        <p style="font-size:.7rem;font-weight:300;line-height:1.9;color:var(--stone);max-width:195px">Modern luxury clothing for the conscious wardrobe. Minimal. Enduring. Refined.</p>
+      </div>
+      <div>
+        <p style="font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1rem">Shop</p>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Men</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Women</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">New Arrivals</a>
+      </div>
+      <div>
+        <p style="font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1rem">Help</p>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Shipping &amp; Returns</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Size Guide</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Contact Us</a>
+      </div>
+      <div>
+        <p style="font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1rem">Company</p>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">About AJAX</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Sustainability</a>
+        <a href="#" style="display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.55rem;transition:color .2s" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--stone)'">Careers</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--bdr);padding-top:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
+      <p style="font-size:.58rem;color:var(--stone);letter-spacing:.07em">© 2026 AJAX. All rights reserved.</p>
+      <div style="display:flex;gap:1.4rem;">
+        <a href="#" style="font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em">Privacy Policy</a>
+        <a href="#" style="font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em">Terms of Use</a>
+        <a href="#" style="font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ GLOBAL TOAST ══ -->
+<%- include('../partials/toast') %>
+
+<script>
+/* ── Mobile menu ── */
+document.getElementById('ham').addEventListener('click', () => {
+  document.getElementById('mob-menu').classList.add('open');
+});
+document.getElementById('mob-close').addEventListener('click', () => {
+  document.getElementById('mob-menu').classList.remove('open');
+});
+
+/* ── Sidebar drawer ── */
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
+  document.getElementById('sidebar-drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+document.getElementById('drawer-close').addEventListener('click', () => {
+  document.getElementById('sidebar-drawer').classList.remove('open');
+  document.body.style.overflow = '';
+});
+document.getElementById('drawer-bg').addEventListener('click', () => {
+  document.getElementById('sidebar-drawer').classList.remove('open');
+  document.body.style.overflow = '';
+});
+
+/* ── Account Dropdown ── */
+const accBtn = document.getElementById('accountBtn');
+const accDrop = document.getElementById('accountDropdown');
+if(accBtn && accDrop) {
+  accBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    accDrop.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!accDrop.contains(e.target) && !accBtn.contains(e.target)) {
+      accDrop.classList.remove('open');
+    }
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  document.getElementById('mob-menu').classList.remove('open');
+  document.getElementById('sidebar-drawer').classList.remove('open');
+  if(accDrop) accDrop.classList.remove('open');
+  document.body.style.overflow = '';
+});
+
+/* ── Form Validation & Submission ── */
+const rules = {
+  name:    { required:true, minLen:2,  label:'full name' },
+  phone:   { required:true, pattern:/^[+\d][\d\s\-().]{6,19}$/, label:'mobile number' },
+  pincode: { required:true, pattern:/^\d{4,10}$/, label:'pincode' },
+  city:    { required:true, minLen:2,  label:'city' },
+  state:   { required:true, minLen:2,  label:'state' },
+  country: { required:true, minLen:2,  label:'country' },
+  addressLine: { required:true, minLen:5,  label:'detailed address' }
+};
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  const err = document.getElementById('err-' + id);
+  if(el) el.classList.add('error');
+  if (err) { err.textContent = msg; err.style.display = 'block'; }
+}
+function clearError(id) {
+  const el = document.getElementById(id);
+  const err = document.getElementById('err-' + id);
+  if(el) el.classList.remove('error');
+  if (err) err.style.display = 'none';
+}
+function validateField(id) {
+  const rule = rules[id];
+  if (!rule) return true;
+  const el = document.getElementById(id);
+  if(!el) return true;
+  
+  const val = el.value.trim();
+  if (rule.required && !val) {
+    showError(id, `Please enter your ${rule.label}.`);
+    return false;
+  }
+  if (val && rule.minLen && val.length < rule.minLen) {
+    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1)} is too short.`);
+    return false;
+  }
+  if (val && rule.pattern && !rule.pattern.test(val)) {
+    showError(id, `Enter a valid ${rule.label}.`);
+    return false;
+  }
+  clearError(id);
+  return true;
+}
+
+Object.keys(rules).forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('blur', () => validateField(id));
+  el.addEventListener('input', () => {
+    if (el.classList.contains('error')) validateField(id);
+  });
+});
+
+document.getElementById('editAddressForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  let valid = true;
+  Object.keys(rules).forEach(id => {
+    if (!validateField(id)) valid = false;
+  });
+
+  if (!valid) {
+    const firstErr = document.querySelector('.form-input.error');
+    if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  const orgHtml = btn.innerHTML;
+  btn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    </svg>
+    Saving...
+  `;
+  btn.disabled = true;
+  btn.style.opacity = '.7';
+
+  try {
+    const addressId = this.getAttribute('data-id');
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    const response = await fetch(`/edit-address/${addressId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    if (result.success || response.ok) {
+        if(typeof showToast === 'function') {
+           showToast('success', 'Address updated successfully.');
+        }
+        setTimeout(() => {
+          window.location.href = '/address';
+        }, 1200);
+    } else {
+        btn.innerHTML = orgHtml;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        if(typeof showToast === 'function') showToast('error', result.message || 'Failed to update address.');
+    }
+  } catch (error) {
+    console.error(error);
+    btn.innerHTML = orgHtml;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    if(typeof showToast === 'function') showToast('error', 'An error occurred. Please try again.');
+  }
+});
+
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+
+</body>
+</html>

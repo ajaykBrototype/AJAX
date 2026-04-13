@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Profile</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+
+<body class="bg-[#f6f4f1] min-h-screen flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-white border-r hidden md:block p-6">
+    <h1 class="text-xl font-semibold mb-8 tracking-widest">AJAX</h1>
+
+    <nav class="space-y-4 text-sm">
+      <a href="/profile" class="flex items-center gap-2 font-medium text-black">
+        ● Profile
+      </a>
+      <a href="#" class="block text-gray-400">Address</a>
+      <a href="#" class="block text-gray-400">My Orders</a>
+      <a href="#" class="block text-gray-400">Wishlist</a>
+      <a href="#" class="block text-gray-400">Wallet</a>
+    </nav>
+
+    <div class="mt-10 text-red-500 text-sm">
+      <a href="/logout">Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8 md:p-14">
+
+    <!-- HEADER -->
+    <div class="mb-10">
+      <h2 class="text-4xl font-semibold mb-2">Edit Your Profile</h2>
+      <p class="text-gray-400 text-sm tracking-wide">
+        UPDATE YOUR PERSONAL DETAILS
+      </p>
+    </div>
+
+    <!-- PROFILE IMAGE -->
+    <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
+
+      <div class="w-40 h-40 rounded-full overflow-hidden bg-gray-200 shadow">
+        <img 
+          id="previewImage"
+            src="<%= user && user.profileImage ? user.profileImage : '/images/default-user.png' %>"
+          class="w-full h-full object-cover"
+/>
+      </div>
+
+      <div class="flex gap-4">
+        <label class="bg-black text-white px-6 py-2 cursor-pointer hover:opacity-80 transition">
+          Change Photo
+          <input type="file" id="imageInput" name="profileImage" class="hidden" />
+        </label>
+
+        <button onclick="removeImage()"
+          class="border px-6 py-2 hover:bg-gray-100 transition">
+          Remove
+        </button>
+      </div>
+
+    </div>
+
+  <form id="editForm" class="space-y-6 max-w-xl">
+
+  <!-- NAME -->
+  <div>
+    <label class="text-xs text-gray-400">FULL NAME</label>
+    <input type="text" name="name"
+      value="<%= user.name %>"
+      class="w-full border p-3 mt-1 focus:border-black transition" />
+  </div>
+
+  <!-- EMAIL -->
+  <div>
+    <label class="text-xs text-gray-400">EMAIL ADDRESS</label>
+    <input type="email" name="email"
+      value="<%= user.email %>"
+      class="w-full border p-3 mt-1 focus:border-black transition" />
+  </div>
+
+  <!-- PHONE -->
+  <div>
+    <label class="text-xs text-gray-400">PHONE NUMBER</label>
+    <input type="text" name="phone"
+      value="<%= user.phone || '' %>"
+      class="w-full border p-3 mt-1 focus:border-black transition" />
+  </div>
+
+  <!-- DOB -->
+  <div>
+    <label class="text-xs text-gray-400">DATE OF BIRTH</label>
+    <input type="date" name="dob"
+      value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>"
+      class="w-full border p-3 mt-1 focus:border-black transition" />
+  </div>
+
+  <!-- GENDER -->
+  <div>
+    <label class="text-xs text-gray-400">GENDER</label>
+    <select name="gender"
+      class="w-full border p-3 mt-1 focus:border-black transition">
+
+      <option value="">Select Gender</option>
+      <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
+      <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
+      <option value="Other" <%= user.gender === "Other" ? "selected" : "" %>>Other</option>
+
+    </select>
+  </div>
+
+  <!-- NATIONALITY -->
+  <div>
+    <label class="text-xs text-gray-400">NATIONALITY</label>
+    <input type="text" name="nationality"
+      value="<%= user.nationality || '' %>"
+      class="w-full border p-3 mt-1 focus:border-black transition" />
+  </div>
+
+  <!-- BUTTON -->
+  <button class="w-full bg-black text-white py-3 hover:opacity-90 transition">
+    SAVE CHANGES →
+  </button>
+
+</form>
+
+  </main>
+
+  <!-- ══ GLOBAL TOAST ══ -->
+  <%- include('../partials/toast') %>
+
+  <!-- JS -->
+   <script src="/js/common/toast.js"></script> 
+  <script src="/js/user/profile.js"></script>
+  <script>
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button');
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite; display:inline-block; vertical-align:middle; margin-right:8px;">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        SAVING...
+      `;
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        btn.innerHTML = 'SAVED';
+        if(typeof showToast === 'function') {
+          showToast('success', 'Profile updated successfully.');
+        }
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 1500);
+      }, 1000);
+    });
+  </script>
+
+</body>
+</html>

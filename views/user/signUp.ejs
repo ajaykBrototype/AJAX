@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="min-h-screen flex overflow-hidden">
+
+  <!-- LEFT IMAGE -->
+  <div class="hidden md:block w-1/2 h-screen relative overflow-hidden">
+    <img 
+      src="/images/signup.jpg" 
+      class="w-full h-full object-cover"
+    />
+  </div>
+
+  <!-- RIGHT FORM -->
+  <div class="w-full md:w-1/2 flex items-center justify-center bg-[#f5f2ed]">
+
+    <div class="w-full max-w-md p-8">
+
+      <h1 class="text-2xl font-bold mb-6">AJAX</h1>
+
+      <h2 class="text-3xl font-bold mb-2">Create Account</h2>
+      <p class="text-gray-500 mb-6">Join the community — it's free forever.</p>
+
+      <form id="signupForm" class="space-y-4">
+
+        <!-- NAME -->
+        <div>
+          <input type="text" name="name" placeholder="Name"
+            class="w-full p-3 border rounded-lg" />
+          <p id="nameError" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <!-- EMAIL -->
+        <div>
+          <input type="email" name="email" placeholder="Email"
+            class="w-full p-3 border rounded-lg" />
+          <p id="emailError" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="relative">
+          <input type="password" name="password" id="password"
+            class="w-full p-3 border rounded-lg pr-10" placeholder="Password" />
+
+          <span 
+            class="absolute right-3 top-3 cursor-pointer"
+            onclick="togglePassword('password', this)"
+          >👁️</span>
+
+          <p id="passwordError" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="relative">
+          <input type="password" name="confirmPassword" id="confirmPassword"
+            class="w-full p-3 border rounded-lg pr-10" placeholder="Confirm Password" />
+
+          <span 
+            class="absolute right-3 top-3 cursor-pointer"
+            onclick="togglePassword('confirmPassword', this)"
+          >👁️</span>
+
+          <p id="confirmPasswordError" class="text-red-500 text-sm hidden"></p>
+        </div>
+
+        <button class="w-full bg-black text-white py-3 rounded-lg">
+          CREATE ACCOUNT →
+        </button>
+
+      </form>
+      <p class="text-sm text-gray-500 mt-6 text-center">
+    Already have an account? 
+    <a href="/login" class="text-black font-semibold">Sign up</a>
+  </p>
+
+    </div>
+
+  </div>
+
+  <script src="/js/user/signup.js"></script>
+
+  <!-- Global Toast Injection -->
+  <%- include('../partials/toast') %>
+
+</body>
+</html>
