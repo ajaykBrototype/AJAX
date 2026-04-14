@@ -4,6 +4,8 @@ import { success } from "zod";
 export const getAllUsers = async (req, res) => {
     try {
         const searchQuery = req.query.search || "";
+         const status = req.query.status || "all";
+         
         const page=parseInt(req.query.page) ||1;
         const limit=5;
         const skip=(page-1)*limit;
@@ -17,6 +19,11 @@ export const getAllUsers = async (req, res) => {
                 ]
             };
         }
+         if (status === "blocked") {
+                filter.isBlocked = true;
+              } else if (status === "active") {
+              filter.isBlocked = false;
+            }
 
         const users = await User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
         const totalUsers=await User.countDocuments(filter);
@@ -24,6 +31,7 @@ export const getAllUsers = async (req, res) => {
         res.render("admin/users", { 
             users, 
             searchQuery,
+            status,
             currentPage:page,
             totalPages,
             totalUsers

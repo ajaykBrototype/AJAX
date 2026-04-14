@@ -71,15 +71,27 @@ export const forgotPassword = async (req, res) => {
 
 // RESET
 export const resetPassword = async (req, res) => {
-  const result = await resetPasswordService(req.body, req);
+  try {
+    const result = await resetPasswordService(req.body, req);
 
-  if (!result.success) {
-    return res.status(400).json(result);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.json({
+      success: true,
+      redirect: "/login"
+    });
+
+  } catch (err) {
+    console.log("RESET ERROR:", err); // ✅ DEBUG
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Try again."
+    });
   }
-
-  res.json({ success: true, redirect: "/login" });
 };
-
 // LOGIN
 export const loadLogin = (req, res) => {
   const isBlocked = req.query.blocked;
