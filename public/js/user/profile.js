@@ -1,27 +1,34 @@
-    const imageInput = document.getElementById("imageInput");
-    const preview = document.getElementById("previewImage");
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("previewImage");
 
-    imageInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-      }
-    });
+// 🔥 IMAGE PREVIEW
+imageInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+  }
+});
 
-    function removeImage() {
-      preview.src = "/images/default-user.png";
-    }
+// 🔥 REMOVE IMAGE
+function removeImage() {
+  preview.src = "https://via.placeholder.com/150";
+}
 
-    // FORM SUBMIT
+// 🔥 FORM SUBMIT
 document.getElementById('editForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   const form = this;
-  const btn = form.querySelector('button');
+  const btn = document.getElementById("submitBtn");      // 🔥 use id
+  const btnText = document.getElementById("btnText");    // 🔥 text span
+  const loader = document.getElementById("btnLoader");   // 🔥 spinner
+
   const formData = new FormData(form);
 
-  btn.innerText = "Saving...";
+  // 🔥 SHOW SPINNER
   btn.disabled = true;
+  btnText.innerText = "Saving...";
+  loader.classList.remove("hidden");
 
   try {
     const res = await axios.post("/profile/update", formData);
@@ -41,13 +48,15 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
 
       setTimeout(() => {
         window.location.href = "/profile";
-      }, 1200);
+      }, 2000);
     }
 
   } catch (err) {
     showToast("error", err.response?.data?.message || "Something went wrong");
   } finally {
-    btn.innerText = "Save Changes";
+    // 🔥 HIDE SPINNER
     btn.disabled = false;
+    btnText.innerText = "Save Changes →";
+    loader.classList.add("hidden");
   }
 });

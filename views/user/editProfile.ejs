@@ -178,10 +178,16 @@
     </div>
 
     <div class="md:col-span-2 mt-4">
-      <button type="submit"
-        style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;">
-        Save Changes →
-      </button>
+      <button id="submitBtn"
+  style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;"
+  class="flex items-center justify-center gap-3">
+
+  <span id="btnText">Save Changes →</span>
+
+  <!-- 🔥 Spinner -->
+  <span id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+
+</button>
     </div>
 
   </form>
