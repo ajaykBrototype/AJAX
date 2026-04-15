@@ -93,66 +93,99 @@
       </nav>
     </aside>
 
-    <main class="page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
-      
-      <header style="margin-bottom:3rem;">
-        <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">Account Settings</p>
-        <h1 style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);line-height:1.1;color:var(--dark)">Edit Profile</h1>
-      </header>
+<main class="page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
+  
+  <header style="margin-bottom:3rem;">
+    <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">
+      Account Settings
+    </p>
+    <h1 style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);">
+      Edit Profile
+    </h1>
+  </header>
 
-      <div style="display:flex;align-items:center;gap:2.5rem;margin-bottom:3.5rem;background:#fff;border:1px solid var(--bdr);padding:2rem;">
-        <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--bdr);">
-          <img id="previewImage" src="<%= user && user.profileImage ? user.profileImage : '/images/default-user.png' %>" class="w-full h-full object-cover">
-        </div>
-        <div>
-          <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
-            <label style="background:var(--dark);color:#fff;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;cursor:pointer;">
-              Change Photo
-              <input type="file" id="imageInput" name="profileImage" class="hidden" />
-            </label>
-            <button onclick="removeImage()" style="background:none;border:1px solid var(--bdr);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;">Remove</button>
-          </div>
-          <p style="font-size:0.65rem;color:var(--stone);text-transform:uppercase;letter-spacing:0.1em;">JPG or PNG, Max 2MB</p>
-        </div>
+  <!-- 🔥 FORM START -->
+  <form id="editForm" enctype="multipart/form-data"
+    class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8"
+    style="max-width:800px;">
+
+    <!-- 🔥 IMAGE SECTION (NOW INSIDE FORM) -->
+    <div class="md:col-span-2"
+      style="display:flex;align-items:center;gap:2.5rem;margin-bottom:2rem;background:#fff;border:1px solid var(--bdr);padding:2rem;">
+      
+      <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--bdr);">
+        <img id="previewImage"
+          src="<%= user.profileImage || 'https://via.placeholder.com/150' %>"
+          class="w-full h-full object-cover">
       </div>
 
-      <form id="editForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8" style="max-width:800px;">
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Full Name</label>
-          <input type="text" name="name" value="<%= user.name %>" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Email Address</label>
-          <input type="email" name="email" value="<%= user.email %>" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Phone Number</label>
-          <input type="text" name="phone" value="<%= user.phone || '' %>" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Date of Birth</label>
-          <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Gender</label>
-          <select name="gender" class="input-field">
-            <option value="">Select Gender</option>
-            <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
-            <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
-            <option value="Other" <%= user.gender === "Other" ? "selected" : "" %>>Other</option>
-          </select>
-        </div>
-        <div class="flex flex-col">
-          <label style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem">Nationality</label>
-          <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="input-field" />
-        </div>
-        <div class="md:col-span-2 mt-4">
-          <button type="submit" style="width:100%;background:var(--dark);color:#fff;font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;padding:1.2rem;transition:0.3s;" class="flex items-center justify-center gap-3">
-            Save Changes <span>→</span>
+      <div>
+        <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
+          
+          <label style="background:var(--dark);color:#fff;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;cursor:pointer;">
+            Change Photo
+            <!-- ✅ NOW INSIDE FORM -->
+            <input type="file" id="imageInput" name="profileImage" class="hidden" />
+          </label>
+
+          <button type="button" onclick="removeImage()"
+            style="background:none;border:1px solid var(--bdr);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;">
+            Remove
           </button>
+
         </div>
-      </form>
-    </main>
+
+        <p style="font-size:0.65rem;color:var(--stone);text-transform:uppercase;">
+          JPG or PNG, Max 2MB
+        </p>
+      </div>
+    </div>
+
+    <!-- YOUR EXISTING INPUTS -->
+
+    <div class="flex flex-col">
+      <label class="label">Full Name</label>
+      <input type="text" name="name" value="<%= user.name %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Email</label>
+      <input type="email" name="email" value="<%= user.email %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Phone</label>
+      <input type="text" name="phone" value="<%= user.phone || '' %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">DOB</label>
+      <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Gender</label>
+      <select name="gender" class="input-field">
+        <option value="">Select</option>
+        <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
+        <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
+      </select>
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Nationality</label>
+      <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="input-field" />
+    </div>
+
+    <div class="md:col-span-2 mt-4">
+      <button type="submit"
+        style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;">
+        Save Changes →
+      </button>
+    </div>
+
+  </form>
+</main>
   </div>
 </div>
 
@@ -168,20 +201,7 @@
     accBtn.addEventListener('click', (e) => { e.stopPropagation(); accDrop.classList.toggle('open'); });
     document.addEventListener('click', () => accDrop.classList.remove('open'));
   }
-
-  /* Form Logic (Retained) */
-  document.getElementById('editForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = this.querySelector('button');
-    btn.innerHTML = `<svg class="animate-spin-custom" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> SAVING...`;
-    btn.disabled = true;
-
-    setTimeout(() => {
-      btn.innerHTML = 'SAVED';
-      if(typeof showToast === 'function') { showToast('success', 'Profile updated successfully.'); }
-      setTimeout(() => { window.location.href = '/profile'; }, 1500);
-    }, 1000);
-  });
 </script>
+ <script src="/js/user/profile.js"></script>
 </body>
 </html>

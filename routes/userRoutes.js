@@ -12,9 +12,11 @@ import {
   loadProfile,updateProfile,changePassword,
   loadChangePassword
 } from "../controllers/user/profile.controller.js";
-
+import {
+  verifyEmailOtp,
+  resendEmailOtp
+} from "../controllers/user/email.controller.js";
 import { loadAddressPage,loadAddAddressPage,deleteAddress,addAddress,loadEditAddressPage,updateAddress} from "../controllers/user/address.controller.js";
-
 
 import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
@@ -80,6 +82,16 @@ router.get("/home", isLoggedIn, (req, res) => {
 router.get("/profile",noCache, isLoggedIn, loadProfile);
 router.get("/edit-profile",noCache, isLoggedIn, loadEditProfile);
 router.post("/profile/update", isLoggedIn, upload.single("profileImage"), updateProfile);
+
+router.get("/profile/email/verify", isLoggedIn, (req, res) => {
+  if (!req.session.newEmail) {
+    return res.redirect("/profile");
+  }
+  res.render("user/verifyEmailOtp");
+});
+
+router.post("/profile/email/verify", isLoggedIn, verifyEmailOtp);
+router.post("/profile/email/resend-otp", isLoggedIn, resendEmailOtp);
 
 router.get("/change-password",noCache, isLoggedIn, loadChangePassword);
 router.post("/change-password", isLoggedIn, changePassword);

@@ -1,6 +1,9 @@
 import { success } from "zod";
 import User from "../../models/user/userModel.js";
+import { generateOTP } from "../../utils/generateOtp.js"; // adjust path
+import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { changePasswordService } from "../../services/user/profile.service.js";
+import { verifyEmailOtpService, resendEmailOtpService } from "../../services/user/email.service.js";
 export const loadProfile = async (req, res) => {
   try {
     console.log("🔥 PROFILE HIT");
@@ -49,22 +52,51 @@ export const loadEditProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
+    console.log("FILE:", req.file); 
     const userId = req.session.userId;
+    const user = await User.findById(userId);
 
-    const updateData = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      dob: req.body.dob,
-      gender: req.body.gender,
-      nationality: req.body.nationality
-    };
+    const { name, email, phone, dob, gender, nationality } = req.body;
 
-    // ✅ IMAGE SAVE
+    // 🔥 PREPARE DATA
+    const updateData = { name, email, phone, dob, gender, nationality };
+
+    // ✅ IMAGE
     if (req.file) {
       updateData.profileImage = "/uploads/" + req.file.filename;
     }
 
+    // 🔥 EMAIL CHANGE CASE
+    if (email !== user.email) {
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.json({
+          success: false,
+          message: "Email already exists"
+        });
+      }
+
+      const otp = generateOTP();
+
+      // ✅ STORE EVERYTHING
+      req.session.newEmail = email;
+      req.session.emailOtp = otp;
+      req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000;
+
+      // 🔥 THIS IS THE FIX
+      req.session.pendingProfileData = updateData;
+
+      await sendOtpEmail(email, otp);
+
+      return res.json({
+        success: true,
+        requireOtp: true,
+        message: "OTP sent to new email"
+      });
+    }
+
+    // 🔥 NORMAL UPDATE
     await User.findByIdAndUpdate(userId, updateData);
 
     res.json({ success: true });
@@ -75,6 +107,23 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+export const verifyEmailOtp = async (req, res) => {
+  try {
+    const result = await verifyEmailOtpService(req);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.json(result);
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
 
 export const loadChangePassword = (req, res) => {
   res.render("user/changePassword"); // your EJS file name

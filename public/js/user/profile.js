@@ -13,35 +13,41 @@
     }
 
     // FORM SUBMIT
-   document.getElementById("editForm").addEventListener("submit", async (e) => {
+document.getElementById('editForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const formData = new FormData(e.target);
+  const form = this;
+  const btn = form.querySelector('button');
+  const formData = new FormData(form);
 
-  const fileInput = document.getElementById("imageInput");
-
-  if (fileInput.files[0]) {
-    formData.append("profileImage", fileInput.files[0]);
-  }
+  btn.innerText = "Saving...";
+  btn.disabled = true;
 
   try {
-    const res = await axios.post("/profile/update", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
+    const res = await axios.post("/profile/update", formData);
+
+    if (res.data.requireOtp) {
+      showToast("success", "OTP sent to your email");
+
+      setTimeout(() => {
+        window.location.href = "/profile/email/verify";
+      }, 1200);
+
+      return;
+    }
 
     if (res.data.success) {
-      if(typeof showToast === 'function') {
-        showToast('success', 'Profile updated successfully.');
-      }
+      showToast("success", "Profile updated");
+
       setTimeout(() => {
         window.location.href = "/profile";
-      }, 1500);
+      }, 1200);
     }
 
   } catch (err) {
-    console.log(err.response?.data || err.message);
-    if(typeof showToast === 'function') {
-      showToast('error', 'Update failed.');
-    }
+    showToast("error", err.response?.data?.message || "Something went wrong");
+  } finally {
+    btn.innerText = "Save Changes";
+    btn.disabled = false;
   }
 });
