@@ -22,8 +22,7 @@ export const sendOtpEmail = async (email, otp) => {
         <p>This OTP is valid for 2 minutes</p>
       `,
     };
-
-    // ✅ THIS LINE WAS MISSING
+    
     const info = await transporter.sendMail(mailOptions);
 
     console.log("✅ Email sent:", info.response);

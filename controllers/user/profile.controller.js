@@ -1,5 +1,6 @@
 import { success } from "zod";
 import User from "../../models/user/userModel.js";
+import Otp from "../../models/user/otpModel.js";
 import { generateOTP } from "../../utils/generateOtp.js"; // adjust path
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { changePasswordService } from "../../services/user/profile.service.js";
@@ -58,18 +59,19 @@ export const updateProfile = async (req, res) => {
 
     const { name, email, phone, dob, gender, nationality } = req.body;
 
-    // 🔥 PREPARE DATA
     const updateData = { name, email, phone, dob, gender, nationality };
 
-    // ✅ IMAGE
     if (req.file) {
       updateData.profileImage = "/uploads/" + req.file.filename;
     }
+     if (user.googleId) {
+      await User.findByIdAndUpdate(userId, updateData);
+      return res.json({ success: true });
+    }
 
-    // 🔥 EMAIL CHANGE CASE
     if (email !== user.email) {
 
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({ email,  _id: { $ne: userId } });
       if (existingUser) {
         return res.json({
           success: false,
@@ -78,14 +80,23 @@ export const updateProfile = async (req, res) => {
       }
 
       const otp = generateOTP();
+   req.session.newEmail = email;
+     await Otp.findOneAndUpdate(
+  { email: email, type: "email" },
+  {
+    $set: {
+      otp,
+      expiresAt: Date.now() + 2 * 60 * 1000,
+      type: "email"
+    }
+  },
+  { upsert: true }
+);
 
-      // ✅ STORE EVERYTHING
-      req.session.newEmail = email;
-      req.session.emailOtp = otp;
-      req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000;
-
-      // 🔥 THIS IS THE FIX
-      req.session.pendingProfileData = updateData;
+      req.session.pendingProfileData = {
+        ...updateData,
+        email
+      };
 
       await sendOtpEmail(email, otp);
 
@@ -95,8 +106,7 @@ export const updateProfile = async (req, res) => {
         message: "OTP sent to new email"
       });
     }
-
-    // 🔥 NORMAL UPDATE
+       updateData.email = email;
     await User.findByIdAndUpdate(userId, updateData);
 
     res.json({ success: true });

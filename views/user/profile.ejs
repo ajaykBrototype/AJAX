@@ -307,7 +307,9 @@ body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-
             <p style="font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:.9rem">Security Status</p>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;">
               <span style="font-size:.9rem;color:var(--dark)">Password</span>
+              <% if(!user.googleId) {%>
               <a href="/change-password" style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--dark);padding-bottom:1px;transition:opacity .2s" onmouseover="this.style.opacity='.5'" onmouseout="this.style.opacity='1'">Change</a>
+              <%} %>
             </div>
             <p style="font-size:.7rem;font-weight:300;color:var(--stone)">Last updated <%= new Date(user.createdAt) %> ago</p>
           </div>

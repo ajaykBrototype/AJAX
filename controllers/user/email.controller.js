@@ -1,5 +1,13 @@
 import { verifyEmailOtpService, resendEmailOtpService } from "../../services/user/email.service.js";
 
+
+export const loadVerifyEmailPage = (req, res) => {
+  if (!req.session.newEmail) {
+    return res.redirect("/profile");
+  }
+  res.render("user/verifyEmailOtp");
+};
+
 export const verifyEmailOtp = async (req, res) => {
   try {
     const result = await verifyEmailOtpService(req);

@@ -237,7 +237,7 @@
                 </table>
             </div>
 
-            <!-- Footer / Pagination -->
+         
             <div class="p-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-[#FCFCFC]">
                 <p class="text-xs text-brand-muted">
                     Showing <span class="text-brand-text font-bold"><%= (currentPage - 1) * 5 + 1 %></span> 
@@ -281,7 +281,6 @@
 
     </main>
 
-    <!-- Theme Toggle (UI Only) -->
     <div class="glass-dark-toggle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand-text"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
     </div>
@@ -289,7 +288,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Toggle Block User Logic
         async function toggleBlockUser(userId, isBlocked) {
             const action = isBlocked === 'true' ? 'unblock' : 'block';
             
@@ -329,7 +327,6 @@
             }
         }
 
-        // Search Debounce Logic
         let debounceTimer;
         const input = document.getElementById("searchInput");
 

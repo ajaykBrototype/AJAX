@@ -1,46 +1,58 @@
 import User from "../../models/user/userModel.js";
+import Otp from "../../models/user/otpModel.js";
 import { generateOTP } from "../../utils/generateOtp.js";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 
+// 🔹 VERIFY EMAIL OTP
 export const verifyEmailOtpService = async (req) => {
   const { otp } = req.body;
 
-  if (!req.session.emailOtp || !req.session.newEmail) {
+  const userId = req.session.userId;
+  const newEmail = req.session.newEmail;
+
+  if (!userId || !newEmail) {
     return { success: false, message: "Session expired" };
   }
 
-  if (Date.now() > req.session.emailOtpExpiry) {
+  if (!otp) {
+    return { success: false, message: "OTP required" };
+  }
+
+  const record = await Otp.findOne({
+    email: newEmail,
+    type: "email"
+  }).sort({ createdAt: -1 });
+
+  if (!record) {
+    return { success: false, message: "OTP not found" };
+  }
+
+  if (Date.now() > record.expiresAt) {
     return { success: false, message: "OTP expired" };
   }
 
-  if (String(otp) !== String(req.session.emailOtp)) {
+  if (String(otp) !== String(record.otp)) {
     return { success: false, message: "Invalid OTP" };
   }
 
-  const user = await User.findById(req.session.userId);
-
-  if (!user) {
-    return { success: false, message: "User not found" };
-  }
-
   const existingUser = await User.findOne({
-    email: req.session.newEmail
+    email: newEmail,
+    _id: { $ne: userId }
   });
 
   if (existingUser) {
     return { success: false, message: "Email already in use" };
   }
 
- await User.findByIdAndUpdate(req.session.userId, {
-  ...req.session.pendingProfileData,
-  email: req.session.newEmail,
-  isVerified: true
-});
+  // 🔥 DELETE OTP FIRST (security)
+  await Otp.deleteOne({ _id: record._id });
 
-  delete req.session.emailOtp;
+  await User.findByIdAndUpdate(userId, {
+    email: newEmail,
+    isVerified: true
+  });
+
   delete req.session.newEmail;
-  delete req.session.emailOtpExpiry;
-  delete req.session.pendingProfileData;
 
   return {
     success: true,
@@ -49,25 +61,30 @@ export const verifyEmailOtpService = async (req) => {
 };
 
 
-// 🔁 RESEND OTP
+// 🔹 RESEND EMAIL OTP
 export const resendEmailOtpService = async (req) => {
-  // ❌ NO SESSION
-  if (!req.session.newEmail) {
-    return {
-      success: false,
-      message: "Session expired"
-    };
+  const newEmail = req.session.newEmail;
+
+  if (!newEmail) {
+    return { success: false, message: "Session expired" };
   }
 
-  // ✅ GENERATE NEW OTP
   const otp = generateOTP();
 
-  // ✅ STORE IN SESSION
-  req.session.emailOtp = otp;
-  req.session.emailOtpExpiry = Date.now() + 2 * 60 * 1000; // 2 min
+  await Otp.findOneAndUpdate(
+    { email: newEmail, type: "email" },
+    {
+      $set: {
+        email: newEmail,
+        otp,
+        expiresAt: Date.now() + 2 * 60 * 1000,
+        type: "email"
+      }
+    },
+    { upsert: true }
+  );
 
-  // ✅ SEND EMAIL
-  await sendOtpEmail(req.session.newEmail, otp);
+  await sendOtpEmail(newEmail, otp);
 
   return {
     success: true,

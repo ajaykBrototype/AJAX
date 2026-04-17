@@ -364,7 +364,8 @@ body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-
                   class="form-input"
                   placeholder="+91 98765 43210"
                   autocomplete="tel"
-                  maxlength="20"
+                  maxlength="10",
+                  minlength="10"
                 />
               </div>
               <span class="field-error" id="err-phone">Enter a valid mobile number.</span>
@@ -384,7 +385,8 @@ body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-
                 class="form-input"
                 placeholder="10001"
                 autocomplete="postal-code"
-                maxlength="10"
+                maxlength="6"
+                minlength="6"
                 inputmode="numeric"
               />
               <span class="field-error" id="err-pincode">Enter a valid pincode.</span>

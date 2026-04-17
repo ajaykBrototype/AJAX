@@ -7,7 +7,7 @@ export const changePasswordService = async (data, req) => {
   console.log("1. Data received:", !!currentPassword, !!newPassword);
   let errors = {};
 
-  // ✅ validation
+
   if (!currentPassword) {
     errors.currentPassword = ["Current password is required"];
   }
@@ -32,19 +32,23 @@ export const changePasswordService = async (data, req) => {
     };
   }
 
-  // ✅ get user
+ 
   const user = await User.findById(req.session.userId);
 
   if (!user) {
     console.log("2. User not found in DB");
     return { success: false, message: "User not found" };
   }
+  if (user.googleId) {
+  return {
+    success: false,
+    message: "Google users cannot change password"
+  };
+}
 
-  // ✅ compare password
   const isMatch = await bcrypt.compare(currentPassword, user.password);
 console.log("3. Password match result:", isMatch);
   if (!isMatch) {
-    
     return {
       success: false,
       errors: {
@@ -53,7 +57,6 @@ console.log("3. Password match result:", isMatch);
     };
   }
 
-  // ✅ update password
   const hashed = await bcrypt.hash(newPassword, 10);
   user.password = hashed;
   await user.save();

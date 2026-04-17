@@ -36,6 +36,10 @@
     .sidebar-link.active{color:var(--dark);border-left-color:var(--dark);background:rgba(28,28,28,.04);font-weight:500}
 
     /* ── FORM INPUTS ── */
+    input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
     .input-field {
       width: 100%; border: 1px solid var(--bdr); background: #fff; padding: .85rem 1rem;
       font-size: .85rem; transition: all .3s ease; font-family: 'DM Sans', sans-serif;
@@ -124,7 +128,6 @@
           
           <label style="background:var(--dark);color:#fff;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;cursor:pointer;">
             Change Photo
-            <!-- ✅ NOW INSIDE FORM -->
             <input type="file" id="imageInput" name="profileImage" class="hidden" />
           </label>
 
@@ -150,7 +153,12 @@
 
     <div class="flex flex-col">
       <label class="label">Email</label>
-      <input type="email" name="email" value="<%= user.email %>" class="input-field" />
+      <input type="email" name="email" value="<%= user.email %>" class="input-field"  <%= user.googleId ? "disabled" : "" %>/>
+      <% if (user.googleId) { %>
+    <p class="text-xs text-gray-500 mt-1">
+    Email cannot be changed for Google accounts</p>
+   <% } %>
+      
     </div>
 
     <div class="flex flex-col">
@@ -208,6 +216,5 @@
     document.addEventListener('click', () => accDrop.classList.remove('open'));
   }
 </script>
- <script src="/js/user/profile.js"></script>
 </body>
 </html>

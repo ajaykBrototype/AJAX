@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Category Management — AJAX Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=DM+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['DM Sans', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#F5F2ED',
+                            sidebar: '#ECE9E1',
+                            card: '#FFFFFF',
+                            text: '#1C1C1C',
+                            muted: '#9B8E83',
+                            border: 'rgba(28, 28, 28, 0.08)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: #F5F2ED; color: #1C1C1C; min-height: 100vh; overflow-x: hidden; }
+        
+        .sidebar-item { transition: all 0.2s ease; border-radius: 8px; margin: 0 12px; }
+        .sidebar-item.active { background: #1C1C1C; color: #FFFFFF; }
+        .sidebar-item:hover:not(.active) { background: rgba(28, 28, 28, 0.04); }
+
+        .header-title-underline { position: relative; display: inline-block; padding-bottom: 8px; }
+        .header-title-underline::after { content: ''; position: absolute; left: 0; bottom: 0; width: 40px; height: 2px; background: #1c1c1c; }
+
+        .search-input { background: #F3F1ED !important; border: none !important; transition: all 0.2s ease; border-radius: 12px !important; }
+        .search-input:focus { background: #EAE8E4 !important; box-shadow: none !important; }
+
+        .stat-card { background: #FFFFFF; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+        .category-table { border-radius: 16px; overflow: hidden; background: #FFFFFF; }
+        .table-header { border-bottom: 1px solid rgba(28, 28, 28, 0.05); }
+        .table-row { transition: background 0.2s ease; border-bottom: 1px solid rgba(28, 28, 28, 0.03); }
+        .table-row:hover { background: #FAFAFA; }
+
+        .status-pill { font-size: 0.65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status-active { background: #E5E7EB; color: #1C1C1C; }
+        .status-inactive { background: #E5E7EB; color: #9B8E83; opacity: 0.7; }
+
+        .toggle-switch { width: 44px; height: 24px; background: #E5E7EB; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: #1C1C1C; }
+        .toggle-circle { width: 20px; height: 20px; background: #FFFFFF; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.3s; }
+        .toggle-switch.active .toggle-circle { transform: translateX(20px); }
+
+        .pagination-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 8px; border: 1px solid rgba(28, 28, 28, 0.08); transition: all 0.2s; background: #FFFFFF; }
+        .pagination-btn.active { background: #1C1C1C; color: #FFFFFF; border-color: #1C1C1C; }
+        .pagination-btn:hover:not(.active) { background: #F5F2ED; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #DDD6CC; border-radius: 10px; }
+        
+        .nav-section-title { font-size: 0.65rem; font-weight: 700; color: #9B8E83; text-transform: uppercase; letter-spacing: 0.15em; padding: 0 28px; margin-bottom: 12px; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="w-72 h-screen bg-brand-sidebar flex flex-col sticky top-0 z-50">
+        <div class="pt-12 pb-12 px-10">
+            <h2 class="text-3xl font-serif tracking-tight font-bold">AJAX</h2>
+        </div>
+
+        <div class="nav-section-title mt-4">Management</div>
+        
+        <nav class="flex-1 space-y-1">
+            <a href="/admin/dashboard" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span class="text-[0.9rem] font-medium">Dashboard</span>
+            </a>
+            <a href="/admin/orders" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="text-[0.9rem] font-medium">Orders</span>
+            </a>
+            <a href="/admin/products" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="m11 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="M17 12V3"></path><path d="M7 12V3"></path><path d="M3 12h18"></path><path d="M21 3h-18"></path></svg>
+                <span class="text-[0.9rem] font-medium">Products</span>
+            </a>
+            <a href="/admin/categories" class="sidebar-item active flex items-center gap-4 px-6 py-3.5">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                <span class="text-[0.9rem] font-medium">Categories</span>
+            </a>
+            <a href="/admin/subcategories" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h6v6H3z"></path><path d="M15 15h6v6h-6z"></path><path d="M9 6h6v9"></path></svg>
+                <span class="text-[0.9rem] font-medium">Subcategories</span>
+            </a>
+            <a href="/admin/coupons" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5H4v14h11l4-7-4-7z"></path><circle cx="9" cy="12" r="1"></circle></svg>
+                <span class="text-[0.9rem] font-medium">Coupons</span>
+            </a>
+            <a href="/admin/offers" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l3 6-9 12L3 9z"></path></svg>
+                <span class="text-[0.9rem] font-medium">Offers</span>
+            </a>
+            <a href="/admin/users" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span class="text-[0.9rem] font-medium">Customers</span>
+            </a>
+            <a href="/admin/home-manager" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span class="text-[0.9rem] font-medium">Home Manager</span>
+            </a>
+        </nav>
+
+        <!-- Profile Section -->
+        <div class="p-8 border-t border-brand-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <img src="https://i.pravatar.cc/100?u=sebastian" alt="Sebastian" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <h5 class="text-sm font-bold truncate">Sebastian Vielle</h5>
+                    <p class="text-[0.7rem] text-brand-muted truncate">vielle.admin@noco.com</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="flex-1 p-14 overflow-y-auto max-h-screen">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-4xl font-serif font-bold header-title-underline">Categories</h1>
+            </div>
+            <button class="bg-[#1C1C1C] text-white px-6 py-3.5 text-[0.8rem] rounded-xl font-bold flex items-center gap-2 hover:bg-stone-800 transition-all shadow-lg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Category
+            </button>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Total Categories -->
+            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
+                <div>
+                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Total Categories</p>
+                    <h3 class="text-4xl font-serif font-bold">24</h3>
+                </div>
+                <div class="p-3 bg-brand-bg rounded-xl">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><path d="M12 3L3.5 6V18L12 21L20.5 18V6L12 3Z"></path><path d="M3.5 6L12 9L20.5 6"></path><path d="M12 9V21"></path></svg>
+                </div>
+            </div>
+
+            <!-- Total Subcategories -->
+            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
+                <div>
+                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Total Subcategories</p>
+                    <h3 class="text-4xl font-serif font-bold">142</h3>
+                </div>
+                <div class="p-3 bg-brand-bg rounded-xl">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><path d="M9 3H4v6h5V3z"></path><path d="M20 15h-5v6h5v-6z"></path><path d="M9 6h6v9"></path></svg>
+                </div>
+            </div>
+
+            <!-- Active Categories -->
+            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
+                <div>
+                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Active Categories</p>
+                    <h3 class="text-4xl font-serif font-bold">18</h3>
+                </div>
+                <div class="p-3 bg-brand-bg rounded-xl">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                </div>
+            </div>
+
+            <!-- Inactive Categories -->
+            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
+                <div>
+                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Inactive Categories</p>
+                    <h3 class="text-4xl font-serif font-bold">06</h3>
+                </div>
+                <div class="p-3 bg-brand-bg rounded-xl">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Card -->
+        <div class="bg-white rounded-[24px] border border-brand-border overflow-hidden shadow-sm">
+            
+            <!-- Controls -->
+            <div class="px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <h3 class="text-xl font-bold">All Categories</h3>
+                
+                <div class="relative w-full md:w-[380px]">
+                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 text-brand-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input 
+                        type="text" 
+                        placeholder="Search categories..." 
+                        class="search-input w-full pl-14 pr-6 py-4 text-[0.9rem] outline-none placeholder:text-brand-muted/50"
+                    >
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[0.7rem] text-brand-muted font-bold uppercase tracking-[0.15em] table-header bg-[#FAFAFA]">
+                            <th class="px-10 py-5">Sl.No</th>
+                            <th class="px-10 py-5">Category Name</th>
+                            <th class="px-10 py-5">Subcategories</th>
+                            <th class="px-10 py-5">Products</th>
+                            <th class="px-10 py-5">Status</th>
+                            <th class="px-10 py-5 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y-0">
+                        <!-- Row 1 -->
+                        <tr class="table-row">
+                            <td class="px-10 py-6 text-[0.9rem] font-medium text-brand-muted">
+                                1
+                            </td>
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center border border-brand-border border-dashed">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    </div>
+                                    <span class="text-[0.95rem] font-bold">Men</span>
+                                </div>
+                            </td>
+                            <td class="px-10 py-6 text-[0.9rem] font-medium">
+                                12
+                            </td>
+                            <td class="px-10 py-6 text-[0.9rem] font-medium">
+                                124
+                            </td>
+                            <td class="px-10 py-6">
+                                <span class="status-pill status-active">Active</span>
+                            </td>
+                            <td class="px-10 py-6">
+                                <div class="flex items-center justify-center gap-6">
+                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                    <button class="text-brand-muted hover:text-red-600 transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                    <div class="toggle-switch active">
+                                        <div class="toggle-circle"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="table-row">
+                            <td class="px-10 py-6 text-[0.9rem] font-medium text-brand-muted">
+                                2
+                            </td>
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center border border-brand-border border-dashed">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    </div>
+                                    <span class="text-[0.95rem] font-bold">Women</span>
+                                </div>
+                            </td>
+                            <td class="px-10 py-6 text-[0.9rem] font-medium">
+                                18
+                            </td>
+                            <td class="px-10 py-6 text-[0.9rem] font-medium">
+                                85
+                            </td>
+                            <td class="px-10 py-6">
+                                <span class="status-pill status-inactive">Inactive</span>
+                            </td>
+                            <td class="px-10 py-6">
+                                <div class="flex items-center justify-center gap-6">
+                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                    <button class="text-brand-muted hover:text-red-600 transition-colors">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                    <div class="toggle-switch">
+                                        <div class="toggle-circle"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div class="px-10 py-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-brand-border bg-[#FAFAFA]">
+                <p class="text-[0.85rem] text-brand-muted font-medium">
+                    Showing 1-4 of 24 categories
+                </p>
+                
+                <div class="flex items-center gap-2">
+                    <button class="pagination-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <span class="px-2 text-brand-muted">...</span>
+                    <button class="pagination-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Static interactive logic for demonstration
+        document.querySelectorAll('.toggle-switch').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('active');
+                const pill = toggle.closest('tr').querySelector('.status-pill');
+                if (toggle.classList.contains('active')) {
+                    pill.textContent = 'Active';
+                    pill.className = 'status-pill status-active';
+                } else {
+                    pill.textContent = 'Inactive';
+                    pill.className = 'status-pill status-inactive';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
