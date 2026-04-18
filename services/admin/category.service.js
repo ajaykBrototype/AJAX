@@ -23,6 +23,32 @@ export const getCategoriesService=async()=>{
     const categories=await Category.find().sort({createdAt:-1});
     return {success:true,categories};
 }
+
+export const updateCategoryService=async(id,data)=>{
+  const {name,isActive}=data;
+
+  const existing=await Category.findOne({
+    name,
+    _id:{$ne:id}
+  });
+
+  if(existing){
+    return{
+      success:false,
+      message:"Category already exists"
+    }
+  }
+  const category=await Category.findByIdAndUpdate(
+    id,
+    {name,isActive},
+    {new:true}
+  );
+  return {
+    success:true,
+    category
+  }
+}
+
 export const toggleCategoryService = async (id) => {
   const category = await Category.findById(id);
 

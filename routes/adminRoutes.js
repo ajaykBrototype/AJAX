@@ -7,7 +7,8 @@ import {
   createCategory,
   getCategories,
   toggleCategory,
-  deleteCategory
+  deleteCategory,
+  updateCategory
 } from "../controllers/admin/category.controller.js";
 import {getAllUsers,toggleBlockUser} from "../controllers/admin/user.controller.js";
 
@@ -25,6 +26,7 @@ router.patch("/toggleblockuser/:id",toggleBlockUser);
 router.get("/categories", isAdminAuth, loadCategoryPage);
 router.get("/categories/all", isAdminAuth, getCategories);
 router.post("/categories/add", isAdminAuth, createCategory);
+router.patch("/categories/:id", isAdminAuth, updateCategory);
 router.patch("/categories/toggle/:id", isAdminAuth, toggleCategory);
 router.delete("/categories/:id", isAdminAuth, deleteCategory);
 

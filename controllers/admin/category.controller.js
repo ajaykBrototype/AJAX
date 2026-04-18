@@ -4,10 +4,13 @@ import * as categoryService from "../../services/admin/category.service.js";
 
 export const loadCategoryPage=async(req,res)=>{
     try{
-        const categories=await Category.find().sort({createdAt:-1})
+        const categories=await Category.find().sort({createdAt:-1});
+        const activeCount=categories.filter(cat=>cat.isActive).length;
+        const inactiveCount=categories.filter(cat=>!cat.isActive).length;
          res.render("admin/categories",{
             categories,
-            totalCategories:categories.length
+            totalCategories:categories.length,
+            activeCount,inactiveCount
          })
     }catch(err){
          console.log(err);
@@ -32,6 +35,19 @@ export const getCategories = async (req, res) => {
   const result = await categoryService.getCategoriesService();
   res.json(result);
 };
+
+export const updateCategory=async(req,res)=>{
+    const result=await categoryService.updateCategoryService(
+        req.params.id,
+        req.body
+    );
+    if(!result.success){
+        return res.status(400).json(result);
+    }
+    res.json(result);
+}
+
+
 
 export const toggleCategory = async (req, res) => {
   const result = await categoryService.toggleCategoryService(req.params.id);
