@@ -1,20 +1,10 @@
 import express from "express";
 import passport from "passport";
-import {
-  loadSignup,registerUser,
-  verifyOtp,resendOtp,
-  forgotPassword,resetPassword,
-  loadLogin,loginUser,logoutUser
-} from "../controllers/user/auth.controller.js";
 
-import {
-  loadEditProfile,
-  loadProfile,updateProfile,changePassword,
-  loadChangePassword
-} from "../controllers/user/profile.controller.js";
-
-import { loadAddressPage,loadAddAddressPage,deleteAddress,addAddress,loadEditAddressPage,updateAddress} from "../controllers/user/address.controller.js";
-
+import * as authController from "../controllers/user/auth.controller.js";
+import * as profileController from "../controllers/user/profile.controller.js";
+import * as emailController from "../controllers/user/email.controller.js";
+import * as addressController from "../controllers/user/address.controller.js";
 
 import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
@@ -22,74 +12,72 @@ import { noCache } from "../middleware/noCache.js";
 
 const router = express.Router();
 
-router.get("/signup",noCache, isLoggedOut, loadSignup);
-router.post("/signup", registerUser);
+/* ================= AUTH ================= */
+
+router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
+router.post("/signup", authController.registerUser);
 
 router.get("/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"]
-  })
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// 🔥 CALLBACK
 router.get("/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login"
-  }),
-  (req, res) => {
-    req.session.userId = req.user._id;
-    res.redirect("/home");
-  }
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  authController.googleCallback // 🔥 move logic to controller
 );
 
+router.get("/otp", authController.loadOtpPage);
+router.post("/verify-otp", authController.verifyOtp);
+router.post("/resend-otp", authController.resendOtp);
 
+router.get("/login", noCache, isLoggedOut, authController.loadLogin);
+router.post("/login", isLoggedOut, authController.loginUser);
 
-router.get("/otp", (req, res) => {
+router.get("/logout", noCache, authController.logoutUser);
 
-  return res.render("user/otp"); 
-});
-router.post("/verify-otp", verifyOtp);
-router.post("/resend-otp", resendOtp);
+/* ================= PASSWORD ================= */
 
-router.get("/login", noCache,isLoggedOut, loadLogin);
-router.post("/login", isLoggedOut, loginUser); // Added isLoggedOut to POST too
-router.get("/logout",noCache, logoutUser);
+router.get("/forgot-password", authController.loadForgotPassword);
+router.post("/forgot-password", authController.forgotPassword);
 
-router.get("/forgot-password", (req, res) => {
-  // Prevent crash during session destroy
-  req.session.destroy((err) => {
-    return res.render("user/forgotPassword");
-  });
-});
-router.post("/forgot-password", forgotPassword);
+router.get("/reset-password", authController.loadResetPassword);
+router.post("/reset-password", authController.resetPassword);
 
-router.get("/reset-password", (req, res) => {
-  if (!req.session.resetEmail) {
-    return res.redirect("/forgot-password"); 
-  }
-  return res.render("user/resetPassword"); 
-})
+/* ================= HOME ================= */
 
-router.post("/reset-password", resetPassword);
+router.get("/home", isLoggedIn, authController.loadHome);
 
+/* ================= PROFILE ================= */
 
-router.get("/home", isLoggedIn, (req, res) => {
-  return res.render("user/home"); 
-});
+router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);
+router.get("/edit-profile", noCache, isLoggedIn, profileController.loadEditProfile);
 
-router.get("/profile",noCache, isLoggedIn, loadProfile);
-router.get("/edit-profile",noCache, isLoggedIn, loadEditProfile);
-router.post("/profile/update", isLoggedIn, upload.single("profileImage"), updateProfile);
+router.post(
+  "/profile/update",
+  isLoggedIn,
+  upload.single("profileImage"),
+  profileController.updateProfile
+);
 
-router.get("/change-password",noCache, isLoggedIn, loadChangePassword);
-router.post("/change-password", isLoggedIn, changePassword);
+/* ================= EMAIL OTP ================= */
 
-router.get("/address",noCache, isLoggedIn, loadAddressPage);
-router.get("/add-address",noCache, isLoggedIn, loadAddAddressPage);
-router.post("/address/add", isLoggedIn, addAddress); // Added isLoggedIn
-router.delete("/address/:id", isLoggedIn, deleteAddress); // Added isLoggedIn
+router.get("/profile/email/verify", isLoggedIn, emailController.loadVerifyEmailPage);
+router.post("/profile/email/verify", isLoggedIn, emailController.verifyEmailOtp);
+router.post("/profile/email/resend-otp", isLoggedIn, emailController.resendEmailOtp);
 
-router.get("/edit-address/:id",noCache, isLoggedIn, loadEditAddressPage);
-router.post("/edit-address/:id", isLoggedIn, updateAddress); // Added isLoggedIn
+/* ================= PASSWORD CHANGE ================= */
+
+router.get("/change-password", noCache, isLoggedIn, profileController.loadChangePassword);
+router.post("/change-password", isLoggedIn, profileController.changePassword);
+
+/* ================= ADDRESS ================= */
+
+router.get("/address", noCache, isLoggedIn, addressController.loadAddressPage);
+router.get("/add-address", noCache, isLoggedIn, addressController.loadAddAddressPage);
+router.post("/address/add", isLoggedIn, addressController.addAddress);
+router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
+
+router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
+router.post("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
 export default router;

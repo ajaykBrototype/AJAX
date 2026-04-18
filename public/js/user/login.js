@@ -11,7 +11,6 @@ if (loginForm) {
 
       if (res.data.success) {
         showToast('success', res.data.message || 'Login successful!');
-        // Delay redirect seamlessly allowing toast to be noticed
         setTimeout(() => {
           window.location.href = res.data.redirect || '/';
         }, 1500);

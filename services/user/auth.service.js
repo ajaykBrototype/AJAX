@@ -1,12 +1,12 @@
 import User from "../../models/user/userModel.js";
-import { signupSchema } from "../../validators/authValidator.js";
+import Otp from "../../models/user/otpModel.js";
 import bcrypt from "bcryptjs";
 import { generateOTP } from "../../utils/generateOtp.js";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
+import { signupSchema } from "../../validators/authValidator.js";
 
-// REGISTER
+
 export const registerService = async (data, req) => {
-
   const result = signupSchema.safeParse(data);
 
   if (!result.success) {
@@ -18,146 +18,97 @@ export const registerService = async (data, req) => {
 
   const { name, email, password } = result.data;
 
-// if (!name || !email || !password || !confirmPassword) {
-//     return {
-//       success: false,
-//       errors: {
-//         name: !name ? ["Name is required"] : null,
-//         email: !email ? ["Email is required"] : null,
-//         password: !password ? ["Password is required"] : null,
-//         confirmPassword: !confirmPassword ? ["Please confirm password"] : null
-//       }
-//     };
-//   }
-//  if (password.length < 6) {
-//   return {
-//     success: false,
-//     error: { password: ["Minimum 6 characters"] }
-//   };
-// }
-
-//   if (password !== confirmPassword) {
-//     return {
-//       success: false,
-//       errors: { confirmPassword: ["Passwords do not match"] }
-//     };
-//   }
-
   const existingUser = await User.findOne({ email });
-
   if (existingUser) {
     return {
       success: false,
       errors: { email: ["Email already exists"] }
     };
   }
-try {
-    const otp = generateOTP();
-     req.session.tempUser = { name, email, password };
 
-  req.session.otp = otp;
+  const otp = generateOTP();
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  req.session.otpExpiry = Date.now() + 2 * 60 * 1000;
+  await Otp.findOneAndUpdate(
+    { email, type: "signup" },
+    {
+      $set: {
+        email,
+        otp,
+        expiresAt: Date.now() + 2 * 60 * 1000,
+        type: "signup",
+        tempData: { name, password: hashedPassword }
+      }
+    },
+    { upsert: true }
+  );
 
+  req.session.tempEmail = email;
   req.session.type = "signup";
 
+  await sendOtpEmail(email, otp);
 
-
-  await new Promise((resolve, reject) => {
-
-  req.session.save((err) => {
-
-    if (err) reject(err);
-
-    else resolve();
-
-  });
-
-});
-
-  console.log("OTP SAVED:", req.session.otp);
-
-    await sendOtpEmail(email, otp);
-    return { success: true };
-  } catch (err) {
-    console.log("❌ Email error:", err.message);
-    return { success: false, message: "Could not send OTP. Check email address." };
-  }
+  return { success: true };
 };
 
-// VERIFY OTP
+
 export const verifyOtpService = async (req) => {
   const { otp } = req.body;
 
-  console.log("Stored OTP:", req.session.otp);
-  console.log("Entered OTP:", otp);
+  const email =
+    req.session.type === "reset"
+      ? req.session.resetEmail
+      : req.session.tempEmail;
 
-  if (!req.session.otp) {
-    return {
-      success: false,
-      errors: { otp: ["Session expired"] }
-    };
+  const record = await Otp.findOne({ email, type: req.session.type });
+
+  if (!record) {
+    return { success: false, errors: { otp: ["OTP not found"] } };
   }
 
-  if (Date.now() > req.session.otpExpiry) {
-    return {
-      success: false,
-      errors: { otp: ["OTP expired"] }
-    };
+  if (Date.now() > record.expiresAt) {
+    return { success: false, errors: { otp: ["OTP expired"] } };
   }
 
-  if (String(otp) !== String(req.session.otp)) {
-    return {
-      success: false,
-      errors: { otp: ["Invalid OTP"] }
-    };
+  if (String(otp) !== String(record.otp)) {
+    return { success: false, errors: { otp: ["Invalid OTP"] } };
   }
 
-  // 🔥 RESET FLOW
-  if (req.session.type === "reset") {
+  if (record.type === "signup") {
+    const { name, password } = record.tempData;
+
+    await User.create({ name, email, password });
+  }
+
+  if (record.type === "reset") {
     return { success: true, redirect: "/reset-password" };
   }
 
-  // 🔥 SIGNUP FLOW
-  if (req.session.type === "signup") {
-    const { name, email, password } = req.session.tempUser;
+  await Otp.deleteOne({ _id: record._id });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await User.create({
-      name,
-      email,
-      password: hashedPassword
-    });
-
-    req.session.destroy();
-
-    return { success: true, redirect: "/login" };
-  }
+  return { success: true, redirect: "/login" };
 };
-// RESEND
+
+// 🔹 RESEND OTP
 export const resendOtpService = async (req) => {
-  let email =
+  const email =
     req.session.type === "reset"
       ? req.session.resetEmail
-      : req.session.tempUser?.email;
+      : req.session.tempEmail;
 
-  if (!email) return { success: false };
+  if (!email) {
+    return { success: false, message: "Session expired" };
+  }
 
   const otp = generateOTP();
 
-  req.session.otp = otp;
-  req.session.otpExpiry = Date.now() + 2 * 60 * 1000;
-
-  console.log("NEW OTP SAVED:", otp);
-
-  // ✅ FORCE SAVE SESSION
-  await new Promise((resolve, reject) => {
-    req.session.save((err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+  await Otp.findOneAndUpdate(
+    { email, type: req.session.type },
+    {
+      otp,
+      expiresAt: Date.now() + 2 * 60 * 1000
+    }
+  );
 
   await sendOtpEmail(email, otp);
 
@@ -186,34 +137,31 @@ export const resetPasswordService = async (data, req) => {
   return { success: true };
 };
 
-export const loginService = async (data) => { // Removed 'req' as it's cleaner to handle session in controller
+export const loginService = async (data) => { 
   try {
     const { email, password } = data;
 
-    // 1. Check for empty fields
     if (!email || !password) {
       return { success: false, message: "Email and password are required", status: 400 };
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
 
-    // 2. Check if user exists
     if (!user) {
       return { success: false, message: "User not found", status: 401 };
     }
 
-    // 3. Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return { success: false, message: "Incorrect password", status: 401 };
     }
 
-    // 4. Success - Return the user object so the controller can use it
+    
     return { success: true, user };
 
   } catch (err) {
     console.error("Service Error:", err);
-    throw err; // Let the controller catch the actual crash
+    throw err; 
   }
 };
   

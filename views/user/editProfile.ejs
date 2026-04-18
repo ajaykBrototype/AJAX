@@ -1,170 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Edit Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Profile — AJAX</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
-</head>
-
-<body class="bg-[#f6f4f1] min-h-screen flex">
-
-  <!-- SIDEBAR -->
-  <aside class="w-64 bg-white border-r hidden md:block p-6">
-    <h1 class="text-xl font-semibold mb-8 tracking-widest">AJAX</h1>
-
-    <nav class="space-y-4 text-sm">
-      <a href="/profile" class="flex items-center gap-2 font-medium text-black">
-        ● Profile
-      </a>
-      <a href="#" class="block text-gray-400">Address</a>
-      <a href="#" class="block text-gray-400">My Orders</a>
-      <a href="#" class="block text-gray-400">Wishlist</a>
-      <a href="#" class="block text-gray-400">Wallet</a>
-    </nav>
-
-    <div class="mt-10 text-red-500 text-sm">
-      <a href="/logout">Logout</a>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="flex-1 p-8 md:p-14">
-
-    <!-- HEADER -->
-    <div class="mb-10">
-      <h2 class="text-4xl font-semibold mb-2">Edit Your Profile</h2>
-      <p class="text-gray-400 text-sm tracking-wide">
-        UPDATE YOUR PERSONAL DETAILS
-      </p>
-    </div>
-
-    <!-- PROFILE IMAGE -->
-    <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
-
-      <div class="w-40 h-40 rounded-full overflow-hidden bg-gray-200 shadow">
-        <img 
-          id="previewImage"
-            src="<%= user && user.profileImage ? user.profileImage : '/images/default-user.png' %>"
-          class="w-full h-full object-cover"
-/>
-      </div>
-
-      <div class="flex gap-4">
-        <label class="bg-black text-white px-6 py-2 cursor-pointer hover:opacity-80 transition">
-          Change Photo
-          <input type="file" id="imageInput" name="profileImage" class="hidden" />
-        </label>
-
-        <button onclick="removeImage()"
-          class="border px-6 py-2 hover:bg-gray-100 transition">
-          Remove
-        </button>
-      </div>
-
-    </div>
-
-  <form id="editForm" class="space-y-6 max-w-xl">
-
-  <!-- NAME -->
-  <div>
-    <label class="text-xs text-gray-400">FULL NAME</label>
-    <input type="text" name="name"
-      value="<%= user.name %>"
-      class="w-full border p-3 mt-1 focus:border-black transition" />
-  </div>
-
-  <!-- EMAIL -->
-  <div>
-    <label class="text-xs text-gray-400">EMAIL ADDRESS</label>
-    <input type="email" name="email"
-      value="<%= user.email %>"
-      class="w-full border p-3 mt-1 focus:border-black transition" />
-  </div>
-
-  <!-- PHONE -->
-  <div>
-    <label class="text-xs text-gray-400">PHONE NUMBER</label>
-    <input type="text" name="phone"
-      value="<%= user.phone || '' %>"
-      class="w-full border p-3 mt-1 focus:border-black transition" />
-  </div>
-
-  <!-- DOB -->
-  <div>
-    <label class="text-xs text-gray-400">DATE OF BIRTH</label>
-    <input type="date" name="dob"
-      value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>"
-      class="w-full border p-3 mt-1 focus:border-black transition" />
-  </div>
-
-  <!-- GENDER -->
-  <div>
-    <label class="text-xs text-gray-400">GENDER</label>
-    <select name="gender"
-      class="w-full border p-3 mt-1 focus:border-black transition">
-
-      <option value="">Select Gender</option>
-      <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
-      <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
-      <option value="Other" <%= user.gender === "Other" ? "selected" : "" %>>Other</option>
-
-    </select>
-  </div>
-
-  <!-- NATIONALITY -->
-  <div>
-    <label class="text-xs text-gray-400">NATIONALITY</label>
-    <input type="text" name="nationality"
-      value="<%= user.nationality || '' %>"
-      class="w-full border p-3 mt-1 focus:border-black transition" />
-  </div>
-
-  <!-- BUTTON -->
-  <button class="w-full bg-black text-white py-3 hover:opacity-90 transition">
-    SAVE CHANGES →
-  </button>
-
-</form>
-
-  </main>
-
-  <!-- ══ GLOBAL TOAST ══ -->
-  <%- include('../partials/toast') %>
-
-  <!-- JS -->
-   <script src="/js/common/toast.js"></script> 
-  <script src="/js/user/profile.js"></script>
   <script>
-    document.getElementById('editForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const btn = this.querySelector('button');
-      btn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite; display:inline-block; vertical-align:middle; margin-right:8px;">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-        </svg>
-        SAVING...
-      `;
-      btn.disabled = true;
-      btn.style.opacity = '0.7';
-
-      setTimeout(() => {
-        btn.innerHTML = 'SAVED';
-        if(typeof showToast === 'function') {
-          showToast('success', 'Profile updated successfully.');
-        }
-        setTimeout(() => {
-          window.location.href = '/profile';
-        }, 1500);
-      }, 1000);
-    });
+    tailwind.config = {
+      theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+    }
   </script>
 
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-x:hidden}
+    :root{--dark:#1C1C1C;--stone:#9B8E83;--bdr:rgba(28,28,28,0.1);--warm:#FAFAF8;--cream:#F5F0E8;}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ccc}
+
+    /* ── NAVBAR ── */
+    #navbar{position:fixed;top:0;left:0;right:0;z-index:999;padding:.9rem 3rem;background:rgba(250,250,248,.97);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--bdr)}
+    .logo{font-family:'Playfair Display',serif;font-weight:400;font-size:1.45rem;letter-spacing:.42em;text-transform:uppercase;color:var(--dark);text-decoration:none}
+    .nav-link{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dark);text-decoration:none;position:relative;padding-bottom:3px;transition:opacity .25s}
+    .nav-link:hover{opacity:.55}
+    .nav-icon{cursor:pointer;transition:transform .25s,opacity .25s;background:none;border:none;padding:6px;color:var(--dark);display:flex;align-items:center;}
+
+    /* ── SIDEBAR ── */
+    .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-left:2px solid transparent;transition:all .25s}
+    .sidebar-link:hover{color:var(--dark);background:rgba(28,28,28,.03)}
+    .sidebar-link.active{color:var(--dark);border-left-color:var(--dark);background:rgba(28,28,28,.04);font-weight:500}
+
+    /* ── FORM INPUTS ── */
+    input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+    .input-field {
+      width: 100%; border: 1px solid var(--bdr); background: #fff; padding: .85rem 1rem;
+      font-size: .85rem; transition: all .3s ease; font-family: 'DM Sans', sans-serif;
+    }
+    .input-field:focus { outline: none; border-color: var(--dark); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+
+    /* ── PAGE ANIMATION ── */
+    @keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .page-in{animation:pageIn .7s cubic-bezier(.16,1,.3,1) both}
+
+    /* ── ACCOUNT DROPDOWN ── */
+    .dropdown-menu { position: absolute; top: calc(100% + 20px); right: 0; width: 240px; background: #fff; border: 1px solid var(--bdr); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); z-index: 50; padding: 0.5rem 0; }
+    .dropdown-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .dropdown-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.4rem; font-size: 0.72rem; color: var(--dark); text-decoration: none; transition: 0.25s; }
+    .dropdown-item:hover { background: var(--cream); transform: translateX(3px); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .animate-spin-custom { animation: spin 0.8s linear infinite; }
+  </style>
+</head>
+<body>
+
+
+
+<div style="padding-top:65px; min-height:100vh;">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
+
+    <aside class="hidden md:block" style="width:220px;min-height:calc(100vh - 65px);border-right:1px solid var(--bdr);padding:3.5rem 0;flex-shrink:0;position:sticky;top:65px;">
+      <nav style="display:flex;flex-direction:column;gap:.1rem;">
+        <a href="/profile" class="sidebar-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </a>
+        <a href="/address" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Address
+        </a>
+        <a href="/orders" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          My Orders
+        </a>
+        <a href="/wishlist" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Wishlist
+        </a>
+        <a href="/wallet" class="sidebar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Wallet
+        </a>
+        <div style="height:1px;background:var(--bdr);margin:1.75rem 1rem"></div>
+        <a href="/logout" class="sidebar-link" style="color:#B04040">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+           Logout
+        </a>
+      </nav>
+    </aside>
+
+<main class="page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
+  
+  <header style="margin-bottom:3rem;">
+    <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">
+      Account Settings
+    </p>
+    <h1 style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);">
+      Edit Profile
+    </h1>
+  </header>
+
+  <!-- 🔥 FORM START -->
+  <form id="editForm" enctype="multipart/form-data"
+    class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8"
+    style="max-width:800px;">
+
+    <!-- 🔥 IMAGE SECTION (NOW INSIDE FORM) -->
+    <div class="md:col-span-2"
+      style="display:flex;align-items:center;gap:2.5rem;margin-bottom:2rem;background:#fff;border:1px solid var(--bdr);padding:2rem;">
+      
+      <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--bdr);">
+        <img id="previewImage"
+          src="<%= user.profileImage || 'https://via.placeholder.com/150' %>"
+          class="w-full h-full object-cover">
+      </div>
+
+      <div>
+        <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
+          
+          <label style="background:var(--dark);color:#fff;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;cursor:pointer;">
+            Change Photo
+            <input type="file" id="imageInput" name="profileImage" class="hidden" />
+          </label>
+
+          <button type="button" onclick="removeImage()"
+            style="background:none;border:1px solid var(--bdr);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;">
+            Remove
+          </button>
+
+        </div>
+
+        <p style="font-size:0.65rem;color:var(--stone);text-transform:uppercase;">
+          JPG or PNG, Max 2MB
+        </p>
+      </div>
+    </div>
+
+    <!-- YOUR EXISTING INPUTS -->
+
+    <div class="flex flex-col">
+      <label class="label">Full Name</label>
+      <input type="text" name="name" value="<%= user.name %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Email</label>
+      <input type="email" name="email" value="<%= user.email %>" class="input-field"  <%= user.googleId ? "disabled" : "" %>/>
+      <% if (user.googleId) { %>
+    <p class="text-xs text-gray-500 mt-1">
+    Email cannot be changed for Google accounts</p>
+   <% } %>
+      
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Phone</label>
+      <input type="text" name="phone" value="<%= user.phone || '' %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">DOB</label>
+      <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="input-field" />
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Gender</label>
+      <select name="gender" class="input-field">
+        <option value="">Select</option>
+        <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
+        <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
+      </select>
+    </div>
+
+    <div class="flex flex-col">
+      <label class="label">Nationality</label>
+      <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="input-field" />
+    </div>
+
+    <div class="md:col-span-2 mt-4">
+      <button id="submitBtn"
+  style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;"
+  class="flex items-center justify-center gap-3">
+
+  <span id="btnText">Save Changes →</span>
+
+  <!-- 🔥 Spinner -->
+  <span id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+
+</button>
+    </div>
+
+  </form>
+</main>
+  </div>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/common/toast.js"></script> 
+<script src="/js/user/profile.js"></script>
+
+<script>
+  /* Dropdown Logic */
+  const accBtn = document.getElementById('accountBtn');
+  const accDrop = document.getElementById('accountDropdown');
+  if(accBtn && accDrop) {
+    accBtn.addEventListener('click', (e) => { e.stopPropagation(); accDrop.classList.toggle('open'); });
+    document.addEventListener('click', () => accDrop.classList.remove('open'));
+  }
+</script>
 </body>
 </html>

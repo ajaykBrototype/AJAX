@@ -1,4 +1,4 @@
-// Wait until DOM loads
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("signupForm");
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return; // 🚨 stop here (no Swal)
   }
 
-  // ✅ FALLBACK (server/general error)
+
   const fallbackMsg = error?.message || err.message || "Registration failed. Please try again.";
   showToast('error', fallbackMsg);
 }
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// 🔹 show error
+
 function showError(id, message) {
   const el = document.getElementById(id);
 
@@ -62,12 +62,11 @@ function showError(id, message) {
     el.textContent = message;
     el.classList.remove("hidden");
 
-    // highlight input
     const input = el.previousElementSibling;
     input.classList.add("border-red-500");
   }
 }
-// 🔹 clear errors
+
 function clearErrors() {
   document.querySelectorAll("p[id$='Error']").forEach(el => {
     el.textContent = "";

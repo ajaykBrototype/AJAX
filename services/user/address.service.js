@@ -1,6 +1,5 @@
 import Address from "../../models/user/addressModel.js";
 
-// ADD ADDRESS
 export const addAddressService = async (data, userId) => {
   const address = await Address.create({
     ...data,
@@ -10,7 +9,7 @@ export const addAddressService = async (data, userId) => {
   return { success: true, address };
 };
 
-// GET ADDRESSES
+
 export const getAddressService = async (userId) => {
   const addresses = await Address.find({ userId });
 

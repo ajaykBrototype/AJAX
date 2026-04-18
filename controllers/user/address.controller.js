@@ -4,7 +4,7 @@ import {
 } from "../../services/user/address.service.js";
 import Address from "../../models/user/addressModel.js";
 
-// LOAD ADDRESS PAGE
+
 export const loadAddressPage = async (req, res) => {
   const result = await getAddressService(req.session.userId);
 
@@ -13,12 +13,11 @@ export const loadAddressPage = async (req, res) => {
   });
 };
 
-// LOAD ADD ADDRESS PAGE
+
 export const loadAddAddressPage = (req, res) => {
-  res.render("user/addAddress"); // ❌ no need to fetch addresses here
+  res.render("user/addAddress"); 
 };
 
-// ADD ADDRESS
 export const addAddress = async (req, res) => {
 
 if (!req.session.userId) {
@@ -40,11 +39,11 @@ if (!req.session.userId) {
     res.json({ success: true });
 
   } catch (err) {
-    console.log("ERROR:", err); // 🔥 VERY IMPORTANT
+    console.log("ERROR:", err);
 
     res.status(500).json({
       success: false,
-      message: err.message // 👈 show real error
+      message: err.message 
     });
   }
 };
@@ -52,7 +51,7 @@ if (!req.session.userId) {
 
 export const deleteAddress = async (req, res) => {
   try {
-    const userId = req.session?.userId; // Use optional chaining just in case
+    const userId = req.session?.userId; 
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -73,7 +72,6 @@ export const loadEditAddressPage = async (req, res) => {
     const userId = req.session.userId;
     const addressId = req.params.id;
 
-    // Fetch the address to pre-fill the form fields
     const address = await Address.findOne({ _id: addressId, userId: userId });
 
     if (!address) {

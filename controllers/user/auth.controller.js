@@ -1,4 +1,5 @@
 import User from "../../models/user/userModel.js";
+import Otp from "../../models/user/otpModel.js";
 import { generateOTP } from "../../utils/generateOtp.js";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import {
@@ -25,7 +26,7 @@ export const registerUser = async (req, res) => {
   res.json({ success: true, redirect: "/otp" });
 };
 
-// VERIFY OTP
+
 export const verifyOtp = async (req, res) => {
   const result = await verifyOtpService(req);
 
@@ -36,13 +37,13 @@ export const verifyOtp = async (req, res) => {
   res.json({ success: true, redirect: result.redirect });
 };
 
-// RESEND
+
 export const resendOtp = async (req, res) => {
   const result = await resendOtpService(req);
   res.json(result);
 };
 
-// FORGOT
+
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -57,30 +58,48 @@ export const forgotPassword = async (req, res) => {
 
   const otp = generateOTP();
 
-  req.session.resetEmail = email;
-  req.session.otp = otp;
-  req.session.otpExpiry = Date.now() + 2 * 60 * 1000;
-  req.session.type = "reset";
+await Otp.findOneAndUpdate(
+  { email, type: "reset" },
+  {
+    otp,
+    expiresAt: Date.now() + 2 * 60 * 1000
+  },
+  { upsert: true }
+);
 
-  await sendOtpEmail(email, otp);
+await sendOtpEmail(email, otp);
+
+// store ONLY email in session (optional)
+
 
   console.log("Reset OTP:", otp);
 
   res.json({ success: true });
 };
 
-// RESET
 export const resetPassword = async (req, res) => {
-  const result = await resetPasswordService(req.body, req);
+  try {
+    const result = await resetPasswordService(req.body, req);
 
-  if (!result.success) {
-    return res.status(400).json(result);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.json({
+      success: true,
+      redirect: "/login"
+    });
+
+  } catch (err) {
+    console.log("RESET ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Try again."
+    });
   }
-
-  res.json({ success: true, redirect: "/login" });
 };
 
-// LOGIN
 export const loadLogin = (req, res) => {
   const isBlocked = req.query.blocked;
 
@@ -92,7 +111,6 @@ export const loginUser = async (req, res) => {
     const result = await loginService(req.body);
 
     if (!result.success) {
-      // The Service returned an error object, so we send it using 'res'
       return res.status(result.status || 400).json({
         success: false,
         message: result.message
@@ -100,7 +118,7 @@ export const loginUser = async (req, res) => {
     }
     req.session.userId = result.user._id;
 
-    // ✅ FINAL RESPONSE
+
     return res.json({ 
       success: true, 
       message: "Login successful", 
@@ -126,4 +144,29 @@ export const logoutUser = (req, res) => {
 
     return res.redirect("/login");
   });
+};
+export const googleCallback = (req, res) => {
+  req.session.userId = req.user._id;
+  res.redirect("/home");
+};
+
+export const loadOtpPage = (req, res) => {
+  res.render("user/otp");
+};
+
+export const loadForgotPassword = (req, res) => {
+  req.session.destroy(() => {
+    res.render("user/forgotPassword");
+  });
+};
+
+export const loadResetPassword = (req, res) => {
+  if (!req.session.resetEmail) {
+    return res.redirect("/forgot-password");
+  }
+  res.render("user/resetPassword");
+};
+
+export const loadHome = (req, res) => {
+  res.render("user/home");
 };

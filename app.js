@@ -23,7 +23,7 @@ connectDB();
     resave: false,
     saveUninitialized: false,
      cookie: {
-       secure: false, // Must be false for localhost/HTTP
+       secure: false,
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000
   }

@@ -109,6 +109,11 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>
                 <span class="text-sm">Reviews</span>
             </a>
+             <button type="button" id="logoutAdmin" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>
+                <span class="text-sm">SignOut</span>
+             </button>
+            
         </nav>
 
     
@@ -122,10 +127,12 @@
             <div>
                 <h1 class="text-5xl font-serif header-title-underline">User Management</h1>
             </div>
-            <button class="bg-black text-white px-6 py-3 text-[0.7rem] tracking-[0.15em] uppercase font-bold flex items-center gap-2 hover:bg-stone-800 transition-all">
+            <!-- <button class="bg-black text-white px-6 py-3 text-[0.7rem] tracking-[0.15em] uppercase font-bold flex items-center gap-2 hover:bg-stone-800 transition-all">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add User
-            </button>
+            </button> -->
+
+            
         </header>
 
         <!-- Table Card -->
@@ -157,12 +164,15 @@
                         </form>
                     </div>
                     
-                    <div class="relative min-w-[140px]">
-                        <button class="w-full search-input py-3 px-4 flex justify-between items-center text-sm font-medium">
-                            All Status
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"></path></svg>
-                        </button>
-                    </div>
+                   <div class="relative min-w-[140px]">
+                  <select id="statusFilter"  class="search-input py-3 px-4 text-sm font-medium w-full">
+    
+                <option value="all" <%= status === "all" ? "selected" : "" %>>All</option>
+                <option value="active" <%= status === "active" ? "selected" : "" %>>Active</option>
+                <option value="blocked" <%= status === "blocked" ? "selected" : "" %>>Blocked</option>
+
+               </select>
+                 </div>
                 </div>
             </div>
 
@@ -227,7 +237,7 @@
                 </table>
             </div>
 
-            <!-- Footer / Pagination -->
+         
             <div class="p-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-[#FCFCFC]">
                 <p class="text-xs text-brand-muted">
                     Showing <span class="text-brand-text font-bold"><%= (currentPage - 1) * 5 + 1 %></span> 
@@ -237,7 +247,7 @@
                 
                 <div class="flex items-center gap-4">
                     <% if(currentPage > 1) { %>
-                        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" class="text-brand-muted hover:text-brand-text transition-colors">
+                        <a href="/admin/users?page=<%= i %>&search=<%= searchQuery %>&status=<%= status %>" class="text-brand-muted hover:text-brand-text transition-colors">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         </a>
                     <% } else { %>
@@ -271,7 +281,6 @@
 
     </main>
 
-    <!-- Theme Toggle (UI Only) -->
     <div class="glass-dark-toggle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand-text"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
     </div>
@@ -279,7 +288,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Toggle Block User Logic
         async function toggleBlockUser(userId, isBlocked) {
             const action = isBlocked === 'true' ? 'unblock' : 'block';
             
@@ -319,7 +327,6 @@
             }
         }
 
-        // Search Debounce Logic
         let debounceTimer;
         const input = document.getElementById("searchInput");
 
@@ -331,5 +338,37 @@
           }, 400);  
         });
     </script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById("logoutAdmin").addEventListener("click", function () {
+
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You will be logged out",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#1C1C1C",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, logout"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/admin/logout";
+    }
+  });
+
+});
+</script>
+<script>const statusFilter = document.getElementById("statusFilter");
+
+statusFilter.addEventListener("change", () => {
+  const status = statusFilter.value;
+  const search = document.getElementById("searchInput").value;
+
+  window.location.href = `/admin/users?page=1&search=${search}&status=${status}`;
+});</script>
+
 </body>
 </html>
