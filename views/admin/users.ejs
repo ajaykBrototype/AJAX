@@ -18,7 +18,7 @@
                     colors: {
                         brand: {
                             bg: '#F5F2ED',
-                            sidebar: '#FFFFFF',
+                            sidebar: '#ECE9E1',
                             card: '#FFFFFF',
                             text: '#1C1C1C',
                             muted: '#9B8E83',
@@ -33,159 +33,142 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', sans-serif; background: #F5F2ED; color: #1C1C1C; min-height: 100vh; overflow-x: hidden; }
         
-        .sidebar-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
-        .sidebar-item.active { background: #f8f8f8; color: #1c1c1c; border-right-color: #1c1c1c; font-weight: 500; }
-        .sidebar-item:hover:not(.active) { background: #fafafa; color: #1c1c1c; }
+        /* Sidebar Styling */
+        .sidebar-item { transition: all 0.2s ease; border-radius: 8px; margin: 0 12px; }
+        .sidebar-item.active { background: #1C1C1C; color: #FFFFFF; }
+        .sidebar-item:hover:not(.active) { background: rgba(28, 28, 28, 0.04); }
+        .nav-section-title { font-size: 0.65rem; font-weight: 700; color: #9B8E83; text-transform: uppercase; letter-spacing: 0.15em; padding: 0 28px; margin-bottom: 12px; }
 
+        /* Header Styling */
         .header-title-underline { position: relative; display: inline-block; padding-bottom: 8px; }
-        .header-title-underline::after { content: ''; position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: #1c1c1c; }
+        .header-title-underline::after { content: ''; position: absolute; left: 0; bottom: 0; width: 40px; height: 2px; background: #1c1c1c; }
 
-        .search-input { background: #F2F2F2 !important; border: none !important; transition: all 0.2s ease; }
-        .search-input:focus { background: #EAEAEA !important; box-shadow: none !important; }
+        /* Input & Controls */
+        .search-input { background: #F3F1ED !important; border: none !important; transition: all 0.2s ease; border-radius: 12px !important; }
+        .search-input:focus { background: #EAE8E4 !important; box-shadow: none !important; }
 
-        .table-row { transition: background 0.2s ease; }
+        /* Table Styling */
+        .user-table-container { border-radius: 16px; overflow: hidden; background: #FFFFFF; border: 1px solid rgba(28, 28, 28, 0.05); }
+        .table-row { transition: background 0.2s ease; border-bottom: 1px solid rgba(28, 28, 28, 0.03); }
         .table-row:hover { background: #FAFAFA; }
 
-        .badge { font-size: 0.65rem; letter-spacing: 0.05em; font-weight: 600; padding: 4px 12px; border-radius: 4px; text-transform: uppercase; }
-        .badge-active { background: #F2F2F2; color: #1C1C1C; }
+        /* Badges */
+        .badge { font-size: 0.65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-active { background: #E5E7EB; color: #1C1C1C; }
         .badge-blocked { background: #FFEAEA; color: #B04040; }
 
-        .action-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; border: 1px solid transparent; }
-        .action-icon:hover { background: #F2F2F2; border-color: rgba(0,0,0,0.05); }
+        /* Action Icons */
+        .action-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; }
+        .action-icon:hover { background: #F5F2ED; }
 
-        .pagination-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 4px; transition: all 0.2s; }
-        .pagination-btn.active { background: #1c1c1c; color: #fff; }
-        .pagination-btn:hover:not(.active) { background: #f2f2f2; }
+        /* Pagination */
+        .pagination-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 8px; border: 1px solid rgba(28, 28, 28, 0.08); transition: all 0.2s; background: #FFFFFF; }
+        .pagination-btn.active { background: #1C1C1C; color: #FFFFFF; border-color: #1C1C1C; }
+        .pagination-btn:hover:not(.active) { background: #F5F2ED; }
 
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ccc; }
-
-        .glass-dark-toggle { position: fixed; bottom: 30px; right: 30px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s; z-index: 100; }
-        .glass-dark-toggle:hover { transform: scale(1.1); }
+        ::-webkit-scrollbar-thumb { background: #DDD6CC; border-radius: 10px; }
     </style>
 </head>
 <body class="flex">
 
-    <!-- ── SIDEBAR ── -->
-    <aside class="w-64 h-screen bg-white border-r border-brand-border flex flex-col sticky top-0 z-50">
-        <div class="pt-10 pb-8 px-8">
-            <h2 class="text-3xl font-serif tracking-tight cursor-default">AJAX</h2>
+    <aside class="w-72 h-screen bg-brand-sidebar flex flex-col sticky top-0 z-50">
+        <div class="pt-12 pb-12 px-10">
+            <h2 class="text-3xl font-serif tracking-tight font-bold">AJAX</h2>
         </div>
 
-        <div class="px-4 text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-4 mt-4">Management</div>
+        <div class="nav-section-title mt-4">Management</div>
         
         <nav class="flex-1 space-y-1">
-            <a href="/admin/dashboard" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <span class="text-sm">Dashboard</span>
+            <a href="/admin/dashboard" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span class="text-[0.9rem] font-medium">Dashboard</span>
             </a>
-            <a href="/admin/orders" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span class="text-sm">Orders</span>
+            <a href="/admin/orders" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span class="text-[0.9rem] font-medium">Orders</span>
             </a>
-            <a href="/admin/products" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"></path><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.27 6.96 8.73 5.04 8.73-5.04"></path><path d="M12 22.08V12"></path></svg>
-                <span class="text-sm">Products</span>
+            <a href="/admin/products" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="m11 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="M17 12V3"></path><path d="M7 12V3"></path><path d="M3 12h18"></path><path d="M21 3h-18"></path></svg>
+                <span class="text-[0.9rem] font-medium">Products</span>
             </a>
-            <a href="/admin/categories" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M9 21V9"></path></svg>
-                <span class="text-sm">Categories</span>
+            <a href="/admin/categories" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                <span class="text-[0.9rem] font-medium">Categories</span>
             </a>
-            <a href="/admin/coupons" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5H4v14h11l4-7-4-7z"></path><path d="M9 10a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"></path></svg>
-                <span class="text-sm">Coupons</span>
+              <a href="/admin/coupons" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5H4v14h11l4-7-4-7z"></path><circle cx="9" cy="12" r="1"></circle></svg>
+                <span class="text-[0.9rem] font-medium">Coupons</span>
             </a>
-            <a href="/admin/offers" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                <span class="text-sm">Offers</span>
+            <a href="/admin/offers" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l3 6-9 12L3 9z"></path></svg>
+                <span class="text-[0.9rem] font-medium">Offers</span>
             </a>
-            <a href="/admin/users" class="sidebar-item active flex items-center gap-3 px-8 py-4 text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span class="text-sm">Customers</span>
+            <a href="/admin/users" class="sidebar-item active flex items-center gap-4 px-6 py-3.5">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span class="text-[0.9rem] font-medium">Customers</span>
             </a>
-            <a href="/admin/reviews" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>
-                <span class="text-sm">Reviews</span>
+            <a href="/admin/home-manager" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span class="text-[0.9rem] font-medium">Home Manager</span>
             </a>
-             <button type="button" id="logoutAdmin" class="sidebar-item flex items-center gap-3 px-8 py-4 text-brand-muted hover:text-brand-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>
-                <span class="text-sm">SignOut</span>
-             </button>
-            
         </nav>
 
-    
+        <div class="p-8 border-t border-brand-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-white border border-brand-border">
+                    <img src="https://i.pravatar.cc/100?u=sebastian" alt="Admin" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <h5 class="text-sm font-bold truncate">Sebastian Vielle</h5>
+                    <p id="logoutAdmin" class="text-[0.7rem] text-brand-muted cursor-pointer hover:text-brand-text transition-colors">Logout Account</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
-    <!-- ── MAIN CONTENT ── -->
     <main class="flex-1 p-12 overflow-y-auto max-h-screen">
         
-        <!-- Header -->
         <header class="flex justify-between items-end mb-12">
             <div>
                 <h1 class="text-5xl font-serif header-title-underline">User Management</h1>
             </div>
-            <!-- <button class="bg-black text-white px-6 py-3 text-[0.7rem] tracking-[0.15em] uppercase font-bold flex items-center gap-2 hover:bg-stone-800 transition-all">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add User
-            </button> -->
-
-            
         </header>
 
-        <!-- Table Card -->
-        <div class="bg-white border border-brand-border overflow-hidden">
-            
-            <!-- Controls -->
-            <div class="p-6 lg:p-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-brand-border">
-                <h3 class="text-xl font-bold">Users</h3>
+        <div class="user-table-container">
+            <div class="p-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-brand-border">
+                <h3 class="text-xl font-bold">Customer Directory</h3>
                 
                 <div class="flex flex-1 md:justify-end items-center gap-4 w-full md:w-auto">
                     <div class="relative flex-1 md:max-w-[340px]">
-                        <form id="searchForm" onsubmit="return false">
-                            <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                            <input 
-                                type="text" 
-                                id="searchInput"
-                                name="search"
-                                value="<%= searchQuery || '' %>"
-                                placeholder="Search users..." 
-                                class="search-input w-full pl-11 pr-4 py-3 text-sm outline-none placeholder:text-brand-muted/60"
-                            >
-                            <% if (searchQuery && searchQuery.length > 0) { %>
-                                <a href="/admin/users" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </a>
-                            <% } %>
-                        </form>
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            value="<%= searchQuery || '' %>"
+                            placeholder="Search by name or email..." 
+                            class="search-input w-full pl-11 pr-4 py-3 text-sm outline-none placeholder:text-brand-muted/60"
+                        >
                     </div>
                     
-                   <div class="relative min-w-[140px]">
-                  <select id="statusFilter"  class="search-input py-3 px-4 text-sm font-medium w-full">
-    
-                <option value="all" <%= status === "all" ? "selected" : "" %>>All</option>
-                <option value="active" <%= status === "active" ? "selected" : "" %>>Active</option>
-                <option value="blocked" <%= status === "blocked" ? "selected" : "" %>>Blocked</option>
-
-               </select>
-                 </div>
+                    <select id="statusFilter" class="search-input py-3 px-4 text-sm font-medium min-w-[140px] cursor-pointer">
+                        <option value="all" <%= status === "all" ? "selected" : "" %>>All Status</option>
+                        <option value="active" <%= status === "active" ? "selected" : "" %>>Active</option>
+                        <option value="blocked" <%= status === "blocked" ? "selected" : "" %>>Blocked</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-[0.62rem] text-brand-muted font-bold uppercase tracking-[0.2em] border-b border-brand-border bg-[#FCFCFC]">
-                            <th class="px-8 py-5">Sl No</th>
-                            <th class="px-8 py-5">User</th>
-                            <th class="px-8 py-5">User ID</th>
+                            <th class="px-8 py-5">#</th>
+                            <th class="px-8 py-5">Profile</th>
                             <th class="px-8 py-5">Status</th>
-                            <th class="px-8 py-5">Joined At</th>
+                            <th class="px-8 py-5">Registration</th>
                             <th class="px-8 py-5 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -198,7 +181,7 @@
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
                                         <div class="w-10 h-10 rounded-full bg-brand-bg overflow-hidden border border-brand-border">
-                                            <img src="<%= user.profileImage || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) %>" class="w-full h-full object-cover">
+                                            <img src="<%= user.profileImage || 'https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.name) %>" class="w-full h-full object-cover">
                                         </div>
                                         <div>
                                             <h5 class="text-[0.85rem] font-bold text-brand-text leading-tight"><%= user.name %></h5>
@@ -207,26 +190,23 @@
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <code class="text-[0.75rem] text-brand-muted font-mono"><%= user._id.toString().slice(-6) %>...</code>
-                                </td>
-                                <td class="px-8 py-6">
                                     <span class="badge <%= user.isBlocked ? 'badge-blocked' : 'badge-active' %>">
                                         <%= user.isBlocked ? 'Blocked' : 'Active' %>
                                     </span>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <h5 class="text-[0.8rem] font-medium text-brand-text leading-tight"><%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></h5>
-                                    <p class="text-[0.65rem] text-brand-muted mt-0.5 uppercase"><%= new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></p>
+                                    <h5 class="text-[0.8rem] font-medium text-brand-text"><%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></h5>
+                                    <p class="text-[0.65rem] text-brand-muted uppercase tracking-wider"><%= new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></p>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <div class="flex items-center justify-end gap-3 text-brand-muted">
-                                        <a href="#" class="text-[0.7rem] font-bold underline underline-offset-4 hover:text-brand-text transition-colors uppercase tracking-wider">View</a>
-                                        <div class="action-icon <%= user.isBlocked ? 'text-green-600' : 'text-red-500' %>" title="<%= user.isBlocked ? 'Unblock' : 'Block' %> User"
-                                            onclick="toggleBlockUser('<%=user._id %>','<%=user.isBlocked %>')">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <div class="action-icon <%= user.isBlocked ? 'text-green-600' : 'text-red-500' %>" 
+                                             title="<%= user.isBlocked ? 'Unblock' : 'Block' %> User"
+                                             onclick="toggleBlockUser('<%=user._id %>','<%=user.isBlocked %>')">
                                             <% if(user.isBlocked) { %>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"></path></svg>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg>
                                             <% } else { %>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                                             <% } %>
                                         </div>
                                     </div>
@@ -237,73 +217,50 @@
                 </table>
             </div>
 
-         
             <div class="p-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-[#FCFCFC]">
                 <p class="text-xs text-brand-muted">
                     Showing <span class="text-brand-text font-bold"><%= (currentPage - 1) * 5 + 1 %></span> 
-                    to <span class="text-brand-text font-bold"><%= Math.min(currentPage * 5, totalUsers) %></span> 
-                    of <span class="text-brand-text font-bold"><%= totalUsers %></span> users
+                    - <span class="text-brand-text font-bold"><%= Math.min(currentPage * 5, totalUsers) %></span> 
+                    of <span class="text-brand-text font-bold"><%= totalUsers %></span>
                 </p>
                 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
                     <% if(currentPage > 1) { %>
-                        <a href="/admin/users?page=<%= i %>&search=<%= searchQuery %>&status=<%= status %>" class="text-brand-muted hover:text-brand-text transition-colors">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= searchQuery %>&status=<%= status %>" class="pagination-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         </a>
-                    <% } else { %>
-                        <span class="text-brand-muted/30">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </span>
                     <% } %>
 
-                    <div class="flex items-center gap-1">
-                        <% for(let i = 1; i <= totalPages; i++) { %>
-                            <a 
-                              href="/admin/users?page=<%= i %>&search=<%= searchQuery %>"
-                              class="pagination-btn <%= currentPage === i ? 'active' : '' %>">
-                              <%= i %>
-                            </a>
-                        <% } %>
-                    </div>
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="/admin/users?page=<%= i %>&search=<%= searchQuery %>&status=<%= status %>" 
+                           class="pagination-btn <%= currentPage === i ? 'active' : '' %>">
+                           <%= i %>
+                        </a>
+                    <% } %>
 
                     <% if(currentPage < totalPages) { %>
-                        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" class="text-brand-muted hover:text-brand-text transition-colors">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= searchQuery %>&status=<%= status %>" class="pagination-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </a>
-                    <% } else { %>
-                        <span class="text-brand-muted/30">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </span>
                     <% } %>
                 </div>
             </div>
         </div>
-
     </main>
 
-    <div class="glass-dark-toggle">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand-text"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-    </div>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         async function toggleBlockUser(userId, isBlocked) {
             const action = isBlocked === 'true' ? 'unblock' : 'block';
-            
             const result = await Swal.fire({
                 title: `<span style="font-family: 'Playfair Display', serif;">${action.toUpperCase()} USER?</span>`,
-                text: `Are you sure you want to ${action} this user?`,
+                text: `Confirm to ${action} this user's access.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1C1C1C',
                 cancelButtonColor: '#d33',
                 confirmButtonText: `Yes, ${action}`,
-                background: '#FAFAF8',
-                customClass: {
-                    title: 'font-serif',
-                    confirmButton: 'rounded-none'
-                }
+                background: '#F5F2ED'
             });
 
             if (result.isConfirmed) {
@@ -312,63 +269,44 @@
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' }
                     });
-
                     const data = await response.json();
-
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        Swal.fire('Error', data.message || 'Action failed', 'error');
-                    }
+                    if (data.success) window.location.reload();
+                    else Swal.fire('Error', data.message, 'error');
                 } catch (error) {
-                    console.error('Fetch error:', error);
-                    Swal.fire('Error', 'Connection lost', 'error');
+                    Swal.fire('Error', 'Connection failed', 'error');
                 }
             }
         }
 
+        // Search & Filter Logic
         let debounceTimer;
         const input = document.getElementById("searchInput");
+        const statusFilter = document.getElementById("statusFilter");
+
+        const updateFilters = () => {
+            const query = input.value.trim();
+            const status = statusFilter.value;
+            window.location.href = `/admin/users?page=1&search=${query}&status=${status}`;
+        };
 
         input.addEventListener("input", () => {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            const query = input.value.trim();
-            window.location.href = `/admin/users?page=1&search=${query}`;
-          }, 400);  
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(updateFilters, 500);
+        });
+
+        statusFilter.addEventListener("change", updateFilters);
+
+        document.getElementById("logoutAdmin")?.addEventListener("click", function () {
+            Swal.fire({
+                title: "Logout?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#1C1C1C",
+                confirmButtonText: "Logout"
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = "/admin/logout";
+            });
         });
     </script>
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.getElementById("logoutAdmin").addEventListener("click", function () {
-
-  Swal.fire({
-    title: "Are you sure?",
-    text: "You will be logged out",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#1C1C1C",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, logout"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = "/admin/logout";
-    }
-  });
-
-});
-</script>
-<script>const statusFilter = document.getElementById("statusFilter");
-
-statusFilter.addEventListener("change", () => {
-  const status = statusFilter.value;
-  const search = document.getElementById("searchInput").value;
-
-  window.location.href = `/admin/users?page=1&search=${search}&status=${status}`;
-});</script>
-
 </body>
 </html>

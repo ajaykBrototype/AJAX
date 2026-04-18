@@ -16,7 +16,7 @@ export const loginAdmin = async (req, res) => {
       });
     }
     const { email, password } = result.data;
-    const admin = await adminService.loginAdmin(email, password);
+    const admin = await adminService.loginAdminService(email, password);
 
     req.session.adminId = admin._id;
     console.log("SESSION SAVED:", req.session.adminId);

@@ -142,7 +142,7 @@
             <div>
                 <h1 class="text-4xl font-serif font-bold header-title-underline">Categories</h1>
             </div>
-            <button class="bg-[#1C1C1C] text-white px-6 py-3.5 text-[0.8rem] rounded-xl font-bold flex items-center gap-2 hover:bg-stone-800 transition-all shadow-lg">
+            <button  onclick="openModal()" class="bg-[#1C1C1C] text-white px-6 py-3.5 text-[0.8rem] rounded-xl font-bold flex items-center gap-2 hover:bg-stone-800 transition-all shadow-lg">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add Category
             </button>
@@ -150,11 +150,11 @@
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <!-- Total Categories -->
+          
             <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
                 <div>
                     <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Total Categories</p>
-                    <h3 class="text-4xl font-serif font-bold">24</h3>
+                    <h3 class="text-4xl font-serif font-bold"><%=totalCategories%></h3>
                 </div>
                 <div class="p-3 bg-brand-bg rounded-xl">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><path d="M12 3L3.5 6V18L12 21L20.5 18V6L12 3Z"></path><path d="M3.5 6L12 9L20.5 6"></path><path d="M12 9V21"></path></svg>
@@ -213,6 +213,7 @@
                     >
                 </div>
             </div>
+            
 
             <!-- Table -->
             <div class="overflow-x-auto">
@@ -228,17 +229,18 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y-0">
+                       <% categories.forEach((cat, index) => { %>
                         <!-- Row 1 -->
                         <tr class="table-row">
                             <td class="px-10 py-6 text-[0.9rem] font-medium text-brand-muted">
-                                1
+                                <%= index+1 %>
                             </td>
                             <td class="px-10 py-6">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center border border-brand-border border-dashed">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                     </div>
-                                    <span class="text-[0.95rem] font-bold">Men</span>
+                                    <span class="text-[0.95rem] font-bold"><%= cat.name %></span>
                                 </div>
                             </td>
                             <td class="px-10 py-6 text-[0.9rem] font-medium">
@@ -248,7 +250,11 @@
                                 124
                             </td>
                             <td class="px-10 py-6">
+                                <% if(cat.isActive){ %>
                                 <span class="status-pill status-active">Active</span>
+                                <% }else {%>
+                                     <span class="status-pill status-inactive">Inactive</span>
+                                <% } %>
                             </td>
                             <td class="px-10 py-6">
                                 <div class="flex items-center justify-center gap-6">
@@ -267,49 +273,18 @@
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Row 2 -->
-                        <tr class="table-row">
-                            <td class="px-10 py-6 text-[0.9rem] font-medium text-brand-muted">
-                                2
-                            </td>
-                            <td class="px-10 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center border border-brand-border border-dashed">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                    </div>
-                                    <span class="text-[0.95rem] font-bold">Women</span>
-                                </div>
-                            </td>
-                            <td class="px-10 py-6 text-[0.9rem] font-medium">
-                                18
-                            </td>
-                            <td class="px-10 py-6 text-[0.9rem] font-medium">
-                                85
-                            </td>
-                            <td class="px-10 py-6">
-                                <span class="status-pill status-inactive">Inactive</span>
-                            </td>
-                            <td class="px-10 py-6">
-                                <div class="flex items-center justify-center gap-6">
-                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                    </button>
-                                    <button class="text-brand-muted hover:text-red-600 transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
-                                    <div class="toggle-switch">
-                                        <div class="toggle-circle"></div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        <% }) %>
+                        <% if (categories.length === 0) { %>
+                        <tr>
+                          <td colspan="6" class="text-center py-10 text-gray-400">
+                              No categories found
+                              </td>
+                          </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
+           
 
             <!-- Footer / Pagination -->
             <div class="px-10 py-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-brand-border bg-[#FAFAFA]">
@@ -334,6 +309,43 @@
 
     </main>
 
+<div id="categoryModal"
+     class="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm hidden items-center justify-center">
+
+  <div id="modalContent"
+       class="bg-white w-[420px] rounded-2xl p-6 relative scale-95 opacity-0 transition-all duration-200">
+
+    <!-- CLOSE -->
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 text-xl">✕</button>
+
+    <h2 class="text-2xl font-semibold mb-4">Add Category</h2>
+
+    <label class="text-sm text-gray-600">Category Name</label>
+    <input id="categoryName"
+      class="w-full border rounded-lg px-3 py-2 mt-1 mb-4"
+      placeholder="e.g. Summer Collection" />
+
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <p class="font-medium">Active Status</p>
+        <p class="text-xs text-gray-500">Set category as visible</p>
+      </div>
+
+      <input type="checkbox" id="categoryStatus" checked />
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded-lg">
+        Cancel
+      </button>
+
+      <button onclick="saveCategory()" class="px-4 py-2 bg-black text-white rounded-lg">
+        Save Category
+      </button>
+    </div>
+
+  </div>
+</div>
     <script>
         // Static interactive logic for demonstration
         document.querySelectorAll('.toggle-switch').forEach(toggle => {
@@ -350,6 +362,7 @@
             });
         });
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/admin/category.js"></script>
 </body>
 </html>
