@@ -3,17 +3,15 @@ import {
   loadLogin,loginAdmin,logoutAdmin
 } from "../controllers/admin/auth.controller.js";
 import {
-  loadCategoryPage,
-  createCategory,
-  getCategories,
-  toggleCategory,
-  deleteCategory,
-  updateCategory
+  loadCategoryPage,createCategory,getCategories,
+  toggleCategory,deleteCategory, updateCategory
 } from "../controllers/admin/category.controller.js";
+
 import {getAllUsers,toggleBlockUser} from "../controllers/admin/user.controller.js";
 
 import { isAdminAuth,isLoggedOut } from "../middleware/adminAuth.js";
 import { noCache } from "../middleware/noCache.js";
+import {loadSubCategoryPage,createSubCategory } from "../controllers/admin/subCategory.controller.js";
 
 const router = express.Router();
 
@@ -29,6 +27,11 @@ router.post("/categories/add", isAdminAuth, createCategory);
 router.patch("/categories/:id", isAdminAuth, updateCategory);
 router.patch("/categories/toggle/:id", isAdminAuth, toggleCategory);
 router.delete("/categories/:id", isAdminAuth, deleteCategory);
+
+router.get("/subcategories", isAdminAuth, loadSubCategoryPage);
+router.post("/subcategories/add",isAdminAuth,createSubCategory);
+
+
 
 
 router.get("/logout", logoutAdmin);

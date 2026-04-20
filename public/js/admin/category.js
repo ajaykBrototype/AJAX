@@ -64,10 +64,6 @@ window.saveCategory = async function () {
   const isActive = document.getElementById("categoryStatus").checked;
 
      console.log("ID:", id);
-  if (!name) {
-    alert("Category name required");
-    return;
-  }
 
   try {
     let res;

@@ -4,7 +4,13 @@ import * as categoryService from "../../services/admin/category.service.js";
 
 export const loadCategoryPage=async(req,res)=>{
     try{
-        const categories=await Category.find().sort({createdAt:-1});
+         const page=parseInt(req.query.page)||1;
+         const limit=5;
+         const skip=(page-1)*limit;
+
+        const categories=await Category.find().sort({createdAt:-1}).skip(skip).limit(limit);
+
+        
         const activeCount=categories.filter(cat=>cat.isActive).length;
         const inactiveCount=categories.filter(cat=>!cat.isActive).length;
          res.render("admin/categories",{
