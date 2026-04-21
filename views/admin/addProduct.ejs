@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create New Product — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Cropper.js CSS MUST come before Tailwind so Tailwind doesn't reset it -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"/>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Playfair Display', 'serif'],
+          sans: ['Plus Jakarta Sans', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* --- Reset & Base --- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F3F2EE; color: #1C1C1C; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* --- Sidebar --- */
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; font-size: 14px; font-weight: 500; color: #8E8E8E; position: relative; transition: color .2s, background .2s; }
+  .sidebar-item:hover { color: #1C1C1C; background: rgba(0,0,0,.03); }
+  .sidebar-item.active { background: #EBEAE4; color: #1C1C1C; }
+  .sidebar-item.active::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: #C1272D; }
+
+  /* --- Form --- */
+  .fl { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #8E8E8E; margin-bottom: 8px; }
+  .fin { width: 100%; padding: 13px 16px; background: #fff; border: 1.5px solid #E5E5E5; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .2s, box-shadow .2s; }
+  .fin:focus { border-color: #1C1C1C; box-shadow: 0 0 0 3px rgba(28,28,28,.06); }
+  select.fin { cursor: pointer; appearance: none; }
+
+  /* --- Cards --- */
+  .section-card { background: #EEEDE8; border-radius: 20px; padding: 36px; }
+
+  /* --- Accordion --- */
+  .acc-head { background: #EEEDE8; border-radius: 14px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background .2s; user-select: none; }
+  .acc-head:hover { background: #E5E4DE; }
+  .acc-body { background: #EEEDE8; border-radius: 0 0 14px 14px; padding: 0 24px; max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .35s ease; }
+  .acc-body.open { max-height: 400px; padding: 16px 24px 24px; }
+  .acc-head .icon-chevron { transition: transform .3s; }
+  .acc-head.open .icon-chevron { transform: rotate(180deg); }
+
+  /* --- Upload zone --- */
+  .upload-zone { border: 2px dashed #CCC; border-radius: 14px; padding: 40px 24px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+  .upload-zone:hover, .upload-zone.drag { border-color: #1C1C1C; background: #F7F6F2; }
+
+  /* --- Preview thumbnails --- */
+  .thumb { width: 110px; height: 144px; border-radius: 12px; overflow: hidden; position: relative; border: 1.5px solid #E0DFD9; flex-shrink: 0; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .del-btn { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,.55); border: none; color: #fff; display: none; align-items: center; justify-content: center; cursor: pointer; transition: background .2s; }
+  .thumb:hover .del-btn { display: flex; }
+  .thumb .del-btn:hover { background: #C1272D; }
+  .thumb .badge { position: absolute; bottom: 6px; left: 6px; background: #000; color: #fff; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+
+  /* --- Sticky footer --- */
+  .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); border-top: 1px solid #E5E5E5; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 200; }
+
+  /* ================================================================
+     CROP MODAL – critical: container must NOT clip cropper handles
+     ================================================================ */
+  #cropModal {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.82);
+    backdrop-filter: blur(6px);
+    display: none;          /* hidden by default */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #cropModal.open { display: flex; }
+
+  #cropModalBox {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 700px;
+    overflow: hidden;       /* keep the BOX clipped */
+    box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* This wrapper MUST be block, no overflow:hidden, fixed height so Cropper can measure */
+  #cropperWrapper {
+    width: 100%;
+    height: 420px;          /* fixed height — Cropper needs this */
+    background: #F5F5F5;
+    position: relative;     /* Cropper appends its canvas here */
+    overflow: hidden;       /* safe here because it's the direct Cropper parent */
+  }
+
+  #cropImage {
+    display: block;
+    max-width: 100%;
+    /* DO NOT set height: auto here — Cropper sets its own styles */
+  }
+
+  /* Ensure Cropper.js controls are visible above Tailwind resets */
+  .cropper-container, .cropper-wrap-box, .cropper-canvas, .cropper-drag-box,
+  .cropper-crop-box, .cropper-face, .cropper-view-box, .cropper-dashed,
+  .cropper-point, .cropper-line { position: absolute !important; }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .anim { animation: fadeUp .55s cubic-bezier(.16,1,.3,1) both; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- ═══════════════════════════════════════ SIDEBAR ═══ -->
+<aside id="sidebar" class="w-64 bg-white border-r border-stone-200 flex flex-col flex-shrink-0 sticky top-0 h-screen overflow-y-auto">
+  <div class="p-6">
+    <!-- Logo -->
+    <div class="mb-10">
+      <h1 class="text-3xl font-serif font-bold tracking-tighter">AJAX</h1>
+    </div>
+
+    <!-- Nav -->
+    <nav class="space-y-0.5">
+      <p class="text-[10px] font-bold text-stone-400 tracking-[.2em] mb-4 uppercase px-4">Management</p>
+
+      <a href="/admin/dashboard" class="sidebar-item rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/admin/orders" class="sidebar-item rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+      </a>
+      <a href="/admin/products" class="sidebar-item active rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        Products
+      </a>
+      <a href="/admin/categories" class="sidebar-item rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Categories
+      </a>
+      <a href="/admin/subcategories" class="sidebar-item rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3l-2 18"/></svg>
+        Subcategories
+      </a>
+      <a href="/admin/users" class="sidebar-item rounded-lg">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+    </nav>
+  </div>
+
+  <!-- Profile -->
+  <div class="mt-auto p-6 border-t border-stone-100 flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0">
+      <img src="https://ui-avatars.com/api/?name=Safwan&background=EBEAE4&color=1C1C1C" alt="Admin" class="w-full h-full object-cover">
+    </div>
+    <div class="flex-1 overflow-hidden">
+      <p class="text-sm font-bold truncate">Safwan</p>
+      <p class="text-[10px] text-stone-400 uppercase tracking-widest truncate">Administrator</p>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════ MAIN ════════ -->
+<main class="flex-1 min-w-0 pb-28">
+
+  <!-- Top bar (mobile) -->
+  <div class="lg:hidden sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-stone-200 px-5 py-4 flex items-center gap-3">
+    <button id="sidebarToggle" class="p-2 hover:bg-stone-100 rounded-lg">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="font-bold text-sm">Add Product</span>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-5 lg:px-10 pt-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-400 uppercase mb-6">
+      <a href="/admin/products" class="hover:text-stone-700 transition-colors">Product Management</a>
+      <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      <span class="text-stone-700">Advanced Product Creation</span>
+    </nav>
+
+    <!-- Title -->
+    <h2 class="text-5xl font-serif font-bold mb-12 leading-tight">Create New Product</h2>
+
+    <!-- ── FORM ── -->
+    <form id="productForm" method="POST" action="/admin/products/add"  class="space-y-8 anim">
+
+      <!-- ── GENERAL INFO ── -->
+      <section class="section-card space-y-7">
+        <h3 class="text-xl font-serif font-bold">General Information</h3>
+
+        <!-- Name -->
+        <div>
+          <label class="fl">Product Name</label>
+          <input type="text" name="name" class="fin" placeholder="e.g. Silk Evening Gown">
+        </div>
+
+        <!-- Category + Subcategory -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="fl">Category</label>
+            <div class="relative">
+              <select name="category" class="fin pr-10">
+                <option value="">Select category</option>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat._id %>"><%= cat.name %></option>
+                <% }) %>
+              </select>
+              <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div>
+            <label class="fl">Subcategory</label>
+            <div class="relative">
+              <select name="subcategory" class="fin pr-10">
+                <option value="">Select subcategory</option>
+                <% subCategories.forEach(sub => { %>
+                  <option value="<%= sub._id %>"><%= sub.name %></option>
+                <% }) %>
+              </select>
+              <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Material -->
+        <div>
+          <label class="fl">Material</label>
+          <input type="text" name="material" class="fin" placeholder="e.g. 100% Mulberry Silk">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="fl">Description &amp; Fit Details</label>
+          <textarea name="description" rows="5" class="fin resize-none" placeholder="Detailed product description and fit guide..."></textarea>
+        </div>
+
+        <!-- Care Guide -->
+        <div>
+          <label class="fl">Care Guide</label>
+          <textarea name="careGuide" rows="3" class="fin resize-none" placeholder="e.g. Dry clean only. Do not bleach."></textarea>
+        </div>
+      </section>
+
+  <!-- Footer -->
+      <p class="text-center text-[10px] text-stone-400 tracking-widest uppercase pb-8">© 2024 AJAX Digital Atelier. All Rights Reserved.</p>
+    </form>
+  </div>
+</main>
+
+
+<div class="sticky-bar">
+  <div class="flex items-center gap-2.5">
+    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+    <span class="text-[10px] font-bold tracking-widest text-stone-400 uppercase">Cloud Synchronized</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/admin/products" class="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest border border-stone-200 rounded-xl hover:bg-stone-50 transition-all">Discard</a>
+    <button type="submit" form="productForm" class="px-9 py-2.5 text-[11px] font-bold uppercase tracking-widest bg-black text-white rounded-xl hover:bg-stone-800 transition-all shadow-md">Save Product</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ Cropper.js ══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="/js/admin/product.js"></script>
+
+<script>
+  // Accordion
+  function toggleAcc(head) {
+    head.classList.toggle('open');
+    const body = head.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  // Mobile sidebar
+  const sidebarEl = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => sidebarEl.classList.toggle('-translate-x-full'));
+  }
+</script>
+</body>
+</html>

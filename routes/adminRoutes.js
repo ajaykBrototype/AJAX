@@ -12,7 +12,8 @@ import {getAllUsers,toggleBlockUser} from "../controllers/admin/user.controller.
 import { isAdminAuth,isLoggedOut } from "../middleware/adminAuth.js";
 import { noCache } from "../middleware/noCache.js";
 import {loadSubCategoryPage,createSubCategory,updateSubCategory,deleteSubCategory,toggleSubCategory } from "../controllers/admin/subCategory.controller.js";
-
+import { loadAddProductPage, loadProductPage,addProduct, toggleProduct,loadProductDetails } from "../controllers/admin/product.controller.js";
+import { loadVariantPage, } from "../controllers/admin/variant.controller.js";
 const router = express.Router();
 
 router.get("/login",isLoggedOut,noCache, loadLogin);
@@ -34,8 +35,14 @@ router.patch("/subcategories/:id", isAdminAuth, updateSubCategory);
 router.delete("/subcategories/:id", isAdminAuth, deleteSubCategory);
 router.patch("/subcategories/toggle/:id", isAdminAuth, toggleSubCategory);
 
+router.get("/products", isAdminAuth,loadProductPage);
+router.get("/products/add", isAdminAuth,loadAddProductPage);
+router.post("/products/add", isAdminAuth, addProduct);
+router.patch("/products/toggle/:id", isAdminAuth, toggleProduct);
 
+router.get("/products/:id", isAdminAuth, loadProductDetails);
 
+router.get("/products/:id/variants", loadVariantPage);
 
 router.get("/logout", logoutAdmin);
 
