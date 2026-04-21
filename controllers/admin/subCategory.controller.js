@@ -5,18 +5,31 @@ import SubCategory from "../../models/admin/subCategoryModel.js";
 export const loadSubCategoryPage = async (req, res) => {
   try {
       const search=req.query.search || "";
-      const categoryFilter=req.query.category || "";
+      const selectedCategory= req.query.category || "" ; 
+      const page=parseInt(req.query.page) || 1;
+      const limit=5;
+      const skip=(page-1)*limit;
 
       let filter={};
-
       if(search){
         filter.name={$regex:search,$options:"i"};
       }
 
+      if (selectedCategory) {
+       filter.category = selectedCategory;
+       }
+
+      const total=await SubCategory.countDocuments(filter);
+
     const categories = await Category.find({ isActive: true });
            
-      const subCategories = await SubCategory.find()
-      .populate("category", "name").sort({createdAt:-1});
+      const subCategories = await SubCategory.find(filter)
+      .populate("category", "name").sort({createdAt:-1}).skip(skip).limit(limit);
+
+      const activeCount=subCategories.filter(cat=>cat.isActive).length;
+      const inactiveCount=subCategories.filter(cat=>!cat.isActive).length;
+
+      const totalPages=Math.ceil(total/limit);
 
     console.log("CATEGORIES:", categories);
 
@@ -24,7 +37,12 @@ export const loadSubCategoryPage = async (req, res) => {
       categories,
       subCategories,
       search,
-      categoryFilter
+      currentPage: page,
+      totalPages,
+      total,
+      selectedCategory,
+      totalSubCategory:subCategories.length,
+      activeCount,inactiveCount
     });
 
   } catch (err) {
@@ -46,3 +64,26 @@ export const createSubCategory=async(req,res)=>{
   }
   res.json(result);
 }
+
+export const updateSubCategory = async (req, res) => {
+  const result = await subService.updateSubCategoryService(
+    req.params.id,
+    req.body
+  );
+
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+
+  res.json(result);
+};
+
+export const deleteSubCategory = async (req, res) => {
+  const result = await subService.deleteSubCategoryService(req.params.id);
+  res.json(result);
+};
+
+export const toggleSubCategory = async (req, res) => {
+  const result = await subService.toggleSubCategoryService(req.params.id);
+  res.json(result);
+};

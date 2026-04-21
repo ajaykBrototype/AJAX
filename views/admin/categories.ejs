@@ -1,356 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Category Management — AJAX Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=DM+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        serif: ['Playfair Display', 'Georgia', 'serif'],
-                        sans: ['DM Sans', 'system-ui', 'sans-serif']
-                    },
-                    colors: {
-                        brand: {
-                            bg: '#F5F2ED',
-                            sidebar: '#ECE9E1',
-                            card: '#FFFFFF',
-                            text: '#1C1C1C',
-                            muted: '#9B8E83',
-                            border: 'rgba(28, 28, 28, 0.08)'
-                        }
-                    }
-                }
-            }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Categories — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=DM+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Playfair Display', 'serif'],
+          sans: ['DM Sans', 'sans-serif']
         }
-    </script>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; background: #F5F2ED; color: #1C1C1C; min-height: 100vh; overflow-x: hidden; }
-        
-        .sidebar-item { transition: all 0.2s ease; border-radius: 8px; margin: 0 12px; }
-        .sidebar-item.active { background: #1C1C1C; color: #FFFFFF; }
-        .sidebar-item:hover:not(.active) { background: rgba(28, 28, 28, 0.04); }
+      }
+    }
+  }
+</script>
 
-        .header-title-underline { position: relative; display: inline-block; padding-bottom: 8px; }
-        .header-title-underline::after { content: ''; position: absolute; left: 0; bottom: 0; width: 40px; height: 2px; background: #1c1c1c; }
+<style>
+  :root {
+    --admin-bg: #F8F7F4;
+    --admin-sidebar: #FFFFFF;
+    --admin-border: rgba(0,0,0,0.06);
+    --admin-accent: #1C1C1C;
+    --admin-muted: #888888;
+  }
 
-        .search-input { background: #F3F1ED !important; border: none !important; transition: all 0.2s ease; border-radius: 12px !important; }
-        .search-input:focus { background: #EAE8E4 !important; box-shadow: none !important; }
+  body { background: var(--admin-bg); color: var(--admin-accent); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  
+  /* Sidebar */
+  .side-item { display: flex; align-items: center; gap: .8rem; padding: .85rem 1.25rem; font-size: .82rem; color: var(--admin-muted); border-radius: 8px; transition: all .25s; margin-bottom: .25rem; }
+  .side-item:hover { background: rgba(0,0,0,0.03); color: var(--admin-accent); }
+  .side-item.active { background: var(--admin-accent); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        .stat-card { background: #FFFFFF; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+  /* Table */
+  .table-card { background: #fff; border: 1px solid var(--admin-border); border-radius: 12px; overflow: hidden; }
+  .tr-row { transition: background .2s; }
+  .tr-row:hover { background: #FAF9F8; }
 
-        .category-table { border-radius: 16px; overflow: hidden; background: #FFFFFF; }
-        .table-header { border-bottom: 1px solid rgba(28, 28, 28, 0.05); }
-        .table-row { transition: background 0.2s ease; border-bottom: 1px solid rgba(28, 28, 28, 0.03); }
-        .table-row:hover { background: #FAFAFA; }
+  /* Stats */
+  .stat-bubble { background: #fff; border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.5rem; transition: transform .3s; }
+  .stat-bubble:hover { transform: translateY(-3px); }
 
-        .status-pill { font-size: 0.65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .status-active { background: #E5E7EB; color: #1C1C1C; }
-        .status-inactive { background: #E5E7EB; color: #9B8E83; opacity: 0.7; }
+  /* Status Pills */
+  .status-pill { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .35rem .8rem; border-radius: 20px; }
+  .status-active { background: #E8F5E9; color: #2E7D32; }
+  .status-inactive { background: #F5F5F5; color: #757575; }
 
-        .toggle-switch { width: 44px; height: 24px; background: #E5E7EB; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
-        .toggle-switch.active { background: #1C1C1C; }
-        .toggle-circle { width: 20px; height: 20px; background: #FFFFFF; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.3s; }
-        .toggle-switch.active .toggle-circle { transform: translateX(20px); }
+  /* Toggle */
+  .switch { position: relative; display: inline-block; width: 42px; height: 22px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background-color: #E2E2E2; border-radius: 34px; transition: .4s; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; }
+  input:checked + .slider { background-color: var(--admin-accent); }
+  input:checked + .slider:before { transform: translateX(20px); }
 
-        .pagination-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 8px; border: 1px solid rgba(28, 28, 28, 0.08); transition: all 0.2s; background: #FFFFFF; }
-        .pagination-btn.active { background: #1C1C1C; color: #FFFFFF; border-color: #1C1C1C; }
-        .pagination-btn:hover:not(.active) { background: #F5F2ED; }
+  /* Animations */
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #DDD6CC; border-radius: 10px; }
-        
-        .nav-section-title { font-size: 0.65rem; font-weight: 700; color: #9B8E83; text-transform: uppercase; letter-spacing: 0.15em; padding: 0 28px; margin-bottom: 12px; }
-    </style>
+  #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  @media(max-width:1024px) {
+    #sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 1001; width: 280px; }
+    #sidebar.open { transform: translateX(0); }
+  }
+</style>
 </head>
 <body class="flex">
 
-    <!-- ── SIDEBAR ── -->
-    <aside class="w-72 h-screen bg-brand-sidebar flex flex-col sticky top-0 z-50">
-        <div class="pt-12 pb-12 px-10">
-            <h2 class="text-3xl font-serif tracking-tight font-bold">AJAX</h2>
+  <!-- ── SIDEBAR ── -->
+  <aside id="sidebar" class="w-72 bg-white border-r border-[var(--admin-border)] flex flex-col p-6 flex-shrink-0">
+    <div class="mb-12 px-2 text-2xl font-serif font-bold tracking-widest">
+      AJAX <span class="text-[0.6rem] font-sans tracking-normal font-medium bg-black text-white px-2 py-1 rounded ml-1">ADMIN</span>
+    </div>
+
+    <nav class="flex-1">
+      <p class="text-[0.6rem] uppercase tracking-[0.2em] font-bold text-stone-400 mb-4 px-2">Overview</p>
+      <a href="/admin/dashboard" class="side-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Dashboard
+      </a>
+      
+      <p class="text-[0.6rem] uppercase tracking-[0.2em] font-bold text-stone-400 mt-8 mb-4 px-2">Store Management</p>
+      <a href="/admin/products" class="side-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Products
+      </a>
+      <a href="/admin/categories" class="side-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Categories
+      </a>
+      <a href="/admin/subcategories" class="side-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3L8 21"/><path d="M16 3l-2 18"/></svg>
+        Subcategories
+      </a>
+      <a href="/admin/users" class="side-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a href="/admin/orders" class="side-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Orders
+      </a>
+    </nav>
+
+    <div class="pt-6 border-t border-[var(--admin-border)]">
+      <button id="logoutAdmin" class="side-item w-full !text-red-600 hover:!bg-red-50">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="flex-1 flex flex-col min-w-0">
+    
+    <header class="h-20 bg-white border-b border-[var(--admin-border)] flex items-center justify-between px-8 sticky top-0 z-50">
+      <div class="flex items-center gap-4">
+        <button id="sidebarToggle" class="lg:hidden p-2 hover:bg-stone-100 rounded-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <h1 class="text-xl font-serif font-bold">Categories</h1>
+      </div>
+      <button onclick="openModal()" class="bg-black text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-lg flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Category
+      </button>
+    </header>
+
+    <div class="p-8 animate-up">
+      
+      <!-- Stats Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="stat-bubble">
+          <p class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 mb-2">Total Collections</p>
+          <div class="flex items-baseline gap-2">
+            <h3 class="text-3xl font-serif font-bold"><%= totalCategories %></h3>
+          </div>
         </div>
-
-        <div class="nav-section-title mt-4">Management</div>
-        
-        <nav class="flex-1 space-y-1">
-            <a href="/admin/dashboard" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <span class="text-[0.9rem] font-medium">Dashboard</span>
-            </a>
-            <a href="/admin/orders" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span class="text-[0.9rem] font-medium">Orders</span>
-            </a>
-            <a href="/admin/products" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="m11 16-2-2.73a2 2 0 0 0-3.23 0l-2 2.73"></path><path d="M17 12V3"></path><path d="M7 12V3"></path><path d="M3 12h18"></path><path d="M21 3h-18"></path></svg>
-                <span class="text-[0.9rem] font-medium">Products</span>
-            </a>
-            <a href="/admin/categories" class="sidebar-item active flex items-center gap-4 px-6 py-3.5">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                <span class="text-[0.9rem] font-medium">Categories</span>
-            </a>
-            <a href="/admin/subcategories" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h6v6H3z"></path><path d="M15 15h6v6h-6z"></path><path d="M9 6h6v9"></path></svg>
-                <span class="text-[0.9rem] font-medium">Subcategories</span>
-            </a>
-            <a href="/admin/coupons" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5H4v14h11l4-7-4-7z"></path><circle cx="9" cy="12" r="1"></circle></svg>
-                <span class="text-[0.9rem] font-medium">Coupons</span>
-            </a>
-            <a href="/admin/offers" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l3 6-9 12L3 9z"></path></svg>
-                <span class="text-[0.9rem] font-medium">Offers</span>
-            </a>
-            <a href="/admin/users" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span class="text-[0.9rem] font-medium">Customers</span>
-            </a>
-            <a href="/admin/home-manager" class="sidebar-item flex items-center gap-4 px-6 py-3.5 text-brand-muted">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span class="text-[0.9rem] font-medium">Home Manager</span>
-            </a>
-        </nav>
-
-        <!-- Profile Section -->
-        <div class="p-8 border-t border-brand-border">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full overflow-hidden">
-                    <img src="https://i.pravatar.cc/100?u=sebastian" alt="Sebastian" class="w-full h-full object-cover">
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <h5 class="text-sm font-bold truncate">Sebastian Vielle</h5>
-                    <p class="text-[0.7rem] text-brand-muted truncate">vielle.admin@noco.com</p>
-                </div>
-            </div>
+        <div class="stat-bubble">
+          <p class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 mb-2">Sub Groups</p>
+          <h3 class="text-3xl font-serif font-bold"><%= totalSubCategories %></h3>
         </div>
-    </aside>
-
-    <!-- ── MAIN CONTENT ── -->
-    <main class="flex-1 p-14 overflow-y-auto max-h-screen">
-        
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-4xl font-serif font-bold header-title-underline">Categories</h1>
-            </div>
-            <button  onclick="openModal()" class="bg-[#1C1C1C] text-white px-6 py-3.5 text-[0.8rem] rounded-xl font-bold flex items-center gap-2 hover:bg-stone-800 transition-all shadow-lg">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add Category
-            </button>
-        </header>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          
-            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
-                <div>
-                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Total Categories</p>
-                    <h3 class="text-4xl font-serif font-bold"><%=totalCategories%></h3>
-                </div>
-                <div class="p-3 bg-brand-bg rounded-xl">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><path d="M12 3L3.5 6V18L12 21L20.5 18V6L12 3Z"></path><path d="M3.5 6L12 9L20.5 6"></path><path d="M12 9V21"></path></svg>
-                </div>
-            </div>
-
-            <!-- Total Subcategories -->
-            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
-                <div>
-                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Total Subcategories</p>
-                    <h3 class="text-4xl font-serif font-bold">142</h3>
-                </div>
-                <div class="p-3 bg-brand-bg rounded-xl">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><path d="M9 3H4v6h5V3z"></path><path d="M20 15h-5v6h5v-6z"></path><path d="M9 6h6v9"></path></svg>
-                </div>
-            </div>
-
-            <!-- Active Categories -->
-            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
-                <div>
-                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Active Categories</p>
-                    <h3 class="text-4xl font-serif font-bold"><%= activeCount %></h3>
-                </div>
-                <div class="p-3 bg-brand-bg rounded-xl">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
-                </div>
-            </div>
-
-            <!-- Inactive Categories -->
-            <div class="stat-card p-6 flex justify-between items-start border border-brand-border">
-                <div>
-                    <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-widest mb-3">Inactive Categories</p>
-                    <h3 class="text-4xl font-serif font-bold"><%= inactiveCount %></h3>
-                </div>
-                <div class="p-3 bg-brand-bg rounded-xl">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                </div>
-            </div>
+        <div class="stat-bubble">
+          <p class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 mb-2">Active</p>
+          <h3 class="text-3xl font-serif font-bold text-emerald-600"><%= activeCount %></h3>
         </div>
-
-        <!-- Content Card -->
-        <div class="bg-white rounded-[24px] border border-brand-border overflow-hidden shadow-sm">
-            
-            <!-- Controls -->
-            <div class="px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <h3 class="text-xl font-bold">All Categories</h3>
-                
-                <div class="relative w-full md:w-[380px]">
-                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 text-brand-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input 
-                        type="text" 
-                        placeholder="Search categories..." 
-                        class="search-input w-full pl-14 pr-6 py-4 text-[0.9rem] outline-none placeholder:text-brand-muted/50"
-                    >
-                </div>
-            </div>
-            
-
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="text-[0.7rem] text-brand-muted font-bold uppercase tracking-[0.15em] table-header bg-[#FAFAFA]">
-                            <th class="px-10 py-5">Sl.No</th>
-                            <th class="px-10 py-5">Category Name</th>
-                            <th class="px-10 py-5">Subcategories</th>
-                            <th class="px-10 py-5">Products</th>
-                            <th class="px-10 py-5">Status</th>
-                            <th class="px-10 py-5 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y-0">
-                       <% categories.forEach((cat, index) => { %>
-                        <!-- Row 1 -->
-                        <tr class="table-row">
-                            <td class="px-10 py-6 text-[0.9rem] font-medium text-brand-muted">
-                                <%= index+1 %>
-                            </td>
-                            <td class="px-10 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-brand-bg flex items-center justify-center border border-brand-border border-dashed">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                    </div>
-                                    <span class="text-[0.95rem] font-bold"><%= cat.name %></span>
-                                </div>
-                            </td>
-                            <td class="px-10 py-6 text-[0.9rem] font-medium">
-                                12
-                            </td>
-                            <td class="px-10 py-6 text-[0.9rem] font-medium">
-                                124
-                            </td>
-                            <td class="px-10 py-6">
-                          <% if(cat.isActive === true || cat.isActive === 'true'){ %>
-                           <span class="status-pill status-active">Active</span>
-                         <% } else { %>
-                           <span class="status-pill status-inactive">Inactive</span>
-                        <% } %>
-                            </td>
-                            <td class="px-10 py-6">
-                                <div class="flex items-center justify-center gap-6">
-                                    <button class="text-brand-muted hover:text-brand-text transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                   <button onclick="openEditModal('<%= cat._id %>', '<%= cat.name %>', <%= cat.isActive %>)"
-                                        class="text-brand-muted hover:text-brand-text transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                    </button>
-                                    <button onclick="deleteCategory('<%= cat._id %>')"  class="text-brand-muted hover:text-red-600 transition-colors">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
-                                    <div onclick="toggleCategory('<%= cat._id %>', this)"  class="toggle-switch <%= (cat.isActive === true || cat.isActive === 'true') ? 'active' : '' %>">
-                                        <div class="toggle-circle"></div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }) %>
-                        <% if (categories.length === 0) { %>
-                        <tr>
-                          <td colspan="6" class="text-center py-10 text-gray-400">
-                              No categories found
-                              </td>
-                          </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
-           
-
-            <!-- Footer / Pagination -->
-            <div class="px-10 py-10 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-brand-border bg-[#FAFAFA]">
-                <p class="text-[0.85rem] text-brand-muted font-medium">
-                    Showing 1-4 of 24 categories
-                </p>
-                
-                <div class="flex items-center gap-2">
-                    <button class="pagination-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <span class="px-2 text-brand-muted">...</span>
-                    <button class="pagination-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                </div>
-            </div>
+        <div class="stat-bubble">
+          <p class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 mb-2">Inactive</p>
+          <h3 class="text-3xl font-serif font-bold text-stone-400"><%= inactiveCount %></h3>
         </div>
-
-    </main>
-
-<div id="categoryModal"
-     class="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm hidden items-center justify-center">
-
-  <div id="modalContent"
-       class="bg-white w-[420px] rounded-2xl p-6 relative scale-95 opacity-0 transition-all duration-200">
-
-    <!-- CLOSE -->
-    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 text-xl">✕</button>
-
-    <h2 id="modalTitle" class="text-2xl font-semibold mb-4">Add Category</h2>
-
-
-    <input type="hidden" id="categoryId" />
-
-    <label class="text-sm text-gray-600">Category Name</label>
-    <input id="categoryName"
-      class="w-full border rounded-lg px-3 py-2 mt-1 mb-4"
-      placeholder="e.g. Summer Collection" />
-
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <p class="font-medium">Active Status</p>
-        <p class="text-xs text-gray-500">Set category as visible</p>
       </div>
 
-      <input type="checkbox" id="categoryStatus" checked />
-    </div>
+      <!-- Content -->
+      <div class="table-card">
+        <div class="p-6 border-b border-[var(--admin-border)] flex flex-col md:flex-row justify-between items-center gap-4">
+          <h3 class="font-serif font-bold text-lg">Category Registry</h3>
+          <form method="GET" action="/admin/categories" class="relative w-full md:w-72">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" name="search" value="<%= search %>" placeholder="Search catalogs..." class="w-full pl-10 pr-10 py-2.5 bg-stone-50 border border-[var(--admin-border)] rounded-lg text-sm outline-none focus:bg-white focus:border-black transition-all">
+            <% if(search) { %>
+              <button type="button" onclick="window.location.href='/admin/categories'" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-black">✕</button>
+            <% } %>
+          </form>
+        </div>
 
-    <div class="flex justify-end gap-3">
-      <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded-lg">
-        Cancel
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-stone-50 border-b border-[var(--admin-border)]">
+                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Index</th>
+                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Identity</th>
+                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Sub-Tier</th>
+                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Visibility</th>
+                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 text-center">Settings</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--admin-border)]">
+              <% categories.forEach((cat, index) => { %>
+                <tr class="tr-row">
+                  <td class="px-8 py-5 text-xs text-stone-400"><%= (currentPage - 1) * 5 + index + 1 %></td>
+                  <td class="px-8 py-5">
+                    <p class="text-sm font-bold"><%= cat.name %></p>
+                    <p class="text-[0.6rem] text-stone-400 uppercase tracking-tighter">Collection ID: <%= cat._id.toString().slice(-6) %></p>
+                  </td>
+                  <td class="px-8 py-5 text-xs font-medium"><%= cat.subCount %> Nodes</td>
+                  <td class="px-8 py-5">
+                    <span class="status-pill <%= cat.isActive ? 'status-active' : 'status-inactive' %>">
+                      <%= cat.isActive ? 'VISIBLE' : 'HIDDEN' %>
+                    </span>
+                  </td>
+                  <td class="px-8 py-5">
+                    <div class="flex items-center justify-center gap-4">
+                      <button onclick='openEditModal(<%- JSON.stringify(cat._id) %>, <%- JSON.stringify(cat.name) %>, <%= cat.isActive %>)' class="p-2 hover:bg-stone-100 rounded-lg text-stone-400 hover:text-black transition-all">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onclick="deleteCategory('<%= cat._id %>')" class="p-2 hover:bg-red-50 rounded-lg text-stone-400 hover:text-red-600 transition-all">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                      <label class="switch ml-2">
+                        <input type="checkbox" <%= cat.isActive ? 'checked' : '' %> onchange="toggleCategory('<%= cat._id %>', this)">
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+              <% if(categories.length === 0) { %>
+                <tr><td colspan="5" class="py-20 text-center text-sm text-stone-400 font-medium italic">No collections match your criteria.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="px-8 py-6 bg-stone-50 border-t border-[var(--admin-border)] flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p class="text-[0.7rem] text-stone-400 font-medium">Page <%= currentPage %> of <%= totalPages %></p>
+          <div class="flex gap-1.5">
+            <% if(currentPage > 1) { %>
+              <a href="?page=<%= currentPage - 1 %>&search=<%= search %>" class="w-8 h-8 flex items-center justify-center border border-[var(--admin-border)] rounded hover:bg-white transition-all">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </a>
+            <% } %>
+            <% for(let i=1; i<=totalPages; i++) { %>
+              <a href="?page=<%= i %>&search=<%= search %>" class="w-8 h-8 flex items-center justify-center border border-[var(--admin-border)] rounded text-[0.65rem] font-black tracking-tighter transition-all <%= i === currentPage ? 'bg-black text-white border-black' : 'hover:bg-white' %>"><%= i %></a>
+            <% } %>
+            <% if(currentPage < totalPages) { %>
+              <a href="?page=<%= currentPage + 1 %>&search=<%= search %>" class="w-8 h-8 flex items-center justify-center border border-[var(--admin-border)] rounded hover:bg-white transition-all">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div id="categoryModal" class="fixed inset-0 z-[2000] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="modalContent" class="bg-white w-full max-w-md rounded-2xl p-8 relative shadow-2xl scale-95 opacity-0 transition-all duration-300">
+      <button onclick="closeModal()" class="absolute top-6 right-6 text-stone-400 hover:text-black transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
 
-      <button onclick="saveCategory()" class="px-4 py-2 bg-black text-white rounded-lg">
-        Save Category
-      </button>
-    </div>
+      <h2 id="modalTitle" class="text-3xl font-serif font-bold mb-6">New Category</h2>
+      <input type="hidden" id="categoryId">
 
+      <div class="space-y-6">
+        <div class="space-y-2">
+          <label class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Identity Name</label>
+          <input id="categoryName" class="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-black transition-all font-medium" placeholder="Collection title..." maxlength="50">
+        </div>
+
+        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-xl border border-stone-100">
+          <div>
+            <p class="text-sm font-bold">Public Visibility</p>
+            <p class="text-[0.65rem] text-stone-400">Available across the storefront</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="categoryStatus" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="pt-4 flex gap-3">
+          <button onclick="closeModal()" class="flex-1 px-6 py-3 border border-stone-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-50 transition-all">Cancel</button>
+          <button id="saveBtn" onclick="saveCategory()" class="flex-2 px-8 py-3 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-md">Create Entry</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/js/admin/category.js"></script>
+
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden"></div>
+
+  <script src="/js/admin/category.js"></script>
 </body>
 </html>

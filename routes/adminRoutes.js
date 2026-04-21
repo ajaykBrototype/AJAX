@@ -11,7 +11,7 @@ import {getAllUsers,toggleBlockUser} from "../controllers/admin/user.controller.
 
 import { isAdminAuth,isLoggedOut } from "../middleware/adminAuth.js";
 import { noCache } from "../middleware/noCache.js";
-import {loadSubCategoryPage,createSubCategory } from "../controllers/admin/subCategory.controller.js";
+import {loadSubCategoryPage,createSubCategory,updateSubCategory,deleteSubCategory,toggleSubCategory } from "../controllers/admin/subCategory.controller.js";
 
 const router = express.Router();
 
@@ -30,6 +30,9 @@ router.delete("/categories/:id", isAdminAuth, deleteCategory);
 
 router.get("/subcategories", isAdminAuth, loadSubCategoryPage);
 router.post("/subcategories/add",isAdminAuth,createSubCategory);
+router.patch("/subcategories/:id", isAdminAuth, updateSubCategory);
+router.delete("/subcategories/:id", isAdminAuth, deleteSubCategory);
+router.patch("/subcategories/toggle/:id", isAdminAuth, toggleSubCategory);
 
 
 

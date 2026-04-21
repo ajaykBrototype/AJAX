@@ -1,130 +1,146 @@
-window.openModal = function () {
-  document.getElementById("categoryId").value = "";
-  document.getElementById("categoryName").value = "";
-  document.getElementById("categoryStatus").checked = true;
+document.addEventListener('DOMContentLoaded', () => {
+    /* UI ELEMENTS */
+    const m = document.getElementById('categoryModal');
+    const mc = document.getElementById('modalContent');
+    const sb = document.getElementById('sidebar');
+    const sbToggle = document.getElementById('sidebarToggle');
+    const sbOverlay = document.getElementById('sidebarOverlay');
 
-  document.getElementById("modalTitle").innerText = "Add Category";
+    /* MODAL ACCESSORS (Internal) */
+    const showModal = () => {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        setTimeout(() => {
+            mc.classList.remove('scale-95', 'opacity-0');
+            mc.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    };
 
-  const modal = document.getElementById("categoryModal");
-  const content = document.getElementById("modalContent");
+    window.closeModal = function () {
+        mc.classList.remove('scale-100', 'opacity-100');
+        mc.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }, 200);
+    };
 
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+    /* EXPOSED HELPERS */
+    window.openModal = function () {
+        document.getElementById('modalTitle').textContent = 'New Category';
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryStatus').checked = true;
+        document.getElementById('saveBtn').textContent = 'Create Entry';
+        showModal();
+    };
 
-  setTimeout(() => {
-    content.classList.remove("scale-95", "opacity-0");
-    content.classList.add("scale-100", "opacity-100");
-  }, 10);
-};
+    window.openEditModal = function (id, name, status) {
+        document.getElementById('modalTitle').textContent = 'Update Category';
+        document.getElementById('categoryId').value = id;
+        document.getElementById('categoryName').value = name;
+        document.getElementById('categoryStatus').checked = (status === true || status === 'true');
+        document.getElementById('saveBtn').textContent = 'Apply Updates';
+        showModal();
+    };
 
-window.closeModal = function () {
-  const modal = document.getElementById("categoryModal");
-  const content = document.getElementById("modalContent");
+    /* ACTIONS */
+    window.saveCategory = async function () {
+        const id = document.getElementById('categoryId').value;
+        const name = document.getElementById('categoryName').value.trim();
+        const isActive = document.getElementById('categoryStatus').checked;
 
-  content.classList.remove("scale-100", "opacity-100");
-  content.classList.add("scale-95", "opacity-0");
+        if (!name) {
+            ajaxToast('warning', 'Category name is required.');
+            return;
+        }
 
-  setTimeout(() => {
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
+        try {
+            let res;
+            if (id) {
+                res = await axios.patch(`/admin/categories/${id}`, { name, isActive });
+            } else {
+                res = await axios.post("/admin/categories/add", { name, isActive });
+            }
 
-     document.getElementById("categoryName").value = "";
-  document.getElementById("categoryStatus").checked = true;
-  }, 200);
-  modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    closeModal();
-  }
+            if (res.data.success) {
+                window.closeModal();
+                ajaxToast('success', res.data.message || 'Category saved.');
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (err) {
+            ajaxAlert('error', err.response?.data?.message || 'Failed to save category.');
+        }
+    };
+
+    window.toggleCategory = async function (id, el) {
+        try {
+            const res = await axios.patch(`/admin/categories/toggle/${id}`);
+            if (res.data.success) {
+                const isChecked = el.checked;
+                const pill = el.closest("tr").querySelector(".status-pill");
+                if (isChecked) {
+                    pill.textContent = "VISIBLE";
+                    pill.className = "status-pill status-active";
+                    ajaxToast('success', 'Category set to visible.');
+                } else {
+                    pill.textContent = "HIDDEN";
+                    pill.className = "status-pill status-inactive";
+                    ajaxToast('info', 'Category hidden from store.');
+                }
+            } else {
+                el.checked = !el.checked;
+                ajaxAlert('error', res.data.message || 'Toggle failed.');
+            }
+        } catch (err) {
+            el.checked = !el.checked;
+            ajaxAlert('error', 'Network or server error during toggle.');
+        }
+    };
+
+    window.deleteCategory = async function (id) {
+        const result = await ajaxConfirm({
+            title: "DELETE CATEGORY?",
+            text: "This will remove the category and all associated product links.",
+            confirmText: "DELETE",
+            cancelText: "CANCEL",
+            icon: "warning"
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await axios.delete(`/admin/categories/${id}`);
+            if (res.data.success) {
+                ajaxToast('success', 'Category deleted.');
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (err) {
+            ajaxAlert('error', 'Failed to delete category.');
+        }
+    };
+
+    /* SIDEBAR & OVERLAY */
+    sbToggle?.addEventListener('click', () => {
+        sb.classList.toggle('open');
+        sbOverlay.classList.toggle('hidden');
+    });
+
+    sbOverlay?.addEventListener('click', () => {
+        sb.classList.remove('open');
+        sbOverlay.classList.add('hidden');
+    });
+
+    /* LOGOUT */
+    document.getElementById('logoutAdmin')?.addEventListener('click', () => {
+        ajaxConfirm({
+            title: "SIGN OUT?",
+            text: "Ending your administrator session in AJAX.",
+            confirmText: "SIGN OUT",
+            cancelText: "STAY",
+            icon: "question"
+        }).then((r) => {
+            if (r.isConfirmed) window.location.href = "/admin/logout";
+        });
+    });
 });
-};
-window.openEditModal = function (id, name, isActive) {
-  console.log("EDIT ID:", id);
-
-  const modal = document.getElementById("categoryModal");
-  const content = document.getElementById("modalContent");
-
-  document.getElementById("categoryId").value = id;
-  document.getElementById("categoryName").value = name;
-  document.getElementById("categoryStatus").checked = (isActive === true || isActive === "true");
-
-  document.getElementById("modalTitle").innerText = "Edit Category";
-
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-
-  setTimeout(() => {
-    content.classList.remove("scale-95", "opacity-0");
-    content.classList.add("scale-100", "opacity-100");
-  }, 10);
-};
-
-window.saveCategory = async function () {
-  const id = document.getElementById("categoryId").value;
-  const name = document.getElementById("categoryName").value.trim();
-  const isActive = document.getElementById("categoryStatus").checked;
-
-     console.log("ID:", id);
-
-  try {
-    let res;
-
-     if (id && id !== "") {
-      res = await axios.patch(`/admin/categories/${id}`, {
-        name,
-        isActive
-      });
-    } else {
-      res = await axios.post("/admin/categories/add", {
-        name,
-        isActive
-      });
-    }
-
-    if (res.data.success) {
-      closeModal();
-      location.reload();
-    }
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Error");
-  }
-};
-
-window.deleteCategory = async function (id) {
-  if (!confirm("Are you sure you want to delete this category?")) return;
-
-  try {
-    const res = await axios.delete(`/admin/categories/${id}`);
-
-    if (res.data.success) {
-      location.reload();
-    }
-
-  } catch (err) {
-    alert("Delete failed");
-  }
-};
-window.toggleCategory = async function (id, el) {
-  try {
-    const res = await axios.patch(`/admin/categories/toggle/${id}`);
-
-    if (res.data.success) {
-
-      el.classList.toggle("active");
-
-      const pill = el.closest("tr").querySelector(".status-pill");
-
-      if (el.classList.contains("active")) {
-        pill.textContent = "Active";
-        pill.className = "status-pill status-active";
-      } else {
-        pill.textContent = "Inactive";
-        pill.className = "status-pill status-inactive";
-      }
-
-    }
-
-  } catch (err) {
-    alert("Toggle failed");
-  }
-};

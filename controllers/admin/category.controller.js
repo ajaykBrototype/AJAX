@@ -1,31 +1,90 @@
 import { success } from "zod";
 import Category from "../../models/admin/categoryModel.js";
+import SubCategory from "../../models/admin/subCategoryModel.js";
 import * as categoryService from "../../services/admin/category.service.js";
 
-export const loadCategoryPage=async(req,res)=>{
-    try{
-         const page=parseInt(req.query.page)||1;
-         const limit=5;
-         const skip=(page-1)*limit;
+export const loadCategoryPage = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-        const categories=await Category.find().sort({createdAt:-1}).skip(skip).limit(limit);
+    let matchStage = {};
 
-        
-        const activeCount=categories.filter(cat=>cat.isActive).length;
-        const inactiveCount=categories.filter(cat=>!cat.isActive).length;
-         res.render("admin/categories",{
-            categories,
-            totalCategories:categories.length,
-            activeCount,inactiveCount
-         })
-    }catch(err){
-         console.log(err);
-         res.render("admin/categories",{
-            categories:[],
-            totalCategories:0
-         })
+    if (search) {
+      matchStage.name = { $regex: search, $options: "i" };
     }
-}
+
+    const categories = await Category.aggregate([
+      {
+        $match: matchStage   // ✅ search filter
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "_id",
+          foreignField: "category",
+          as: "subCategories"
+        }
+      },
+      {
+        $addFields: {
+          subCount: { $size: "$subCategories" }
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      }
+    ]);
+
+    // ✅ total count WITH search
+    const total = await Category.countDocuments(matchStage);
+
+    // ✅ total subcategories
+    const totalSubCategories = await SubCategory.countDocuments();
+
+    // ✅ status counts
+    const activeCount = await Category.countDocuments({ isActive: true });
+    const inactiveCount = await Category.countDocuments({ isActive: false });
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.render("admin/categories", {
+      categories,
+      totalSubCategories,
+      search,
+      currentPage: page,
+      totalCategories: total,
+      activeCount,
+      inactiveCount,
+      totalPages,
+      total
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.render("admin/categories", {
+      categories: [],
+      totalCategories: 0,
+      activeCount: 0,
+      inactiveCount: 0,
+      totalPages: 0,
+      total: 0,
+      currentPage: 1,
+      search: ""
+    });
+  }
+};
+
+
+
 export const createCategory=async(req,res)=>{
     const result=await categoryService.createCategoryService(req.body);
 
