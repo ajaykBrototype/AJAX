@@ -229,7 +229,7 @@
           <div class="flex items-center gap-4">
 
               <div class="variant-image-box border border-stone-200">
-                  <img src="<%= variant.images?.[0] || '/images/no-image.png' %>" 
+                  <img src="<%= variant.images[0] || '/images/no-image.png' %>" 
                        class="w-full h-full object-cover">
               </div>
 
@@ -256,7 +256,7 @@
 
       <!-- SKU -->
       <td class="px-6 py-6 text-[11px] font-bold text-stone-400 uppercase tracking-tight">
-          <%= variant._id %>
+          <%= variant.sku %>
       </td>
 
       <!-- PRICE -->
@@ -302,21 +302,12 @@
             </table>
         </div>
 
-        <!-- Footer / Pagination -->
-        <div class="p-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-xs text-stone-400 font-medium tracking-tight">Showing 4 of 12 variants</p>
-            <div class="flex items-center gap-1">
-                <button class="p-2 text-stone-400 hover:text-stone-900">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <button class="w-8 h-8 flex items-center justify-center rounded-sm bg-stone-900 text-white text-xs font-bold shadow-sm">1</button>
-                <button class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-stone-100 text-stone-600 text-xs font-bold transition-all">2</button>
-                <button class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-stone-100 text-stone-600 text-xs font-bold transition-all">3</button>
-                <button class="p-2 text-stone-400 hover:text-stone-900">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-            </div>
-        </div>
+        <!-- Footer / Summary -->
+        <div class="p-6 border-t border-stone-100 flex items-center justify-between gap-4">
+            <p class="text-xs text-stone-400 font-medium tracking-tight">
+                Showing <span class="text-stone-700 font-bold"><%= variants.length %></span> variant<%= variants.length !== 1 ? 's' : '' %> for this product
+            </p>
+          
     </div>
   </main>
 

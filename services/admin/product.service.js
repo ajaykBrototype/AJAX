@@ -1,4 +1,5 @@
 import Product from "../../models/admin/productModel.js";
+import Variant from "../../models/admin/variantModel.js";
 
 export const createProductService = async (data) => {
   return await Product.create(data);
@@ -26,3 +27,5 @@ export const getAllProductsService = async (filter, skip, limit) => {
     .limit(limit)
     .sort({ createdAt: -1 });
 };
+
+

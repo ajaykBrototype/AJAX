@@ -31,8 +31,6 @@ export const loadSubCategoryPage = async (req, res) => {
 
       const totalPages=Math.ceil(total/limit);
 
-    console.log("CATEGORIES:", categories);
-
     res.render("admin/subcategories", {
       categories,
       subCategories,
@@ -46,12 +44,18 @@ export const loadSubCategoryPage = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+    console.error("SubCategory Controller Error:", err);
     res.render("admin/subcategories", {
       categories: [],
-       subCategories: [],
-       search: "",
-       categoryFilter: ""
+      subCategories: [],
+      search: "",
+      currentPage: 1,
+      totalPages: 0,
+      total: 0,
+      selectedCategory: "",
+      totalSubCategory: 0,
+      activeCount: 0,
+      inactiveCount: 0
     });
   }
 };
@@ -86,4 +90,15 @@ export const deleteSubCategory = async (req, res) => {
 export const toggleSubCategory = async (req, res) => {
   const result = await subService.toggleSubCategoryService(req.params.id);
   res.json(result);
+};
+
+export const getSubCategoriesByCategory = async (req, res) => {
+  try {
+    const { catId } = req.params;
+    const subcategories = await SubCategory.find({ category: catId, isActive: true });
+    res.json({ success: true, subcategories });
+  } catch (err) {
+    console.error("Error fetching subcategories by category:", err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 };

@@ -1,4 +1,5 @@
 import Product from "../../models/admin/productModel.js";
+import Variant from "../../models/admin/variantModel.js";
 import Category from "../../models/admin/categoryModel.js";
 import SubCategory from "../../models/admin/subCategoryModel.js";
 
@@ -7,7 +8,6 @@ import {
   getAllProductsService,
   toggleProductService
 } from "../../services/admin/product.service.js";
-import { tr } from "zod/locales";
 
 export const toggleProduct = async (req, res) => {
   try {
@@ -30,7 +30,7 @@ export const loadProductPage = async (req, res) => {
     const categories = await Category.find({ isActive: true });
     const subCategories = await SubCategory.find({ isActive: true });
 
-     const total = await Product.countDocuments(); 
+     const total = await Product.countDocuments(); // Keep for future dashboard stats if needed
 
   
     let filter = {};
@@ -58,8 +58,21 @@ export const loadProductPage = async (req, res) => {
     }
 
 
-    const products = await getAllProductsService(filter, skip, limit);
+    const productsRaw = await getAllProductsService(filter, skip, limit);
     const totalMatchingProducts = await Product.countDocuments(filter);
+
+    // Attach default variant to each product for image promotion
+    const products = await Promise.all(productsRaw.map(async (prod) => {
+      const defaultVariant = await Variant.findOne({ productId: prod._id, isDefault: true }) || await Variant.findOne({ productId: prod._id });
+      return {
+        ...prod.toObject(),
+        variant: defaultVariant ? {
+            price: defaultVariant.price,
+            stock: defaultVariant.stock,
+            images: defaultVariant.images
+        } : null
+      };
+    }));
 
     res.render("admin/products", {
       products,
@@ -68,7 +81,7 @@ export const loadProductPage = async (req, res) => {
       currentPage: page,
       limit, 
       totalPages: Math.ceil(totalMatchingProducts / limit),
-      totalMatchingProducts:total,
+      totalMatchingProducts: totalMatchingProducts,
       search: search || "",
       selectedCategory: category || "",
       selectedSubCategory: subcategory || "",
@@ -129,21 +142,38 @@ export const addProduct = async (req, res) => {
   }
 };
 
-export const loadProductDetails=async(req,res)=>{
-  try{
-    const {id}=req.params;
+export const loadProductDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    const product=await Product.findById(id).populate("category").populate("subcategory");
-
-     if (!product) {
+    const product = await Product.findById(id).populate("category").populate("subcategory");
+    if (!product) {
       return res.redirect("/admin/products");
     }
-      res.render("admin/productDetails", {
-      product
+
+    // Fetch all variants to show in details
+    const variants = await Variant.find({ productId: product._id });
+    
+    // Support variant selection via query param (?variant=ID)
+    const selectedVariantId = req.query.variant;
+    let defaultVariant;
+    
+    if (selectedVariantId) {
+      defaultVariant = variants.find(v => v._id.toString() === selectedVariantId);
+    }
+    
+    if (!defaultVariant) {
+      defaultVariant = variants.find(v => v.isDefault) || variants[0];
+    }
+
+    res.render("admin/productDetails", {
+      product,
+      variants,
+      defaultVariant
     });
 
-  }catch(err){
-     console.log(err);
+  } catch (err) {
+    console.log(err);
     res.redirect("/admin/products");
   }
 }

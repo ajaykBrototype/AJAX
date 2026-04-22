@@ -1,4 +1,5 @@
 import express from "express";
+import { upload } from "../middleware/upload.js";
 import {
   loadLogin,loginAdmin,logoutAdmin
 } from "../controllers/admin/auth.controller.js";
@@ -11,9 +12,17 @@ import {getAllUsers,toggleBlockUser} from "../controllers/admin/user.controller.
 
 import { isAdminAuth,isLoggedOut } from "../middleware/adminAuth.js";
 import { noCache } from "../middleware/noCache.js";
-import {loadSubCategoryPage,createSubCategory,updateSubCategory,deleteSubCategory,toggleSubCategory } from "../controllers/admin/subCategory.controller.js";
+import {
+  loadSubCategoryPage,
+  createSubCategory,
+  updateSubCategory,
+  deleteSubCategory,
+  toggleSubCategory,
+  getSubCategoriesByCategory 
+} from "../controllers/admin/subCategory.controller.js";
 import { loadAddProductPage, loadProductPage,addProduct, toggleProduct,loadProductDetails } from "../controllers/admin/product.controller.js";
-import { loadVariantPage, } from "../controllers/admin/variant.controller.js";
+import { loadVariantPage,loadAddVariantPage,addVariant } from "../controllers/admin/variant.controller.js";
+
 const router = express.Router();
 
 router.get("/login",isLoggedOut,noCache, loadLogin);
@@ -33,6 +42,7 @@ router.get("/subcategories", isAdminAuth, loadSubCategoryPage);
 router.post("/subcategories/add",isAdminAuth,createSubCategory);
 router.patch("/subcategories/:id", isAdminAuth, updateSubCategory);
 router.delete("/subcategories/:id", isAdminAuth, deleteSubCategory);
+router.get("/subcategories/by-category/:catId", isAdminAuth, getSubCategoriesByCategory);
 router.patch("/subcategories/toggle/:id", isAdminAuth, toggleSubCategory);
 
 router.get("/products", isAdminAuth,loadProductPage);
@@ -43,6 +53,8 @@ router.patch("/products/toggle/:id", isAdminAuth, toggleProduct);
 router.get("/products/:id", isAdminAuth, loadProductDetails);
 
 router.get("/products/:id/variants", loadVariantPage);
+router.get("/products/:id/variants/add",isAdminAuth,loadAddVariantPage);
+router.post("/products/:id/variants/add",isAdminAuth,  upload.array("images", 5),addVariant);
 
 router.get("/logout", logoutAdmin);
 

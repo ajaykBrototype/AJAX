@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Product Details AJAX Admin</title>
+<title><%= product.name %> — AJAX Admin</title>
 
 <!-- FONTS -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <!-- TAILWIND -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -16,14 +16,14 @@
     theme: {
       extend: {
         fontFamily: {
-          serif: ['Playfair Display', 'serif'],
           sans: ['Plus Jakarta Sans', 'sans-serif']
         },
         colors: {
-          'luxury-bg': '#F4F2EE', /* Beige from Figma */
-          'luxury-accent': '#C1272D', /* Red accent */
-          'luxury-text': '#1C1C1C',
-          'luxury-muted': '#8E8E8E'
+          'luxury-bg': '#F8F6F0',
+          'luxury-accent': '#1C1C1C',
+          'luxury-text': '#111111',
+          'luxury-muted': '#737373',
+          'luxury-border': '#E5E5E5'
         }
       }
     }
@@ -31,308 +31,316 @@
 </script>
 
 <style>
-  body { background-color: theme('colors.luxury-bg'); color: theme('colors.luxury-text'); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+  body { background-color: theme('colors.luxury-bg'); color: theme('colors.luxury-text'); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   
-  /* Sidebar styles */
-  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 0px; transition: all 0.2s ease; position: relative; color: theme('colors.luxury-muted'); font-size: 14px; font-weight: 500; }
-  .sidebar-item:hover { color: theme('colors.luxury-text'); }
-  .sidebar-item.active { background-color: #fff; color: theme('colors.luxury-text'); }
-  .sidebar-item.active::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background-color: theme('colors.luxury-accent'); }
+  /* Sidebar */
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; transition: all 0.2s ease; position: relative; color: theme('colors.luxury-muted'); font-size: 14px; font-weight: 600; }
+  .sidebar-item:hover { color: theme('colors.luxury-text'); background: rgba(0,0,0,0.03); }
+  .sidebar-item.active { background-color: #fff; color: theme('colors.luxury-text'); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  
+  /* Premium Cards */
+  .detail-card { background: white; border-radius: 20px; border: 1px solid theme('colors.luxury-border'); box-shadow: 0 4px 20px rgba(0,0,0,0.01); }
+  
+  /* Badges */
+  .status-badge { padding: 6px 14px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: #F4F4F5; color: #111; }
+  .category-pill { background: #111; color: white; padding: 6px 14px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 
-  /* Card Styles */
-  .detail-card { background: white; border-radius: 0px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #E5E7EB; border-color: rgba(229, 231, 235, 0.5); }
+  /* Modern Gallery Styles */
+  .gallery-main { width: 100%; aspect-ratio: 3/4; border-radius: 16px; overflow: hidden; background: #F4F4F5; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+  .gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .gallery-main:hover img { transform: scale(1.02); }
   
-  .status-badge { padding: 4px 10px; border-radius: 100px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border: 1.5px solid #1C1C1C; }
+  .thumb-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px; margin-top: 16px; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
+  .thumb-scroller::-webkit-scrollbar { display: none; }
   
-  .category-pill { background: #1C1C1C; color: white; padding: 4px 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .thumb-item { width: 80px; height: 100px; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; background: #fff; }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+  .thumb-item:hover img { opacity: 1; }
+  .thumb-item.active { border-color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .thumb-item.active img { opacity: 1; }
+
+  /* Swatch */
+  .swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px #E5E5E5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .swatch.active { box-shadow: 0 0 0 2px #111; transform: scale(1.05); }
+  .swatch:hover { transform: scale(1.1); }
 
   /* Animations */
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; }
-  .delay-100 { animation-delay: 0.1s; }
-  .delay-200 { animation-delay: 0.2s; }
-  .delay-300 { animation-delay: 0.3s; }
-
-  /* Media Gallery */
-  .thumbnail-box { aspect-ratio: 1; width: 100%; border: 1px solid #E5E7EB; cursor: pointer; transition: all 0.2s; background: #F9FAFB; }
-  .thumbnail-box:hover { border-color: #1C1C1C; }
-  .thumbnail-box.active { border-color: #1C1C1C; box-shadow: 0 0 0 1px #1C1C1C; }
-
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  
   /* Progress Bar */
-  .avail-progress { height: 6px; background: #E5E7EB; width: 100%; border-radius: 10px; overflow: hidden; }
-  .avail-progress-inner { height: 100%; background: #1C1C1C; border-radius: 10px; transition: width 1s ease-in-out; }
-
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #D1D1D1; border-radius: 10px; }
+  .progress-bg { height: 6px; background: #E5E5E5; border-radius: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #111; border-radius: 10px; transition: width 1s ease; }
 </style>
 </head>
 <body class="flex min-h-screen">
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-stone-200 transition-transform lg:translate-x-0 lg:static lg:inset-0 -translate-x-full">
-    <div class="h-full flex flex-col pt-8 pb-6">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200 transition-transform lg:translate-x-0 lg:static lg:inset-0 -translate-x-full">
+    <div class="h-full flex flex-col p-6">
       <!-- Logo -->
-      <div class="px-8 mb-12">
-        <h1 class="text-2xl font-serif font-bold tracking-tighter uppercase">AJAX</h1>
+      <div class="mb-10">
+        <h1 class="text-3xl font-extrabold tracking-tighter text-luxury-text">AJAX</h1>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-4 space-y-1">
-        <p class="text-[10px] font-bold text-stone-400 tracking-[0.2em] mb-4 px-4 uppercase">Management</p>
+      <nav class="flex-1 space-y-1">
+        <p class="text-[10px] font-bold text-stone-400 tracking-[0.2em] mb-4 uppercase">Management</p>
         
         <a href="/admin/dashboard" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           Dashboard
         </a>
         <a href="/admin/orders" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           Orders
         </a>
         <a href="/admin/products" class="sidebar-item active">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
           Products
         </a>
         <a href="/admin/categories" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           Categories
         </a>
         <a href="/admin/coupons" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 7v5l3 3"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0Z"/><path d="m7 7 10 10"/><path d="m17 7-10 10"/></svg>
           Coupons
         </a>
         <a href="/admin/offers" class="sidebar-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Offers
         </a>
         <a href="/admin/users" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Customers
         </a>
         <a href="/admin/reviews" class="sidebar-item">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Reviews
         </a>
       </nav>
 
       <!-- Profile Section -->
-      <div class="px-8 mt-auto pt-6 border-t border-stone-100 flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center overflow-hidden border border-stone-200">
-            <img src="https://ui-avatars.com/api/?name=Sebastian+Vane&background=F3F2EE&color=1C1C1C" alt="Admin" class="w-full h-full object-cover">
+      <div class="mt-auto pt-6 border-t border-stone-100 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center overflow-hidden">
+            <img src="https://ui-avatars.com/api/?name=Abdulla+Safwan&background=F3F2EE&color=1C1C1C" alt="Admin" class="w-full h-full object-cover">
         </div>
         <div class="flex-1 overflow-hidden">
-          <p class="text-[11px] font-bold truncate uppercase tracking-tighter">Sebastian Vane</p>
-          <p class="text-[9px] text-stone-400 font-bold truncate tracking-widest uppercase">Head Curator</p>
+          <p class="text-sm font-bold truncate">Abdulla Safwan</p>
+          <p class="text-[10px] text-stone-400 truncate tracking-tight">admin@noco.luxury</p>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 min-w-0 flex flex-col p-6 lg:p-10">
-    
-    <!-- Header Section -->
-    <header class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10 animate-fade-in">
+  <!-- MAIN -->
+  <main class="flex-1 min-w-0 p-6 lg:p-14 pb-32">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-[11px] font-semibold text-luxury-muted mb-10 anim-fade-up">
+        <a href="/admin/products" class="hover:text-luxury-text transition-colors flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Products
+        </a>
+        <span class="text-luxury-border px-1">/</span>
+        <span class="text-luxury-text">Product Details</span>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12 anim-fade-up">
         <div class="flex-1">
-            <div class="flex items-center gap-3">
-                <h2 class="text-5xl font-serif font-bold leading-none tracking-tight"><%= product.name %></h2>
-                <span class="status-badge bg-white">  <%= product.isActive ? "Active" : "Inactive" %></span>
+            <div class="flex items-center gap-4 flex-wrap mb-4">
+                <span class="status-badge shadow-sm"><%= product.isActive ? "● Active" : "○ Inactive" %></span>
+                <p class="text-[11px] font-bold text-luxury-muted uppercase tracking-widest flex items-center gap-2">
+                    <span class="text-luxury-text"><%= product.category ? product.category.name : "Uncategorized" %></span>
+                    <span class="w-1 h-1 rounded-full bg-luxury-border"></span>
+                    ID: <%= product._id.toString().slice(-8).toUpperCase() %>
+                </p>
             </div>
-            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mt-3">Product ID: <%= product._id %></p>
+            <h2 class="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-luxury-text"><%= product.name %></h2>
         </div>
         
-        <div class="flex flex-wrap items-center gap-3">
-           <a href="/admin/products/<%= product._id %>/variants"
-                class="px-6 py-3 border border-stone-900 text-[11px] font-bold uppercase tracking-widest">
-               View All Variants
-                 </a>
-            <button class="px-6 py-3 border border-red-200 text-red-600 hover:bg-red-50 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                Delete
-            </button>
-            <button class="px-6 py-3 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-stone-800 transition-all shadow-md">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <div class="flex items-center gap-3 mt-4 lg:mt-0">
+            <a href="/admin/products/<%= product._id %>/variants" class="px-6 py-3 border border-luxury-border rounded-xl text-xs font-bold text-luxury-text hover:bg-stone-50 transition-all shadow-sm">View Variants</a>
+            <button class="px-6 py-3 bg-luxury-text text-white rounded-xl text-xs font-bold hover:bg-stone-800 transition-all shadow-md flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 Edit Product
             </button>
         </div>
     </header>
 
-    <!-- Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- CONTENT GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
         
-        <!-- MAIN LEFT COLUMN (8/12) -->
-        <div class="lg:col-span-8 space-y-8">
+        <!-- LEFT COLUMN: Gallery & Logistics (Constraints the image size) -->
+        <div class="flex flex-col gap-6 anim-fade-up">
             
-            <!-- Product Media Card -->
-            <div class="detail-card p-8 animate-fade-in delay-100">
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-xl font-serif font-bold">Product Media</h3>
-                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">5 Images Total</span>
+            <!-- Gallery Card -->
+            <div class="detail-card p-4">
+                <!-- HERO -->
+                <div class="gallery-main rounded-xl shadow-sm">
+                    <% if (defaultVariant && defaultVariant.images.length > 0) { %>
+                        <img id="mainHero" src="<%= defaultVariant.images[0] %>" alt="<%= product.name %>">
+                    <% } else { %>
+                        <div class="w-full h-full flex flex-col items-center justify-center text-luxury-muted bg-stone-50">
+                            <svg class="mb-4 opacity-30" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-stone-400">No Image</span>
+                        </div>
+                    <% } %>
                 </div>
                 
-                <div class="space-y-6">
-                    <!-- Main Image Window -->
-                    <div class="w-full aspect-[4/3] bg-stone-50 border border-stone-100 flex items-center justify-center overflow-hidden">
-                        <img src="<%= product.images?.[0] || '/images/no-image.png' %>"alt="Main Product Image" class="w-full h-full object-cover">
+                <!-- THUMBS -->
+                <% if (defaultVariant && defaultVariant.images.length > 1) { %>
+                    <div class="thumb-scroller">
+                        <% defaultVariant.images.forEach((img, idx) => { %>
+                            <div class="thumb-item <%= idx === 0 ? 'active' : '' %>" onclick="swapMedia('<%= img %>', this)">
+                                <img src="<%= img %>" alt="Detail <%= idx + 1 %>">
+                            </div>
+                        <% }) %>
                     </div>
-                    
-                    <!-- Thumbnails -->
-                    <div class="grid grid-cols-4 sm:grid-cols-4 gap-4">
-                        <div class="thumbnail-box active overflow-hidden">
-                            <img src=<img src="<%= product.images?.[0] || '/images/no-image.png' %>" alt="Thumb 1" class="w-full h-full object-cover">
+                <% } %>
+            </div>
+
+            <!-- Logistics Card -->
+            <div class="detail-card p-6">
+                <h4 class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-6">Additional Information</h4>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-white border border-stone-100 shadow-sm flex items-center justify-center shrink-0 text-luxury-text mt-0.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         </div>
-                        <div class="thumbnail-box overflow-hidden grayscale opacity-70">
-                            <img src="<%= product.images?.[1] || '/images/no-image.png' %>" class="w-full h-full object-cover">
+                        <div>
+                            <p class="text-[10px] font-bold text-luxury-text mb-1 uppercase tracking-widest">Care Guidelines</p>
+                            <p class="text-[12px] leading-relaxed text-stone-500"><%= product.careGuide || 'Standard care required.' %></p>
                         </div>
-                        <div class="thumbnail-box overflow-hidden grayscale opacity-70">
-                           <img src="<%= product.images?.[2] || '/images/no-image.png' %>" alt="Thumb 3" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="flex items-start gap-4 p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-white border border-stone-100 shadow-sm flex items-center justify-center shrink-0 text-luxury-text mt-0.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         </div>
-                        <div class="thumbnail-box overflow-hidden grayscale opacity-70">
-                           <img src="<%= product.images?.[0] || '/images/no-image.png' %>" alt="Thumb 4" class="w-full h-full object-cover">
+                        <div>
+                            <p class="text-[10px] font-bold text-luxury-text mb-1 uppercase tracking-widest">Added On</p>
+                            <p class="text-[12px] leading-relaxed text-stone-500"><%= new Date(product.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Basic Information Card -->
-            <div class="detail-card p-8 animate-fade-in delay-200">
-                <h3 class="text-xl font-serif font-bold mb-10">Basic Information</h3>
-                
-                <div class="space-y-12">
-                    <div>
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">Full Product Name</p>
-                        <p class="text-2xl font-serif font-medium leading-tight"><%= product.name %></p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-10 gap-x-12">
+        </div>
+
+        <!-- RIGHT COLUMN: Pricing, Overview, Controls -->
+        <div class="lg:col-span-2 flex flex-col gap-6 anim-fade-up" style="animation-delay: 0.1s;">
+            
+            <!-- PRICING & VARIANTS CARD -->
+            <div class="detail-card p-6 lg:p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
+                    <svg width="160" height="160" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle cx="12" cy="12" r="5"/></svg>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8 relative">
+                    <!-- Left side: Pricing & Stock -->
+                    <div class="space-y-8">
                         <div>
-                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">Category</p>
-                            <span class="category-pill"> <%= product.category ? product.category.name : "N/A" %></span>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">SKU Identifier</p>
-                            <p class="text-sm font-bold tracking-tight">Product ID: <%= product._id %></p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">Subcategory</p>
-                            <p class="text-sm font-bold tracking-tight">  <%= product.subcategory ? product.subcategory.name : "N/A" %></p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">Display Status</p>
-                            <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest"><%= product.isActive ? "Active" : "Inactive" %></p>
+                            <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-2">Base Price</p>
+                            <div class="flex items-end gap-3">
+                                <p class="text-5xl font-extrabold tracking-tight text-luxury-text">₹<%= defaultVariant ? defaultVariant.price.toLocaleString('en-IN') : '0' %></p>
+                                <span class="bg-gray-100 text-gray-800 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md mb-2">Current</span>
                             </div>
                         </div>
+
+                        <div class="p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest">Total Stock Allocation</p>
+                                <p class="text-lg font-bold"><%= defaultVariant ? defaultVariant.stock : '0' %> <span class="text-[10px] font-semibold text-luxury-muted">UNITS</span></p>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: <%= Math.min((defaultVariant ? defaultVariant.stock : 0), 100) %>%"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Right side: Swatches -->
+                    <div class="lg:border-l border-luxury-border lg:pl-8">
+                        <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-4">Available Palette (<%= variants ? variants.length : 0 %>)</p>
+                        
+                        <% if (variants && variants.length > 0) { %>
+                            <div class="flex flex-wrap gap-4">
+                                <% variants.forEach(variant => { %>
+                                    <div class="flex flex-col items-center gap-2 group cursor-pointer" onclick="window.location.href='/admin/products/<%= product._id %>?variant=<%= variant._id %>'">
+                                        <div class="swatch <%= defaultVariant && variant._id.toString() === defaultVariant._id.toString() ? 'active' : '' %>" style="background-color: <%= variant.color && variant.color.match(/^#|^rgb/) ? variant.color : 'transparent' %>; border: 2px solid <%= variant.color && !variant.color.match(/^#|^rgb/) ? 'transparent' : '#E5E5E5' %>">
+                                            <% if (!variant.color || !variant.color.match(/^#|^rgb/)) { %>
+                                                <span class="text-[8px] font-bold text-luxury-text leading-none text-center px-1"><%= (variant.color || 'N/A').substring(0, 3).toUpperCase() %></span>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest text-stone-500 group-hover:text-luxury-text transition-colors"><%= variant.color %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-xs text-luxury-muted italic">No distinct color variants added yet.</p>
+                        <% } %>
                     </div>
                 </div>
             </div>
 
-            <!-- Description Card -->
-            <div class="detail-card p-8 animate-fade-in delay-300">
-                <h3 class="text-xl font-serif font-bold mb-10">Description</h3>
+            <!-- OVERVIEW CARD -->
+            <div class="detail-card p-6 lg:p-8">
+                <div class="mb-6 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-luxury-text tracking-tight shrink-0">Product Overview</h3>
+                    <div class="h-px bg-luxury-border flex-1 ml-6"></div>
+                </div>
                 
-                <div class="space-y-8">
+                <div class="p-6 bg-stone-50 border border-stone-100 rounded-xl mb-8">
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">Narrative</p>
+                    <div class="text-[13px] leading-relaxed text-stone-600 font-medium space-y-4">
+                        <p><%= product.description %></p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-stone-50 border border-stone-100 rounded-xl">
                     <div>
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-4">Detailed Description</p>
-                        <div class="text-[13px] leading-relaxed text-stone-600 font-medium space-y-4">
-                            <p><%= product.description %></p>
-                            
-                        </div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Category</p>
+                        <p class="text-xs font-semibold text-luxury-text"><%= product.category ? product.category.name : 'Unknown' %></p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SIDEBAR RIGHT COLUMN (4/12) -->
-        <div class="lg:col-span-4 space-y-8 animate-fade-in delay-200">
-            
-            <!-- Pricing Strategy Card -->
-            <div class="detail-card p-8">
-                <div class="flex items-center gap-3 mb-10">
-                    <svg class="text-stone-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">Pricing Strategy</h3>
-                </div>
-                
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between pb-6 border-b border-stone-50">
-                        <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">Market Base Price</p>
-                        <p class="text-sm font-bold font-serif">$450.00</p>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Material</p>
+                        <p class="text-xs font-semibold text-luxury-text"><%= product.material || 'Organic' %></p>
                     </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">Active Discount</p>
-                        <p class="text-xs font-bold text-luxury-accent">10% OFF</p>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">SKU</p>
+                        <p class="text-xs font-semibold <%= product.isActive ? 'text-green-600' : 'text-stone-400' %>">
+                            <%= defaultVariant?.sku || 'NONE' %>
+                        </p>
                     </div>
-                    
-                    <div class="pt-8">
-                        <p class="text-[9px] font-bold text-stone-300 uppercase tracking-[0.2em] mb-2 leading-none">Retail Final Price</p>
-                        <p class="text-5xl font-serif font-bold tracking-tighter">$405.00</p>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Product ID</p>
+                        <p class="text-[11px] font-mono font-medium text-stone-500"><%= product._id.toString().slice(-8).toUpperCase() %></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Inventory Control Card -->
-            <div class="detail-card p-8">
-                <div class="flex items-center gap-3 mb-10">
-                    <svg class="text-stone-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">Inventory Control</h3>
-                </div>
-                
-                <div class="space-y-10">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <p class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">Availability</p>
-                            <p class="text-[9px] font-bold text-stone-300 uppercase">45% Remaining</p>
-                        </div>
-                        <div class="avail-progress">
-                            <div class="avail-progress-inner" style="width: 45%;"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between pt-4">
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">On-Hand Stock</p>
-                        <p class="text-xl font-serif font-bold italic underline underline-offset-4 decoration-stone-200">15 Units</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEO Settings Card -->
-            <div class="detail-card p-8">
-                <div class="flex items-center gap-3 mb-10">
-                    <svg class="text-stone-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">SEO Settings</h3>
-                </div>
-                
-                <div class="space-y-8">
-                    <div>
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Material</p>
-                        <div class="bg-stone-50 border border-stone-100 p-4 text-[11px] font-medium text-stone-600 tracking-tight">
-                           <%= product.material || "Not specified" %>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">Care Guide</p>
-                        <div class="bg-stone-50 border border-stone-100 p-4 text-[11px] font-medium text-stone-600 tracking-tight leading-relaxed">
-                            <%= product.careGuide || "No care guide" %>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-    
-    <!-- Floating Settings Button (Matching Cog icon from Figma) -->
-    <button class="fixed bottom-10 right-10 w-12 h-12 bg-luxury-text text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
   </main>
 
   <script>
-    // Sidebar toggle for mobile (placeholder logic)
-    const sidebar = document.getElementById('sidebar');
-    // Mobile toggle logic can be added here
+    function swapMedia(src, thumbEl) {
+        const hero = document.getElementById('mainHero');
+        if (!hero) return;
+
+        // Update Active Class
+        document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
+        if (thumbEl) thumbEl.classList.add('active');
+
+        // Transition Animation
+        hero.style.opacity = '0';
+        hero.style.transform = 'scale(1.01)';
+        
+        setTimeout(() => {
+            hero.src = src;
+            hero.style.opacity = '1';
+            hero.style.transform = 'scale(1.0)';
+        }, 200);
+    }
   </script>
 </body>
 </html>

@@ -9,8 +9,6 @@ import {
   loginService,
   resetPasswordService
 } from "../../services/user/auth.service.js";
-import { success } from "zod";
-import { fa } from "zod/locales";
 
 export const loadSignup = (req, res) => {
   res.render("user/signup");

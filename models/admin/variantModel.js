@@ -16,6 +16,11 @@ const variantSchema = new mongoose.Schema({
   size: {
     type: String
   },
+  sku: {
+    type: String,
+    required: true,
+    unique: true
+  },
 
   price: {
     type: Number,
@@ -35,7 +40,10 @@ const variantSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  isDefault: {
+     type: Boolean, 
+     default: false }
 
 }, { timestamps: true });
 

@@ -1,4 +1,3 @@
-import { success } from "zod";
 import User from "../../models/user/userModel.js";
 import Otp from "../../models/user/otpModel.js";
 import { generateOTP } from "../../utils/generateOtp.js"; // adjust path

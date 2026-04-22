@@ -3,25 +3,18 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Create New Product — AJAX Admin</title>
+<title>Edit <%= product ? product.name : 'Product' %> — AJAX Admin</title>
 
 <!-- FONTS -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Cropper.js CSS MUST come before Tailwind so Tailwind doesn't reset it -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/js/utils/swal-helper.js"></script>
-
 <script>
   tailwind.config = {
     theme: {
       extend: {
         fontFamily: {
-          serif: ['Playfair Display', 'serif'],
           sans: ['Plus Jakarta Sans', 'sans-serif'],
         }
       }
@@ -108,7 +101,7 @@
     <button id="sidebarToggle" class="p-2 hover:bg-stone-100 rounded-lg">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <span class="font-bold text-sm">Add Product</span>
+    <span class="font-bold text-sm">Edit Product</span>
   </div>
 
   <div class="max-w-[1200px] mx-auto px-5 lg:px-12 pt-10">
@@ -117,34 +110,34 @@
     <nav class="flex items-center gap-2 text-[12px] font-semibold text-stone-500 mb-2 anim">
       <a href="/admin/products" class="hover:text-stone-800 transition-colors">Products</a>
       <span>›</span>
-      <span class="text-stone-800">Create</span>
+      <span class="text-stone-800"><%= product ? product.name : 'Edit' %></span>
     </nav>
-    <h2 class="text-3xl font-extrabold text-stone-800 leading-tight anim" style="animation-delay: 50ms;">Create Product</h2>
-    <p class="text-[13px] font-medium text-stone-500 mt-1 anim" style="animation-delay: 100ms;">Initialize the base product profile before adding visual variants.</p>
+    <h2 class="text-3xl font-extrabold text-stone-800 leading-tight anim" style="animation-delay: 50ms;">Edit Product</h2>
+    <p class="text-[13px] font-medium text-stone-500 mt-1 anim" style="animation-delay: 100ms;">Updating: <%= product ? product.name : '' %></p>
 
     <!-- ── FORM ── -->
-    <form id="productForm" method="POST" action="/admin/products/add" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
+    <form id="productForm" method="POST" action="/admin/products/edit/<%= product ? product._id : '' %>" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
 
       <!-- LEFT COLUMN -->
       <div class="flex-1 space-y-6">
           <!-- Detailed Description -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
               <h3 class="text-[15px] font-extrabold text-stone-800 mb-4">Detailed Description</h3>
-              <textarea name="description" rows="5" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."></textarea>
+              <textarea name="description" rows="5" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."><%= product ? product.description : '' %></textarea>
           </div>
 
           <!-- Material / Ingredients -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
               <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Material Composition</h3>
               <p class="text-[12px] font-medium text-stone-500 mb-4">Separated by commas, descending order of prominence.</p>
-              <textarea name="material" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. 100% Organic Cotton..."></textarea>
+              <textarea name="material" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. 100% Organic Cotton..."><%= product ? product.material : '' %></textarea>
           </div>
 
           <!-- Care Guide -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
               <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Care Guidelines</h3>
               <p class="text-[12px] font-medium text-stone-500 mb-4">Specific washing and maintenance instructions.</p>
-              <textarea name="careGuide" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Dry clean only. Iron inside out..."></textarea>
+              <textarea name="careGuide" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Dry clean only. Iron inside out..."><%= product ? product.careGuide : '' %></textarea>
           </div>
       </div>
 
@@ -157,7 +150,7 @@
               <div class="space-y-5">
                   <div>
                       <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Product Name <span class="text-red-500">*</span></label>
-                      <input type="text" name="name" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. The Executive Oxford">
+                      <input type="text" name="name" value="<%= product ? product.name : '' %>" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. The Executive Oxford">
                   </div>
 
                   <div>
@@ -165,9 +158,11 @@
                       <div class="relative">
                           <select name="category" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
                               <option value="">Select category</option>
-                              <% categories.forEach(cat => { %>
-                              <option value="<%= cat._id %>"><%= cat.name %></option>
-                              <% }) %>
+                              <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                  <option value="<%= cat._id %>" <%= product && product.category && product.category.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }) %>
+                              <% } %>
                           </select>
                           <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                       </div>
@@ -176,8 +171,14 @@
                   <div>
                       <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Subcategory <span class="text-red-500">*</span></label>
                       <div class="relative">
-                          <select name="subcategory" class="w-full p-3.5 pr-10 bg-stone-50 text-stone-500 border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-not-allowed" disabled>
-                              <option value="">Select category first</option>
+                          <!-- If we have subcategories passed along, populate them. Else script fetches -->
+                          <select name="subcategory" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
+                              <option value="">Select subcategory</option>
+                              <% if (typeof subCategories !== 'undefined' && subCategories.length > 0) { %>
+                                <% subCategories.forEach(sub => { %>
+                                  <option value="<%= sub._id %>" <%= product && product.subcategory && product.subcategory.toString() === sub._id.toString() ? 'selected' : '' %>><%= sub.name %></option>
+                                <% }) %>
+                              <% } %>
                           </select>
                           <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                       </div>
@@ -190,11 +191,14 @@
               <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Pricing & Inventory</h3>
               <p class="text-[12px] font-medium text-stone-500 mb-5">Managed per variant separately.</p>
               
-              <div class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-start gap-4 shadow-sm">
-                  <div class="bg-emerald-100 p-1.5 rounded-lg shrink-0 text-emerald-600 mt-0.5">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-start flex-col gap-3 shadow-sm">
+                  <div class="flex gap-4">
+                      <div class="bg-emerald-100 p-1.5 rounded-lg shrink-0 text-emerald-600 mt-0.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <p class="text-[12px] leading-relaxed font-semibold">Images, pricing, and stock are managed inside the variants tab.</p>
                   </div>
-                  <p class="text-[12px] leading-relaxed font-semibold">Images, pricing, stock, and colors are managed securely within the variants tab after initial save.</p>
+                  <a href="/admin/products/<%= product ? product._id : '' %>/variants" class="mt-2 text-[11px] font-bold uppercase tracking-widest text-emerald-700 bg-white border border-emerald-200 px-4 py-2 rounded-lg hover:bg-emerald-50 transition w-full text-center">Manage Variants &rarr;</a>
               </div>
           </div>
 
@@ -203,11 +207,11 @@
               <div class="flex items-center justify-between mb-2">
                   <h3 class="text-[15px] font-extrabold text-stone-800">Product Visibility</h3>
                   <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="isActive" class="sr-only peer" checked value="true">
+                    <input type="checkbox" name="isActive" class="sr-only peer" value="true" <%= product && product.isActive ? 'checked' : '' %>>
                     <div class="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                   </label>
               </div>
-              <p class="text-[12px] font-medium text-stone-500">Enable to show on store front immediately.</p>
+              <p class="text-[12px] font-medium text-stone-500">Enable to show on store front.</p>
           </div>
       </div>
     </form>
@@ -218,11 +222,11 @@
 <div class="sticky-bar">
   <div class="flex items-center gap-2.5 ml-4">
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-    <span class="text-[10px] font-bold tracking-widest text-stone-400 uppercase">Input Live</span>
+    <span class="text-[10px] font-bold tracking-widest text-stone-400 uppercase">Edit Live</span>
   </div>
   <div class="flex items-center gap-3">
-    <a href="/admin/products" class="px-6 py-3 text-[12px] font-bold text-stone-600 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-all shadow-sm">Discard</a>
-    <button type="submit" form="productForm" class="px-8 py-3 text-[12px] font-bold text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">Complete Setup</button>
+    <a href="/admin/products" class="px-6 py-3 text-[12px] font-bold text-stone-600 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-all shadow-sm">Cancel changes</a>
+    <button type="submit" form="productForm" class="px-8 py-3 text-[12px] font-bold text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">Update Product</button>
   </div>
 </div>
 
@@ -241,6 +245,10 @@
       subcategorySelect.classList.remove('bg-white', 'text-stone-900', 'cursor-pointer');
       return;
     }
+
+    // Set loading state
+    subcategorySelect.disabled = true;
+    subcategorySelect.innerHTML = '<option value="">Loading...</option>';
 
     try {
       const response = await fetch(`/admin/subcategories/by-category/${catId}`);

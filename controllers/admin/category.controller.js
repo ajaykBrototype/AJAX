@@ -1,4 +1,3 @@
-import { success } from "zod";
 import Category from "../../models/admin/categoryModel.js";
 import SubCategory from "../../models/admin/subCategoryModel.js";
 import * as categoryService from "../../services/admin/category.service.js";
@@ -69,10 +68,11 @@ export const loadCategoryPage = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+    console.error("Category Controller Error:", err);
     res.render("admin/categories", {
       categories: [],
       totalCategories: 0,
+      totalSubCategories: 0,
       activeCount: 0,
       inactiveCount: 0,
       totalPages: 0,

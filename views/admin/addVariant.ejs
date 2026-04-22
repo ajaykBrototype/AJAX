@@ -51,11 +51,16 @@
   .section-card { background: white; border-radius: 0px; padding: 40px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
 
   /* Upload zone */
-  .upload-zone { border: 2px dashed #D1D5DB; border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #F9FAFB; }
+  .upload-zone { border: 2px dashed #D1D5DB; border-radius: 16px; padding: 32px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #F9FAFB; }
   .upload-zone:hover { border-color: #1C1C1C; background: white; }
 
   /* Sticky footer */
   .sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-top: 1px solid #E5E7EB; padding: 16px 40px; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+
+  /* Size Button */
+  .size-btn { border: 1.5px solid #E5E7EB; background: white; padding: 10px 16px; border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; transition: all 0.2s; color: #8E8E8E; }
+  .size-btn:hover { border-color: #1C1C1C; color: #1C1C1C; }
+  .size-btn.active { background: #1C1C1C; border-color: #1C1C1C; color: white; }
 
   /* Animations */
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -65,11 +70,16 @@
   #cropModal.open { display: flex; }
   #cropModalBox { background: white; border-radius: 24px; width: 100%; max-width: 700px; overflow: hidden; display: flex; flex-direction: column; }
   #cropperWrapper { width: 100%; height: 450px; background: #F3F4F6; position: relative; overflow: hidden; }
+
+  /* Thumbnail grid */
+  .thumb-container { display: grid; grid-template-cols: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-top: 24px; }
+  .thumb-item { aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; border: 1.5px solid #E5E7EB; position: relative; background: #F9FAFB; }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb-remove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; items-center justify-center text-luxury-accent shadow-sm; cursor: pointer; }
 </style>
 </head>
 <body class="flex min-h-screen">
 
-  <!-- SIDEBAR (Consistent with others) -->
   <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200 transition-transform lg:translate-x-0 lg:static lg:inset-0 -translate-x-full">
     <div class="h-full flex flex-col pt-8 pb-6">
       <div class="px-8 mb-12"><h1 class="text-2xl font-serif font-bold tracking-tighter uppercase text-luxury-text">AJAX</h1></div>
@@ -92,102 +102,91 @@
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main class="flex-1 min-w-0 p-6 lg:p-12 pb-32">
-    <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-400 uppercase mb-8 animate-fade-in">
         <a href="/admin/products" class="hover:text-stone-700 transition-colors">Catalog</a>
-        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-        <a href="/admin/variants" class="hover:text-stone-700 transition-colors">Variants</a>
         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
         <span class="text-luxury-text">Add Variant</span>
     </nav>
 
     <header class="mb-12 animate-fade-in">
         <h2 class="text-5xl font-serif font-bold leading-tight">Add Product Variant</h2>
-        <p class="text-stone-400 text-sm mt-3">Define SKU specifics for your luxury product</p>
+        <p class="text-stone-400 text-sm mt-3">Define SKU specifics and upload minimum 3 high-fidelity images.</p>
     </header>
 
-    <!-- PARENT PRODUCT CONTEXT -->
     <section class="mb-10 bg-white p-5 border border-stone-200 flex items-center gap-5 animate-fade-in" style="animation-delay: 0.1s;">
-        <div class="w-14 h-18 bg-stone-100 overflow-hidden border border-stone-200">
-            <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&q=80" class="w-full h-full object-cover">
+        <div class="w-14 h-18 bg-stone-100 overflow-hidden border border-stone-200" style="width:56px; height:72px; flex-shrink:0;">
+            <img src="<%= product.previewImage || '/images/no-image.png' %>" class="w-full h-full object-cover">
         </div>
         <div>
             <p class="text-[9px] font-bold text-stone-300 uppercase tracking-widest">Selected Product</p>
-            <h3 class="text-lg font-serif font-medium">Silk Evening Gown — Black</h3>
+            <h3 class="text-lg font-serif font-medium"><%= product.name %></h3>
+            <p class="text-[10px] text-stone-400 mt-0.5"><%= product.category ? product.category.name : '' %><% if (product.subcategory) { %> / <%= product.subcategory.name %><% } %></p>
         </div>
     </section>
 
-    <!-- FORM GRID -->
-    <form id="variantForm" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <!-- LEFT: Media Upload -->
+    <form id="variantForm" action="/admin/products/<%= product._id %>/variants/add" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <input type="hidden" name="productId" value="<%= product._id %>">
+        <input type="hidden" name="size" id="sizeInput">
+
         <div class="lg:col-span-5 space-y-8 animate-fade-in" style="animation-delay: 0.2s;">
             <div class="section-card">
                 <h3 class="text-xl font-serif font-bold mb-8">Variant Media</h3>
                 
                 <div class="upload-zone" id="uploadTrigger">
-                    <svg class="mx-auto mb-4 text-stone-300" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    <p class="text-xs font-bold text-stone-900 mb-1 leading-none uppercase tracking-widest">Upload Main Image</p>
-                    <p class="text-[10px] text-stone-400">Resolution should be min 1200x1600px</p>
+                    <svg class="mx-auto mb-4 text-stone-300" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <p class="text-[10px] font-bold text-stone-900 mb-1 leading-none uppercase tracking-widest">Add Product Image</p>
+                    <p class="text-[9px] text-stone-400 mb-4">Minimum 3 images required</p>
                     <input type="file" id="imageInput" class="hidden" accept="image/*">
                 </div>
 
-                <div id="imagePreview" class="mt-6 hidden">
-                    <div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden border border-stone-200">
-                        <img id="previewImg" class="w-full h-full object-cover">
-                        <button type="button" id="removeImg" class="absolute top-4 right-4 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-luxury-accent">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                        </button>
-                    </div>
+                <div id="imageGallery" class="thumb-container">
+                    <!-- Images will be added here -->
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: Configuration -->
         <div class="lg:col-span-7 space-y-8 animate-fade-in" style="animation-delay: 0.3s;">
             <div class="section-card space-y-10">
-                <!-- Attributes -->
                 <div>
                     <h3 class="text-xl font-serif font-bold mb-8 underline decoration-stone-100 underline-offset-8">Attributes</h3>
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-8">
                         <div>
                             <label class="fl">Primary Color</label>
-                            <input type="text" class="fin" placeholder="e.g. Midnight Black">
+                            <input type="text" name="color" class="fin" placeholder="e.g. Midnight Black" required>
                         </div>
                         <div>
-                            <label class="fl">Size</label>
-                            <input type="text" class="fin" placeholder="e.g. M, L, 42">
+                            <label class="fl text-luxury-muted mb-4 uppercase text-[10px] tracking-widest font-bold">Select Size</label>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="size-btn" data-size="S">S</button>
+                                <button type="button" class="size-btn" data-size="M">M</button>
+                                <button type="button" class="size-btn" data-size="L">L</button>
+                                <button type="button" class="size-btn" data-size="XL">XL</button>
+                                <button type="button" class="size-btn" data-size="XXL">XXL</button>
+                                <button type="button" class="size-btn" data-size="3XL">3XL</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Inventory -->
                 <div>
-                    <h3 class="text-xl font-serif font-bold mb-8 underline decoration-stone-100 underline-offset-8">Inventory</h3>
+                    <h3 class="text-xl font-serif font-bold mb-8 underline decoration-stone-100 underline-offset-8">Inventory & Pricing</h3>
                     <div class="grid grid-cols-2 gap-6">
-                        <div>
+                        <div class="col-span-2 sm:col-span-1">
                             <label class="fl">SKU Identifier</label>
-                            <input type="text" class="fin" placeholder="AJAX-SILK-M-BLK">
+                            <input type="text" name="sku" class="fin" placeholder="AJAX-SILK-M-BLK" required>
                         </div>
-                        <div>
+                        <div class="col-span-2 sm:col-span-1">
                             <label class="fl">Stock Quantity</label>
-                            <input type="number" class="fin" placeholder="0">
+                            <input type="number" name="stock" class="fin" placeholder="0" required min="0">
                         </div>
-                    </div>
-                </div>
-
-                <!-- Financials -->
-                <div>
-                    <h3 class="text-xl font-serif font-bold mb-8 underline decoration-stone-100 underline-offset-8">Financials</h3>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
+                        <div class="col-span-2 sm:col-span-1">
                             <label class="fl">Base Price (₹)</label>
-                            <input type="number" class="fin" placeholder="45000">
+                            <input type="number" name="price" class="fin" placeholder="45000" required min="0">
                         </div>
-                        <div>
+                        <div class="col-span-2 sm:col-span-1">
                             <label class="fl">Active Discount (%)</label>
-                            <input type="number" class="fin" value="0">
+                            <input type="number" name="discount" class="fin" value="0" min="0" max="100">
                         </div>
                     </div>
                 </div>
@@ -196,20 +195,18 @@
     </form>
   </main>
 
-  <!-- STICKY FOOTER -->
   <div class="sticky-footer">
-      <p class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Variant Status: <span class="text-stone-900">Configuring</span></p>
+      <p class="text-[10px] font-bold text-stone-400 tracking-widest uppercase" id="imgCountText">Images: <span class="text-stone-900">0 / 3 uploaded</span></p>
       <div class="flex items-center gap-4">
-          <a href="/admin/variants" class="px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-stone-400 hover:text-luxury-accent transition-colors">Discard</a>
-          <button type="button" class="px-10 py-3 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl">Save Variant</button>
+          <a href="/admin/products" class="px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-stone-400 hover:text-luxury-accent transition-colors">Cancel</a>
+          <button type="button" id="saveVariantBtn" class="px-10 py-3 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">Save Variant</button>
       </div>
   </div>
 
-  <!-- CROP MODAL -->
   <div id="cropModal">
     <div id="cropModalBox">
         <div class="p-6 border-b border-stone-100 flex items-center justify-between">
-            <h4 class="text-lg font-serif font-bold">Refine Variant Image</h4>
+            <h4 class="text-lg font-serif font-bold">Refine Product Image</h4>
             <button id="closeCrop" class="p-2 text-stone-400 hover:text-stone-900 transition-colors">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
@@ -223,15 +220,28 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
   <script>
-    // Placeholder interaction logic
     const uploadTrigger = document.getElementById('uploadTrigger');
     const imageInput = document.getElementById('imageInput');
+    const imageGallery = document.getElementById('imageGallery');
     const cropModal = document.getElementById('cropModal');
     const cropImage = document.getElementById('cropImage');
     const applyCrop = document.getElementById('applyCrop');
-    const previewImg = document.getElementById('previewImg');
-    const imagePreview = document.getElementById('imagePreview');
+    const imgCountText = document.getElementById('imgCountText');
+    const saveVariantBtn = document.getElementById('saveVariantBtn');
+    const variantForm = document.getElementById('variantForm');
+    const sizeInput = document.getElementById('sizeInput');
+    
     let cropper;
+    let uploadedFiles = []; // Array to store Blobs
+
+    // Size button logic
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            sizeInput.value = btn.dataset.size;
+        });
+    });
 
     uploadTrigger.addEventListener('click', () => imageInput.click());
 
@@ -243,24 +253,103 @@
                 cropImage.src = event.target.result;
                 cropModal.classList.add('open');
                 if (cropper) cropper.destroy();
-                cropper = new Cropper(cropImage, { aspectRatio: 3/4, viewMode: 2 });
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 3/4,
+                    viewMode: 2,
+                    guides: true,
+                    autoCropArea: 1
+                });
             };
             reader.readAsDataURL(file);
         }
     });
 
     applyCrop.addEventListener('click', () => {
-        const canvas = cropper.getCroppedCanvas();
-        previewImg.src = canvas.toDataURL();
-        imagePreview.classList.remove('hidden');
-        uploadTrigger.classList.add('hidden');
-        cropModal.classList.remove('open');
+        const canvas = cropper.getCroppedCanvas({ width: 1200, height: 1600 });
+        canvas.toBlob((blob) => {
+            uploadedFiles.push(blob);
+            updateGallery();
+            cropModal.classList.remove('open');
+            imageInput.value = ''; // Reset input
+        }, 'image/jpeg', 0.9);
     });
 
-    document.getElementById('removeImg').addEventListener('click', () => {
-        imagePreview.classList.add('hidden');
-        uploadTrigger.classList.remove('hidden');
-        imageInput.value = '';
+    function updateGallery() {
+        imageGallery.innerHTML = '';
+        uploadedFiles.forEach((blob, index) => {
+            const div = document.createElement('div');
+            div.className = 'thumb-item animate-fade-in';
+            div.innerHTML = `
+                <img src="${URL.createObjectURL(blob)}">
+                <div class="thumb-remove" onclick="removeImage(${index})">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </div>
+                ${index === 0 ? '<div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] font-bold uppercase py-1 text-center">Primary</div>' : ''}
+            `;
+            imageGallery.appendChild(div);
+        });
+
+        const count = uploadedFiles.length;
+        imgCountText.innerHTML = `Images: <span class="${count >= 3 ? 'text-emerald-600' : 'text-luxury-accent'}">${count} / 3 uploaded</span>`;
+        // Only allow saving if at least 3 images are present
+        // saveVariantBtn.disabled = count < 3; 
+    }
+
+    window.removeImage = (index) => {
+        uploadedFiles.splice(index, 1);
+        updateGallery();
+    };
+
+    saveVariantBtn.addEventListener('click', async () => {
+        if (uploadedFiles.length < 3) {
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Images Required',
+                text: 'Please upload at least 3 images for this variant.',
+                confirmButtonColor: '#1C1C1C'
+            });
+        }
+
+        if (!sizeInput.value) {
+            return Swal.fire({ icon: 'warning', title: 'Size Required', text: 'Please select a size.', confirmButtonColor: '#1C1C1C' });
+        }
+
+        const formData = new FormData(variantForm);
+        // Remove individual images field if any, and add our blobs
+        formData.delete('images');
+        uploadedFiles.forEach((blob, i) => {
+            formData.append('images', blob, `variant_${i}.jpg`);
+        });
+
+        try {
+            saveVariantBtn.disabled = true;
+            saveVariantBtn.innerHTML = 'Saving...';
+
+            const response = await fetch(variantForm.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = result.redirectUrl;
+                });
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+            saveVariantBtn.disabled = false;
+            saveVariantBtn.innerHTML = 'Save Variant';
+        }
     });
 
     document.getElementById('closeCrop').addEventListener('click', () => cropModal.classList.remove('open'));
