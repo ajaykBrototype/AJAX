@@ -35,6 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('saveBtn').textContent = 'Save Node';
         showSubModal();
     };
+  
+
+    function handleEditClick(btn) {
+    const id = btn.getAttribute('data-id');
+    const name = btn.getAttribute('data-name');
+    const catId = btn.getAttribute('data-category');
+    const active = btn.getAttribute('data-active') === 'true';
+    
+    openSubEditModal(id, name, catId, active);
+}
 
     window.openSubEditModal = function (id, name, catId, status) {
         document.getElementById('subModalTitle').textContent = 'Update Sub-tier';

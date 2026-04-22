@@ -30,6 +30,9 @@
 </script>
 
 <style>
+
+
+
   /* --- Reset & Base --- */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #FAFAFA; color: #1C1C1C; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -126,6 +129,7 @@
     <form id="productForm" method="POST" action="/admin/products/add" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
 
       <!-- LEFT COLUMN -->
+       
       <div class="flex-1 space-y-6">
           <!-- Detailed Description -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
@@ -215,6 +219,11 @@
 </main>
 
 
+  <div id="global-toast" class="global-toast">
+  <div id="toast-indicator"></div>
+  <p id="global-toast-msg"></p>
+</div>
+
 <div class="sticky-bar">
   <div class="flex items-center gap-2.5 ml-4">
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -226,7 +235,9 @@
   </div>
 </div>
 
+<script src="/js/utils/swal-helper.js"></script>
 <script src="/js/admin/product.js"></script>
+
 <script>
   // Dynamic Subcategory Loading with refined UI states
   const categorySelect = document.querySelector('select[name="category"]');

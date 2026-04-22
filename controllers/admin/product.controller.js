@@ -126,7 +126,7 @@ export const addProduct = async (req, res) => {
       careGuide
     });
 
-    res.redirect("/admin/products");
+    res.redirect("/admin/products?created=true");
 
   } catch (err) {
     console.log(err);
@@ -177,3 +177,62 @@ export const loadProductDetails = async (req, res) => {
     res.redirect("/admin/products");
   }
 }
+
+
+export const loadEditProductPage = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    const categories = await Category.find({ isActive: true });
+    const subCategories = await SubCategory.find({ isActive: true });
+
+    res.render("admin/editProduct", { 
+      product, 
+      categories, 
+      subCategories 
+    });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/admin/products");
+  }
+}
+
+export const updateProduct = async (req, res) => {
+  try {
+    console.log("UPDATE CONTROLLER HIT ✅");
+  console.log("BODY:", req.body);
+
+    const { name, category, subcategory, description, material, careGuide, isActive } = req.body;
+
+    await Product.findByIdAndUpdate(req.params.id, {
+      name,
+      category,
+      subcategory,
+      description,
+      material,
+      careGuide,
+      isActive: isActive === "true"
+    });
+
+    res.redirect("/admin/products?updated=true");
+  } catch (err) {
+    console.log(err);
+    res.redirect("/admin/products");
+  }
+};
+export const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("DELETE HIT ✅", req.params.id);
+        const deletedProduct = await Product.findByIdAndDelete(id);
+
+        if (!deletedProduct) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        res.json({ success: true, message: "Product deleted successfully" });
+    } catch (err) {
+        console.error("Delete Error:", err);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};

@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('saveBtn').textContent = 'Create Entry';
         showModal();
     };
+     
+    window.handleEdit = function(btn) {
+    const id = btn.getAttribute('data-id');
+    const name = btn.getAttribute('data-name');
+    const status = btn.getAttribute('data-status') === 'true'; // Converts string to boolean
+    
+    // Calls your existing function below
+    window.openEditModal(id, name, status);
+};
 
     window.openEditModal = function (id, name, status) {
         document.getElementById('modalTitle').textContent = 'Update Category';

@@ -1,7 +1,4 @@
-/**
- * Global Toast Notification Handler
- * Use this to display success, error, or warning toasts across the application.
- */
+
 
 window.showToast = function(type, message, duration = 2500) {
   const toast = document.getElementById("global-toast");

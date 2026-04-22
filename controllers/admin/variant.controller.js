@@ -90,3 +90,43 @@ export const addVariant = async (req, res) => {
     res.status(500).json({ success: false, message: err.message || "Error adding variant" });
   }
 };
+
+export const toggleVariantStatus = async (req, res) => {
+  try {
+     const isActive = req.body.isActive === true;
+
+    const variant = await Variant.findByIdAndUpdate(
+      req.params.id,
+      { isActive },
+      { new: true }
+    );
+
+    if (!variant) {
+      return res.json({ success: false, message: "Variant not found" });
+    }
+
+    res.json({
+      success: true,
+      isActive: variant.isActive
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+};
+
+export const deleteVariant = async (req, res) => {
+  try {
+    const deleted = await Variant.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.json({ success: false, message: "Not found" });
+    }
+
+    res.status(200).json({ success: true });
+
+  } catch (err) {
+    res.json({ success: false });
+  }
+};

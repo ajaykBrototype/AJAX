@@ -93,7 +93,7 @@
   </div>
 </aside>
 
-<!-- ═══════════════════════════════════════ MAIN ════════ -->
+
 <main class="flex-1 min-w-0 pb-28">
 
   <!-- Top bar (mobile) -->
@@ -116,7 +116,7 @@
     <p class="text-[13px] font-medium text-stone-500 mt-1 anim" style="animation-delay: 100ms;">Updating: <%= product ? product.name : '' %></p>
 
     <!-- ── FORM ── -->
-    <form id="productForm" method="POST" action="/admin/products/edit/<%= product ? product._id : '' %>" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
+    <form id="productForm" method="POST" action="/admin/products/edit/<%= product._id %>"  class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
 
       <!-- LEFT COLUMN -->
       <div class="flex-1 space-y-6">
@@ -218,6 +218,10 @@
   </div>
 </main>
 
+ <div id="global-toast" class="global-toast">
+  <div id="toast-indicator"></div>
+  <p id="global-toast-msg"></p>
+</div>
 
 <div class="sticky-bar">
   <div class="flex items-center gap-2.5 ml-4">
@@ -229,8 +233,10 @@
     <button type="submit" form="productForm" class="px-8 py-3 text-[12px] font-bold text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">Update Product</button>
   </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
 <script src="/js/admin/product.js"></script>
+
 <script>
   // Dynamic Subcategory Loading with refined UI states
   const categorySelect = document.querySelector('select[name="category"]');

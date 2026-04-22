@@ -20,8 +20,8 @@ import {
   toggleSubCategory,
   getSubCategoriesByCategory 
 } from "../controllers/admin/subCategory.controller.js";
-import { loadAddProductPage, loadProductPage,addProduct, toggleProduct,loadProductDetails } from "../controllers/admin/product.controller.js";
-import { loadVariantPage,loadAddVariantPage,addVariant } from "../controllers/admin/variant.controller.js";
+import { loadAddProductPage, loadProductPage,addProduct, toggleProduct,loadProductDetails,loadEditProductPage,updateProduct,deleteProduct } from "../controllers/admin/product.controller.js";
+import { loadVariantPage,loadAddVariantPage,addVariant,toggleVariantStatus,deleteVariant } from "../controllers/admin/variant.controller.js";
 
 const router = express.Router();
 
@@ -49,12 +49,17 @@ router.get("/products", isAdminAuth,loadProductPage);
 router.get("/products/add", isAdminAuth,loadAddProductPage);
 router.post("/products/add", isAdminAuth, addProduct);
 router.patch("/products/toggle/:id", isAdminAuth, toggleProduct);
+router.get('/products/edit/:id', isAdminAuth,loadEditProductPage);
+router.post('/products/edit/:id', isAdminAuth,updateProduct);
+router.delete("/products/delete/:id",isAdminAuth, deleteProduct);
 
 router.get("/products/:id", isAdminAuth, loadProductDetails);
 
 router.get("/products/:id/variants", loadVariantPage);
 router.get("/products/:id/variants/add",isAdminAuth,loadAddVariantPage);
 router.post("/products/:id/variants/add",isAdminAuth,  upload.array("images", 5),addVariant);
+router.patch("/variants/toggle/:id",isAdminAuth, toggleVariantStatus);
+router.delete("/variants/delete/:id", isAdminAuth, deleteVariant);
 
 router.get("/logout", logoutAdmin);
 

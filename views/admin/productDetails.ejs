@@ -254,7 +254,7 @@
                                 <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest">Total Stock Allocation</p>
                                 <p class="text-lg font-bold"><%= defaultVariant ? defaultVariant.stock : '0' %> <span class="text-[10px] font-semibold text-luxury-muted">UNITS</span></p>
                             </div>
-                            <div class="progress-bg"><div class="progress-fill" style="width: <%= Math.min((defaultVariant ? defaultVariant.stock : 0), 100) %>%"></div></div>
+                           <div class="progress-fill" style="width: <%= defaultVariant ? Math.min(defaultVariant.stock, 100) : 0 %>%"></div>
                         </div>
                     </div>
 
