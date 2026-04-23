@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.isConfirmed) {
             try {
-                const res = await axios.patch(`/admin/toggleblockuser/${userId}`);
+                const res = await axios.patch(`/admin/toggleblockuser/${userId}`, {},
+             {
+                 withCredentials: true
+               });
                 if (res.data.success) {
                     ajaxToast('success', `Access ${state ? 'restored' : 'revoked'} successfully.`);
                     setTimeout(() => window.location.reload(), 1200);

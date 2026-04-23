@@ -37,14 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   
 
-    function handleEditClick(btn) {
+   window.handleEditClick = function (btn) {
     const id = btn.getAttribute('data-id');
     const name = btn.getAttribute('data-name');
     const catId = btn.getAttribute('data-category');
     const active = btn.getAttribute('data-active') === 'true';
-    
+
     openSubEditModal(id, name, catId, active);
-}
+};
 
     window.openSubEditModal = function (id, name, catId, status) {
         document.getElementById('subModalTitle').textContent = 'Update Sub-tier';
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* LOGOUT */
-    document.getElementById('logoutAdmin')?.addEventListener('click', () => {
+    document.getElementById('logoutBTN')?.addEventListener('click', () => {
         ajaxConfirm({
             title: "SIGN OUT?",
             text: "Ending your administrator session in AJAX.",

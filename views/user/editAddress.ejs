@@ -567,17 +567,29 @@ document.addEventListener('keydown', e => {
   document.body.style.overflow = '';
 });
 
-/* ── Form Validation & Submission ── */
 const rules = {
-  name:    { required:true, minLen:2,  label:'full name' },
-  phone:   { required:true, pattern:/^[+\d][\d\s\-().]{6,19}$/, label:'mobile number' },
-  pincode: { required:true, pattern:/^\d{4,10}$/, label:'pincode' },
-  city:    { required:true, minLen:2,  label:'city' },
-  state:   { required:true, minLen:2,  label:'state' },
-  country: { required:true, minLen:2,  label:'country' },
-  addressLine: { required:true, minLen:5,  label:'detailed address' }
-};
+  fullName: { required:true, minLen:2, label:'full name' },
 
+  phone: { 
+    required:true, 
+    pattern:/^\d{10}$/, 
+    label:'mobile number (10 digits)' 
+  },
+
+  street: { required:true, minLen:3, label:'street / road' },
+  area: { required:true, minLen:5, label:'house / area details' },
+
+
+  pincode: { 
+    required:true, 
+    pattern:/^\d{6}$/, 
+    label:'pincode (6 digits)' 
+  },
+
+  city: { required:true, minLen:2, label:'city' },
+  state: { required:true, minLen:2, label:'state' },
+  country: { required:true, minLen:2, label:'country' },
+};
 function showError(id, msg) {
   const el = document.getElementById(id);
   const err = document.getElementById('err-' + id);
