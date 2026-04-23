@@ -9,10 +9,10 @@ import * as addressController from "../controllers/user/address.controller.js";
 import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
+import { loadMenPage } from "../controllers/user/product.controller.js";
 
 const router = express.Router();
 
-/* ================= AUTH ================= */
 
 router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
 router.post("/signup", authController.registerUser);
@@ -35,7 +35,6 @@ router.post("/login", isLoggedOut, authController.loginUser);
 
 router.get("/logout", noCache, authController.logoutUser);
 
-/* ================= PASSWORD ================= */
 
 router.get("/forgot-password", authController.loadForgotPassword);
 router.post("/forgot-password", authController.forgotPassword);
@@ -43,34 +42,22 @@ router.post("/forgot-password", authController.forgotPassword);
 router.get("/reset-password", authController.loadResetPassword);
 router.post("/reset-password", authController.resetPassword);
 
-/* ================= HOME ================= */
 
 router.get("/home", isLoggedIn, authController.loadHome);
 
-/* ================= PROFILE ================= */
 
 router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);
 router.get("/edit-profile", noCache, isLoggedIn, profileController.loadEditProfile);
 
-router.post(
-  "/profile/update",
-  isLoggedIn,
-  upload.single("profileImage"),
-  profileController.updateProfile
-);
-
-/* ================= EMAIL OTP ================= */
+router.post( "/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
 
 router.get("/profile/email/verify", isLoggedIn, emailController.loadVerifyEmailPage);
 router.post("/profile/email/verify", isLoggedIn, emailController.verifyEmailOtp);
 router.post("/profile/email/resend-otp", isLoggedIn, emailController.resendEmailOtp);
 
-/* ================= PASSWORD CHANGE ================= */
-
 router.get("/change-password", noCache, isLoggedIn, profileController.loadChangePassword);
 router.post("/change-password", isLoggedIn, profileController.changePassword);
 
-/* ================= ADDRESS ================= */
 
 router.get("/address", noCache, isLoggedIn, addressController.loadAddressPage);
 router.get("/add-address", noCache, isLoggedIn, addressController.loadAddAddressPage);
@@ -79,5 +66,7 @@ router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
 router.post("/edit-address/:id", isLoggedIn, addressController.updateAddress);
+
+router.get("/menProductList",isLoggedIn,loadMenPage)
 
 export default router;

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AJAX — Men's Shirts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+tailwind.config = {
+  theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-x:hidden}
+:root{--dark:#1C1C1C;--cream:#F5F0E8;--warm:#FAFAF8;--stone:#9B8E83;--mist:#EAE5DC;--bdr:rgba(28,28,28,0.1)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ccc}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:999;transition:background .5s,padding .4s,box-shadow .4s;padding:1.5rem 3rem}
+#navbar.scrolled{background:rgba(250,250,248,.96);backdrop-filter:blur(16px);padding:.9rem 3rem;box-shadow:0 1px 0 var(--bdr)}
+@media(max-width:767px){#navbar{padding:1.2rem 1.5rem}#navbar.scrolled{padding:.8rem 1.5rem}}
+.logo{font-family:'Playfair Display',serif;font-weight:400;font-size:1.45rem;letter-spacing:.42em;text-transform:uppercase;text-decoration:none;transition:color .4s}
+.nav-link{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;position:relative;padding-bottom:3px;transition:opacity .25s}
+.nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:currentColor;transition:width .4s cubic-bezier(.25,.1,.25,1)}
+.nav-link:hover::after{width:100%}.nav-link:hover{opacity:.6}
+.nav-icon{cursor:pointer;transition:transform .25s,opacity .25s;display:flex;align-items:center;justify-content:center;background:none;border:none;padding:6px}
+.nav-icon:hover{transform:scale(1.1);opacity:.55}
+
+/* MOBILE MENU */
+#mob-menu{display:none;position:fixed;inset:0;z-index:998;background:var(--warm);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem}
+#mob-menu.open{display:flex}
+#mob-close{position:absolute;top:1.5rem;right:1.75rem;background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--dark);opacity:.5;transition:opacity .2s}
+#mob-close:hover{opacity:1}
+.mob-link{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;color:var(--dark);text-decoration:none;transition:opacity .25s}
+.mob-link:hover{opacity:.35}
+
+/* PAGE SPECIFIC STYLES */
+.page-title {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3rem, 6vw, 5rem);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--dark);
+  margin-top: 8rem; /* Space for navbar */
+  margin-bottom: 1.5rem;
+}
+
+/* HORIZONTAL SCROLLBAR FOR CATEGORIES */
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+.hide-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* PRODUCT CARD */
+.product-card {
+  position: relative;
+  cursor: pointer;
+  group;
+}
+.product-img-wrap {
+  position: relative;
+  background: var(--cream);
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+.product-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.product-card:hover .product-img-wrap img {
+  transform: scale(1.05);
+}
+.wishlist-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  color: var(--dark);
+  opacity: 0.7;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.wishlist-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.wishlist-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+.product-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dark);
+  margin-bottom: 0.2rem;
+}
+.product-price {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+.color-swatches {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border: 1px solid var(--bdr);
+}
+.color-more {
+  font-size: 0.65rem;
+  color: var(--stone);
+  margin-left: 0.2rem;
+}
+
+/* ANIMATIONS */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* FOOTER */
+footer{background:var(--warm);border-top:1px solid var(--bdr);padding:5rem 3rem 2.5rem; margin-top: 5rem;}
+@media(max-width:640px){footer{padding:3.5rem 1.5rem 2rem}}
+.ft-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3.5rem}
+@media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem 2.5rem}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr 1fr;gap:1.75rem 1.25rem}}
+.ft-logo{font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:.35em;color:var(--dark);margin-bottom:.9rem;display:block;text-decoration:none}
+.ft-desc{font-size:.7rem;font-weight:300;line-height:1.9;color:var(--stone);max-width:195px;margin-bottom:1.4rem}
+.ft-socials{display:flex;gap:.75rem}
+.ft-soc{width:30px;height:30px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,background .3s;text-decoration:none;color:var(--stone)}
+.ft-soc:hover{border-color:var(--dark);background:var(--dark);color:#fff}
+.ft-col-h{font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1.15rem}
+.ft-link{display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.6rem;letter-spacing:.02em;transition:color .25s}
+.ft-link:hover{color:var(--dark)}
+.ft-bot{border-top:1px solid var(--bdr);padding-top:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
+.ft-copy{font-size:.58rem;color:var(--stone);letter-spacing:.07em}
+.ft-legal{display:flex;gap:1.4rem}
+.ft-legal a{font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+.ft-legal a:hover{color:var(--dark)}
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div id="mob-menu">
+  <button id="mob-close">✕</button>
+  <a href="/" class="mob-link">Home</a>
+  <a href="/menProductList" class="mob-link">Men</a>
+  <a href="/women" class="mob-link">Women</a>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar" class="scrolled">
+  <div style="max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <a href="/" class="logo" id="logo" style="color:#1C1C1C">AJAX</a>
+
+    <div class="hidden md:flex items-center gap-10" id="nav-links">
+      <a href="/" class="nav-link" data-nav style="color:#1C1C1C">HOME</a>
+      <a href="/menProductList" class="nav-link" data-nav style="color:#1C1C1C">MENS</a>
+      <a href="/women" class="nav-link" data-nav style="color:#1C1C1C">WOMEN</a>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button class="nav-icon" title="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#1C1C1C">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Wishlist">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#1C1C1C">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Account">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#1C1C1C">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Cart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#1C1C1C">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </button>
+      <button id="ham" class="nav-icon md:hidden">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+          <line x1="0" y1="1"  x2="20" y2="1"  stroke="#1C1C1C" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="7"  x2="20" y2="7"  stroke="#1C1C1C" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="13" x2="20" y2="13" stroke="#1C1C1C" stroke-width="1.5" class="hl"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="px-6 md:px-12 max-w-[1440px] mx-auto">
+  
+  <!-- Header Section -->
+  <div class="fade-in-up">
+    <h1 class="page-title">MEN'S SHIRTS</h1>
+  </div>
+
+  <!-- Categories / Filters -->
+  <div class="flex flex-col gap-6 mb-10 fade-in-up delay-1">
+    <!-- Category Pills -->
+    <div class="flex gap-3 overflow-x-auto hide-scroll pb-2 items-center">
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-[#1C1C1C] text-white text-[0.6rem] tracking-[0.1em] font-bold border border-[#1C1C1C] uppercase hover:bg-black transition-colors">VIEW ALL</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">SHIRTS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">JEANS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">BASICS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">HOODIES & SWEATSHIRTS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">POLOS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">T-SHIRTS & TOPS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">TROUSERS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">JACKETS & COATS</a>
+      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">SWEATERS & CARDIGANS</a>
+    </div>
+
+    <!-- Filter Toggle -->
+    <div>
+      <button class="text-[0.65rem] tracking-[0.15em] font-bold uppercase text-[#1C1C1C] flex items-center gap-1 hover:opacity-70 transition-opacity">
+        FILTER <span class="text-xs font-normal ml-1">┼</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Product Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 fade-in-up delay-2">
+
+  <% if (products.length > 0) { %>
+
+    <% products.forEach(product => { %>
+
+      <% const variant = product.variants?.[0]; %>
+
+      <div class="product-card group">
+
+        <div class="product-img-wrap">
+
+          <button class="wishlist-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+
+          <img 
+            src="<%= variant?.images?.[0] %>" 
+            alt="<%= product.name %>"
+          />
+
+        </div>
+
+        <div class="product-info">
+          <h3 class="product-name"><%= product.name %></h3>
+          <p class="product-price">₹<%= variant?.price %></p>
+        </div>
+
+      </div>
+
+    <% }) %>
+
+  <% } else { %>
+
+    <p class="col-span-4 text-center text-gray-500 mt-10">
+      No products available
+    </p>
+
+  <% } %>
+
+</div>
+
+  <!-- Pagination -->
+  <div class="mt-20 mb-10 flex flex-col items-center justify-center fade-in-up delay-3">
+    <div class="flex items-center gap-3 text-[0.85rem] font-medium text-[#1C1C1C]">
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="w-8 h-8 flex items-center justify-center bg-[#1C1C1C] text-white">1</button>
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">2</button>
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">3</button>
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">4</button>
+      <span class="px-1 tracking-widest">...</span>
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">8</button>
+      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+    <p class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] mt-6 uppercase">SHOWING 12 OF 94 PRODUCTS</p>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-grid max-w-[1440px] mx-auto">
+    <div>
+      <a href="/" class="ft-logo">AJAX</a>
+      <p class="ft-desc">Modern luxury clothing for the conscious wardrobe. Minimal. Enduring. Refined.</p>
+      <div class="ft-socials">
+        <a href="#" class="ft-soc" title="Instagram">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="X">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.5 4.3 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="Pinterest">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.236 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.181-.78 1.172-4.97 1.172-4.97s-.299-.598-.299-1.482c0-1.388.806-2.428 1.808-2.428.852 0 1.265.64 1.265 1.408 0 .858-.546 2.14-.828 3.33-.236.995.499 1.806 1.476 1.806 1.771 0 3.135-1.867 3.135-4.56 0-2.385-1.715-4.052-4.163-4.052-2.838 0-4.503 2.128-4.503 4.328 0 .857.33 1.776.742 2.278a.3.3 0 0 1 .07.285c-.076.315-.245.993-.278 1.132-.045.183-.149.222-.344.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.22-5.19 6.22-1.013 0-1.966-.527-2.292-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <p class="ft-col-h">Shop</p>
+      <a href="#" class="ft-link">Men</a>
+      <a href="#" class="ft-link">Women</a>
+      <a href="#" class="ft-link">New Arrivals</a>
+      <a href="#" class="ft-link">Best Sellers</a>
+      <a href="#" class="ft-link">Sale</a>
+      <a href="#" class="ft-link">Gift Cards</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Help</p>
+      <a href="#" class="ft-link">Shipping & Returns</a>
+      <a href="#" class="ft-link">Size Guide</a>
+      <a href="#" class="ft-link">Care Guide</a>
+      <a href="#" class="ft-link">Contact Us</a>
+      <a href="#" class="ft-link">Track Order</a>
+      <a href="#" class="ft-link">FAQ</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Company</p>
+      <a href="#" class="ft-link">About AJAX</a>
+      <a href="#" class="ft-link">Sustainability</a>
+      <a href="#" class="ft-link">Careers</a>
+      <a href="#" class="ft-link">Press</a>
+      <a href="#" class="ft-link">Stores</a>
+      <a href="#" class="ft-link">Journal</a>
+    </div>
+  </div>
+  <div class="ft-bot max-w-[1440px] mx-auto">
+    <p class="ft-copy">© 2026 AJAX. All rights reserved.</p>
+    <div class="ft-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Mobile menu */
+document.getElementById('ham').addEventListener('click',()=>document.getElementById('mob-menu').classList.add('open'));
+document.getElementById('mob-close').addEventListener('click',()=>document.getElementById('mob-menu').classList.remove('open'));
+</script>
+
+</body>
+</html>
