@@ -80,27 +80,8 @@
 </head>
 <body class="flex min-h-screen">
 
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200 transition-transform lg:translate-x-0 lg:static lg:inset-0 -translate-x-full">
-    <div class="h-full flex flex-col pt-8 pb-6">
-      <div class="px-8 mb-12"><h1 class="text-2xl font-serif font-bold tracking-tighter uppercase text-luxury-text">AJAX</h1></div>
-      <nav class="flex-1 px-4 space-y-1">
-        <p class="text-[10px] font-bold text-stone-400 tracking-[0.2em] mb-4 px-4 uppercase">Management</p>
-        <a href="/admin/dashboard" class="sidebar-item">Dashboard</a>
-        <a href="/admin/orders" class="sidebar-item">Orders</a>
-        <a href="/admin/products" class="sidebar-item active">Products</a>
-        <a href="/admin/categories" class="sidebar-item">Categories</a>
-      </nav>
-      <div class="px-8 mt-auto pt-6 border-t border-stone-100 flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center overflow-hidden border border-stone-200">
-            <img src="https://ui-avatars.com/api/?name=Sebastian+Vane&background=F3F2EE&color=1C1C1C" class="w-full h-full object-cover">
-        </div>
-        <div class="flex-1 overflow-hidden">
-          <p class="text-xs font-bold truncate">Sebastian Vane</p>
-          <p class="text-[10px] text-stone-400 truncate tracking-tight uppercase">Head Curator</p>
-        </div>
-      </div>
-    </div>
-  </aside>
+  <!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/variants' }) %>
 
   <main class="flex-1 min-w-0 p-6 lg:p-12 pb-32">
     <nav class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-400 uppercase mb-8 animate-fade-in">

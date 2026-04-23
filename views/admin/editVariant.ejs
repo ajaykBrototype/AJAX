@@ -60,17 +60,8 @@
 </head>
 <body class="flex min-h-screen">
 
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200 lg:static lg:translate-x-0 -translate-x-full">
-    <div class="h-full flex flex-col pt-8 pb-6">
-      <div class="px-8 mb-12"><h1 class="text-2xl font-serif font-bold tracking-tighter uppercase text-luxury-text">AJAX</h1></div>
-      <nav class="flex-1 px-4 space-y-1">
-        <p class="text-[10px] font-bold text-stone-400 tracking-[0.2em] mb-4 px-4 uppercase">Management</p>
-        <a href="/admin/dashboard" class="sidebar-item">Dashboard</a>
-        <a href="/admin/products" class="sidebar-item active">Products</a>
-        <a href="/admin/categories" class="sidebar-item">Categories</a>
-      </nav>
-    </div>
-  </aside>
+  <!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/variants' }) %>
 
   <main class="flex-1 min-w-0 p-6 lg:p-12 pb-32">
     <nav class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-400 uppercase mb-8 animate-fade-in">

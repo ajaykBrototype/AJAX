@@ -53,55 +53,8 @@
 <body class="flex min-h-screen">
 
 <!-- ═══════════════════════════════════════ SIDEBAR ═══ -->
-<aside id="sidebar" class="w-64 bg-white border-r border-stone-200 flex flex-col flex-shrink-0 sticky top-0 h-screen overflow-y-auto">
-  <div class="p-6">
-    <!-- Logo -->
-    <div class="mb-10">
-      <h1 class="text-3xl font-extrabold tracking-tighter text-stone-900">AJAX</h1>
-    </div>
-
-    <!-- Nav -->
-    <nav class="space-y-1">
-      <p class="text-[10px] font-bold text-stone-400 tracking-[.2em] mb-4 uppercase px-4">Management</p>
-
-      <a href="/admin/dashboard" class="sidebar-item">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a href="/admin/orders" class="sidebar-item">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        Orders
-      </a>
-      <a href="/admin/products" class="sidebar-item active">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-        Products
-      </a>
-      <a href="/admin/categories" class="sidebar-item">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Categories
-      </a>
-      <a href="/admin/subcategories" class="sidebar-item">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3l-2 18"/></svg>
-        Subcategories
-      </a>
-      <a href="/admin/users" class="sidebar-item">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Customers
-      </a>
-    </nav>
-  </div>
-
-  <!-- Profile -->
-  <div class="mt-auto p-6 border-t border-stone-100 flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0">
-      <img src="https://ui-avatars.com/api/?name=Safwan&background=F4F4F5&color=1C1C1C" alt="Admin" class="w-full h-full object-cover">
-    </div>
-    <div class="flex-1 overflow-hidden">
-      <p class="text-sm font-bold truncate">Safwan</p>
-      <p class="text-[10px] text-stone-400 uppercase tracking-widest truncate">Administrator</p>
-    </div>
-  </div>
-</aside>
+<!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/products' }) %>
 
 <!-- ═══════════════════════════════════════ MAIN ════════ -->
 <main class="flex-1 min-w-0 pb-28">
