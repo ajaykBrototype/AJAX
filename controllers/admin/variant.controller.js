@@ -4,15 +4,34 @@ import Product from "../../models/admin/productModel.js";
 export const loadVariantPage = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    const search = req.query.search || "";
+    const status = req.query.status || "all";
+
+    let filter = { productId: id };
+
+    if (search) {
+      filter.$or = [
+        { sku: { $regex: search, $options: "i" } },
+        { color: { $regex: search, $options: "i" } }
+      ];
+    }
+    if (status === "active") {
+      filter.isActive = true;
+    } else if (status === "inactive") {
+      filter.isActive = false;
+    }
 
     const product = await Product.findById(id)
       .populate("category")
       .populate("subcategory");
-    const variants = await Variant.find({ productId: id });
+    const variants = await Variant.find(filter).sort({ isDefault: -1, createdAt: -1 });
     
     res.render("admin/variants", {
       product,
-      variants
+      variants,
+      search,
+      status
     });
 
   } catch (err) {
@@ -116,6 +135,33 @@ export const toggleVariantStatus = async (req, res) => {
   }
 };
 
+export const setDefaultVariant = async (req, res) => {
+  try {
+    const variantId = req.params.id;
+    const variant = await Variant.findById(variantId);
+    
+    if (!variant) {
+      return res.json({ success: false, message: "Variant not found" });
+    }
+
+    // Unset default for all variants of this product
+    await Variant.updateMany(
+      { productId: variant.productId },
+      { isDefault: false }
+    );
+
+    // Set the selected one as default
+    variant.isDefault = true;
+    await variant.save();
+
+    res.json({ success: true, message: "Default variant updated" });
+
+  } catch (err) {
+    console.error("Error setting default variant:", err);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
 export const deleteVariant = async (req, res) => {
   try {
     const deleted = await Variant.findByIdAndDelete(req.params.id);
@@ -128,5 +174,85 @@ export const deleteVariant = async (req, res) => {
 
   } catch (err) {
     res.json({ success: false });
+  }
+};
+
+export const loadEditVariantPage =async(req,res)=>{
+  try{
+     const variant = await Variant.findById(req.params.id);
+    if (!variant) {
+      return res.redirect("/admin/products");
+    }
+     const product = await Product.findById(variant.productId);
+    res.render("admin/editVariant", {
+      variant,
+      product
+    });
+  }catch(err){
+     console.log(err);
+    res.redirect("/admin/products");
+  }
+}
+
+export const updateVariant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { color, size, price, stock, sku } = req.body;
+
+    let existingImages = [];
+    if (req.body.existingImages) {
+      existingImages = JSON.parse(req.body.existingImages);
+    }
+
+
+    let newImages = [];
+    if (req.files && req.files.length > 0) {
+      newImages = req.files.map(file =>
+        file.path.replace(/\\/g, "/").replace("public", "")
+      );
+    }
+
+
+    const finalImages = [...existingImages, ...newImages];
+
+
+    if (finalImages.length < 3) {
+      return res.json({
+        success: false,
+        message: "Minimum 3 images required"
+      });
+    }
+
+    const updatedVariant = await Variant.findByIdAndUpdate(
+      id,
+      {
+        color,
+        size,
+        price,
+        stock,
+        sku,
+        images: finalImages
+      },
+      { new: true }
+    );
+
+    if (!updatedVariant) {
+      return res.json({
+        success: false,
+        message: "Variant not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      redirectUrl: `/admin/products/${updatedVariant.productId}/variants`
+    });
+
+  } catch (err) {
+    console.error("Update Variant Error:", err);
+    res.json({
+      success: false,
+      message: "Update failed"
+    });
   }
 };

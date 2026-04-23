@@ -233,14 +233,17 @@ input:checked + .slider:before {
     <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="relative w-full sm:w-96">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="Search SKU or attribute..." class="w-full pl-11 pr-4 py-3 bg-white border border-stone-200 text-sm focus:outline-none focus:border-stone-900 transition-all font-medium placeholder:text-stone-300">
+            <input  id="searchInput" type="text" value="<%= search || '' %>" placeholder="Search SKU or attribute..." class="w-full pl-11 pr-4 py-3 bg-white border border-stone-200 text-sm focus:outline-none focus:border-stone-900 transition-all font-medium placeholder:text-stone-300">
         </div>
         
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <button class="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-stone-200 text-[13px] font-semibold hover:bg-stone-50 transition-all min-w-[120px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg>
-                Filter
-            </button>
+           <select id="statusFilter" class="px-6 py-3 bg-white border border-stone-200 text-sm font-semibold">
+                <option value="all" <%= status === 'all' ? 'selected' : '' %>>All</option>
+                 <option value="active" <%= status === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+            </select>
+
+            
             <a href="/admin/products/<%= product._id %>/variants/add"
                    class="flex items-center justify-center gap-2 px-8 py-3 bg-stone-900 text-white text-[13px] font-semibold hover:bg-stone-800 transition-all shadow-md">
              Add Variant
@@ -273,7 +276,7 @@ input:checked + .slider:before {
               <% variants.forEach((variant, index) => { %>
               <tr data-id="<%= variant._id %>" class="group hover:bg-stone-50/50 transition-colors">
                  <td class="px-6 py-6">
-           <div class="radio-dot <%= index === 0 ? 'selected' : '' %>"></div>
+           <div class="radio-dot <%= variant.isDefault ? 'selected' : '' %>" onclick="handleDefaultToggle('<%= variant._id %>')"></div>
            </td>
 
         <td class="px-6 py-6 min-w-[280px]">
@@ -284,7 +287,7 @@ input:checked + .slider:before {
             <div>
               <div class="flex items-center gap-2">
                 <p class="text-sm font-bold text-stone-900"><%= variant.color %></p>
-                <% if(index === 0){ %>
+                <% if(variant.isDefault){ %>
                   <span class="text-[9px] font-bold px-1.5 py-0.5 bg-stone-100 text-stone-400 border border-stone-200 rounded-sm">DEFAULT</span>
                 <% } %>
               </div>

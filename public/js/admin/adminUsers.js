@@ -63,15 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
         statusFilter.addEventListener('change', runFilters);
     }
 
-    document.getElementById('logoutAdmin')?.addEventListener('click', () => {
-        ajaxConfirm({
-            title: "SIGN OUT?",
-            text: "Ending your administrator session in AJAX.",
-            confirmText: "SIGN OUT",
-            cancelText: "STAY",
-            icon: "question"
-        }).then((r) => {
-            if (r.isConfirmed) window.location.href = "/admin/logout";
-        });
+ 
+document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+    e.preventDefault(); // 🔥 VERY IMPORTANT
+
+    ajaxConfirm({
+        title: "SIGN OUT?",
+        text: "Ending your administrator session in AJAX.",
+        confirmText: "SIGN OUT",
+        cancelText: "STAY",
+        icon: "question"
+    }).then((r) => {
+        if (r.isConfirmed) {
+            window.location.href = "/admin/logout";
+        }
     });
+})
 });

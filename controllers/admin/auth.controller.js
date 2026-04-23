@@ -47,7 +47,15 @@ export const loginAdmin = async (req, res) => {
 // };
 
 export const logoutAdmin = (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed"
+      });
+    }
+
+    res.clearCookie("connect.sid");
     res.redirect("/admin/login");
   });
 };
