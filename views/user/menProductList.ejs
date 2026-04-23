@@ -241,17 +241,25 @@ footer{background:var(--warm);border-top:1px solid var(--bdr);padding:5rem 3rem 
   <div class="flex flex-col gap-6 mb-10 fade-in-up delay-1">
     <!-- Category Pills -->
     <div class="flex gap-3 overflow-x-auto hide-scroll pb-2 items-center">
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-[#1C1C1C] text-white text-[0.6rem] tracking-[0.1em] font-bold border border-[#1C1C1C] uppercase hover:bg-black transition-colors">VIEW ALL</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">SHIRTS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">JEANS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">BASICS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">HOODIES & SWEATSHIRTS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">POLOS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">T-SHIRTS & TOPS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">TROUSERS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">JACKETS & COATS</a>
-      <a href="#" class="whitespace-nowrap px-6 py-2.5 bg-transparent text-[#1C1C1C] text-[0.6rem] tracking-[0.1em] font-bold border border-[#EAE5DC] uppercase hover:border-[#1C1C1C] transition-colors">SWEATERS & CARDIGANS</a>
-    </div>
+
+  <!-- VIEW ALL -->
+  <a href="/menProductList"
+     class="px-6 py-2.5 border uppercase
+     <%= !selectedSub ? 'bg-black text-white' : '' %>">
+     VIEW ALL
+  </a>
+
+  <% subCategories.forEach(sub => { %>
+    <a href="/menProductList?sub=<%= sub._id %>"
+       class="px-6 py-2.5 border uppercase
+       <%= selectedSub == sub._id.toString() ? 'bg-black text-white' : '' %>">
+
+      <%= sub.name %>
+
+    </a>
+  <% }) %>
+
+</div>
 
     <!-- Filter Toggle -->
     <div>
@@ -306,20 +314,54 @@ footer{background:var(--warm);border-top:1px solid var(--bdr);padding:5rem 3rem 
 
 </div>
 
-  <!-- Pagination -->
-  <div class="mt-20 mb-10 flex flex-col items-center justify-center fade-in-up delay-3">
-    <div class="flex items-center gap-3 text-[0.85rem] font-medium text-[#1C1C1C]">
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <button class="w-8 h-8 flex items-center justify-center bg-[#1C1C1C] text-white">1</button>
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">2</button>
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">3</button>
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">4</button>
-      <span class="px-1 tracking-widest">...</span>
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">8</button>
-      <button class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
-    </div>
-    <p class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] mt-6 uppercase">SHOWING 12 OF 94 PRODUCTS</p>
+ <!-- Pagination -->
+<div class="mt-20 mb-10 flex flex-col items-center justify-center fade-in-up delay-3">
+
+  <div class="flex items-center gap-3 text-[0.85rem] font-medium text-[#1C1C1C]">
+
+    <!-- 🔙 PREV -->
+    <% if (currentPage > 1) { %>
+      <a href="?page=<%= currentPage - 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
+         class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </a>
+    <% } %>
+
+    <!-- 🔢 PAGE NUMBERS -->
+    <% for (let i = 1; i <= totalPages; i++) { %>
+
+      <a href="?page=<%= i %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
+         class="w-8 h-8 flex items-center justify-center transition-colors
+         <%= currentPage === i 
+            ? 'bg-[#1C1C1C] text-white' 
+            : 'hover:bg-[#EAE5DC]' %>">
+
+        <%= i %>
+
+      </a>
+
+    <% } %>
+
+    <!-- 🔜 NEXT -->
+    <% if (currentPage < totalPages) { %>
+      <a href="?page=<%= currentPage + 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
+         class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </a>
+    <% } %>
+
   </div>
+
+  <!-- 🔢 PRODUCT COUNT -->
+  <p class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] mt-6 uppercase">
+    SHOWING <%= products.length %> OF <%= totalProducts %> PRODUCTS
+  </p>
+
+</div>
 
 </main>
 
