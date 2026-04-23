@@ -6,9 +6,6 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-  <!-- ✅ TOAST -->
-  <script src="/js/utils/toast.js"></script>
 </head>
 
 <body class="min-h-screen flex overflow-hidden">
@@ -163,32 +160,40 @@ document.getElementById("verifyBtn").addEventListener("click", verifyOtp);
 
 // 🔁 TIMER
 let time = 60;
+let timerInterval = null;
 const timerEl = document.getElementById("timer");
 const resendBtn = document.getElementById("resendBtn");
 
-const interval = setInterval(() => {
-  time--;
+function startTimer() {
+  time = 60;
+  resendBtn.classList.add("hidden");
   timerEl.innerText = `Resend code in ${time}s`;
 
-  if (time <= 0) {
-    clearInterval(interval);
-    resendBtn.classList.remove("hidden");
-    timerEl.innerText = "Didn't receive code?";
-  }
-}, 1000);
+  if (timerInterval) clearInterval(timerInterval);
+  
+  timerInterval = setInterval(() => {
+    time--;
+    timerEl.innerText = `Resend code in ${time}s`;
+
+    if (time <= 0) {
+      clearInterval(timerInterval);
+      resendBtn.classList.remove("hidden");
+      timerEl.innerText = "Didn't receive code?";
+    }
+  }, 1000);
+}
+
+// Initial start
+startTimer();
 
 // 🔁 RESEND
 resendBtn.addEventListener("click", async () => {
   try {
-    await axios.post("/profile/email/resend-otp");
-
-    showToast("success", "OTP resent successfully");
-
-    time = 60;
-    resendBtn.classList.add("hidden");
-
+    const res = await axios.post("/profile/email/resend-otp");
+    showToast("success", res.data.message || "OTP resent successfully");
+    startTimer();
   } catch (err) {
-    showToast("error", "Failed to resend OTP");
+    showToast("error", err.response?.data?.message || "Failed to resend OTP");
   }
 });
 
@@ -206,7 +211,9 @@ function clearOtpError() {
 
 inputs[0].focus();
 </script>
-<!-- <script src="/js/user/otp.js"></script> -->
+
+<%- include('../partials/toast') %>
+<script src="/js/utils/toast.js"></script>
 
 </body>
 </html>

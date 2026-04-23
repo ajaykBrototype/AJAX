@@ -9,7 +9,6 @@ export const loadMenPage = async (req, res) => {
     const limit = 8; // products per page
     const skip = (page - 1) * limit;
 
-    // ✅ Get category
     const menCategory = await Category.findOne({ name: "Men" });
 
     if (!menCategory) {
@@ -21,8 +20,6 @@ export const loadMenPage = async (req, res) => {
         totalPages: 1
       });
     }
-
-    // ✅ Get subcategories
     const subCategories = await SubCategory.find({
       category: menCategory._id,
       isActive: true
@@ -33,7 +30,6 @@ export const loadMenPage = async (req, res) => {
       category: menCategory._id
     };
 
-    // ✅ Subcategory filter
     if (sub) {
       filter.subcategory = sub;
     } else {
@@ -41,11 +37,9 @@ export const loadMenPage = async (req, res) => {
       filter.subcategory = { $in: subIds };
     }
 
-    // ✅ Total count for pagination
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    // ✅ Get paginated products
     const products = await Product.find(filter)
       .skip(skip)
       .limit(limit)
@@ -73,6 +67,35 @@ export const loadMenPage = async (req, res) => {
 
   } catch (err) {
     console.log(err);
+    res.redirect("/home");
+  }
+};
+
+export const loadProductDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id).lean();
+
+    if (!product) {
+      return res.redirect("/home");
+    }
+    const variants = await Variant.find({
+      productId: id,
+      isActive: true
+    }).lean();
+
+    const defaultVariant =
+      variants.find(v => v.isDefault) || variants[0];
+
+    res.render("user/productDetails", {
+      product,
+      variants,
+      variant: defaultVariant
+    });
+
+  } catch (err) {
+    console.log("PRODUCT DETAILS ERROR:", err);
     res.redirect("/home");
   }
 };

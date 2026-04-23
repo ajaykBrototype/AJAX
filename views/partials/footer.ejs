@@ -1,84 +1,61 @@
-<style>
-/* FOOTER */
-footer{background:var(--warm);border-top:1px solid var(--bdr);padding:4rem 3rem 2rem;}
-@media(max-width:640px){footer{padding:3.5rem 1.5rem 2rem}}
-.ft-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3.5rem}
-@media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem 2.5rem}}
-@media(max-width:480px){.ft-grid{grid-template-columns:1fr 1fr;gap:1.75rem 1.25rem}}
-.ft-logo{font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:.35em;color:var(--dark);margin-bottom:.9rem;display:block;text-decoration:none}
-.ft-desc{font-size:.7rem;font-weight:300;line-height:1.9;color:var(--stone);max-width:195px;margin-bottom:1.4rem}
-.ft-socials{display:flex;gap:.75rem}
-.ft-soc{width:30px;height:30px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,background .3s;text-decoration:none;color:var(--stone)}
-.ft-soc:hover{border-color:var(--dark);background:var(--dark);color:#fff}
-.ft-col-h{font-size:.57rem;letter-spacing:.27em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:1.15rem}
-.ft-link{display:block;text-decoration:none;font-size:.73rem;font-weight:300;color:var(--stone);margin-bottom:.6rem;letter-spacing:.02em;transition:color .25s}
-.ft-link:hover{color:var(--dark)}
-.ft-bot{border-top:1px solid var(--bdr);padding-top:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
-.ft-copy{font-size:.58rem;color:var(--stone);letter-spacing:.07em}
-.ft-legal{display:flex;gap:1.4rem}
-.ft-legal a{font-size:.58rem;color:var(--stone);text-decoration:none;letter-spacing:.05em;transition:color .2s}
-.ft-legal a:hover{color:var(--dark)}
-</style>
 
 <footer>
-  <div style="max-width:1320px;margin:0 auto;">
-    <div class="ft-grid">
-      <div>
-        <a href="/" class="ft-logo">AJAX</a>
-        <p class="ft-desc">Modern luxury clothing for the conscious wardrobe. Minimal. Enduring. Refined.</p>
-        <div class="ft-socials">
-          <a href="#" class="ft-soc" title="Instagram">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/>
-            </svg>
-          </a>
-          <a href="#" class="ft-soc" title="X">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.5 4.3 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
-            </svg>
-          </a>
-          <a href="#" class="ft-soc" title="Pinterest">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.236 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.181-.78 1.172-4.97 1.172-4.97s-.299-.598-.299-1.482c0-1.388.806-2.428 1.808-2.428.852 0 1.265.64 1.265 1.408 0 .858-.546 2.14-.828 3.33-.236.995.499 1.806 1.476 1.806 1.771 0 3.135-1.867 3.135-4.56 0-2.385-1.715-4.052-4.163-4.052-2.838 0-4.503 2.128-4.503 4.328 0 .857.33 1.776.742 2.278a.3.3 0 0 1 .07.285c-.076.315-.245.993-.278 1.132-.045.183-.149.222-.344.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.22-5.19 6.22-1.013 0-1.966-.527-2.292-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-      <div>
-        <p class="ft-col-h">Shop</p>
-        <a href="/menProductList" class="ft-link">Men</a>
-        <a href="#" class="ft-link">Women</a>
-        <a href="#" class="ft-link">New Arrivals</a>
-        <a href="#" class="ft-link">Best Sellers</a>
-        <a href="#" class="ft-link">Sale</a>
-        <a href="#" class="ft-link">Gift Cards</a>
-      </div>
-      <div>
-        <p class="ft-col-h">Help</p>
-        <a href="#" class="ft-link">Shipping & Returns</a>
-        <a href="#" class="ft-link">Size Guide</a>
-        <a href="#" class="ft-link">Care Guide</a>
-        <a href="#" class="ft-link">Contact Us</a>
-        <a href="#" class="ft-link">Track Order</a>
-        <a href="#" class="ft-link">FAQ</a>
-      </div>
-      <div>
-        <p class="ft-col-h">Company</p>
-        <a href="#" class="ft-link">About AJAX</a>
-        <a href="#" class="ft-link">Sustainability</a>
-        <a href="#" class="ft-link">Careers</a>
-        <a href="#" class="ft-link">Press</a>
-        <a href="#" class="ft-link">Stores</a>
-        <a href="#" class="ft-link">Journal</a>
+  <div class="ft-grid">
+    <div>
+      <a href="/" class="ft-logo">AJAX</a>
+      <p class="ft-desc">Modern luxury clothing for the conscious wardrobe. Minimal. Enduring. Refined.</p>
+      <div class="ft-socials">
+        <a href="#" class="ft-soc" title="Instagram">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="X">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.5 4.3 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+          </svg>
+        </a>
+        <a href="#" class="ft-soc" title="Pinterest">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.236 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.181-.78 1.172-4.97 1.172-4.97s-.299-.598-.299-1.482c0-1.388.806-2.428 1.808-2.428.852 0 1.265.64 1.265 1.408 0 .858-.546 2.14-.828 3.33-.236.995.499 1.806 1.476 1.806 1.771 0 3.135-1.867 3.135-4.56 0-2.385-1.715-4.052-4.163-4.052-2.838 0-4.503 2.128-4.503 4.328 0 .857.33 1.776.742 2.278a.3.3 0 0 1 .07.285c-.076.315-.245.993-.278 1.132-.045.183-.149.222-.344.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.22-5.19 6.22-1.013 0-1.966-.527-2.292-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </a>
       </div>
     </div>
-    <div class="ft-bot">
-      <p class="ft-copy">© 2026 AJAX. All rights reserved.</p>
-      <div class="ft-legal">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Use</a>
-        <a href="#">Cookies</a>
-      </div>
+    <div>
+      <p class="ft-col-h">Shop</p>
+      <a href="/menProductList" class="ft-link">Men</a>
+      <a href="#" class="ft-link">Women</a>
+      <a href="#" class="ft-link">New Arrivals</a>
+      <a href="#" class="ft-link">Best Sellers</a>
+      <a href="#" class="ft-link">Sale</a>
+      <a href="#" class="ft-link">Gift Cards</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Help</p>
+      <a href="#" class="ft-link">Shipping & Returns</a>
+      <a href="#" class="ft-link">Size Guide</a>
+      <a href="#" class="ft-link">Care Guide</a>
+      <a href="#" class="ft-link">Contact Us</a>
+      <a href="#" class="ft-link">Track Order</a>
+      <a href="#" class="ft-link">FAQ</a>
+    </div>
+    <div>
+      <p class="ft-col-h">Company</p>
+      <a href="#" class="ft-link">About AJAX</a>
+      <a href="#" class="ft-link">Sustainability</a>
+      <a href="#" class="ft-link">Careers</a>
+      <a href="#" class="ft-link">Press</a>
+      <a href="#" class="ft-link">Stores</a>
+      <a href="#" class="ft-link">Journal</a>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <p class="ft-copy">© 2026 AJAX. All rights reserved.</p>
+    <div class="ft-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Cookies</a>
     </div>
   </div>
 </footer>

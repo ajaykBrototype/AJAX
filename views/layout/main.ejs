@@ -1,0 +1,95 @@
+<%--
+  BASE LAYOUT — views/layout/main.ejs
+  ─────────────────────────────────────────────────────────
+  This file documents the standard page structure for all
+  user-facing pages. EJS does not natively support template
+  inheritance, so each page uses include() to pull in shared
+  partials rather than extending this file directly.
+
+  HOW TO STRUCTURE EVERY PAGE
+  ─────────────────────────────────────────────────────────
+
+  1. SOLID NAVBAR PAGES (profile, address, menProductList…)
+  ──────────────────────────────────────────────────────────
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Page Title — AJAX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } } }</script>
+
+    <%- include('../partials/navbar-styles') %>  ← shared navbar CSS
+    <%- include('../partials/footer-styles') %>  ← shared footer CSS (optional)
+
+    <style>
+      /* PAGE-SPECIFIC styles only */
+    </style>
+  </head>
+  <body>
+
+    <%- include('../partials/navbar', { hasSidebarToggle: true }) %>  ← hasSidebarToggle if page has mobile drawer
+    <%- include('../partials/sidebar-drawer', { activePage: 'profile' }) %> ← Mobile sidebar drawer
+
+    <div style="padding-top:65px; min-height:100vh;">
+      <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
+
+        <%- include('../partials/sidebar', { activePage: 'profile' }) %> ← Desktop sidebar
+
+        <main style="flex:1;padding:3.5rem 3rem;min-width:0;">
+          <!-- PAGE CONTENT HERE -->
+        </main>
+
+      </div>
+    </div>
+
+    <%- include('../partials/footer') %>          ← shared footer HTML
+    <%- include('../partials/toast') %>
+    <script src="/js/utils/toast.js"></script>
+
+  </body>
+  </html>
+
+
+  2. HERO NAVBAR PAGES (home)
+  ──────────────────────────────────────────────────────────
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    ...fonts/tailwind same as above...
+
+    <%- include('../partials/navbar-hero-styles') %>  ← transparent navbar CSS
+    <%- include('../partials/footer-styles') %>
+
+    <style>
+      /* PAGE-SPECIFIC styles only */
+    </style>
+  </head>
+  <body>
+
+    <%- include('../partials/navbar-hero') %>          ← hero navbar HTML + JS
+
+    <!-- PAGE CONTENT HERE -->
+
+    <%- include('../partials/footer') %>
+  </body>
+  </html>
+
+
+  AVAILABLE PARTIALS
+  ─────────────────────────────────────────────────────────
+  views/partials/navbar.ejs            → solid fixed navbar (dark text, always visible)
+  views/partials/navbar-hero.ejs       → transparent navbar (white text → dark on scroll)
+  views/partials/navbar-styles.ejs     → CSS for solid navbar (include in <head>)
+  views/partials/navbar-hero-styles.ejs→ CSS for hero navbar (include in <head>)
+  views/partials/sidebar.ejs           → desktop account navigation (pass {activePage})
+  views/partials/sidebar-drawer.ejs    → mobile account navigation drawer (pass {activePage})
+  views/partials/footer.ejs            → global footer HTML
+  views/partials/footer-styles.ejs     → global footer CSS (include in <head>)
+  views/partials/toast.ejs             → global toast notification system
+-%>

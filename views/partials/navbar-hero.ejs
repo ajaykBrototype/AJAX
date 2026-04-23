@@ -1,0 +1,123 @@
+
+
+<!-- MOBILE MENU -->
+<div id="mob-menu">
+  <button id="mob-close">✕</button>
+  <a href="/" class="mob-link">Home</a>
+  <a href="/menProductList" class="mob-link">Men</a>
+  <a href="#" class="mob-link">Women</a>
+  <a href="#" class="mob-link">New Arrivals</a>
+  <a href="#" class="mob-link">Journal</a>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <a href="/" class="logo" id="logo" style="color:#fff">AJAX</a>
+
+    <div class="hidden md:flex items-center gap-10" id="nav-links">
+      <a href="/" class="nav-link" data-nav style="color:#fff">HOME</a>
+      <a href="/menProductList" class="nav-link" data-nav style="color:#fff">MEN</a>
+      <a href="#" class="nav-link" data-nav style="color:#fff">WOMEN</a>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button class="nav-icon" title="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Wishlist">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="nav-icon hidden md:flex" title="Cart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+      </button>
+      <button id="accountBtn" class="nav-icon hidden md:flex" title="Account">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </button>
+      <div id="accountDropdown" class="absolute right-0 mt-4 w-60 bg-white border border-[var(--bdr)] shadow-[0_12px_48px_rgba(28,28,28,0.08)] opacity-0 invisible translate-y-[-8px] transition-all duration-300 z-50 py-2">
+        <div class="px-5 py-4 border-b border-[var(--bdr)] mb-1">
+          <p class="text-[0.52rem] tracking-[0.25em] uppercase text-[var(--stone)] mb-1.5">Quick Access</p>
+          <p class="font-serif text-[1.15rem] text-[var(--dark)] leading-tight">My Account</p>
+        </div>
+        <a href="/profile" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Overview
+        </a>
+        <a href="/address" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Addresses
+        </a>
+        <a href="/orders" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          My Orders
+        </a>
+        <div class="h-px bg-[var(--bdr)] my-1.5"></div>
+        <button id="logoutBtn" style="all:unset; cursor:pointer; width:100%;">
+          <div class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[#B04040] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
+            Sign out
+          </div>
+        </button>
+      </div>
+      <button id="ham" class="nav-icon md:hidden">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+          <line x1="0" y1="1"  x2="20" y2="1"  stroke="#fff" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="7"  x2="20" y2="7"  stroke="#fff" stroke-width="1.5" class="hl"/>
+          <line x1="0" y1="13" x2="20" y2="13" stroke="#fff" stroke-width="1.5" class="hl"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script>
+/* Navbar: scroll color transition */
+const nb  = document.getElementById('navbar');
+const lg  = document.getElementById('logo');
+const navs = document.querySelectorAll('[data-nav]');
+const svgs = document.querySelectorAll('.ns');
+const hls  = document.querySelectorAll('.hl');
+
+function setNav(dark) {
+  const c = dark ? '#1C1C1C' : '#fff';
+  lg.style.color = c;
+  navs.forEach(e => e.style.color = c);
+  svgs.forEach(s => s.setAttribute('stroke', c));
+  hls.forEach(l  => l.setAttribute('stroke', c));
+  if (dark) { nb.classList.add('scrolled'); }
+  else      { nb.classList.remove('scrolled'); }
+}
+window.addEventListener('scroll', () => setNav(window.scrollY > 70), { passive: true });
+setNav(false);
+
+/* Navbar: Mobile menu */
+document.getElementById('ham').addEventListener('click', () => document.getElementById('mob-menu').classList.add('open'));
+document.getElementById('mob-close').addEventListener('click', () => document.getElementById('mob-menu').classList.remove('open'));
+
+/* Navbar: Account Dropdown */
+const accBtn = document.getElementById('accountBtn');
+const accDrop = document.getElementById('accountDropdown');
+if (accBtn && accDrop) {
+  accBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    accDrop.classList.toggle('opacity-0');
+    accDrop.classList.toggle('invisible');
+    accDrop.classList.toggle('translate-y-[-8px]');
+  });
+  document.addEventListener('click', e => {
+    if (!accDrop.contains(e.target) && !accBtn.contains(e.target)) {
+      accDrop.classList.add('opacity-0', 'invisible', 'translate-y-[-8px]');
+    }
+  });
+}
+</script>

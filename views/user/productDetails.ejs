@@ -6,9 +6,15 @@
     <title><%= (typeof product !== 'undefined' && product) ? product.name + ' — AJAX' : 'Sky Linen Shirt — AJAX' %></title>
     
     <!-- Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Serif:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { serif: ['Playfair Display','serif'], sans: ['DM Sans','sans-serif'] } } }
+        }
+    </script>
     
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,137 +23,69 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
-    <style>
+    <%- include('../partials/navbar-styles') %>
+<%- include('../partials/footer-styles') %>
+<style>
+        
         :root {
-            --bg-color: #F9F9F8;
-            --surface-color: #F4F4F3;
-            --text-primary: #1A1C1C;
-            --text-secondary: #474747;
-            --text-muted: #A1A1AA;
-            --border-color: #E4E4E7;
+            --bg-color: #FFFFFF; 
+            --surface-color: #F9F9F8;
+            --text-primary: #121212;
+            --text-secondary: #4A4A4A;
+            --text-muted: #8E8E8E;
+            --border-color: rgba(0,0,0,0.06);
             --accent-color: #000000;
-            --font-main: 'Inter', sans-serif;
-            --font-serif: 'Noto Serif', serif;
+            --font-main: 'DM Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-main);
-            overflow-x: hidden;
-            line-height: 1.5;
-        }
-
-        /* --- Header --- */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 80px;
-            background: rgba(249, 249, 248, 0.8);
-            backdrop-filter: blur(12px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            padding: 0 48px;
-            border-bottom: 1px solid rgba(228, 228, 231, 0.1);
-        }
-
-        .nav-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-family: var(--font-serif);
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: 7.2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: var(--text-primary);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-link {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: opacity 0.3s;
-        }
-
-        .nav-link.secondary {
-            font-weight: 400;
-            color: var(--text-secondary);
-        }
-
-        .nav-link:hover {
-            opacity: 0.6;
-        }
-
-        .nav-icons {
-            display: flex;
-            gap: 24px;
-            align-items: center;
-        }
-
-        .nav-icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-        }
-
+        
         /* --- Main Layout --- */
         main {
-            padding-top: 176px; /* 80px header + 96px padding as per Figma */
-            max-width: 1280px;
+            padding-top: 140px; 
+            max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            gap: 48px;
-            min-height: 1024px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 80px;
+            padding-left: 40px;
+            padding-right: 40px;
+            align-items: start;
         }
 
         /* --- Product Images Section --- */
         .product-images {
-            display: flex;
-            gap: 16px;
-            flex: 1;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .main-image-column {
+            min-width: 0;
         }
 
         .thumbnail-strip {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            width: 96px;
+            width: 80px;
+            flex-shrink: 0;
         }
 
         .thumbnail {
-            width: 96px;
-            height: 128px;
+            width: 70px;
+            height: 94px;
             background: var(--surface-color);
             cursor: pointer;
             overflow: hidden;
-            transition: transform 0.3s;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+        }
+
+        .thumbnail.active-thumb {
+            border-color: var(--accent-color);
         }
 
         .thumbnail:hover {
@@ -161,11 +99,17 @@
         }
 
         .main-image-container {
-            position: relative;
-            width: 545.33px;
-            height: 727.11px;
+            width: 100%;
+            aspect-ratio: 0.82;
             background: var(--surface-color);
             overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.02);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .main-image-container:hover {
+            transform: scale(1.01);
         }
 
         .main-image {
@@ -196,9 +140,11 @@
 
         /* --- Product Details Right Panel --- */
         .product-details {
-            flex: 0 0 446.67px;
             display: flex;
             flex-direction: column;
+            padding-top: 10px;
+            position: sticky;
+            top: 140px;
         }
 
         .editorial-label {
@@ -211,18 +157,20 @@
 
         .product-title {
             font-family: var(--font-serif);
-            font-size: 60px;
-            font-weight: 700;
-            line-height: 1;
-            letter-spacing: -1.5px;
-            margin-bottom: 16px;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            color: var(--text-primary);
         }
 
         .product-price {
-            font-size: 24px;
-            font-weight: 300;
-            color: rgba(26, 28, 28, 0.8);
-            margin-bottom: 40px;
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
         }
 
         .short-desc {
@@ -232,15 +180,16 @@
         }
 
         .long-desc {
-            font-size: 16px;
-            line-height: 1.6;
-            color: rgba(26, 28, 28, 0.7);
-            margin-bottom: 48px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-weight: 300;
         }
 
         /* Option Selectors */
         .option-group {
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .option-label {
@@ -260,10 +209,12 @@
         }
 
         .swatch {
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
             position: relative;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
         }
 
         .swatch.active::after {
@@ -274,6 +225,7 @@
             right: -4px;
             bottom: -4px;
             border: 1px solid var(--accent-color);
+            border-radius: 50%;
             padding: 4px;
         }
 
@@ -284,12 +236,14 @@
         }
 
         .size-btn {
-            height: 46px;
+            height: 52px;
             border: 1px solid var(--border-color);
             background: none;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
-            transition: all 0.3s;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--text-secondary);
         }
 
         .size-btn:hover {
@@ -315,9 +269,11 @@
             display: flex;
             align-items: center;
             border: 1px solid var(--border-color);
-            width: 128px;
-            height: 42px;
+            width: 120px;
+            height: 48px;
             margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .qty-btn {
@@ -347,49 +303,60 @@
         }
 
         .btn-primary {
-            height: 57px;
+            height: 54px;
             background: var(--accent-color);
             color: #ffffff;
             border: none;
             font-size: 11px;
-            letter-spacing: 2.2px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: opacity 0.3s;
+            gap: 12px;
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary:hover {
+            background: #222;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
         .btn-secondary {
-            height: 59px;
-            background: none;
-            border: 1px solid var(--accent-color);
+            height: 54px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             color: var(--accent-color);
             font-size: 11px;
-            letter-spacing: 2.2px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 4px;
             transition: all 0.3s;
         }
 
         .btn-secondary:hover {
-            background: var(--accent-color);
-            color: #ffffff;
+            border-color: var(--accent-color);
+            background: #fafafa;
         }
 
         /* Accordions */
         .accordions {
-            margin-top: 64px;
+            margin-top: 40px;
+            width: 100%;
         }
 
         .accordion-item {
-            border-top: 1px solid #F4F4F5;
-            padding: 32px 0;
+            border-top: 1px solid var(--border-color);
+            padding: 24px 0;
         }
 
         .accordion-header {
@@ -401,16 +368,19 @@
         }
 
         .accordion-title {
-            font-size: 11px;
-            letter-spacing: 1.1px;
+            font-size: 12px;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            font-weight: 400;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .accordion-content {
             font-size: 14px;
-            line-height: 1.6;
-            color: rgba(26, 28, 28, 0.7);
+            line-height: 1.8;
+            color: var(--text-secondary);
+            padding-bottom: 24px;
+            max-width: 90%;
         }
 
         .accordion-list {
@@ -463,6 +433,7 @@
             background: #ffffff;
             margin-bottom: 24px;
             overflow: hidden;
+            border-radius: 8px;
         }
 
         .card-img img {
@@ -533,8 +504,13 @@
 
         .stars-row {
             display: flex;
+            align-items: center;
             gap: 4px;
             margin-bottom: 4px;
+        }
+
+        .stars-row svg {
+            display: block;
         }
 
         .rating-count {
@@ -596,6 +572,10 @@
 
         .review-stars {
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #000;
         }
 
         .review-title {
@@ -703,66 +683,83 @@
 
         /* --- Animations --- */
         .reveal {
-            opacity: 0;
-            transform: translateY(30px);
+            /* Removed initial hidden state for reliability */
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <div class="nav-container">
-            <a href="/" class="logo">AJAX</a>
-            <nav class="nav-links">
-                <a href="/men" class="nav-link">Men</a>
-                <a href="/women" class="nav-link secondary">Women</a>
-                <a href="/editorial" class="nav-link secondary">Editorial</a>
-            </nav>
-            <div class="nav-icons">
-                <button class="nav-icon-btn"><i data-lucide="search" size="18"></i></button>
-                <button class="nav-icon-btn"><i data-lucide="user" size="18"></i></button>
-                <button class="nav-icon-btn"><i data-lucide="shopping-bag" size="18"></i></button>
-            </div>
-        </div>
-    </header>
+    <%- include('../partials/navbar') %>
 
     <main>
         <section class="product-images">
-            <div class="thumbnail-strip reveal">
-                <div class="thumbnail"><img src="/linen_fabric_texture_1776954165604.png" alt="Detail"></div>
-                <div class="thumbnail"><img src="/premium_sky_blue_linen_shirt_1776953916501.png" alt="Back View"></div>
-                <div class="thumbnail"><img src="/linen_shirt_hanger_1776954277351.png" alt="Lifestyle"></div>
+            <div class="thumbnail-strip">
+                <% if (variant && variant.images && variant.images.length > 0) { %>
+                    <% variant.images.forEach((img, idx) => { %>
+                        <div class="thumbnail <%= idx === 0 ? 'active-thumb' : '' %>" onclick="switchImage('<%= img %>', this)">
+                            <img src="<%= img %>" alt="View <%= idx + 1 %>">
+                        </div>
+                    <% }) %>
+                <% } %>
             </div>
-            <div class="main-image-container reveal" style="transition-delay: 0.1s;">
-                <img src="/premium_sky_blue_linen_shirt_1776953916501.png" alt="Sky Linen Shirt" class="main-image">
-                <button class="wishlist-toggle">
-                    <i data-lucide="heart" size="19"></i>
-                </button>
+            <div class="main-image-column">
+                <div class="main-image-container">
+                    <img id="mainImage" src="<%= variant?.images?.[0] %>" alt="Product Image" class="main-image" style="opacity: 1 !important;">
+                    <button class="wishlist-toggle">
+                        <i data-lucide="heart" size="19"></i>
+                    </button>
+                </div>
+                
+                <!-- Accordions strictly below the image -->
+                <div class="accordions reveal" style="transition-delay: 0.6s; margin-top: 40px; border-top: 1px solid var(--border-color);">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span class="accordion-title">Material</span>
+                            <i data-lucide="plus" size="14"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="accordion-list">
+                                <li><div class="bullet"></div> 100% European Flax Linen</li>
+                                <li><div class="bullet"></div> Pre-washed for extra softness</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span class="accordion-title">Care guide</span>
+                            <i data-lucide="plus" size="14"></i>
+                        </div>
+                        <div class="accordion-content">
+                            To maintain the integrity of the linen fibers, machine wash cold with like colors. Do not bleach. 
+                            Hang to dry or tumble dry low.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section class="product-details">
             <div class="reveal" style="transition-delay: 0.2s;">
                 <p class="editorial-label">Summer Editorial 24'</p>
-                <h1 class="product-title"><%= (typeof product !== 'undefined' && product) ? product.name : 'Sky Linen Shirt' %></h1>
-                <p class="product-price">$<%= (typeof product !== 'undefined' && product) ? product.price : '89.00' %></p>
+                <h1 class="product-title"><%= product.name %></h1>
+                <p class="product-price">₹<%= variant?.price %></p>
             </div>
 
             <div class="reveal" style="transition-delay: 0.3s;">
-                <p class="short-desc">"Lightweight comfort meets effortless style"</p>
+                <!-- <p class="short-desc">"Lightweight comfort meets effortless style"</p> -->
                 <p class="long-desc">
-                    Our signature Sky Linen Shirt is crafted from the finest European flax. 
-                    Designed for a relaxed, breathable fit that transitions seamlessly from seaside lunches to sunset soirées.
+                    <%= product.description %>
                 </p>
             </div>
 
             <div class="option-group reveal" style="transition-delay: 0.4s;">
                 <div class="option-label">Color — Sky Blue</div>
-                <div class="swatches">
-                    <div class="swatch active" style="background: #BED4E7;"></div>
-                    <div class="swatch" style="background: #FFFFFF; border: 1px solid #eee;"></div>
-                    <div class="swatch" style="background: #556B2F;"></div>
+               <div class="swatches">
+                   <% variants.forEach(v => { %>
+                <div class="swatch <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>"
+                    style="background:<%= v.color %>">
                 </div>
+               <% }) %>
+             </div>
             </div>
 
             <div class="option-group reveal" style="transition-delay: 0.5s;">
@@ -791,36 +788,12 @@
                     <button class="btn-secondary">Wishlist</button>
                 </div>
 
-                <div style="background: #F4F4F3; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
-                    <i data-lucide="truck" size="16" color="#A1A1AA"></i>
-                    <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #52525B;">Complimentary standard shipping on all orders</span>
+                <div style="background: #f8f8f8; padding: 20px; border-radius: 8px; display: flex; align-items: center; gap: 14px; margin-bottom: 32px; border: 1px solid #f0f0f0;">
+                    <i data-lucide="truck" size="18" stroke-width="1.5" color="#666"></i>
+                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #444; font-weight: 500;">Complimentary standard shipping on all orders</span>
                 </div>
             </div>
 
-            <div class="accordions reveal" style="transition-delay: 0.7s;">
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <span class="accordion-title">Material</span>
-                        <i data-lucide="plus" size="14"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <ul class="accordion-list">
-                            <li><div class="bullet"></div> 100% European Flax Linen</li>
-                            <li><div class="bullet"></div> Pre-washed for extra softness</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <span class="accordion-title">Care guide</span>
-                        <i data-lucide="plus" size="14"></i>
-                    </div>
-                    <div class="accordion-content">
-                        To maintain the integrity of the linen fibers, machine wash cold with like colors. Do not bleach. 
-                        Hang to dry or tumble dry low.
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
@@ -950,61 +923,51 @@
         </div>
     </section>
 
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-brand">
-                <h2>AJAX</h2>
-                <p>Redefining modern luxury through conscious craftsmanship and timeless design. Based in Stockholm, inspired by the world.</p>
-                <div style="display: flex; gap: 24px;">
-                    <a href="#" class="nav-link" style="font-size: 10px;">Instagram</a>
-                    <a href="#" class="nav-link" style="font-size: 10px;">Pinterest</a>
-                    <a href="#" class="nav-link" style="font-size: 10px;">Twitter</a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <h4>Support</h4>
-                <ul class="footer-nav">
-                    <li><a href="#">Shipping & Returns</a></li>
-                    <li><a href="#">Care Guide</a></li>
-                    <li><a href="#">Size Chart</a></li>
-                    <li><a href="#">FAQ</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Newsletter</h4>
-                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">Join our editorial community for early access and seasonal updates.</p>
-                <div style="position: relative;">
-                    <input type="email" placeholder="email@example.com" class="newsletter-input">
-                    <button style="position: absolute; right: 0; bottom: 8px; background: none; border: none; cursor: pointer;">
-                        <i data-lucide="arrow-right" size="15"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div>© 2024 AJAX Official. All Rights Reserved.</div>
-            <div style="display: flex; gap: 32px;">
-                <a href="#" style="text-decoration: none; color: inherit;">Privacy Policy</a>
-                <a href="#" style="text-decoration: none; color: inherit;">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
+    <%- include('../partials/footer') %>
 
     <script>
         // Initialize Icons
         lucide.createIcons();
 
-        // Reveal Animations
-        window.addEventListener('DOMContentLoaded', () => {
+        // Luxury Image Load Animations
+        window.addEventListener('load', () => {
+            // Main Image Zoom Out effect
+            if (document.querySelector('.main-image')) {
+                gsap.from('.main-image', {
+                    scale: 1.1,
+                    duration: 1.5,
+                    ease: "power2.out"
+                });
+            }
+
+            // Simple reveal for elements that might still have the class
             gsap.to('.reveal', {
                 opacity: 1,
                 y: 0,
-                duration: 1.2,
+                duration: 0.8,
                 stagger: 0.1,
-                ease: "power4.out",
-                delay: 0.2
+                ease: "power2.out"
             });
         });
+
+        // Image Switching Logic
+        function switchImage(src, thumb) {
+            const mainImg = document.getElementById('mainImage');
+            
+            // Add fade-out/in effect
+            gsap.to(mainImg, {
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => {
+                    mainImg.src = src;
+                    gsap.to(mainImg, { opacity: 1, duration: 0.4 });
+                }
+            });
+
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active-thumb'));
+            thumb.classList.add('active-thumb');
+        }
 
         // Simple Quantity Stepper Logic
         const qtyVal = document.querySelector('.qty-val');

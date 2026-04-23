@@ -76,7 +76,7 @@ function getOtp() {
 
 
 let interval = null;
-let time = 30;
+let time = 60;
 
 function startTimer() {
   const timerEl = document.getElementById("timer");
@@ -84,8 +84,7 @@ function startTimer() {
 
   if (!timerEl || !resendBtn) return;
 
-
-  time = 30;
+  time = 60;
 
   if (interval) {
     clearInterval(interval);
@@ -100,7 +99,9 @@ function startTimer() {
   interval = setInterval(() => {
     time--;
 
-    timerEl.textContent = `Resend code in ${time}s`;
+    if (time >= 0) {
+      timerEl.textContent = `Resend code in ${time}s`;
+    }
 
     if (time <= 0) {
       clearInterval(interval);
@@ -161,11 +162,19 @@ async function resendOtp() {
     const res = await axios.post("/resend-otp");
 
     if (res.data.success) {
-      showToast?.("success", "OTP resent successfully");
+      if (typeof showToast === "function") {
+        showToast("success", res.data.message || "OTP resent successfully");
+      }
       startTimer();
+    } else {
+      if (typeof showToast === "function") {
+        showToast("error", res.data.message || "Failed to resend OTP");
+      }
     }
 
   } catch (err) {
-    showToast?.("error", "Resending OTP failed");
+    if (typeof showToast === "function") {
+      showToast("error", err.response?.data?.message || "Resending OTP failed");
+    }
   }
 }

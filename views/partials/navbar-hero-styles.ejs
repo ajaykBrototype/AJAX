@@ -1,0 +1,27 @@
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-x:hidden}
+:root{--dark:#1C1C1C;--cream:#F5F0E8;--warm:#FAFAF8;--stone:#9B8E83;--mist:#EAE5DC;--bdr:rgba(28,28,28,0.1)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ccc}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:999;transition:background .5s,padding .4s,box-shadow .4s;padding:1.5rem 3rem}
+#navbar.scrolled{background:rgba(250,250,248,.96);backdrop-filter:blur(16px);padding:.9rem 3rem;box-shadow:0 1px 0 var(--bdr)}
+@media(max-width:767px){#navbar{padding:1.2rem 1.5rem}#navbar.scrolled{padding:.8rem 1.5rem}}
+.logo{font-family:'Playfair Display',serif;font-weight:400;font-size:1.45rem;letter-spacing:.42em;text-transform:uppercase;text-decoration:none;transition:color .4s}
+.nav-link{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;position:relative;padding-bottom:3px;transition:opacity .25s}
+.nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:currentColor;transition:width .4s cubic-bezier(.25,.1,.25,1)}
+.nav-link:hover::after{width:100%}.nav-link:hover{opacity:.6}
+.nav-icon{cursor:pointer;transition:transform .25s,opacity .25s;display:flex;align-items:center;justify-content:center;background:none;border:none;padding:6px}
+.nav-icon:hover{transform:scale(1.1);opacity:.55}
+
+/* MOBILE MENU */
+#mob-menu{display:none;position:fixed;inset:0;z-index:998;background:var(--warm);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem}
+#mob-menu.open{display:flex}
+#mob-close{position:absolute;top:1.5rem;right:1.75rem;background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--dark);opacity:.5;transition:opacity .2s}
+#mob-close:hover{opacity:1}
+.mob-link{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;color:var(--dark);text-decoration:none;transition:opacity .25s}
+.mob-link:hover{opacity:.35}
+</style>

@@ -9,7 +9,7 @@ import * as addressController from "../controllers/user/address.controller.js";
 import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
-import { loadMenPage } from "../controllers/user/product.controller.js";
+import { loadMenPage,loadProductDetails } from "../controllers/user/product.controller.js";
 
 const router = express.Router();
 
@@ -67,6 +67,8 @@ router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
 router.post("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
-router.get("/menProductList",isLoggedIn,loadMenPage)
+router.get("/menProductList",isLoggedIn,loadMenPage);
+
+router.get("/product/:id", isLoggedIn, loadProductDetails);
 
 export default router;

@@ -49,7 +49,7 @@
 
       <!-- RESEND -->
       <div class="flex justify-between mt-4 text-sm text-gray-400">
-        <span id="timer">Resend code in 30s</span>
+        <span id="timer">Resend code in 60s</span>
         <button id="resendBtn" onclick="resendOtp()" class="text-black font-semibold">
           RESEND
         </button>
@@ -73,6 +73,7 @@
 
 
   <script src="/js/user/otp.js"></script>
-
+  <%- include('../partials/toast') %>
+  <script src="/js/utils/toast.js"></script>
 </body>
 </html>
