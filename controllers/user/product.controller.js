@@ -111,17 +111,51 @@ export const loadProductDetails = async (req, res) => {
       })
     );
 
+    const stock=defaultVariant?.stock || 0;
+
     res.render("user/productDetails", {
       product,
       variants,
       variant: defaultVariant,
       relatedProducts,
       category,
-      subCategory
+      subCategory,
+      stock
     });
 
   } catch (err) {
     console.log("PRODUCT DETAILS ERROR:", err);
     res.redirect("/home");
+  }
+};
+
+export const checkQuantity = async (req, res) => {
+  try {
+    const { variantId, quantity } = req.body;
+
+    const variant = await Variant.findById(variantId);
+
+    if (!variant) {
+      return res.json({ success: false, message: "Variant not found" });
+    }
+
+    if (quantity > 5) {
+      return res.json({
+        success: false,
+        message: "Maximum 5 items allowed"
+      });
+    }
+
+    if (quantity > variant.stock) {
+      return res.json({
+        success: false,
+        message: `Only ${variant.stock} items available`
+      });
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.json({ success: false, message: "Server error" });
   }
 };

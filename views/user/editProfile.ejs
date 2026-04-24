@@ -53,6 +53,13 @@
 
 <main class="page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
   
+  <%- include('../partials/breadcrumbs', { 
+      breadcrumbs: [
+          { name: "My Profile", url: "/profile" },
+          { name: "Edit Profile" }
+      ] 
+  }) %>
+  
   <header style="margin-bottom:3rem;">
     <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">
       Account Settings

@@ -23,6 +23,13 @@
 
     <div class="w-full max-w-md p-8">
 
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: "Login", url: "/login" },
+              { name: "OTP Verification" }
+          ] 
+      }) %>
+
       <h1 class="text-xl font-semibold mb-6">AJAX</h1>
 
       <h2 class="text-3xl font-bold mb-2">Verify your email</h2>

@@ -114,12 +114,13 @@ tailwind.config = {
     <!-- MAIN CONTENT -->
     <main class="main-pad" style="flex:1;padding:3.5rem 3rem;min-width:0;">
 
-      <!-- Breadcrumb -->
-      <div class="breadcrumb page-in d1">
-        <a href="/address">My Addresses</a>
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        <span>Add New Address</span>
-      </div>
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: "My Profile", url: "/profile" },
+              { name: "My Addresses", url: "/address" },
+              { name: "Add New Address" }
+          ] 
+      }) %>
 
       <!-- Page Header -->
       <div class="page-in d2" style="margin-bottom:2.5rem;">

@@ -1,0 +1,13 @@
+<div class="breadcrumbs" style="grid-column: 1 / -1; margin-bottom: 20px; font-size: 11px; color: #777; margin-left: -4px; letter-spacing: 0.05em; text-transform: uppercase;">
+  <a href="/" style="text-decoration:none; color: inherit; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='inherit'">Home</a>
+  <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length > 0) { %>
+    <% breadcrumbs.forEach(function(crumb) { %>
+      <span style="margin: 0 8px; opacity: 0.5;">/</span>
+      <% if (crumb.url) { %>
+        <a href="<%= crumb.url %>" style="text-decoration:none; color: inherit; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='inherit'"><%= crumb.name %></a>
+      <% } else { %>
+        <span style="color:#000; font-weight: 500;"><%= crumb.name %></span>
+      <% } %>
+    <% }); %>
+  <% } %>
+</div>

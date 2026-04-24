@@ -42,7 +42,7 @@
         
         /* --- Main Layout --- */
         main {
-            padding-top: 140px; 
+            padding-top: 100px; 
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
@@ -169,11 +169,117 @@
         }
 
         .product-price {
-            font-size: 20px;
-            font-weight: 400;
-            color: var(--text-secondary);
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .price-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
             margin-bottom: 32px;
-            letter-spacing: 0.5px;
+        }
+
+        .original-price {
+            font-size: 16px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-weight: 300;
+        }
+
+        .discount-badge {
+            background: #EBF7EE;
+            color: #1B7A3D;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .rating-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2px;
+            cursor: pointer;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stock-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .stock-in { color: #1B7A3D; }
+        .stock-in .stock-dot { background: #1B7A3D; }
+        .stock-low { color: #B04040; }
+        .stock-low .stock-dot { background: #B04040; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .offers-container {
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .offer-card {
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .offer-card:hover {
+            border-color: var(--accent-color);
+            background: #fafafa;
+        }
+
+        .offer-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .offer-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .short-desc {
@@ -696,23 +802,13 @@
     <main>
 
 
-      <div style="grid-column: 1 / -1; margin-bottom: 20px; font-size: 12px; color: #777;">
-
-  <a href="/" style="text-decoration:none;">Home</a> /
-
-  <a href="/menProductList" style="text-decoration:none;">
-    <%= category?.name || "Category" %>
-  </a> /
-
-  <span>
-    <%= subCategory?.name || "Subcategory" %>
-  </span> /
-
-  <span style="color:#000;">
-    <%= product.name %>
-  </span>
-
-</div>
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: category?.name || "Category", url: "/menProductList" },
+              { name: subCategory?.name || "Subcategory", url: "/menProductList?sub=" + subCategory?._id },
+              { name: product.name }
+          ] 
+      }) %>
 
 
 
@@ -765,7 +861,28 @@
             <div class="reveal" style="transition-delay: 0.2s;">
                 <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
                 <h1 class="product-title"><%= product.name %></h1>
-                <p class="product-price">₹<%= variant?.price %></p>
+                
+                <div class="rating-summary">
+                    <div class="rating-stars">
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="none" stroke="#000"></i>
+                    </div>
+                    <span class="rating-text">4.8 (128 Reviews)</span>
+                </div>
+
+                <div class="price-wrapper">
+                    <p class="product-price" id="productPrice">₹<%= variant?.price %></p>
+                    <p class="original-price" id="originalPrice">₹<%= Math.round(variant?.price * 1.4) %></p>
+                    <div class="discount-badge">40% OFF</div>
+                </div>
+
+                <div id="stockInfoContainer" class="stock-info <%= (variant?.stock || 0) < 5 ? 'stock-low' : 'stock-in' %>">
+                    <div class="stock-dot"></div>
+                    <span id="stockStatus"><%= (variant?.stock || 0) < 5 ? 'Limited Stock: Only ' + variant.stock + ' left' : 'In Stock & Ready to Ship' %></span>
+                </div>
             </div>
 
             <div class="reveal" style="transition-delay: 0.3s;">
@@ -776,12 +893,19 @@
             </div>
 
             <div class="option-group reveal" style="transition-delay: 0.4s;">
-                <div class="option-label">Color — <%= variant?.color || "N/A" %></div>
+                <div class="option-label" id="colorLabel">Color — <%= variant?.color || "N/A" %></div>
                <div class="swatches">
                    <% variants.forEach(v => { %>
-                <div class="swatch <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>"
-                    style="background:<%= v.color %>">
-                </div>
+               <div 
+  class="swatch <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>"
+  style="background:<%= v.color %>"
+  data-id="<%= v._id %>"
+  data-color="<%= v.color %>"
+  data-images='<%= JSON.stringify(v.images) %>'
+  data-price="<%= v.price %>"
+  data-stock="<%= v.stock %>"
+>
+</div>
                <% }) %>
              </div>
             </div>
@@ -793,21 +917,31 @@
                 </div>
                 <div class="size-grid">
                     <% variants.forEach(v=>{ %>
-
-                    <button class="size-btn" <%= v._id.toString()===variant._id.toString ? 'active' : "" %>>
-                        <%= v.size %>
-                    </button>
+                        <button class="size-btn <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>" data-id="<%= v._id %>">
+                            <%= v.size %>
+                        </button>
                     <% }) %>
-                   
                 </div>
             </div>
 
             <div class="reveal" style="transition-delay: 0.6s;">
                 <div class="option-label">Quantity</div>
-                <div class="quantity-stepper">
-                    <button class="qty-btn"><i data-lucide="minus" size="14"></i></button>
-                    <div class="qty-val">1</div>
-                    <button class="qty-btn"><i data-lucide="plus" size="14"></i></button>
+                <div class="quantity-stepper" data-stock="<%= stock %>" data-variant="<%= variant._id %>">
+                    <button class="qty-btn" id="decrease">-</button>
+                 <div class="qty-val" id="qtyValue">1</div>
+                 <button class="qty-btn" id="increase">+</button>
+                </div>
+
+                <div class="option-label">Available Offers</div>
+                <div class="offers-container">
+                    <div class="offer-card">
+                        <span class="offer-tag">New User</span>
+                        <p class="offer-title">Flat ₹500 OFF on first order</p>
+                    </div>
+                    <div class="offer-card">
+                        <span class="offer-tag">Seasonal</span>
+                        <p class="offer-title">Extra 10% OFF on ₹2,499+</p>
+                    </div>
                 </div>
 
                 <div class="action-btns">
@@ -824,34 +958,6 @@
         </section>
     </main>
 
-    <section class="related-section">
-        <div class="related-header reveal">
-            <div>
-                <p class="editorial-label" style="margin-bottom: 8px;">Recommendation</p>
-                <h3 style="font-family: var(--font-serif); font-size: 36px; letter-spacing: -0.9px;">Completing the Look</h3>
-            </div>
-            <a href="#" class="nav-link" style="text-decoration: underline;">View All</a>
-        </div>
-      <div class="related-grid">
-
-    <% relatedProducts.forEach(r => { %>
-
-      <a href="/product/<%= r._id %>" class="product-card">
-
-        <div class="card-img">
-          <img src="<%= r.image || '/fallback.png' %>">
-        </div>
-
-        <h4 class="card-title"><%= r.name %></h4>
-        <p class="card-price">₹<%= r.price || '' %></p>
-
-      </a>
-
-    <% }) %>
-
-  </div>
-
-    </section>
 
     <section class="reviews-section">
         <div class="reviews-summary reveal">
@@ -940,6 +1046,36 @@
         </div>
     </section>
 
+    
+    <section class="related-section">
+        <div class="related-header reveal">
+            <div>
+                <p class="editorial-label" style="margin-bottom: 8px;">Recommendation</p>
+                <h3 style="font-family: var(--font-serif); font-size: 36px; letter-spacing: -0.9px;">Completing the Look</h3>
+            </div>
+            <a href="#" class="nav-link" style="text-decoration: underline;">View All</a>
+        </div>
+      <div class="related-grid">
+
+    <% relatedProducts.forEach(r => { %>
+
+      <a href="/product/<%= r._id %>" class="product-card">
+
+        <div class="card-img">
+          <img src="<%= r.image || '/fallback.png' %>">
+        </div>
+
+        <h4 class="card-title"><%= r.name %></h4>
+        <p class="card-price">₹<%= r.price || '' %></p>
+
+      </a>
+
+    <% }) %>
+
+  </div>
+
+    </section>
+
     <%- include('../partials/footer') %>
 
     <script>
@@ -986,16 +1122,6 @@
             thumb.classList.add('active-thumb');
         }
 
-        // Simple Quantity Stepper Logic
-        const qtyVal = document.querySelector('.qty-val');
-        document.querySelectorAll('.qty-btn').forEach((btn, idx) => {
-            btn.addEventListener('click', () => {
-                let current = parseInt(qtyVal.innerText);
-                if (idx === 0 && current > 1) qtyVal.innerText = current - 1;
-                if (idx === 1) qtyVal.innerText = current + 1;
-            });
-        });
-
         // Size Button Toggle
         document.querySelectorAll('.size-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1009,6 +1135,65 @@
             swatch.addEventListener('click', () => {
                 document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
+
+                // Dynamic UI Update
+                const id = swatch.dataset.id;
+                const color = swatch.dataset.color;
+                const price = swatch.dataset.price;
+                const stock = swatch.dataset.stock;
+                const images = JSON.parse(swatch.dataset.images);
+
+                // Update Label
+                document.getElementById('colorLabel').textContent = `Color — ${color}`;
+
+                // Update Price
+                document.getElementById('productPrice').textContent = `₹${price}`;
+                document.getElementById('originalPrice').textContent = `₹${Math.round(price * 1.4)}`;
+
+                // Update Stock
+                const stockStatus = document.getElementById('stockStatus');
+                const stockInfoContainer = document.getElementById('stockInfoContainer');
+                if (parseInt(stock) < 5) {
+                    stockInfoContainer.className = 'stock-info stock-low';
+                    stockStatus.textContent = `Limited Stock: Only ${stock} left`;
+                } else {
+                    stockInfoContainer.className = 'stock-info stock-in';
+                    stockStatus.textContent = 'In Stock & Ready to Ship';
+                }
+
+                // Update Quantity Stepper Attributes
+                const stepper = document.querySelector('.quantity-stepper');
+                if (stepper) {
+                    stepper.dataset.stock = stock;
+                    stepper.dataset.variant = id;
+                    // Reset quantity to 1 when variant changes
+                    const qtyVal = document.getElementById('qtyValue');
+                    if (qtyVal) qtyVal.textContent = '1';
+                }
+
+                // Update Size Buttons Active State
+                document.querySelectorAll('.size-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.id === id) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Update Images
+                const thumbStrip = document.querySelector('.thumbnail-strip');
+                if (thumbStrip && images.length > 0) {
+                    thumbStrip.innerHTML = '';
+                    images.forEach((img, idx) => {
+                        const thumb = document.createElement('div');
+                        thumb.className = `thumbnail ${idx === 0 ? 'active-thumb' : ''}`;
+                        thumb.setAttribute('onclick', `switchImage('${img}', this)`);
+                        thumb.innerHTML = `<img src="${img}" alt="View ${idx + 1}">`;
+                        thumbStrip.appendChild(thumb);
+                    });
+
+                    // Update Main Image with first image of new variant
+                    switchImage(images[0], thumbStrip.firstChild);
+                }
             });
         });
 
@@ -1033,5 +1218,10 @@
             mainImage.style.transformOrigin = "center center";
         });
     </script>
+   <!-- 1. Axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="/js/user/productDetail.js"></script>
 </body>
 </html>

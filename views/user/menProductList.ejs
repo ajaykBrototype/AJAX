@@ -138,6 +138,12 @@ tailwind.config = {
 <!-- MAIN CONTENT -->
 <main class="px-6 md:px-12 max-w-[1440px] mx-auto">
   
+  <%- include('../partials/breadcrumbs', { 
+      breadcrumbs: [
+          { name: "Men's Shirts" }
+      ] 
+  }) %>
+  
   <!-- Header Section -->
   <div class="fade-in-up">
     <h1 class="page-title">MEN'S SHIRTS</h1>

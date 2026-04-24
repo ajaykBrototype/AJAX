@@ -103,6 +103,12 @@ tailwind.config = {
     <!-- MAIN CONTENT -->
     <main class="main-pad page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
 
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: "My Profile" }
+          ] 
+      }) %>
+
       <!-- Page Header -->
       <div class="header-row page-in d1" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1.25rem;margin-bottom:3rem;">
         <div>
