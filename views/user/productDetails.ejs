@@ -892,41 +892,51 @@
                 </p>
             </div>
 
+            <% 
+              // Group variants by color for clean rendering
+              const colorGroups = {};
+              variants.forEach(v => {
+                if (!colorGroups[v.color]) {
+                  colorGroups[v.color] = [];
+                }
+                colorGroups[v.color].push(v);
+              });
+              const uniqueColors = Object.keys(colorGroups);
+            %>
+
             <div class="option-group reveal" style="transition-delay: 0.4s;">
-                <div class="option-label" id="colorLabel">Color — <%= variant?.color || "N/A" %></div>
+                <div class="option-label" id="colorLabel">Select Color</div>
                <div class="swatches">
-                   <% variants.forEach(v => { %>
-               <div 
-  class="swatch <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>"
-  style="background:<%= v.color %>"
-  data-id="<%= v._id %>"
-  data-color="<%= v.color %>"
-  data-images='<%= JSON.stringify(v.images) %>'
-  data-price="<%= v.price %>"
-  data-stock="<%= v.stock %>"
->
-</div>
-               <% }) %>
+                   <% uniqueColors.forEach(color => { 
+                       const group = colorGroups[color];
+                       // Use the first variant of the group as the representative for images/prices
+                       const rep = group[0];
+                   %>
+                   <div 
+                      class="swatch"
+                      style="background:<%= color %>"
+                      data-color="<%= color %>"
+                      data-variants='<%= JSON.stringify(group) %>'
+                   >
+                   </div>
+                   <% }) %>
              </div>
             </div>
 
             <div class="option-group reveal" style="transition-delay: 0.5s;">
                 <div class="option-label">
-                    <span>Size</span>
+                    <span>Select Size</span>
                     <span class="size-guide-link">Size Guide</span>
                 </div>
-                <div class="size-grid">
-                    <% variants.forEach(v=>{ %>
-                        <button class="size-btn <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>" data-id="<%= v._id %>">
-                            <%= v.size %>
-                        </button>
-                    <% }) %>
+                <div class="size-grid" id="sizeGrid">
+                    <!-- Sizes will be populated dynamically based on color selection -->
+                    <p class="text-[10px] text-stone-400 uppercase tracking-widest py-4">Please select a color first</p>
                 </div>
             </div>
 
             <div class="reveal" style="transition-delay: 0.6s;">
                 <div class="option-label">Quantity</div>
-                <div class="quantity-stepper" data-stock="<%= stock %>" data-variant="<%= variant._id %>">
+                <div class="quantity-stepper" data-stock="0" data-variant="">
                     <button class="qty-btn" id="decrease">-</button>
                  <div class="qty-val" id="qtyValue">1</div>
                  <button class="qty-btn" id="increase">+</button>
@@ -945,7 +955,9 @@
                 </div>
 
                 <div class="action-btns">
-                    <button class="btn-primary">Add to Bag <i data-lucide="arrow-right" size="14"></i></button>
+                    <button class="btn-primary" id="addToBagBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Add to Bag <i data-lucide="arrow-right" size="14"></i>
+                    </button>
                     <button class="btn-secondary">Wishlist</button>
                 </div>
 
@@ -1122,80 +1134,131 @@
             thumb.classList.add('active-thumb');
         }
 
-        // Size Button Toggle
-        document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
 
-        // Swatch Toggle
+        // State Management
+        let state = {
+            selectedColor: null,
+            selectedVariant: null
+        };
+
+        function updateActionButtons() {
+            const btn = document.getElementById('addToBagBtn');
+            const stock = state.selectedVariant ? parseInt(state.selectedVariant.stock) : 0;
+            
+            if (state.selectedColor && state.selectedVariant && stock > 0) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.innerHTML = 'Add to Bag <i data-lucide="arrow-right" size="14"></i>';
+                lucide.createIcons();
+            } else if (state.selectedVariant && stock <= 0) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = 'Out of Stock';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = 'Add to Bag <i data-lucide="arrow-right" size="14"></i>';
+                lucide.createIcons();
+            }
+        }
+
+        // Swatch Toggle Logic
         document.querySelectorAll('.swatch').forEach(swatch => {
             swatch.addEventListener('click', () => {
                 document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
 
-                // Dynamic UI Update
-                const id = swatch.dataset.id;
                 const color = swatch.dataset.color;
-                const price = swatch.dataset.price;
-                const stock = swatch.dataset.stock;
-                const images = JSON.parse(swatch.dataset.images);
+                const colorVariants = JSON.parse(swatch.dataset.variants);
+                const firstVariant = colorVariants[0];
 
-                // Update Label
+                state.selectedColor = color;
+                state.selectedVariant = null; // Reset size on color change
+
+                // Update UI Labels
                 document.getElementById('colorLabel').textContent = `Color — ${color}`;
+                
+                // Update Gallery with the representative variant images
+                updateGallery(firstVariant.images);
+                
+                // Update Prices
+                document.getElementById('productPrice').textContent = `₹${firstVariant.price}`;
+                document.getElementById('originalPrice').textContent = `₹${Math.round(firstVariant.price * 1.4)}`;
 
-                // Update Price
-                document.getElementById('productPrice').textContent = `₹${price}`;
-                document.getElementById('originalPrice').textContent = `₹${Math.round(price * 1.4)}`;
+                // Render Size Grid for this color
+                renderSizeGrid(colorVariants);
+                
+                // Reset Quantity
+                const qtyVal = document.getElementById('qtyValue');
+                if (qtyVal) qtyVal.textContent = '1';
 
-                // Update Stock
-                const stockStatus = document.getElementById('stockStatus');
-                const stockInfoContainer = document.getElementById('stockInfoContainer');
-                if (parseInt(stock) < 5) {
-                    stockInfoContainer.className = 'stock-info stock-low';
-                    stockStatus.textContent = `Limited Stock: Only ${stock} left`;
-                } else {
-                    stockInfoContainer.className = 'stock-info stock-in';
-                    stockStatus.textContent = 'In Stock & Ready to Ship';
-                }
-
-                // Update Quantity Stepper Attributes
-                const stepper = document.querySelector('.quantity-stepper');
-                if (stepper) {
-                    stepper.dataset.stock = stock;
-                    stepper.dataset.variant = id;
-                    // Reset quantity to 1 when variant changes
-                    const qtyVal = document.getElementById('qtyValue');
-                    if (qtyVal) qtyVal.textContent = '1';
-                }
-
-                // Update Size Buttons Active State
-                document.querySelectorAll('.size-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.id === id) {
-                        btn.classList.add('active');
-                    }
-                });
-
-                // Update Images
-                const thumbStrip = document.querySelector('.thumbnail-strip');
-                if (thumbStrip && images.length > 0) {
-                    thumbStrip.innerHTML = '';
-                    images.forEach((img, idx) => {
-                        const thumb = document.createElement('div');
-                        thumb.className = `thumbnail ${idx === 0 ? 'active-thumb' : ''}`;
-                        thumb.setAttribute('onclick', `switchImage('${img}', this)`);
-                        thumb.innerHTML = `<img src="${img}" alt="View ${idx + 1}">`;
-                        thumbStrip.appendChild(thumb);
-                    });
-
-                    // Update Main Image with first image of new variant
-                    switchImage(images[0], thumbStrip.firstChild);
-                }
+                updateActionButtons();
             });
         });
+
+        function renderSizeGrid(variants) {
+            const grid = document.getElementById('sizeGrid');
+            grid.innerHTML = '';
+            
+            variants.forEach(v => {
+                const btn = document.createElement('button');
+                btn.className = 'size-btn';
+                btn.textContent = v.size;
+                btn.dataset.id = v._id;
+                btn.dataset.stock = v.stock;
+                
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    state.selectedVariant = v;
+                    
+                    // Update Stock Display
+                    updateStockDisplay(v.stock);
+                    
+                    // Update Quantity Stepper
+                    const stepper = document.querySelector('.quantity-stepper');
+                    if (stepper) {
+                        stepper.dataset.stock = v.stock;
+                        stepper.dataset.variant = v._id;
+                    }
+
+                    updateActionButtons();
+                });
+                
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateStockDisplay(stock) {
+            const stockStatus = document.getElementById('stockStatus');
+            const stockInfoContainer = document.getElementById('stockInfoContainer');
+            if (parseInt(stock) < 5) {
+                stockInfoContainer.className = 'stock-info stock-low';
+                stockStatus.textContent = `Limited Stock: Only ${stock} left`;
+            } else {
+                stockInfoContainer.className = 'stock-info stock-in';
+                stockStatus.textContent = 'In Stock & Ready to Ship';
+            }
+        }
+
+        function updateGallery(images) {
+            const thumbStrip = document.querySelector('.thumbnail-strip');
+            if (thumbStrip && images.length > 0) {
+                thumbStrip.innerHTML = '';
+                images.forEach((img, idx) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = `thumbnail ${idx === 0 ? 'active-thumb' : ''}`;
+                    thumb.setAttribute('onclick', `switchImage('${img}', this)`);
+                    thumb.innerHTML = `<img src="${img}" alt="View ${idx + 1}">`;
+                    thumbStrip.appendChild(thumb);
+                });
+                switchImage(images[0], thumbStrip.firstChild);
+            }
+        }
 
         // Image Zoom Logic
         const imageContainer = document.querySelector('.main-image-container');

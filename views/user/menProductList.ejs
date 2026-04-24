@@ -20,12 +20,76 @@ tailwind.config = {
 .page-title {
   font-family: 'DM Sans', sans-serif;
   font-weight: 900;
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   text-transform: uppercase;
   letter-spacing: -0.02em;
   color: var(--dark);
-  margin-top: 8rem; /* Space for navbar */
-  margin-bottom: 1.5rem;
+  margin-top: 6rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+/* SEARCH & SORT BAR */
+.toolbar-link {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dark);
+  transition: opacity 0.3s;
+}
+.toolbar-link:hover { opacity: 0.6; }
+
+.search-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  outline: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  width: 0;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.search-container:hover .search-input,
+.search-input:focus {
+  width: 200px;
+  opacity: 1;
+  border-bottom-color: var(--dark);
+  padding-left: 0.5rem;
+}
+
+/* PRODUCT CARD ENHANCEMENTS */
+.product-card {
+  position: relative;
+  overflow: hidden;
+}
+.secondary-img {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+}
+.product-card:hover .secondary-img {
+  opacity: 1;
+}
+.product-card:hover .primary-img {
+  opacity: 0.8;
+}
+
+.sort-select {
+  appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 /* HORIZONTAL SCROLLBAR FOR CATEGORIES */
@@ -37,84 +101,10 @@ tailwind.config = {
   scrollbar-width: none;
 }
 
-/* PRODUCT CARD */
-.product-card {
-  position: relative;
-  cursor: pointer;
-}
-.product-img-wrap {
-  position: relative;
-  background: var(--cream);
-  aspect-ratio: 3/4;
-  overflow: hidden;
-  margin-bottom: 0.8rem;
-}
-.product-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-.product-card:hover .product-img-wrap img {
-  transform: scale(1.05);
-}
-.wishlist-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 10;
-  color: var(--dark);
-  opacity: 0.7;
-  transition: opacity 0.3s, transform 0.3s;
-}
-.wishlist-btn:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-.wishlist-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke-width: 1.5;
-}
-
-.product-name {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--dark);
-  margin-bottom: 0.2rem;
-}
-.product-price {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--dark);
-  margin-bottom: 0.5rem;
-}
-.color-swatches {
-  display: flex;
-  gap: 0.3rem;
-  align-items: center;
-}
-.swatch {
-  width: 10px;
-  height: 10px;
-  display: inline-block;
-  border: 1px solid var(--bdr);
-}
-.color-more {
-  font-size: 0.65rem;
-  color: var(--stone);
-  margin-left: 0.2rem;
-}
-
 /* ANIMATIONS */
 .fade-in-up {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes fadeInUp {
@@ -149,35 +139,56 @@ tailwind.config = {
     <h1 class="page-title">MEN'S SHIRTS</h1>
   </div>
 
-  <!-- Categories / Filters -->
-  <div class="flex flex-col gap-6 mb-10 fade-in-up delay-1">
-    <!-- Category Pills -->
-    <div class="flex gap-3 overflow-x-auto hide-scroll pb-2 items-center">
-
-  <!-- VIEW ALL -->
-  <a href="/menProductList"
-     class="px-6 py-2.5 border uppercase
-     <%= !selectedSub ? 'bg-black text-white' : '' %>">
-     VIEW ALL
-  </a>
-
-  <% subCategories.forEach(sub => { %>
-    <a href="/menProductList?sub=<%= sub._id %>"
-       class="px-6 py-2.5 border uppercase
-       <%= selectedSub == sub._id.toString() ? 'bg-black text-white' : '' %>">
-
-      <%= sub.name %>
-
+  <!-- Categories Pills -->
+  <div class="flex gap-2 overflow-x-auto hide-scroll mb-8 fade-in-up delay-1">
+    <a href="/menProductList"
+       class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all
+       <%= !selectedSub ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>">
+       VIEW ALL
     </a>
-  <% }) %>
+    <% subCategories.forEach(sub => { %>
+      <a href="/menProductList?sub=<%= sub._id %>"
+         class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all
+         <%= selectedSub == sub._id.toString() ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>">
+        <%= sub.name %>
+      </a>
+    <% }) %>
+  </div>
 
-</div>
-
-    <!-- Filter Toggle -->
-    <div>
-      <button class="text-[0.65rem] tracking-[0.15em] font-bold uppercase text-[#1C1C1C] flex items-center gap-1 hover:opacity-70 transition-opacity">
-        FILTER <span class="text-xs font-normal ml-1">┼</span>
+  <!-- Toolbar: Filter, Search, Sort -->
+  <div class="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[var(--bdr)] mb-12 fade-in-up delay-1">
+    
+    <!-- Left: Filter -->
+    <div class="flex items-center">
+      <button class="toolbar-link flex items-center gap-2">
+        FILTER <i data-lucide="plus" size="12" stroke-width="3"></i>
       </button>
+    </div>
+
+    <!-- Right: Search & Sort -->
+    <div class="flex items-center gap-8 md:gap-12 ml-auto">
+      <!-- Search -->
+      <div class="search-container flex items-center gap-2">
+        <input type="text" placeholder="SEARCH..." class="search-input">
+        <button class="toolbar-link flex items-center gap-2">
+          <i data-lucide="search" size="14" stroke-width="2.5"></i>
+        </button>
+      </div>
+
+      <!-- Sort -->
+      <div class="flex items-center gap-4">
+        <span class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] uppercase">Sort</span>
+        <div class="flex items-center gap-1">
+          <select class="sort-select">
+            <option value="newest">Newest</option>
+            <option value="price-low">Price: Low - High</option>
+            <option value="price-high">Price: High - Low</option>
+            <option value="name-az">A - Z</option>
+            <option value="name-za">Z - A</option>
+          </select>
+          <i data-lucide="chevron-down" size="10" class="text-stone-400"></i>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -191,29 +202,40 @@ tailwind.config = {
       <% const variant = product.variants?.[0]; %>
       <a href="/product/<%= product._id %>" class="block">
 
-  <div class="product-card group">
+    <div class="product-card group">
+      <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
+        
+        <button class="wishlist-btn absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.preventDefault()">
+          <i data-lucide="heart" size="18" stroke-width="1.5"></i>
+        </button>
 
-    <div class="product-img-wrap">
+        <!-- Primary Image -->
+        <img 
+          src="<%= variant?.images?.[0] %>" 
+          alt="<%= product.name %>"
+          class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+        />
 
-      <button class="wishlist-btn" onclick="event.preventDefault()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-      </button>
+        <!-- Secondary Image (Hover) -->
+        <% if (variant?.images?.[1]) { %>
+        <img 
+          src="<%= variant.images[1] %>" 
+          alt="<%= product.name %>"
+          class="secondary-img w-full h-full object-cover"
+        />
+        <% } %>
 
-      <img 
-        src="<%= variant?.images?.[0] %>" 
-        alt="<%= product.name %>"
-      />
+        <!-- Quick Add Overlay (Aesthetic) -->
+        <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
+           <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
+        </div>
+      </div>
 
+      <div class="product-info space-y-1">
+        <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]"><%= product.name %></h3>
+        <p class="text-[0.75rem] font-medium text-stone-500">₹<%= variant?.price %></p>
+      </div>
     </div>
-
-    <div class="product-info">
-      <h3 class="product-name"><%= product.name %></h3>
-      <p class="product-price">₹<%= variant?.price %></p>
-    </div>
-
-  </div>
 
 </a>
     <% }) %>
@@ -281,6 +303,48 @@ tailwind.config = {
 
 <%- include('../partials/footer') %>
 
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons();
 
+    // Sorting Logic (UI and URL Update)
+    const sortSelect = document.querySelector('.sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            const value = sortSelect.value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', value);
+            window.location.href = url.toString();
+        });
+    }
+
+    // Search Logic (UI and URL Update)
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const value = searchInput.value.trim();
+                const url = new URL(window.location.href);
+                if (value) {
+                    url.searchParams.set('search', value);
+                } else {
+                    url.searchParams.delete('search');
+                }
+                window.location.href = url.toString();
+            }
+        });
+    }
+
+    // Restore sort/search values from URL
+    window.addEventListener('load', () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('sort') && sortSelect) {
+            sortSelect.value = url.searchParams.get('sort');
+        }
+        if (url.searchParams.has('search') && searchInput) {
+            searchInput.value = url.searchParams.get('search');
+        }
+    });
+</script>
 </body>
 </html>
