@@ -74,8 +74,10 @@ export const loadMenPage = async (req, res) => {
 export const loadProductDetails = async (req, res) => {
   try {
     const { id } = req.params;
-
+    
     const product = await Product.findById(id).lean();
+    const category = await Category.findById(product.category).lean(); 
+    const subCategory = await SubCategory.findById(product.subcategory).lean();
 
     if (!product) {
       return res.redirect("/home");
@@ -113,7 +115,9 @@ export const loadProductDetails = async (req, res) => {
       product,
       variants,
       variant: defaultVariant,
-      relatedProducts
+      relatedProducts,
+      category,
+      subCategory
     });
 
   } catch (err) {

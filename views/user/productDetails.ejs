@@ -694,6 +694,28 @@
     <%- include('../partials/navbar') %>
 
     <main>
+
+
+      <div style="grid-column: 1 / -1; margin-bottom: 20px; font-size: 12px; color: #777;">
+
+  <a href="/" style="text-decoration:none;">Home</a> /
+
+  <a href="/menProductList" style="text-decoration:none;">
+    <%= category?.name || "Category" %>
+  </a> /
+
+  <span>
+    <%= subCategory?.name || "Subcategory" %>
+  </span> /
+
+  <span style="color:#000;">
+    <%= product.name %>
+  </span>
+
+</div>
+
+
+
         <section class="product-images">
             <div class="thumbnail-strip">
                 <% if (variant && variant.images && variant.images.length > 0) { %>
