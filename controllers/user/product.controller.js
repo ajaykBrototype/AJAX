@@ -64,7 +64,6 @@ export const loadMenPage = async (req, res) => {
       totalPages,
       totalProducts
     });
-
   } catch (err) {
     console.log(err);
     res.redirect("/home");

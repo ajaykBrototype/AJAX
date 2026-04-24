@@ -69,3 +69,28 @@ decreaseBtn.addEventListener("click", () => {
         qtyValue.innerText = currentQty - 1;
     }
 });
+
+
+const addBtn=document.getElementById("addToBagBtn");
+
+addBtn.addEventListener("click",async()=>{
+    try{
+       if(!state.selectedVariant){
+        return ajaxToast("error","Please Select Size");
+       }
+       const qty=parseInt(document.getElementById("qtyValue").innerText);
+
+       const res=await axios.post("/cart/add",{
+        variantId:state.selectedVariant._id,
+         quantity:qty
+       });
+        if (res.data.success) {
+      window.location.href = "/cart"; 
+    } else {
+      ajaxToast("error", res.data.message);
+    }
+    }catch(err){
+        console.log(err);
+    ajaxToast("error", "Something went wrong");
+    }
+})

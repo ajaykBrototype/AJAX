@@ -10,6 +10,7 @@ import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
 import { loadMenPage,loadProductDetails,checkQuantity } from "../controllers/user/product.controller.js";
+import {loadCartPage,addToCart  } from "../controllers/user/cart.controller.js";
 
 const router = express.Router();
 
@@ -71,5 +72,7 @@ router.get("/menProductList",isLoggedIn,loadMenPage);
 
 router.get("/product/:id", isLoggedIn, loadProductDetails);
 router.post("/check-quantity",isLoggedIn, checkQuantity);
+router.post("/cart/add", isLoggedIn, addToCart);
+router.get("/cart", isLoggedIn, loadCartPage);
 
 export default router;
