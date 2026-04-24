@@ -65,18 +65,58 @@ export const loadCartPage = async (req, res) => {
     let totalPrice = 0;
 
     if (cart) {
+      let changed = false;
+      const validItems = [];
+
+      for (const item of cart.items) {
+        // Remove if variant or product is inactive
+        if (!item.variant || !item.variant.isActive || !item.variant.productId || !item.variant.productId.isActive) {
+          changed = true;
+          continue;
+        }
+
+        // Reduce quantity if it exceeds current stock
+        if (item.quantity > item.variant.stock) {
+          item.quantity = item.variant.stock;
+          changed = true;
+        }
+
+        // Enforce max limit of 5
+        if (item.quantity > 5) {
+          item.quantity = 5;
+          changed = true;
+        }
+
+        if (item.quantity > 0) {
+          validItems.push(item);
+        } else {
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        cart.items = validItems;
+        await cart.save();
+      }
+
+      let totalPrice = 0;
       cart.items.forEach(item => {
         totalPrice += item.variant.price * item.quantity;
       });
+
+      res.render("user/cart", {
+        cart,
+        totalPrice
+      });
+    } else {
+      res.render("user/cart", {
+        cart: null,
+        totalPrice: 0
+      });
     }
 
-    res.render("user/cart", {
-      cart,
-      totalPrice
-    });
-
   } catch (err) {
-    console.log(err);
+    console.log("LOAD CART ERROR:", err);
     res.redirect("/home");
   }
 };
@@ -112,8 +152,11 @@ export const updateCartQty = async (req, res) => {
 
    
     let total = 0;
-    cart.items.forEach(i => {
-      total += i.quantity * variant.price;
+    const populatedCart = await Cart.findOne({ user: userId }).populate("items.variant");
+    populatedCart.items.forEach(i => {
+      if (i.variant) {
+        total += i.quantity * i.variant.price;
+      }
     });
 
     res.json({

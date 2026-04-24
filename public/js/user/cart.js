@@ -39,6 +39,7 @@ async function removeItem(itemId) {
         const res = await axios.post("/cart/remove", { itemId });
 
         if (res.data.success) {
+            ajaxToast(success,"Product removed")
             // Start animation
             itemRow.classList.add('item-exit');
             
@@ -52,4 +53,4 @@ async function removeItem(itemId) {
     } catch (err) {
         console.log("REMOVE ERROR:", err);
     }
-}
+}
