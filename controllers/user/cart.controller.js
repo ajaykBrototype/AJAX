@@ -1,5 +1,6 @@
 import Cart from "../../models/user/cartModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import { success } from "zod";
 
 export const addToCart = async (req, res) => {
   try {
@@ -77,5 +78,70 @@ export const loadCartPage = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.redirect("/home");
+  }
+};
+
+export const updateCartQty = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { itemId, delta } = req.body;
+
+    const cart = await Cart.findOne({ user: userId });
+
+    const item = cart.items.id(itemId);
+
+    if (!item) {
+      return res.json({ success: false });
+    }
+
+    const variant = await Variant.findById(item.variant);
+
+    let newQty = item.quantity + delta;
+
+    if (newQty < 1) newQty = 1;
+    if (newQty > 5) {
+      return res.json({ success: false, message: "Max 5 allowed" });
+    }
+    if (newQty > variant.stock) {
+      return res.json({ success: false, message: "Out of stock" });
+    }
+
+    item.quantity = newQty;
+
+    await cart.save();
+
+   
+    let total = 0;
+    cart.items.forEach(i => {
+      total += i.quantity * variant.price;
+    });
+
+    res.json({
+      success: true,
+      qty: newQty,
+      total
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+};
+
+export const removeCartItem = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { itemId } = req.body;
+
+    const cart = await Cart.findOne({ user: userId });
+
+    cart.items.pull({ _id: itemId });
+
+    await cart.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.json({ success: false });
   }
 };
