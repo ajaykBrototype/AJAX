@@ -80,6 +80,7 @@ export const loadProductDetails = async (req, res) => {
     if (!product) {
       return res.redirect("/home");
     }
+
     const variants = await Variant.find({
       productId: id,
       isActive: true
@@ -88,10 +89,31 @@ export const loadProductDetails = async (req, res) => {
     const defaultVariant =
       variants.find(v => v.isDefault) || variants[0];
 
+    const relatedRaw = await Product.find({
+      category: product.category,
+      _id: { $ne: product._id }
+    }).limit(4).lean();
+
+    const relatedProducts = await Promise.all(
+      relatedRaw.map(async (p) => {
+        const v = await Variant.findOne({
+          productId: p._id,
+          isActive: true
+        }).lean();
+
+        return {
+          ...p,
+          image: v?.images?.[0] || null,
+          price: v?.price || null
+        };
+      })
+    );
+
     res.render("user/productDetails", {
       product,
       variants,
-      variant: defaultVariant
+      variant: defaultVariant,
+      relatedProducts
     });
 
   } catch (err) {

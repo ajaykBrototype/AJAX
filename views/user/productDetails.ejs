@@ -109,13 +109,15 @@
         }
 
         .main-image-container:hover {
-            transform: scale(1.01);
+            cursor: zoom-in;
         }
 
         .main-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.1s ease-out;
+            pointer-events: none;
         }
 
         .wishlist-toggle {
@@ -132,6 +134,7 @@
             align-items: center;
             cursor: pointer;
             transition: background 0.3s;
+            z-index: 10;
         }
 
         .wishlist-toggle:hover {
@@ -718,8 +721,8 @@
                         </div>
                         <div class="accordion-content">
                             <ul class="accordion-list">
-                                <li><div class="bullet"></div> 100% European Flax Linen</li>
-                                <li><div class="bullet"></div> Pre-washed for extra softness</li>
+                                <li><div class="bullet"></div> <%= product.material%></li>
+                              
                             </ul>
                         </div>
                     </div>
@@ -729,8 +732,7 @@
                             <i data-lucide="plus" size="14"></i>
                         </div>
                         <div class="accordion-content">
-                            To maintain the integrity of the linen fibers, machine wash cold with like colors. Do not bleach. 
-                            Hang to dry or tumble dry low.
+                         <%=product.careGuide%>
                         </div>
                     </div>
                 </div>
@@ -739,7 +741,7 @@
 
         <section class="product-details">
             <div class="reveal" style="transition-delay: 0.2s;">
-                <p class="editorial-label">Summer Editorial 24'</p>
+                <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
                 <h1 class="product-title"><%= product.name %></h1>
                 <p class="product-price">₹<%= variant?.price %></p>
             </div>
@@ -752,7 +754,7 @@
             </div>
 
             <div class="option-group reveal" style="transition-delay: 0.4s;">
-                <div class="option-label">Color — Sky Blue</div>
+                <div class="option-label">Color — <%= variant?.color || "N/A" %></div>
                <div class="swatches">
                    <% variants.forEach(v => { %>
                 <div class="swatch <%= v._id.toString() === variant._id.toString() ? 'active' : '' %>"
@@ -768,10 +770,13 @@
                     <span class="size-guide-link">Size Guide</span>
                 </div>
                 <div class="size-grid">
-                    <button class="size-btn">S</button>
-                    <button class="size-btn active">M</button>
-                    <button class="size-btn">L</button>
-                    <button class="size-btn">XL</button>
+                    <% variants.forEach(v=>{ %>
+
+                    <button class="size-btn" <%= v._id.toString()===variant._id.toString ? 'active' : "" %>>
+                        <%= v.size %>
+                    </button>
+                    <% }) %>
+                   
                 </div>
             </div>
 
@@ -805,35 +810,25 @@
             </div>
             <a href="#" class="nav-link" style="text-decoration: underline;">View All</a>
         </div>
-        <div class="related-grid">
-            <div class="product-card reveal" style="transition-delay: 0.1s;">
-                <div class="card-img"><img src="/related_minimalist_white_shirt_1776954058211.png" alt="Item"></div>
-                <p class="card-category">Editorial 24'</p>
-                <h4 class="card-title">Classic White Linen</h4>
-                <p class="card-price">$89.00</p>
-            </div>
-            <div class="product-card reveal" style="transition-delay: 0.2s;">
-                <div class="card-img"><img src="/related_olive_linen_shirt_1776954098434.png" alt="Item"></div>
-                <p class="card-category">Summer Drop</p>
-                <h4 class="card-title">Olive Field Shirt</h4>
-                <p class="card-price">$95.00</p>
-            </div>
-            <div class="product-card reveal" style="transition-delay: 0.3s;">
-                <div class="card-img"><img src="/related_minimalist_white_shirt_1776954058211.png" alt="Item"></div>
-                <p class="card-category">New Arrival</p>
-                <h4 class="card-title">Sand Linen Trousers</h4>
-                <p class="card-price">$120.00</p>
-            </div>
-            <div class="product-card reveal" style="transition-delay: 0.4s;">
-                <div class="card-img" style="position: relative;">
-                    <img src="/related_olive_linen_shirt_1776954098434.png" alt="Item">
-                    <div style="position: absolute; top: 16px; left: 16px; background: #000; color: #fff; padding: 4px 8px; font-size: 9px; letter-spacing: 0.9px; text-transform: uppercase;">Sold Out</div>
-                </div>
-                <p class="card-category">Essential</p>
-                <h4 class="card-title">Striped Resort Shirt</h4>
-                <p class="card-price">$89.00</p>
-            </div>
+      <div class="related-grid">
+
+    <% relatedProducts.forEach(r => { %>
+
+      <a href="/product/<%= r._id %>" class="product-card">
+
+        <div class="card-img">
+          <img src="<%= r.image || '/fallback.png' %>">
         </div>
+
+        <h4 class="card-title"><%= r.name %></h4>
+        <p class="card-price">₹<%= r.price || '' %></p>
+
+      </a>
+
+    <% }) %>
+
+  </div>
+
     </section>
 
     <section class="reviews-section">
@@ -993,6 +988,27 @@
                 document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
             });
+        });
+
+        // Image Zoom Logic
+        const imageContainer = document.querySelector('.main-image-container');
+        const mainImage = document.getElementById('mainImage');
+
+        imageContainer.addEventListener('mousemove', (e) => {
+            const rect = imageContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+
+            mainImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+            mainImage.style.transform = "scale(2)";
+        });
+
+        imageContainer.addEventListener('mouseleave', () => {
+            mainImage.style.transform = "scale(1)";
+            mainImage.style.transformOrigin = "center center";
         });
     </script>
 </body>
