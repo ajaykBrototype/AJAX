@@ -101,6 +101,72 @@ tailwind.config = {
   scrollbar-width: none;
 }
 
+/* FILTER SIDEBAR */
+.filter-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.1);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.filter-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 380px;
+  height: 100%;
+  background: #fff;
+  z-index: 101;
+  transform: translateX(100%);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 40px rgba(0,0,0,0.03);
+}
+.sidebar-open .filter-overlay { opacity: 1; pointer-events: auto; }
+.sidebar-open .filter-sidebar { transform: translateX(0); }
+
+.filter-section-title {
+  font-[0.6rem] font-bold tracking-[0.2em] text-stone-400 uppercase mb-4 block;
+}
+
+.filter-pill {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--bdr);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  cursor: pointer;
+  text-align: center;
+}
+.filter-pill:hover { border-color: var(--dark); }
+.filter-pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+.price-range-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--bdr);
+  outline: none;
+  margin: 1rem 0;
+}
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--dark);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.price-range-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
 /* ANIMATIONS */
 .fade-in-up {
   opacity: 0;
@@ -136,7 +202,7 @@ tailwind.config = {
   
   <!-- Header Section -->
   <div class="fade-in-up">
-    <h1 class="page-title">MEN'S SHIRTS</h1>
+    <h1 class="page-title">MEN'S COLLECTIONS</h1>
   </div>
 
   <!-- Categories Pills -->
@@ -160,7 +226,7 @@ tailwind.config = {
     
     <!-- Left: Filter -->
     <div class="flex items-center">
-      <button class="toolbar-link flex items-center gap-2">
+      <button class="toolbar-link flex items-center gap-2" onclick="toggleSidebar(true)">
         FILTER <i data-lucide="plus" size="12" stroke-width="3"></i>
       </button>
     </div>
@@ -301,50 +367,72 @@ tailwind.config = {
 
 </main>
 
+<!-- FILTER SIDEBAR -->
+<div class="filter-overlay" onclick="toggleSidebar(false)"></div>
+<aside class="filter-sidebar">
+  <div class="flex items-center justify-between p-6 border-b border-stone-100">
+    <h2 class="text-xl font-serif italic">Filter & Sort</h2>
+    <button onclick="toggleSidebar(false)" class="p-2 hover:bg-stone-50 rounded-full transition-colors">
+      <i data-lucide="x" size="18"></i>
+    </button>
+  </div>
+
+  <div class="flex-grow overflow-y-auto p-6 space-y-8">
+    <!-- Search Section -->
+    <section>
+      <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Search</span>
+      <div class="relative">
+        <input type="text" id="sidebarSearch" placeholder="e.g. Linen, Shirt..." 
+               class="w-full bg-[#F9F9F7] border-none rounded-lg px-4 py-3 text-[0.65rem] font-medium placeholder:text-stone-300 focus:ring-1 focus:ring-black outline-none transition-all">
+        <i data-lucide="search" size="12" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300"></i>
+      </div>
+    </section>
+
+    <!-- Sort Section -->
+    <section>
+      <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Sort By</span>
+      <div class="grid grid-cols-2 gap-2">
+        <button class="filter-pill sort-pill" data-sort="newest">Latest</button>
+        <button class="filter-pill sort-pill" data-sort="price-low">Price Low-High</button>
+        <button class="filter-pill sort-pill" data-sort="price-high">Price High-Low</button>
+        <button class="filter-pill sort-pill" data-sort="name-az">A - Z</button>
+        <button class="filter-pill sort-pill" data-sort="name-za">Z - A</button>
+      </div>
+    </section>
+
+    <!-- Category Section -->
+    <section>
+      <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Category</span>
+      <div class="grid grid-cols-2 gap-2">
+        <button class="filter-pill cat-pill" data-cat="">All Items</button>
+        <% subCategories.forEach(sub => { %>
+          <button class="filter-pill cat-pill" data-cat="<%= sub._id %>"><%= sub.name %></button>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- Price Range Section -->
+    <section>
+      <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Price Range</span>
+      <div class="flex justify-between text-[0.55rem] font-bold text-stone-400">
+        <span>₹0.00</span>
+        <span id="priceLabel">₹10000.00</span>
+      </div>
+      <input type="range" id="priceRange" min="0" max="10000" step="500" value="10000" class="price-range-slider">
+    </section>
+  </div>
+
+  <div class="p-6 border-t border-stone-100 flex gap-3">
+    <button onclick="clearAllFilters()" class="flex-1 py-3 border border-stone-200 text-[0.6rem] font-black tracking-[0.15em] uppercase hover:bg-stone-50 transition-colors">Clear All</button>
+    <button onclick="applyFilters()" class="flex-1 py-3 bg-black text-white text-[0.6rem] font-black tracking-[0.15em] uppercase hover:opacity-90 transition-opacity">Apply</button>
+  </div>
+</aside>
+
 <%- include('../partials/footer') %>
 
 <script src="https://unpkg.com/lucide@latest"></script>
-<script>
-    lucide.createIcons();
 
-    // Sorting Logic (UI and URL Update)
-    const sortSelect = document.querySelector('.sort-select');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', () => {
-            const value = sortSelect.value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('sort', value);
-            window.location.href = url.toString();
-        });
-    }
 
-    // Search Logic (UI and URL Update)
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const value = searchInput.value.trim();
-                const url = new URL(window.location.href);
-                if (value) {
-                    url.searchParams.set('search', value);
-                } else {
-                    url.searchParams.delete('search');
-                }
-                window.location.href = url.toString();
-            }
-        });
-    }
-
-    // Restore sort/search values from URL
-    window.addEventListener('load', () => {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('sort') && sortSelect) {
-            sortSelect.value = url.searchParams.get('sort');
-        }
-        if (url.searchParams.has('search') && searchInput) {
-            searchInput.value = url.searchParams.get('search');
-        }
-    });
-</script>
+    <script src="/js/user/filter.js"></script>
 </body>
 </html>
