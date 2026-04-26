@@ -10,16 +10,16 @@ if (form) {
       const res = await axios.post("/forgot-password", { email });
 
       if (res.data.success) {
-        if(typeof showToast === 'function') {
-          showToast('success', 'OTP sent effectively check your email.');
+        if(typeof ajaxToast === 'function') {
+          ajaxToast('success', 'OTP sent effectively check your email.');
         }
         setTimeout(() => {
           window.location.href = "/otp";
         }, 1500);
       }
     } catch (err) {
-      if(typeof showToast === 'function') {
-        showToast('error', err.response?.data?.message || 'Failed to send OTP.');
+      if(typeof ajaxToast === 'function') {
+        ajaxToast('error', err.response?.data?.message || 'Failed to send OTP.');
       }
     }
   });

@@ -124,10 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
           ajaxToast("success", "Variant added");
           window.location.href = res.data.redirectUrl;
         } else {
-          ajaxToast("error", res.data.message);
+            ajaxToast("error", res.data.message);
         }
       } catch (err) {
-        ajaxToast("error", err.response?.data?.message || "Server error");
+          ajaxToast("error", err.response?.data?.message || "Server error");
       } finally {
         saveVariantBtn.disabled = false;
       }

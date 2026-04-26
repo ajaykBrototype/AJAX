@@ -158,3 +158,87 @@ export const checkQuantity = async (req, res) => {
     res.json({ success: false, message: "Server error" });
   }
 };
+
+
+
+export const loadFilteredProducts = async (req, res) => {
+  try {
+    const { search, sort, category, price } = req.query;
+
+    const menCategory = await Category.findOne({ name: "Men" });
+
+    if (!menCategory) {
+      return res.json({ success: true, products: [] });
+    }
+
+    let filter = {
+      isActive: true,
+      category: menCategory._id
+    };
+
+    // 🔍 SEARCH
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
+
+    // 🏷 CATEGORY
+    if (category) {
+      filter.subcategory = category;
+    } else {
+      const subs = await SubCategory.find({
+        category: menCategory._id,
+        isActive: true
+      });
+
+      filter.subcategory = { $in: subs.map(s => s._id) };
+    }
+
+    const maxPrice = Number(price) || 10000;
+
+    let products = await Product.find(filter).lean();
+
+    // 💰 FILTER BY VARIANT PRICE
+    let productData = await Promise.all(
+      products.map(async (p) => {
+        const variants = await Variant.find({
+          productId: p._id,
+          isActive: true,
+          price: { $lte: maxPrice }
+        }).lean();
+
+        return variants.length ? { ...p, variants } : null;
+      })
+    );
+
+    productData = productData.filter(Boolean);
+
+    // 🔄 SORT
+    const getPrice = (p) => p.variants?.[0]?.price || 0;
+
+    if (sort === "price-low") {
+      productData.sort((a, b) => getPrice(a) - getPrice(b));
+    }
+
+    if (sort === "price-high") {
+      productData.sort((a, b) => getPrice(b) - getPrice(a));
+    }
+
+    if (sort === "name-az") {
+      productData.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    if (sort === "name-za") {
+      productData.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    if (sort === "newest") {
+      productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    res.json({ success: true, products: productData });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+};

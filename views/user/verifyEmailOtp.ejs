@@ -5,6 +5,11 @@
   <title>Verify Email</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 1. Load SweetAlert FIRST -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- 2. Then your helper -->
+<script src="/js/utils/swal-helper.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
@@ -219,8 +224,7 @@ function clearOtpError() {
 inputs[0].focus();
 </script>
 
-<%- include('../partials/toast') %>
-<script src="/js/utils/toast.js"></script>
+<script src="/js/utils/swalToast.js"></script>
 
 </body>
 </html>

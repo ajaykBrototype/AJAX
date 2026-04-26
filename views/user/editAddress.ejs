@@ -87,9 +87,10 @@ tailwind.config = {
 <body>
 
 <%- include('../partials/navbar', { hasSidebarToggle: true }) %>
-<%- include('../partials/sidebar-drawer', { activePage: 'address' }) %>
+<!-- <%- include('../partials/sidebar-drawer', { activePage: 'address' }) %> -->
 
 <!-- ══ PAGE BODY ══ -->
+ 
 <div style="padding-top:65px;min-height:100vh;">
   <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
 
@@ -287,8 +288,6 @@ tailwind.config = {
 <!-- ══ FOOTER ══ -->
 <%- include('../partials/footer') %>
 
-<!-- ══ GLOBAL TOAST ══ -->
-<%- include('../partials/toast') %>
 
 <script>
 

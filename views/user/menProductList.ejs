@@ -232,14 +232,15 @@ tailwind.config = {
     </div>
 
     <!-- Right: Search & Sort -->
-    <div class="flex items-center gap-8 md:gap-12 ml-auto">
+    <div  class="flex items-center gap-8 md:gap-12 ml-auto">
       <!-- Search -->
       <div class="search-container flex items-center gap-2">
-        <input type="text" placeholder="SEARCH..." class="search-input">
-        <button class="toolbar-link flex items-center gap-2">
+        <input type="text" id="toolbarSearch" placeholder="SEARCH..." class="search-input">
+        <button id="toolbarSearchBtn" class="toolbar-link flex items-center gap-2" onclick="triggerToolbarSearch()">
           <i data-lucide="search" size="14" stroke-width="2.5"></i>
         </button>
       </div>
+      
 
       <!-- Sort -->
       <div class="flex items-center gap-4">
@@ -259,7 +260,7 @@ tailwind.config = {
   </div>
 
   <!-- Product Grid -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 fade-in-up delay-2">
+<div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 fade-in-up delay-2">
 
   <% if (products.length > 0) { %>
 
@@ -431,7 +432,7 @@ tailwind.config = {
 <%- include('../partials/footer') %>
 
 <script src="https://unpkg.com/lucide@latest"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script src="/js/user/filter.js"></script>
 </body>

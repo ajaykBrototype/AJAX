@@ -22,7 +22,7 @@ export const loadProfile = async (req, res) => {
 
   } catch (error) {
     console.log("❌ ERROR:", error);
-    res.send("Server Error"); // 👈 TEMP SHOW ERROR
+    res.send("Server Error"); 
   }
 };
 
@@ -135,7 +135,7 @@ export const verifyEmailOtp = async (req, res) => {
 };
 
 export const loadChangePassword = (req, res) => {
-  res.render("user/changePassword"); // your EJS file name
+  res.render("user/changePassword"); 
 };
 
 

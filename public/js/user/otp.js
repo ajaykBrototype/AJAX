@@ -130,6 +130,7 @@ async function verifyOtp() {
 
     if (res.data.success) {
       window.location.href = res.data.redirect;
+      ajaxToast("success","Otp Verified")
     }
 
   } catch (err) {
@@ -163,18 +164,18 @@ async function resendOtp() {
 
     if (res.data.success) {
       if (typeof showToast === "function") {
-        showToast("success", res.data.message || "OTP resent successfully");
+        ajaxToast("success", res.data.message || "OTP resent successfully");
       }
       startTimer();
     } else {
       if (typeof showToast === "function") {
-        showToast("error", res.data.message || "Failed to resend OTP");
+        ajaxToast("error", res.data.message || "Failed to resend OTP");
       }
     }
 
   } catch (err) {
     if (typeof showToast === "function") {
-      showToast("error", err.response?.data?.message || "Resending OTP failed");
+      ajaxToast("error", err.response?.data?.message || "Resending OTP failed");
     }
   }
 }
