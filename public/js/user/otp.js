@@ -163,18 +163,18 @@ async function resendOtp() {
     const res = await axios.post("/resend-otp");
 
     if (res.data.success) {
-      if (typeof showToast === "function") {
+      if (typeof ajaxToast === "function") {
         ajaxToast("success", res.data.message || "OTP resent successfully");
       }
       startTimer();
     } else {
-      if (typeof showToast === "function") {
+      if (typeof ajaxToast === "function") {
         ajaxToast("error", res.data.message || "Failed to resend OTP");
       }
     }
 
   } catch (err) {
-    if (typeof showToast === "function") {
+    if (typeof ajaxToast === "function") {
       ajaxToast("error", err.response?.data?.message || "Resending OTP failed");
     }
   }

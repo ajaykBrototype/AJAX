@@ -47,16 +47,21 @@ export const verifyEmailOtpService = async (req) => {
   // 🔥 DELETE OTP FIRST (security)
   await Otp.deleteOne({ _id: record._id });
 
+  // APPLY ALL PENDING CHANGES
+  const updateData = req.session.pendingProfileData || { email: newEmail };
+  
   await User.findByIdAndUpdate(userId, {
-    email: newEmail,
+    ...updateData,
     isVerified: true
   });
 
+  // CLEANUP
   delete req.session.newEmail;
+  delete req.session.pendingProfileData;
 
   return {
     success: true,
-    message: "Email updated successfully"
+    message: "Profile updated successfully"
   };
 };
 

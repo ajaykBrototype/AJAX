@@ -90,7 +90,7 @@ tailwind.config = {
 <!-- <%- include('../partials/sidebar-drawer', { activePage: 'address' }) %> -->
 
 <!-- ══ PAGE BODY ══ -->
- 
+
 <div style="padding-top:65px;min-height:100vh;">
   <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
 
@@ -421,6 +421,9 @@ const style = document.createElement('style');
 style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(style);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/utils/swal-helper.js"></script>
 
 </body>
 </html>

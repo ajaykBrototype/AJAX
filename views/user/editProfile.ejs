@@ -114,7 +114,7 @@
 
     <div class="flex flex-col">
       <label class="label">Email</label>
-      <input type="email" name="email" value="<%= user.email %>" class="input-field"  <%= user.googleId ? "disabled" : "" %>/>
+      <input type="email" name="email" value="<%= user.email %>" class="input-field"  <%= user.googleId ? "readonly" : "" %>/>
       <% if (user.googleId) { %>
     <p class="text-xs text-gray-500 mt-1">
     Email cannot be changed for Google accounts</p>
@@ -147,7 +147,7 @@
     </div>
 
     <div class="md:col-span-2 mt-4">
-      <button id="submitBtn"
+      <button type="submit" id="submitBtn"
   style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;"
   class="flex items-center justify-center gap-3">
 
@@ -165,7 +165,9 @@
 </div>
 
 <%- include('../partials/footer') %>
-<script src="/js/utils/toast.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/profile.js"></script>
 </body>
 </html>

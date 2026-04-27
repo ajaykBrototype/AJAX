@@ -67,8 +67,8 @@ await Otp.findOneAndUpdate(
 
 await sendOtpEmail(email, otp);
 
-// store ONLY email in session (optional)
-
+  req.session.resetEmail = email;
+  req.session.type = "reset";
 
   console.log("Reset OTP:", otp);
 

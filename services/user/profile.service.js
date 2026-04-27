@@ -22,7 +22,7 @@ export const changePasswordService = async (data, req) => {
     return { success: false, errors };
   }
 
-  // ✅ match
+
   if (newPassword !== confirmPassword) {
     return {
       success: false,

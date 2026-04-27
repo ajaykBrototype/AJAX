@@ -156,14 +156,14 @@ async function verifyOtp() {
   try {
     const res = await axios.post("/profile/email/verify", { otp });
 
-    showToast("success", res.data.message);
+    ajaxToast("success", res.data.message);
 
     setTimeout(() => {
       window.location.href = "/profile";
     }, 1200);
 
   } catch (err) {
-    showToast("error", err.response?.data?.message || "Invalid OTP");
+    ajaxToast("error", err.response?.data?.message || "Invalid OTP");
   }
 }
 
@@ -202,10 +202,10 @@ startTimer();
 resendBtn.addEventListener("click", async () => {
   try {
     const res = await axios.post("/profile/email/resend-otp");
-    showToast("success", res.data.message || "OTP resent successfully");
+    ajaxToast("success", res.data.message || "OTP resent successfully");
     startTimer();
   } catch (err) {
-    showToast("error", err.response?.data?.message || "Failed to resend OTP");
+    ajaxToast("error", err.response?.data?.message || "Failed to resend OTP");
   }
 });
 
@@ -224,7 +224,7 @@ function clearOtpError() {
 inputs[0].focus();
 </script>
 
-<script src="/js/utils/swalToast.js"></script>
+<script src="/js/utils/swal-helper.js"></script>
 
 </body>
 </html>

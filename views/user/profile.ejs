@@ -213,9 +213,7 @@ tailwind.config = {
 
 <%- include('../partials/footer') %>
 
-<script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.getElementById("logoutBtnHeader").addEventListener("click", function () {
 
@@ -236,9 +234,10 @@ document.getElementById("logoutBtnHeader").addEventListener("click", function ()
 });
 </script>
 
-
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="/js/utils/toast.js"></script>   
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/utils/swal-helper.js"></script>
+  
 <!-- <script src="/js/user/logout.js"></script> -->
 </body>
 </html>
