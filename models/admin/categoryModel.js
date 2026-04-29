@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { boolean } from "zod";
+import { boolean, lowercase } from "zod";
 
 const categorySchema=new mongoose.Schema({
     name:{
         type:String,
         require:true,
         unique:true,
+        lowercase:true,
         trim:true
     },
     isActive:{

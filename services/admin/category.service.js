@@ -1,23 +1,29 @@
 import { success } from "zod";
 import Category from "../../models/admin/categoryModel.js";
 
-export const createCategoryService=async(data)=>{
-   const {name,isActive}=data;
-   
-   const existing=await Category.findOne({name});
+export const createCategoryService = async (data) => {
+  let { name, isActive } = data;
 
-   if(existing){
+  name = name.trim().toLowerCase();
+
+  const existing = await Category.findOne({
+    name: { $regex: `^${name}$`, $options: "i" }
+  });
+
+  if (existing) {
     return {
-        success:false,
-        message:"Category already exists"
+      success: false,
+      message: "Category already exists"
     };
-    }
-    const category=await Category.create({name,isActive});
-    return{
-        success:true,
-        category
-    };
-}
+  }
+
+  const category = await Category.create({ name, isActive });
+
+  return {
+    success: true,
+    category
+  };
+};
 
 export const getCategoriesService=async()=>{
     const categories=await Category.find().sort({createdAt:-1});
@@ -26,10 +32,11 @@ export const getCategoriesService=async()=>{
 
 export const updateCategoryService=async(id,data)=>{
   const {name,isActive}=data;
+     name = name.trim().toLowerCase();
 
   const existing=await Category.findOne({
-    name,
-    _id:{$ne:id}
+      name: { $regex: `^${name}$`, $options: "i" },
+    _id: { $ne: id }
   });
 
   if(existing){

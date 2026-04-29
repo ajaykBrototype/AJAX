@@ -155,7 +155,7 @@
                 <tr class="tr-row">
                   <td class="px-8 py-5 text-xs text-stone-400"><%= (currentPage - 1) * 5 + index + 1 %></td>
                   <td class="px-8 py-5">
-                    <p class="text-sm font-bold"><%= cat.name %></p>
+                    <p class="text-sm font-bold"><%= cat.name.charAt(0).toUpperCase() + cat.name.slice(1) %></p>
                     <p class="text-[0.6rem] text-stone-400 uppercase tracking-tighter">Collection ID: <%= cat._id.toString().slice(-6) %></p>
                   </td>
                   <td class="px-8 py-5 text-xs font-medium"><%= cat.subCount %> Nodes</td>

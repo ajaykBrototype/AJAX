@@ -52,11 +52,10 @@
 </head>
 <body class="flex min-h-screen">
 
-<!-- ═══════════════════════════════════════ SIDEBAR ═══ -->
 <!-- ── SIDEBAR (PARTIAL) ── -->
   <%- include('partials/sidebar', { currentPath: '/admin/products' }) %>
 
-<!-- ═══════════════════════════════════════ MAIN ════════ -->
+
 <main class="flex-1 min-w-0 pb-28">
 
   <!-- Top bar (mobile) -->
@@ -192,7 +191,7 @@
 <script src="/js/admin/product.js"></script>
 
 <script>
-  // Dynamic Subcategory Loading with refined UI states
+
   const categorySelect = document.querySelector('select[name="category"]');
   const subcategorySelect = document.querySelector('select[name="subcategory"]');
 
