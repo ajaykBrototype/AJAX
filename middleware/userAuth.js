@@ -2,7 +2,6 @@ import User from "../models/user/userModel.js";
 
 export const isLoggedIn = async (req, res, next) => {
   try {
-    // ❌ No session
     if (!req.session.userId) {
       if (req.xhr || req.headers.accept.includes("json")) {
         return res.status(401).json({
@@ -15,9 +14,8 @@ export const isLoggedIn = async (req, res, next) => {
 
     const user = await User.findById(req.session.userId);
 
-    // ❌ User not found
     if (!user) {
-      delete req.session.userId; // ✅ ONLY remove user session
+      delete req.session.userId; 
 
       if (req.xhr || req.headers.accept.includes("json")) {
         return res.status(401).json({
@@ -29,9 +27,9 @@ export const isLoggedIn = async (req, res, next) => {
       return res.redirect("/login");
     }
 
-    // ❌ User blocked
+
     if (user.isBlocked) {
-      delete req.session.userId; // ✅ DO NOT destroy full session
+      delete req.session.userId; 
 
       if (req.xhr || req.headers.accept.includes("json")) {
         return res.status(403).json({

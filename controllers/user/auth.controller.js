@@ -166,5 +166,5 @@ export const loadResetPassword = (req, res) => {
 };
 
 export const loadHome = (req, res) => {
-  res.render("user/home");
+  res.render("user/home", { user: req.session.userId });
 };

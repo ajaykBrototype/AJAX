@@ -39,6 +39,7 @@
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
       </button>
+      <% if (locals.user) { %>
       <button id="accountBtn" class="nav-icon hidden md:flex" title="Account">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -69,6 +70,14 @@
           </div>
         </button>
       </div>
+      <% } else { %>
+        <a href="/login" class="nav-icon hidden md:flex" title="Login">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" class="ns" stroke="#fff">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </a>
+      <% } %>
       <button id="ham" class="nav-icon md:hidden">
         <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
           <line x1="0" y1="1"  x2="20" y2="1"  stroke="#fff" stroke-width="1.5" class="hl"/>

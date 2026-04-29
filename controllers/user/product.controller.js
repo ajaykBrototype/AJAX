@@ -6,7 +6,7 @@ export const loadMenPage = async (req, res) => {
   try {
     const { sub, page = 1 } = req.query;
 
-    const limit = 8; // products per page
+    const limit = 8; 
     const skip = (page - 1) * limit;
 
     const menCategory = await Category.findOne({ name: "Men" });
@@ -78,8 +78,8 @@ export const loadProductDetails = async (req, res) => {
     const category = await Category.findById(product.category).lean(); 
     const subCategory = await SubCategory.findById(product.subcategory).lean();
 
-    if (!product) {
-      return res.redirect("/home");
+    if (!product || !product.isActive) {
+      return res.redirect("/menProductList");
     }
 
     const variants = await Variant.find({
@@ -92,7 +92,8 @@ export const loadProductDetails = async (req, res) => {
 
     const relatedRaw = await Product.find({
       category: product.category,
-      _id: { $ne: product._id }
+      _id: { $ne: product._id },
+      isActive: true
     }).limit(4).lean();
 
     const relatedProducts = await Promise.all(
@@ -176,12 +177,10 @@ export const loadFilteredProducts = async (req, res) => {
       category: menCategory._id
     };
 
-    // 🔍 SEARCH
     if (search) {
       filter.name = { $regex: search, $options: "i" };
     }
 
-    // 🏷 CATEGORY
     if (category) {
       filter.subcategory = category;
     } else {
@@ -197,7 +196,6 @@ export const loadFilteredProducts = async (req, res) => {
 
     let products = await Product.find(filter).lean();
 
-    // 💰 FILTER BY VARIANT PRICE
     let productData = await Promise.all(
       products.map(async (p) => {
         const variants = await Variant.find({
@@ -212,7 +210,7 @@ export const loadFilteredProducts = async (req, res) => {
 
     productData = productData.filter(Boolean);
 
-    // 🔄 SORT
+
     const getPrice = (p) => p.variants?.[0]?.price || 0;
 
     if (sort === "price-low") {

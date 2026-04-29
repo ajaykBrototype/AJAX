@@ -24,7 +24,7 @@ router.get("/auth/google",
 
 router.get("/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  authController.googleCallback // 🔥 move logic to controller
+  authController.googleCallback 
 );
 
 router.get("/otp", authController.loadOtpPage);
@@ -44,13 +44,13 @@ router.get("/reset-password", authController.loadResetPassword);
 router.post("/reset-password", authController.resetPassword);
 
 
-router.get("/home", isLoggedIn, authController.loadHome);
+router.get("/home", authController.loadHome);
 
 
 router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);
 router.get("/edit-profile", noCache, isLoggedIn, profileController.loadEditProfile);
 
-router.post( "/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
+router.patch( "/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
 
 router.get("/profile/email/verify", isLoggedIn, emailController.loadVerifyEmailPage);
 router.post("/profile/email/verify", isLoggedIn, emailController.verifyEmailOtp);
@@ -66,16 +66,16 @@ router.post("/address/add", isLoggedIn, addressController.addAddress);
 router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
-router.post("/edit-address/:id", isLoggedIn, addressController.updateAddress);
+router.put("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
-router.get("/menProductList",isLoggedIn,loadMenPage);
+router.get("/menProductList",loadMenPage);
 router.get("/api/products",loadFilteredProducts);
 
-router.get("/product/:id", isLoggedIn, loadProductDetails);
-router.post("/check-quantity",isLoggedIn, checkQuantity);
+router.get("/product/:id", loadProductDetails);
+router.post("/check-quantity", checkQuantity);
 router.post("/cart/add", isLoggedIn, addToCart);
 router.get("/cart", isLoggedIn, loadCartPage);
-router.post("/cart/update", isLoggedIn, updateCartQty);
+router.patch("/cart/update", isLoggedIn, updateCartQty);
 router.post("/cart/remove", isLoggedIn, removeCartItem);
 
 export default router;

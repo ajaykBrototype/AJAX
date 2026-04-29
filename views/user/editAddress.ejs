@@ -389,7 +389,7 @@ document.getElementById('editAddressForm').addEventListener('submit', async func
     const data = Object.fromEntries(formData.entries());
 
     const response = await fetch(`/edit-address/${addressId}`, {
-      method: 'POST',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });

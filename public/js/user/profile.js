@@ -44,7 +44,7 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
   loader.classList.remove("hidden");
 
   try {
-    const res = await axios.post("/profile/update", formData);
+    const res = await axios.patch("/profile/update", formData);
 
     console.log("🔥 RESPONSE:", res.data);
 

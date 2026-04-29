@@ -5,9 +5,9 @@
             let subtotal = 0;
             const items = document.querySelectorAll('.bag-card:not(.item-exit)');
             
-            // If we just removed the last item, reload to show empty state
+           
             if (items.length === 0) {
-                // Check if we are ALREADY showing the empty state container
+              
                 const emptyState = document.querySelector('.empty-state-container');
                 if (!emptyState) {
                     window.location.reload();
@@ -16,6 +16,8 @@
             }
 
             items.forEach(card => {
+                if (card.classList.contains('grayscale')) return; // Skip out of stock
+                
                 const price = parseFloat(card.dataset.price) || 0;
                 const qtyVal = card.querySelector('.qty-val');
                 if (qtyVal) {
@@ -30,7 +32,7 @@
             subtotalDisplays.forEach(el => el.innerText = `₹${subtotal.toFixed(2)}`);
             totalDisplays.forEach(el => el.innerText = `₹${subtotal.toFixed(2)}`);
 
-            // If bag is empty after removal, we might want to reload to show empty state
+           
             if (items.length === 0) {
                 window.location.reload();
             }
@@ -46,7 +48,7 @@
 
             if (newQty < 1) return;
             if (newQty > 5) {
-                return ajaxToast("error", "Maximum 5 items allowed");
+                return ajaxToast("error", "Maximum 5 units per item allowed in bag");
             }
 
             try {
@@ -54,7 +56,7 @@
                 qtyEl.innerText = newQty;
                 recalculate();
 
-                const res = await axios.post('/cart/update', { itemId, delta });
+                const res = await axios.patch('/cart/update', { itemId, delta });
                 
                 if (!res.data.success) {
                     // Revert if failed
@@ -63,7 +65,11 @@
                     ajaxToast("error", res.data.message);
                 }
             } catch (err) {
-                console.log(err);
+                console.log("QTY UPDATE ERROR:", err);
+                if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname);
+                    return;
+                }
                 qtyEl.innerText = currentQty;
                 recalculate();
             }
@@ -89,7 +95,11 @@
                     ajaxToast("error", res.data.message);
                 }
             } catch (err) {
-                console.log(err);
+                console.log("REMOVE ITEM ERROR:", err);
+                if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                    window.location.href = "/login?returnTo=" + encodeURIComponent(window.location.pathname);
+                    return;
+                }
             }
         }
 

@@ -50,6 +50,11 @@ app.use("/uploads", express.static("public/uploads"));
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.userId || null;
+  next();
+});
+
 
 app.use("/", userRoutes);
 app.use("/admin", adminRoutes);

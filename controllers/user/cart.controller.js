@@ -32,11 +32,16 @@ export const addToCart = async (req, res) => {
     );
 
     if (existingItem) {
-      existingItem.quantity += quantity;
+      if (existingItem.quantity >= 5) {
+        // Already at max, just redirect to cart instead of showing error
+        return res.json({ success: true, alreadyInCart: true });
+      }
+      const newQty = Math.min(existingItem.quantity + quantity, 5);
+      existingItem.quantity = newQty;
     } else {
       cart.items.push({
         variant: variantId,
-        quantity
+        quantity: Math.min(quantity, 5)
       });
     }
 
@@ -69,16 +74,10 @@ export const loadCartPage = async (req, res) => {
       const validItems = [];
 
       for (const item of cart.items) {
-        // Remove if variant or product is inactive
+        // Remove only if variant or product is inactive (deleted/hidden)
         if (!item.variant || !item.variant.isActive || !item.variant.productId || !item.variant.productId.isActive) {
           changed = true;
           continue;
-        }
-
-        // Reduce quantity if it exceeds current stock
-        if (item.quantity > item.variant.stock) {
-          item.quantity = item.variant.stock;
-          changed = true;
         }
 
         // Enforce max limit of 5
@@ -87,11 +86,14 @@ export const loadCartPage = async (req, res) => {
           changed = true;
         }
 
-        if (item.quantity > 0) {
-          validItems.push(item);
-        } else {
+        // Handle stock capping: if stock > 0 but quantity exceeds stock
+        if (item.variant.stock > 0 && item.quantity > item.variant.stock) {
+          item.quantity = item.variant.stock;
           changed = true;
         }
+
+        // Items with 0 stock will be kept in validItems but handled in UI
+        validItems.push(item);
       }
 
       if (changed) {
@@ -101,7 +103,10 @@ export const loadCartPage = async (req, res) => {
 
       let totalPrice = 0;
       cart.items.forEach(item => {
-        totalPrice += item.variant.price * item.quantity;
+        // Only count items that have stock
+        if (item.variant.stock > 0) {
+          totalPrice += item.variant.price * item.quantity;
+        }
       });
 
       res.render("user/cart", {

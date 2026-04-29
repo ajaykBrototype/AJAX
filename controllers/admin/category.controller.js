@@ -43,13 +43,13 @@ export const loadCategoryPage = async (req, res) => {
       }
     ]);
 
-    // ✅ total count WITH search
+  
     const total = await Category.countDocuments(matchStage);
 
-    // ✅ total subcategories
+
     const totalSubCategories = await SubCategory.countDocuments();
 
-    // ✅ status counts
+
     const activeCount = await Category.countDocuments({ isActive: true });
     const inactiveCount = await Category.countDocuments({ isActive: false });
 

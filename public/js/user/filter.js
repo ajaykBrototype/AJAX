@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🏷 CATEGORY
   document.querySelectorAll(".cat-pill").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".cat-pill").forEach(b => b.classList.remove("active"));
@@ -48,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🔄 SORT (sidebar)
+
   document.querySelectorAll(".sort-pill").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".sort-pill").forEach(b => b.classList.remove("active"));
@@ -58,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🔄 SORT (top dropdown)
+
   const sortSelect = document.querySelector(".sort-select");
   if (sortSelect) {
     sortSelect.addEventListener("change", (e) => {
@@ -67,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 💰 PRICE
+
   const priceRange = document.getElementById("priceRange");
   const priceLabel = document.getElementById("priceLabel");
 
@@ -80,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// 🔍 Toolbar search button click
+
 window.triggerToolbarSearch = function () {
   const toolbarSearch = document.getElementById("toolbarSearch");
   if (toolbarSearch && toolbarSearch.value.trim()) {
@@ -125,13 +124,12 @@ window.applyFilters = async function () {
   }
 };
 
-// ❌ CLEAR FILTER — reload the page to restore original server-rendered products
 window.clearAllFilters = function () {
   window.location.href = '/menProductList';
 };
 
 
-// 🎨 RENDER PRODUCTS — matches the EJS card layout exactly
+
 function renderProducts(products) {
   const container = document.getElementById("productGrid");
 

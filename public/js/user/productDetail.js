@@ -37,7 +37,7 @@ increaseBtn.addEventListener("click", async () => {
     const newQty = currentQty + 1;
 
     if (newQty > 5) {
-        return showError("Maximum 5 items allowed");
+        return showError("Maximum 5 units per item allowed in bag");
     }
 
     if (newQty > currentStock) {
@@ -90,7 +90,12 @@ addBtn.addEventListener("click",async()=>{
       ajaxToast("error", res.data.message);
     }
     }catch(err){
-        console.log(err);
+        console.log("CART ADD ERROR:", err);
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            const currentPath = window.location.pathname;
+            window.location.href = `/login?returnTo=${encodeURIComponent(currentPath)}`;
+            return;
+        }
     ajaxToast("error", "Something went wrong");
     }
 })
