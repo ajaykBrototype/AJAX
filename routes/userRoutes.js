@@ -6,13 +6,14 @@ import * as profileController from "../controllers/user/profile.controller.js";
 import * as emailController from "../controllers/user/email.controller.js";
 import * as addressController from "../controllers/user/address.controller.js";
 
-import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
+import { isLoggedIn, isLoggedOut, checkBlocked } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
 import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 
 const router = express.Router();
+router.use(checkBlocked);
 
 
 router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
@@ -45,6 +46,7 @@ router.post("/reset-password", authController.resetPassword);
 
 
 router.get("/home", authController.loadHome);
+router.get("/", authController.loadHome);
 
 
 router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);

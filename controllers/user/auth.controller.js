@@ -135,12 +135,12 @@ export const logoutUser = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
-      return res.redirect("/home");
+      return res.redirect("/");
     }
 
     res.clearCookie("connect.sid");
 
-    return res.redirect("/login");
+    return res.redirect("/");
   });
 };
 export const googleCallback = (req, res) => {
