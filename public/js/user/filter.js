@@ -3,6 +3,14 @@ function toggleSidebar(open) {
   document.body.style.overflow = open ? 'hidden' : '';
 }
 
+function debounce(func, timeout = 500) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
+
 window.filters = {
   search: "",
   sort: "",
@@ -16,9 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔍 SEARCH (sidebar)
   const searchInput = document.getElementById("sidebarSearch");
+  const debouncedApply = debounce(() => applyFilters(), 500);
+
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       window.filters.search = e.target.value;
+      debouncedApply();
     });
   }
 
@@ -29,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.filters.search = e.target.value;
       // Keep sidebar search in sync
       if (searchInput) searchInput.value = e.target.value;
+      debouncedApply();
     });
     toolbarSearch.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {

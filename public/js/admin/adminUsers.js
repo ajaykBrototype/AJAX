@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('input', () => {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(runFilters, 600);
+            searchTimeout = setTimeout(runFilters, 500);
         });
     }
 

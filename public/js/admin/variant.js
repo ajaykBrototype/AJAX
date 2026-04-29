@@ -241,7 +241,7 @@ if (searchInput) {
       }
 
       window.location.href = url.toString();
-    }, 400);
+    }, 500);
   });
 }
 

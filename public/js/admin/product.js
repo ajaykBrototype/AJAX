@@ -96,6 +96,18 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // 🔍 SEARCH DEBOUNCE
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let timer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                searchInput.form.submit();
+            }, 500);
+        });
+    }
 });
 
 async function toggleProductStatus(productId, toggleInput) {
