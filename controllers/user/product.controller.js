@@ -165,7 +165,10 @@ export const checkQuantity = async (req, res) => {
 
 export const loadFilteredProducts = async (req, res) => {
   try {
-    const { search, sort, category, price } = req.query;
+    const { search, sort, category, minPrice, maxPrice } = req.query;
+
+    const min = Number(minPrice) || 0;
+    const max = Number(maxPrice) || 1000000; // Large default for max if not provided
 
     const menCategory = await Category.findOne({ name: "Men" });
 
@@ -193,7 +196,7 @@ export const loadFilteredProducts = async (req, res) => {
       filter.subcategory = { $in: subs.map(s => s._id) };
     }
 
-    const maxPrice = Number(price) || 10000;
+
 
     let products = await Product.find(filter).lean();
 
@@ -202,7 +205,7 @@ export const loadFilteredProducts = async (req, res) => {
         const variants = await Variant.find({
           productId: p._id,
           isActive: true,
-          price: { $lte: maxPrice }
+          price: { $gte: min, $lte: max }
         }).lean();
 
         return variants.length ? { ...p, variants } : null;

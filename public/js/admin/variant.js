@@ -122,7 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (res.data.success) {
           ajaxToast("success", "Variant added");
-          window.location.href = res.data.redirectUrl;
+          setTimeout(()=>{
+              window.location.href = res.data.redirectUrl;
+          },2000)
         } else {
             ajaxToast("error", res.data.message);
         }
@@ -164,7 +166,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (res.data.success) {
           ajaxToast("success", "Variant updated");
-          window.location.href = res.data.redirectUrl;
+           setTimeout(()=>{
+             window.location.href = res.data.redirectUrl;
+           },2000)
         } else {
           ajaxToast("error", res.data.message);
         }

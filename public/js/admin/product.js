@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const material = productForm.querySelector('[name="material"]');
             const careGuide = productForm.querySelector('[name="careGuide"]');
             
-            // Variant fields
+            // Variant fields (may not exist on edit page)
             const color = productForm.querySelector('[name="color"]');
             const sku = productForm.querySelector('[name="sku"]');
             const price = productForm.querySelector('[name="price"]');
@@ -38,42 +38,56 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (description.value.trim().length < 20) error = "Description must be at least 20 characters";
             else if (!material.value.trim()) error = "Material composition is required";
             else if (!careGuide.value.trim()) error = "Care guidelines are required";
-            else if (!color.value.trim()) error = "Primary color is required";
-            else if (!sku.value.trim()) error = "SKU is required";
-            else if (!price.value || price.value <= 0) error = "Valid price is required";
-            else if (stock.value === "" || stock.value < 0) error = "Valid stock is required";
-            else if (!size.value) error = "Please select a size";
-            else if ((window.uploadedFiles || []).length < 3) error = "Minimum 3 images are required";
+            
+            // Only validate variant fields if they exist (Add Product page)
+            if (!error && color) {
+                if (!color.value.trim()) error = "Primary color is required";
+                else if (!sku.value.trim()) error = "SKU is required";
+                else if (!price.value || price.value <= 0) error = "Valid price is required";
+                else if (stock.value === "" || stock.value < 0) error = "Valid stock is required";
+                else if (!size || !size.value) error = "Please select a size";
+                else if ((window.uploadedFiles || []).length < 3) error = "Minimum 3 images are required";
+            }
 
             if (error) {
                 ajaxToast("error", error);
                 return;
             }
 
-            // Submit using FormData
-            const formData = new FormData(productForm);
-            
-            // Enable subcategory if disabled so it gets included
-            if (subcategory.disabled) subcategory.disabled = false;
-
-            // Add images from memory
-            const uploadedFiles = window.uploadedFiles || [];
-            uploadedFiles.forEach((blob, i) => {
-                formData.append('images', blob, `product_${i}.jpg`);
-            });
-
             try {
                 const submitBtn = productForm.querySelector('button[type="submit"]');
                 if (submitBtn) submitBtn.disabled = true;
 
-                const res = await axios.post(productForm.action, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                const isEdit = productForm.action.includes('edit');
+                let res;
+
+                if (isEdit) {
+                    // Send as JSON for edit page
+                    const data = {
+                        name: name.value.trim(),
+                        category: category.value,
+                        subcategory: subcategory.value,
+                        description: description.value.trim(),
+                        material: material.value.trim(),
+                        careGuide: careGuide.value.trim(),
+                        isActive: productForm.querySelector('[name="isActive"]').checked
+                    };
+                    res = await axios.post(productForm.action, data);
+                } else {
+                    // Send as FormData for add page (images included)
+                    const formData = new FormData(productForm);
+                    if (subcategory.disabled) subcategory.disabled = false;
+                    const uploadedFiles = window.uploadedFiles || [];
+                    uploadedFiles.forEach((blob, i) => {
+                        formData.append('images', blob, `product_${i}.jpg`);
+                    });
+                    res = await axios.post(productForm.action, formData);
+                }
 
                 if (res.data.success) {
-                    window.location.href = "/admin/products?created=true";
+                    window.location.href = `/admin/products?${isEdit ? 'updated' : 'created'}=true`;
                 } else {
-                    ajaxToast("error", res.data.message || "Failed to create product");
+                    ajaxToast("error", res.data.message || `Failed to ${isEdit ? 'update' : 'create'} product`);
                 }
             } catch (err) {
                 console.error(err);

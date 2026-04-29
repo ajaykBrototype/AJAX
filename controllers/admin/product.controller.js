@@ -3,8 +3,8 @@ import Variant from "../../models/admin/variantModel.js";
 import Category from "../../models/admin/categoryModel.js";
 import SubCategory from "../../models/admin/subCategoryModel.js";
 
-import { 
-  createProductService, 
+import {
+  createProductService,
   getAllProductsService,
   toggleProductService
 } from "../../services/admin/product.service.js";
@@ -26,13 +26,13 @@ export const loadProductPage = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
-  
+
     const categories = await Category.find({ isActive: true });
     const subCategories = await SubCategory.find({ isActive: true });
 
-     const total = await Product.countDocuments(); // Keep for future dashboard stats if needed
+    const total = await Product.countDocuments(); // Keep for future dashboard stats if needed
 
-  
+
     let filter = {};
 
 
@@ -67,9 +67,9 @@ export const loadProductPage = async (req, res) => {
       return {
         ...prod.toObject(),
         variant: defaultVariant ? {
-            price: defaultVariant.price,
-            stock: defaultVariant.stock,
-            images: defaultVariant.images
+          price: defaultVariant.price,
+          stock: defaultVariant.stock,
+          images: defaultVariant.images
         } : null
       };
     }));
@@ -79,7 +79,7 @@ export const loadProductPage = async (req, res) => {
       categories,
       subCategories,
       currentPage: page,
-      limit, 
+      limit,
       totalPages: Math.ceil(totalMatchingProducts / limit),
       totalMatchingProducts: totalMatchingProducts,
       search: search || "",
@@ -104,24 +104,23 @@ export const loadAddProductPage = async (req, res) => {
 };
 export const addProduct = async (req, res) => {
   try {
-    const { 
-        name, category, subcategory, material, description, careGuide,
-        color, sku, price, stock, size 
+    const {
+      name, category, subcategory, material, description, careGuide,
+      color, sku, price, stock, size
     } = req.body;
 
     const images = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
 
     if (!name || !category || !subcategory || !sku || !price || !color || !size) {
-        return res.status(400).json({ success: false, message: "Required fields missing" });
+      return res.status(400).json({ success: false, message: "Required fields missing" });
     }
 
-    // 1. Check if SKU already exists
     const existingVariant = await Variant.findOne({ sku });
     if (existingVariant) {
-        return res.status(400).json({ success: false, message: "SKU already exists" });
+      return res.status(400).json({ success: false, message: "SKU already exists" });
     }
 
-    // 2. Create Product
+
     const newProduct = await Product.create({
       name,
       category,
@@ -160,17 +159,17 @@ export const loadProductDetails = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
-    // Fetch all variants to show in details
+
     const variants = await Variant.find({ productId: product._id });
-    
+
     // Support variant selection via query param (?variant=ID)
     const selectedVariantId = req.query.variant;
     let defaultVariant;
-    
+
     if (selectedVariantId) {
       defaultVariant = variants.find(v => v._id.toString() === selectedVariantId);
     }
-    
+
     if (!defaultVariant) {
       defaultVariant = variants.find(v => v.isDefault) || variants[0];
     }
@@ -195,10 +194,10 @@ export const loadEditProductPage = async (req, res) => {
     const categories = await Category.find({ isActive: true });
     const subCategories = await SubCategory.find({ isActive: true });
 
-    res.render("admin/editProduct", { 
-      product, 
-      categories, 
-      subCategories 
+    res.render("admin/editProduct", {
+      product,
+      categories,
+      subCategories
     });
   } catch (err) {
     console.log(err);
@@ -208,40 +207,45 @@ export const loadEditProductPage = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    console.log("UPDATE CONTROLLER HIT ✅");
-  console.log("BODY:", req.body);
-
     const { name, category, subcategory, description, material, careGuide, isActive } = req.body;
 
-    await Product.findByIdAndUpdate(req.params.id, {
+    if (!name || !category || !subcategory) {
+      return res.status(400).json({ success: false, message: "Required fields missing" });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
       name,
       category,
       subcategory,
       description,
       material,
       careGuide,
-      isActive: isActive === "true"
-    });
+      isActive: isActive === "true" || isActive === true
+    }, { new: true });
 
-    res.redirect("/admin/products?updated=true");
+    if (!updatedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.json({ success: true, message: "Product updated successfully" });
   } catch (err) {
-    console.log(err);
-    res.redirect("/admin/products");
+    console.error("UPDATE PRODUCT ERROR:", err);
+    res.status(500).json({ success: false, message: err.message || "Internal server error" });
   }
 };
 export const deleteProduct = async (req, res) => {
-    try {
-        const { id } = req.params;
-        console.log("DELETE HIT ✅", req.params.id);
-        const deletedProduct = await Product.findByIdAndDelete(id);
+  try {
+    const { id } = req.params;
+    console.log("DELETE HIT ✅", req.params.id);
+    const deletedProduct = await Product.findByIdAndDelete(id);
 
-        if (!deletedProduct) {
-            return res.status(404).json({ success: false, message: "Product not found" });
-        }
-
-        res.json({ success: true, message: "Product deleted successfully" });
-    } catch (err) {
-        console.error("Delete Error:", err);
-        res.status(500).json({ success: false, message: "Internal server error" });
+    if (!deletedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
+
+    res.json({ success: true, message: "Product deleted successfully" });
+  } catch (err) {
+    console.error("Delete Error:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };

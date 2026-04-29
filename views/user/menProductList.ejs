@@ -29,7 +29,6 @@ tailwind.config = {
   line-height: 1;
 }
 
-/* SEARCH & SORT BAR */
 .toolbar-link {
   font-size: 0.65rem;
   font-weight: 700;
@@ -61,7 +60,6 @@ tailwind.config = {
   padding-left: 0.5rem;
 }
 
-/* PRODUCT CARD ENHANCEMENTS */
 .product-card {
   position: relative;
   overflow: hidden;
@@ -73,35 +71,9 @@ tailwind.config = {
   opacity: 0;
   transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
 }
-.product-card:hover .secondary-img {
-  opacity: 1;
-}
-.product-card:hover .primary-img {
-  opacity: 0.8;
-}
+.product-card:hover .secondary-img { opacity: 1; }
+.product-card:hover .primary-img { opacity: 0.8; }
 
-.sort-select {
-  appearance: none;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-/* HORIZONTAL SCROLLBAR FOR CATEGORIES */
-.hide-scroll::-webkit-scrollbar {
-  display: none;
-}
-.hide-scroll {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* FILTER SIDEBAR */
 .filter-overlay {
   position: fixed;
   inset: 0;
@@ -130,10 +102,6 @@ tailwind.config = {
 .sidebar-open .filter-overlay { opacity: 1; pointer-events: auto; }
 .sidebar-open .filter-sidebar { transform: translateX(0); }
 
-.filter-section-title {
-  font-[0.6rem] font-bold tracking-[0.2em] text-stone-400 uppercase mb-4 block;
-}
-
 .filter-pill {
   padding: 0.6rem 1rem;
   border: 1px solid var(--bdr);
@@ -148,91 +116,72 @@ tailwind.config = {
 .filter-pill:hover { border-color: var(--dark); }
 .filter-pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
 
-.price-range-slider {
+/* ✨ DUAL RANGE SLIDER ✨ */
+.price-range-slider-container {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  margin-top: 10px;
+}
+.price-range-slider-container input[type="range"] {
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
   -webkit-appearance: none;
+  background: none;
+  height: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+.price-range-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: all;
+  width: 14px;
+  height: 14px;
+  background: var(--dark);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 10;
+}
+.price-track {
+  position: absolute;
   width: 100%;
   height: 2px;
-  background: var(--bdr);
-  outline: none;
-  margin: 1rem 0;
+  background: #eee;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.price-range-highlight {
+  position: absolute;
+  height: 2px;
+  background: var(--dark);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 .sort-select {
   appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none;
-
   background: #f8f8f8;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
-
   padding: 10px 36px 10px 14px;
-
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-
   color: #1c1c1c;
   cursor: pointer;
-
   transition: all 0.25s ease;
 }
-
-/* ✨ Hover */
-.sort-select:hover {
-  background: #f1f1f1;
-  border-color: #dcdcdc;
-}
-
-
-.sort-select:focus {
-  background: #ffffff;
-  border-color: #111;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
-}
-
-/* ✨ Click feel */
-.sort-select:active {
-  transform: scale(0.98);
-}
-
-
-.sort-select + i {
-  pointer-events: none;
-  transition: transform 0.3s ease;
-}
-
-.sort-select + i {
-  position: absolute;
-  right: 8px;
-}
-
-/* rotate on focus */
-.sort-select:focus + i {
-  transform: rotate(180deg);
-}
-.sort-select option {
-  background: #ffffff;
-  color: #1c1c1c;
-  padding: 10px;
-}
-
-/* Optional: smooth click feel */
-.sort-select:active {
-  transform: scale(0.98);
-}
-
-.price-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--dark);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.price-range-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.sort-select:hover { background: #f1f1f1; border-color: #dcdcdc; }
+.sort-select:focus { background: #fff; border-color: #111; box-shadow: 0 0 0 2px rgba(0,0,0,0.05); }
 
 /* ANIMATIONS */
 .fade-in-up {
@@ -240,17 +189,9 @@ tailwind.config = {
   transform: translateY(20px);
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-
 </style>
 <%- include('../partials/footer-styles') %>
 </head>
@@ -258,58 +199,28 @@ tailwind.config = {
 
 <%- include('../partials/navbar') %>
 
-<!-- MAIN CONTENT -->
 <main class="px-6 md:px-12 max-w-[1440px] mx-auto">
-  
-  <%- include('../partials/breadcrumbs', { 
-      breadcrumbs: [
-          { name: "Men's Shirts" }
-      ] 
-  }) %>
-  
-  <!-- Header Section -->
+  <%- include('../partials/breadcrumbs', { breadcrumbs: [{ name: "Men's Shirts" }] }) %>
   <div class="fade-in-up">
     <h1 class="page-title">MEN'S COLLECTIONS</h1>
   </div>
 
-  <!-- Categories Pills -->
   <div class="flex gap-2 overflow-x-auto hide-scroll mb-8 fade-in-up delay-1">
-    <a href="/menProductList"
-       class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all
-       <%= !selectedSub ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>">
-       VIEW ALL
-    </a>
+    <a href="/menProductList" class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all <%= !selectedSub ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>">VIEW ALL</a>
     <% subCategories.forEach(sub => { %>
-      <a href="/menProductList?sub=<%= sub._id %>"
-         class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all
-         <%= selectedSub == sub._id.toString() ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>">
-        <%= sub.name %>
-      </a>
+      <a href="/menProductList?sub=<%= sub._id %>" class="px-5 py-2 text-[0.6rem] font-bold tracking-[0.1em] border uppercase transition-all <%= selectedSub == sub._id.toString() ? 'bg-black text-white border-black' : 'hover:bg-black hover:text-white border-[var(--bdr)]' %>"><%= sub.name %></a>
     <% }) %>
   </div>
 
-  <!-- Toolbar: Filter, Search, Sort -->
   <div class="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[var(--bdr)] mb-12 fade-in-up delay-1">
-    
-    <!-- Left: Filter -->
     <div class="flex items-center">
-      <button class="toolbar-link flex items-center gap-2" onclick="toggleSidebar(true)">
-        FILTER <i data-lucide="plus" size="12" stroke-width="3"></i>
-      </button>
+      <button class="toolbar-link flex items-center gap-2" onclick="toggleSidebar(true)">FILTER <i data-lucide="plus" size="12" stroke-width="3"></i></button>
     </div>
-
-    <!-- Right: Search & Sort -->
-    <div  class="flex items-center gap-8 md:gap-12 ml-auto">
-    
+    <div class="flex items-center gap-8 md:gap-12 ml-auto">
       <div class="search-container flex items-center gap-2">
         <input type="text" id="toolbarSearch" placeholder="SEARCH..." class="search-input">
-        <button id="toolbarSearchBtn" class="toolbar-link flex items-center gap-2" onclick="triggerToolbarSearch()">
-          <i data-lucide="search" size="14" stroke-width="2.5"></i>
-        </button>
+        <button id="toolbarSearchBtn" class="toolbar-link flex items-center gap-2" onclick="triggerToolbarSearch()"><i data-lucide="search" size="14" stroke-width="2.5"></i></button>
       </div>
-      
-
-      <!-- Sort -->
       <div class="flex items-center gap-4">
         <span class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] uppercase">Sort</span>
         <div class="flex items-center gap-1 relative">
@@ -320,143 +231,64 @@ tailwind.config = {
             <option value="name-az">A - Z</option>
             <option value="name-za">Z - A</option>
           </select>
-          <i data-lucide="chevron-down" size="10" class="text-stone-400"></i>
+          <i data-lucide="chevron-down" size="10" class="text-stone-400 absolute right-3 pointer-events-none"></i>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Product Grid -->
-<div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 fade-in-up delay-2">
-
-  <% if (products.length > 0) { %>
-
-    <% products.forEach(product => { %>
-
-      <% const variant = product.variants?.[0]; %>
-      <a href="/product/<%= product._id %>" class="block">
-
-    <div class="product-card group">
-      <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
-        
-        <button class="wishlist-btn absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.preventDefault()">
-          <i data-lucide="heart" size="18" stroke-width="1.5"></i>
-        </button>
-
-        <!-- Primary Image -->
-        <img 
-          src="<%= variant?.images?.[0] %>" 
-          alt="<%= product.name %>"
-          class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-        />
-
-        <!-- Secondary Image (Hover) -->
-        <% if (variant?.images?.[1]) { %>
-        <img 
-          src="<%= variant.images[1] %>" 
-          alt="<%= product.name %>"
-          class="secondary-img w-full h-full object-cover"
-        />
-        <% } %>
-
-        <!-- Quick Add Overlay (Aesthetic) -->
-        <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
-           <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
-        </div>
-      </div>
-
-      <div class="product-info space-y-1">
-        <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]"><%= product.name %></h3>
-        <p class="text-[0.75rem] font-medium text-stone-500">₹<%= variant?.price %></p>
-      </div>
-    </div>
-
-</a>
-    <% }) %>
-
-  <% } else { %>
-
-    <p class="col-span-4 text-center text-gray-500 mt-10">
-      No products available
-    </p>
-
-  <% } %>
-
-</div>
-
- <!-- Pagination -->
-<div class="mt-20 mb-10 flex flex-col items-center justify-center fade-in-up delay-3">
-
-  <div class="flex items-center gap-3 text-[0.85rem] font-medium text-[#1C1C1C]">
-
-    <!-- 🔙 PREV -->
-    <% if (currentPage > 1) { %>
-      <a href="?page=<%= currentPage - 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
-         class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </a>
+  <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 fade-in-up delay-2">
+    <% if (products.length > 0) { %>
+      <% products.forEach(product => { %>
+        <% const variant = product.variants?.[0]; %>
+        <a href="/product/<%= product._id %>" class="block">
+          <div class="product-card group">
+            <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
+              <button class="wishlist-btn absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.preventDefault()"><i data-lucide="heart" size="18" stroke-width="1.5"></i></button>
+              <img src="<%= variant?.images?.[0] %>" alt="<%= product.name %>" class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+              <% if (variant?.images?.[1]) { %><img src="<%= variant.images[1] %>" alt="<%= product.name %>" class="secondary-img w-full h-full object-cover" /><% } %>
+              <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
+                <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
+              </div>
+            </div>
+            <div class="product-info space-y-1">
+              <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]"><%= product.name %></h3>
+              <p class="text-[0.75rem] font-medium text-stone-500">₹<%= variant?.price %></p>
+            </div>
+          </div>
+        </a>
+      <% }) %>
+    <% } else { %>
+      <p class="col-span-4 text-center text-gray-500 mt-10">No products available</p>
     <% } %>
-
-    <!-- 🔢 PAGE NUMBERS -->
-    <% for (let i = 1; i <= totalPages; i++) { %>
-
-      <a href="?page=<%= i %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
-         class="w-8 h-8 flex items-center justify-center transition-colors
-         <%= currentPage === i 
-            ? 'bg-[#1C1C1C] text-white' 
-            : 'hover:bg-[#EAE5DC]' %>">
-
-        <%= i %>
-
-      </a>
-
-    <% } %>
-
-    <!-- 🔜 NEXT -->
-    <% if (currentPage < totalPages) { %>
-      <a href="?page=<%= currentPage + 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>"
-         class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m9 18 6-6-6-6"/>
-        </svg>
-      </a>
-    <% } %>
-
   </div>
 
-  <!-- 🔢 PRODUCT COUNT -->
-  <p class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] mt-6 uppercase">
-    SHOWING <%= products.length %> OF <%= totalProducts %> PRODUCTS
-  </p>
-
-</div>
-
+  <div class="mt-20 mb-10 flex flex-col items-center justify-center fade-in-up delay-3">
+    <div class="flex items-center gap-3 text-[0.85rem] font-medium text-[#1C1C1C]">
+      <% if (currentPage > 1) { %><a href="?page=<%= currentPage - 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>" class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></a><% } %>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %><%= selectedSub ? '&sub=' + selectedSub : '' %>" class="w-8 h-8 flex items-center justify-center transition-colors <%= currentPage === i ? 'bg-[#1C1C1C] text-white' : 'hover:bg-[#EAE5DC]' %>"><%= i %></a>
+      <% } %>
+      <% if (currentPage < totalPages) { %><a href="?page=<%= currentPage + 1 %><%= selectedSub ? '&sub=' + selectedSub : '' %>" class="w-8 h-8 flex items-center justify-center hover:bg-[#EAE5DC] transition-colors"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a><% } %>
+    </div>
+    <p class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] mt-6 uppercase">SHOWING <%= products.length %> OF <%= totalProducts %> PRODUCTS</p>
+  </div>
 </main>
 
-<!-- FILTER SIDEBAR -->
 <div class="filter-overlay" onclick="toggleSidebar(false)"></div>
 <aside class="filter-sidebar">
   <div class="flex items-center justify-between p-6 border-b border-stone-100">
     <h2 class="text-xl font-serif italic">Filter & Sort</h2>
-    <button onclick="toggleSidebar(false)" class="p-2 hover:bg-stone-50 rounded-full transition-colors">
-      <i data-lucide="x" size="18"></i>
-    </button>
+    <button onclick="toggleSidebar(false)" class="p-2 hover:bg-stone-50 rounded-full transition-colors"><i data-lucide="x" size="18"></i></button>
   </div>
-
   <div class="flex-grow overflow-y-auto p-6 space-y-8">
-    <!-- Search Section -->
     <section>
       <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Search</span>
       <div class="relative">
-        <input type="text" id="sidebarSearch" placeholder="e.g. Linen, Shirt..." 
-               class="w-full bg-[#F9F9F7] border-none rounded-lg px-4 py-3 text-[0.65rem] font-medium placeholder:text-stone-300 focus:ring-1 focus:ring-black outline-none transition-all">
+        <input type="text" id="sidebarSearch" placeholder="e.g. Linen, Shirt..." class="w-full bg-[#F9F9F7] border-none rounded-lg px-4 py-3 text-[0.65rem] font-medium placeholder:text-stone-300 focus:ring-1 focus:ring-black outline-none transition-all">
         <i data-lucide="search" size="12" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300"></i>
       </div>
     </section>
-
-    <!-- Sort Section -->
     <section>
       <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Sort By</span>
       <div class="grid grid-cols-2 gap-2">
@@ -467,29 +299,27 @@ tailwind.config = {
         <button class="filter-pill sort-pill" data-sort="name-za">Z - A</button>
       </div>
     </section>
-
-    <!-- Category Section -->
     <section>
       <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Category</span>
       <div class="grid grid-cols-2 gap-2">
         <button class="filter-pill cat-pill" data-cat="">All Items</button>
-        <% subCategories.forEach(sub => { %>
-          <button class="filter-pill cat-pill" data-cat="<%= sub._id %>"><%= sub.name %></button>
-        <% }) %>
+        <% subCategories.forEach(sub => { %><button class="filter-pill cat-pill" data-cat="<%= sub._id %>"><%= sub.name %></button><% }) %>
       </div>
     </section>
-
-    <!-- Price Range Section -->
     <section>
       <span class="text-[0.5rem] font-black tracking-[0.2em] text-stone-400 uppercase mb-3 block">Price Range</span>
-      <div class="flex justify-between text-[0.55rem] font-bold text-stone-400">
-        <span>₹0.00</span>
-        <span id="priceLabel">₹10000.00</span>
+      <div class="flex justify-between text-[0.55rem] font-bold text-stone-400 mb-2">
+        <span id="minPriceLabel">₹0</span>
+        <span id="maxPriceLabel">₹10000</span>
       </div>
-      <input type="range" id="priceRange" min="0" max="10000" step="500" value="10000" class="price-range-slider">
+      <div class="price-range-slider-container">
+        <div class="price-track"></div>
+        <div class="price-range-highlight" id="priceHighlight"></div>
+        <input type="range" id="minPriceRange" min="0" max="10000" step="100" value="0">
+        <input type="range" id="maxPriceRange" min="0" max="10000" step="100" value="10000">
+      </div>
     </section>
   </div>
-
   <div class="p-6 border-t border-stone-100 flex gap-3">
     <button onclick="clearAllFilters()" class="flex-1 py-3 border border-stone-200 text-[0.6rem] font-black tracking-[0.15em] uppercase hover:bg-stone-50 transition-colors">Clear All</button>
     <button onclick="applyFilters()" class="flex-1 py-3 bg-black text-white text-[0.6rem] font-black tracking-[0.15em] uppercase hover:opacity-90 transition-opacity">Apply</button>
@@ -500,9 +330,8 @@ tailwind.config = {
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/js/utils/swal-helper.js"></script>
-
-    <script src="/js/user/filter.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="/js/user/filter.js"></script>
 </body>
 </html>

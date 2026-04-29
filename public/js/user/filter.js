@@ -15,12 +15,52 @@ window.filters = {
   search: "",
   sort: "",
   category: "",
-  price: 10000
+  minPrice: 0,
+  maxPrice: 10000
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-
   lucide.createIcons();
+
+  const minRange = document.getElementById("minPriceRange");
+  const maxRange = document.getElementById("maxPriceRange");
+  const minLabel = document.getElementById("minPriceLabel");
+  const maxLabel = document.getElementById("maxPriceLabel");
+  const highlight = document.getElementById("priceHighlight");
+
+  function updatePriceSlider() {
+    let minVal = parseInt(minRange.value);
+    let maxVal = parseInt(maxRange.value);
+
+    if (maxVal - minVal < 500) {
+      if (this === minRange) {
+        minRange.value = maxVal - 500;
+      } else {
+        maxRange.value = minVal + 500;
+      }
+    }
+
+    minVal = parseInt(minRange.value);
+    maxVal = parseInt(maxRange.value);
+
+    window.filters.minPrice = minVal;
+    window.filters.maxPrice = maxVal;
+
+    minLabel.innerText = `₹${minVal}`;
+    maxLabel.innerText = `₹${maxVal}`;
+
+    const percent1 = (minVal / minRange.max) * 100;
+    const percent2 = (maxVal / maxRange.max) * 100;
+
+    highlight.style.left = percent1 + "%";
+    highlight.style.width = (percent2 - percent1) + "%";
+  }
+
+  if (minRange && maxRange) {
+    minRange.addEventListener("input", updatePriceSlider);
+    maxRange.addEventListener("input", updatePriceSlider);
+    updatePriceSlider(); // Initial update
+  }
 
   // 🔍 SEARCH (sidebar)
   const searchInput = document.getElementById("sidebarSearch");
@@ -38,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (toolbarSearch) {
     toolbarSearch.addEventListener("input", (e) => {
       window.filters.search = e.target.value;
-      // Keep sidebar search in sync
       if (searchInput) searchInput.value = e.target.value;
       debouncedApply();
     });
@@ -54,43 +93,26 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".cat-pill").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       window.filters.category = btn.dataset.cat;
     });
   });
-
 
   document.querySelectorAll(".sort-pill").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".sort-pill").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       window.filters.sort = btn.dataset.sort;
     });
   });
-
 
   const sortSelect = document.querySelector(".sort-select");
   if (sortSelect) {
     sortSelect.addEventListener("change", (e) => {
       window.filters.sort = e.target.value;
-      applyFilters(); // optional auto apply
+      applyFilters();
     });
   }
-
-
-  const priceRange = document.getElementById("priceRange");
-  const priceLabel = document.getElementById("priceLabel");
-
-  if (priceRange) {
-    priceRange.addEventListener("input", () => {
-      window.filters.price = priceRange.value;
-      priceLabel.innerText = "₹" + priceRange.value;
-    });
-  }
-
 });
-
 
 window.triggerToolbarSearch = function () {
   const toolbarSearch = document.getElementById("toolbarSearch");
@@ -101,19 +123,14 @@ window.triggerToolbarSearch = function () {
 };
 
 window.applyFilters = async function () {
-  console.log("APPLY CLICKED 🔥", window.filters);
-
   const container = document.getElementById("productGrid");
   container.innerHTML = "<p>Loading...</p>";
 
   try {
     const params = new URLSearchParams(window.filters);
-
     const res = await axios.get(`/api/products?${params.toString()}`, {
       withCredentials: true
     });
-
-    console.log("RESPONSE:", res.data);
 
     if (!res.data.success) {
       container.innerHTML = "<p>Failed to load</p>";
@@ -130,8 +147,6 @@ window.applyFilters = async function () {
 
   } catch (err) {
     console.log("ERROR:", err);
-    console.log("DATA:", err.response?.data);
-
     container.innerHTML = "<p>Something went wrong</p>";
   }
 };
@@ -139,8 +154,6 @@ window.applyFilters = async function () {
 window.clearAllFilters = function () {
   window.location.href = '/menProductList';
 };
-
-
 
 function renderProducts(products) {
   const container = document.getElementById("productGrid");
@@ -159,29 +172,15 @@ function renderProducts(products) {
       <a href="/product/${p._id}" class="block">
         <div class="product-card group">
           <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
-
             <button class="wishlist-btn absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.preventDefault()">
               <i data-lucide="heart" size="18" stroke-width="1.5"></i>
             </button>
-
-            <img
-              src="${primaryImg}"
-              alt="${p.name}"
-              class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-            />
-
-            ${secondaryImg ? `
-            <img
-              src="${secondaryImg}"
-              alt="${p.name}"
-              class="secondary-img w-full h-full object-cover"
-            />` : ''}
-
+            <img src="${primaryImg}" alt="${p.name}" class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+            ${secondaryImg ? `<img src="${secondaryImg}" alt="${p.name}" class="secondary-img w-full h-full object-cover" />` : ''}
             <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
               <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
             </div>
           </div>
-
           <div class="product-info space-y-1">
             <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]">${p.name}</h3>
             <p class="text-[0.75rem] font-medium text-stone-500">₹${v.price || ''}</p>
@@ -191,13 +190,7 @@ function renderProducts(products) {
     `;
   }).join("");
 
-  // Re-initialize Lucide icons for the dynamically rendered heart icons
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
 }
-
-
-
-
-
