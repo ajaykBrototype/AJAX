@@ -46,7 +46,7 @@ export const registerService = async (data, req) => {
   req.session.tempEmail = email;
   req.session.type = "signup";
 
-  await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp, "signup");
 
   return { success: true };
 };
@@ -110,7 +110,7 @@ export const resendOtpService = async (req) => {
     }
   );
 
-  await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp, req.session.type);
 
   return { success: true };
 };

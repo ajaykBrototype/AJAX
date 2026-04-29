@@ -65,7 +65,7 @@ await Otp.findOneAndUpdate(
   { upsert: true }
 );
 
-await sendOtpEmail(email, otp);
+await sendOtpEmail(email, otp, "reset");
 
   req.session.resetEmail = email;
   req.session.type = "reset";

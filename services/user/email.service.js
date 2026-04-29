@@ -89,7 +89,7 @@ export const resendEmailOtpService = async (req) => {
     { upsert: true }
   );
 
-  await sendOtpEmail(newEmail, otp);
+  await sendOtpEmail(newEmail, otp, "verify_email");
 
   return {
     success: true,

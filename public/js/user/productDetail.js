@@ -99,3 +99,188 @@ addBtn.addEventListener("click",async()=>{
     ajaxToast("error", "Something went wrong");
     }
 })
+
+
+        lucide.createIcons();
+
+        window.addEventListener('load', () => {
+    
+            if (document.querySelector('.main-image')) {
+                gsap.from('.main-image', {
+                    scale: 1.1,
+                    duration: 1.5,
+                    ease: "power2.out"
+                });
+            }
+
+            gsap.to('.reveal', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+  
+        function switchImage(src, thumb) {
+            const mainImg = document.getElementById('mainImage');
+            
+       
+            gsap.to(mainImg, {
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => {
+                    mainImg.src = src;
+                    gsap.to(mainImg, { opacity: 1, duration: 0.4 });
+                }
+            });
+
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active-thumb'));
+            thumb.classList.add('active-thumb');
+        }
+
+
+        let state = {
+            selectedColor: null,
+            selectedVariant: null
+        };
+
+        function updateActionButtons() {
+            const btn = document.getElementById('addToBagBtn');
+            const stock = state.selectedVariant ? parseInt(state.selectedVariant.stock) : 0;
+            
+            if (state.selectedColor && state.selectedVariant && stock > 0) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.innerHTML = 'Add to Bag <i data-lucide="arrow-right" size="14"></i>';
+                lucide.createIcons();
+            } else if (state.selectedVariant && stock <= 0) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = 'Out of Stock';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = 'Add to Bag <i data-lucide="arrow-right" size="14"></i>';
+                lucide.createIcons();
+            }
+        }
+
+   
+        document.querySelectorAll('.swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+
+                const color = swatch.dataset.color;
+                const colorVariants = JSON.parse(swatch.dataset.variants);
+                const firstVariant = colorVariants[0];
+
+                state.selectedColor = color;
+                state.selectedVariant = null; // Reset size on color change
+
+          
+                document.getElementById('colorLabel').textContent = `Color — ${color}`;
+                
+        
+                updateGallery(firstVariant.images);
+                
+        
+                document.getElementById('productPrice').textContent = `₹${firstVariant.price}`;
+                document.getElementById('originalPrice').textContent = `₹${Math.round(firstVariant.price * 1.4)}`;
+
+                renderSizeGrid(colorVariants);
+                
+              
+                const qtyVal = document.getElementById('qtyValue');
+                if (qtyVal) qtyVal.textContent = '1';
+
+                updateActionButtons();
+            });
+        });
+
+        function renderSizeGrid(variants) {
+            const grid = document.getElementById('sizeGrid');
+            grid.innerHTML = '';
+            
+            variants.forEach(v => {
+                const btn = document.createElement('button');
+                btn.className = 'size-btn';
+                btn.textContent = v.size;
+                btn.dataset.id = v._id;
+                btn.dataset.stock = v.stock;
+                
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    state.selectedVariant = v;
+                    
+                    
+                    updateStockDisplay(v.stock);
+                    
+                    const stepper = document.querySelector('.quantity-stepper');
+                    if (stepper) {
+                        stepper.dataset.stock = v.stock;
+                        stepper.dataset.variant = v._id;
+                    }
+
+                    updateActionButtons();
+                });
+                
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateStockDisplay(stock) {
+            const stockStatus = document.getElementById('stockStatus');
+            const stockInfoContainer = document.getElementById('stockInfoContainer');
+            if (parseInt(stock) < 5) {
+                stockInfoContainer.className = 'stock-info stock-low';
+                stockStatus.textContent = `Limited Stock: Only ${stock} left`;
+            } else {
+                stockInfoContainer.className = 'stock-info stock-in';
+                stockStatus.textContent = 'In Stock & Ready to Ship';
+            }
+        }
+
+        function updateGallery(images) {
+            const thumbStrip = document.querySelector('.thumbnail-strip');
+            if (thumbStrip && images.length > 0) {
+                thumbStrip.innerHTML = '';
+                images.forEach((img, idx) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = `thumbnail ${idx === 0 ? 'active-thumb' : ''}`;
+                    thumb.setAttribute('onclick', `switchImage('${img}', this)`);
+                    thumb.innerHTML = `<img src="${img}" alt="View ${idx + 1}">`;
+                    thumbStrip.appendChild(thumb);
+                });
+                switchImage(images[0], thumbStrip.firstChild);
+            }
+        }
+
+        // Image Zoom Logic
+        const imageContainer = document.querySelector('.main-image-container');
+        const mainImage = document.getElementById('mainImage');
+
+        imageContainer.addEventListener('mousemove', (e) => {
+            const rect = imageContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+
+            mainImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+            mainImage.style.transform = "scale(2)";
+        });
+
+        imageContainer.addEventListener('mouseleave', () => {
+            mainImage.style.transform = "scale(1)";
+            mainImage.style.transformOrigin = "center center";
+        });
+   

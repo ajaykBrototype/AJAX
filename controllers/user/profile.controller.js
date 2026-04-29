@@ -112,7 +112,7 @@ export const updateProfile = async (req, res) => {
         email
       };
 
-      await sendOtpEmail(email, otp);
+      await sendOtpEmail(email, otp, "verify_email");
 
       return res.json({
         success: false,
