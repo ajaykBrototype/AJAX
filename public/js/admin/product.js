@@ -13,46 +13,75 @@ document.addEventListener("DOMContentLoaded", () => {
     const productForm = document.getElementById("productForm");
 
     if (productForm) {
-        productForm.addEventListener("submit", function (e) {
+        productForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
             const name = productForm.querySelector('[name="name"]');
             const category = productForm.querySelector('[name="category"]');
             const subcategory = productForm.querySelector('[name="subcategory"]');
             const description = productForm.querySelector('[name="description"]');
             const material = productForm.querySelector('[name="material"]');
             const careGuide = productForm.querySelector('[name="careGuide"]');
+            
+            // Variant fields
+            const color = productForm.querySelector('[name="color"]');
+            const sku = productForm.querySelector('[name="sku"]');
+            const price = productForm.querySelector('[name="price"]');
+            const stock = productForm.querySelector('[name="stock"]');
+            const size = document.getElementById('sizeInput');
 
             let error = "";
 
-            // Validation Logic
-            if (!name.value.trim()) {
-                error = "Product name is required";
-            } else if (!category.value) {
-                error = "Please select a category";
-            } else if (!subcategory.value) {
-                error = "Please select a subcategory";
-            } else if (description.value.trim().length < 20) {
-                error = "Description must be at least 20 characters";
-            } else if (!material.value.trim()) {
-                error = "Material composition is required";
-            } else if (!careGuide.value.trim()) {
-                error = "Care guidelines are required";
-            }
+            if (!name.value.trim()) error = "Product name is required";
+            else if (!category.value) error = "Please select a category";
+            else if (!subcategory.value) error = "Please select a subcategory";
+            else if (description.value.trim().length < 20) error = "Description must be at least 20 characters";
+            else if (!material.value.trim()) error = "Material composition is required";
+            else if (!careGuide.value.trim()) error = "Care guidelines are required";
+            else if (!color.value.trim()) error = "Primary color is required";
+            else if (!sku.value.trim()) error = "SKU is required";
+            else if (!price.value || price.value <= 0) error = "Valid price is required";
+            else if (stock.value === "" || stock.value < 0) error = "Valid stock is required";
+            else if (!size.value) error = "Please select a size";
+            else if ((window.uploadedFiles || []).length < 3) error = "Minimum 3 images are required";
 
             if (error) {
-                e.preventDefault(); // Stop form submission
                 ajaxToast("error", error);
                 return;
             }
 
-            // SUCCESS PATH:
-            // If the subcategory select was disabled (during loading), 
-            // we must enable it before submission or the data won't be sent to the server.
-            if (subcategory.disabled) {
-                subcategory.disabled = false;
-            }
+            // Submit using FormData
+            const formData = new FormData(productForm);
             
-            // Note: Don't show success toast here because the redirect 
-            // will refresh the page and kill the toast immediately.
+            // Enable subcategory if disabled so it gets included
+            if (subcategory.disabled) subcategory.disabled = false;
+
+            // Add images from memory
+            const uploadedFiles = window.uploadedFiles || [];
+            uploadedFiles.forEach((blob, i) => {
+                formData.append('images', blob, `product_${i}.jpg`);
+            });
+
+            try {
+                const submitBtn = productForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
+
+                const res = await axios.post(productForm.action, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                if (res.data.success) {
+                    window.location.href = "/admin/products?created=true";
+                } else {
+                    ajaxToast("error", res.data.message || "Failed to create product");
+                }
+            } catch (err) {
+                console.error(err);
+                ajaxToast("error", err.response?.data?.message || "Server error occurred");
+            } finally {
+                const submitBtn = productForm.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = false;
+            }
         });
     }
 

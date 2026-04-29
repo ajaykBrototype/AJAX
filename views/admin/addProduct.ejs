@@ -81,12 +81,28 @@
     <form id="productForm" method="POST" action="/admin/products/add" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
 
       <!-- LEFT COLUMN -->
-       
       <div class="flex-1 space-y-6">
           <!-- Detailed Description -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
               <h3 class="text-[15px] font-extrabold text-stone-800 mb-4">Detailed Description</h3>
               <textarea name="description" rows="5" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."></textarea>
+          </div>
+
+          <!-- Default Variant Media -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Product Media (Default Variant)</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Minimum 3 high-fidelity images required for the primary variant.</p>
+              
+              <div class="border-2 border-dashed border-stone-200 rounded-2xl p-8 text-center cursor-pointer hover:bg-stone-50 transition-all" id="uploadTrigger">
+                  <svg class="mx-auto mb-3 text-stone-300" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <p class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">Upload Images</p>
+                  <input type="file" id="imageInput" class="hidden" accept="image/*">
+              </div>
+
+              <div id="imageGallery" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-6">
+                  <!-- Thumbnails -->
+              </div>
+              <p class="text-[10px] font-bold text-stone-400 tracking-widest uppercase mt-4" id="imgCountText">0 / 3 images uploaded</p>
           </div>
 
           <!-- Material / Ingredients -->
@@ -141,16 +157,41 @@
               </div>
           </div>
 
-          <!-- Pricing & Inventory Status -->
+          <!-- Default Variant Details -->
           <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
-              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Pricing & Inventory</h3>
-              <p class="text-[12px] font-medium text-stone-500 mb-5">Managed per variant separately.</p>
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-6">Default Variant Details</h3>
+              <input type="hidden" name="size" id="sizeInput">
               
-              <div class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-start gap-4 shadow-sm">
-                  <div class="bg-emerald-100 p-1.5 rounded-lg shrink-0 text-emerald-600 mt-0.5">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="space-y-5">
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Primary Color <span class="text-red-500">*</span></label>
+                      <input type="text" name="color" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Midnight Black">
                   </div>
-                  <p class="text-[12px] leading-relaxed font-semibold">Images, pricing, stock, and colors are managed securely within the variants tab after initial save.</p>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">SKU Identifier <span class="text-red-500">*</span></label>
+                      <input type="text" name="sku" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. AJAX-OXFORD-BLK">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                      <div>
+                          <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Price (₹) <span class="text-red-500">*</span></label>
+                          <input type="number" name="price" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="0">
+                      </div>
+                      <div>
+                          <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Stock <span class="text-red-500">*</span></label>
+                          <input type="number" name="stock" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="0">
+                      </div>
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Size <span class="text-red-500">*</span></label>
+                      <div class="flex flex-wrap gap-2">
+                          <% ['S', 'M', 'L', 'XL', 'XXL', '3XL'].forEach(size => { %>
+                              <button type="button" class="size-btn px-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-500 hover:border-stone-800 hover:text-stone-800 transition-all" data-size="<%= size %>"><%= size %></button>
+                          <% }) %>
+                      </div>
+                  </div>
               </div>
           </div>
 
@@ -176,6 +217,23 @@
   <p id="global-toast-msg"></p>
 </div>
 
+<div id="cropModal" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-[24px] w-full max-w-[700px] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-stone-100 flex items-center justify-between">
+            <h4 class="text-lg font-serif font-bold">Refine Product Image</h4>
+            <button id="closeCrop" class="p-2 text-stone-400 hover:text-stone-900 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="w-full h-[450px] bg-stone-100 relative overflow-hidden">
+            <img id="cropImage" class="max-w-full">
+        </div>
+        <div class="p-6 bg-stone-50 flex justify-end gap-3">
+            <button id="applyCrop" class="px-10 py-3 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-lg">Apply Crop</button>
+        </div>
+    </div>
+</div>
+
 <div class="sticky-bar">
   <div class="flex items-center gap-2.5 ml-4">
     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -187,10 +245,97 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/utils/swal-helper.js"></script>
 <script src="/js/admin/product.js"></script>
 
 <script>
+
+  // --- Size Selection ---
+  const sizeButtons = document.querySelectorAll('.size-btn');
+  const sizeInput = document.getElementById('sizeInput');
+  
+  sizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeButtons.forEach(b => b.classList.remove('border-stone-800', 'text-stone-800', 'bg-stone-100'));
+      btn.classList.add('border-stone-800', 'text-stone-800', 'bg-stone-100');
+      sizeInput.value = btn.dataset.size;
+    });
+  });
+
+  // --- Image Cropping Logic ---
+  const uploadTrigger = document.getElementById('uploadTrigger');
+  const imageInput = document.getElementById('imageInput');
+  const imageGallery = document.getElementById('imageGallery');
+  const cropModal = document.getElementById('cropModal');
+  const cropImage = document.getElementById('cropImage');
+  const applyCrop = document.getElementById('applyCrop');
+  const closeCrop = document.getElementById('closeCrop');
+  const imgCountText = document.getElementById('imgCountText');
+  
+  let cropper;
+  window.uploadedFiles = [];
+
+  uploadTrigger?.addEventListener('click', () => imageInput.click());
+
+  imageInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        cropImage.src = event.target.result;
+        cropModal.classList.remove('hidden');
+        cropModal.classList.add('flex');
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 3/4,
+          viewMode: 2,
+          autoCropArea: 1
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  applyCrop?.addEventListener('click', () => {
+    const canvas = cropper.getCroppedCanvas({ width: 1200, height: 1600 });
+    canvas.toBlob((blob) => {
+      window.uploadedFiles.push(blob);
+      updateGallery();
+      closeModalFunc();
+    }, 'image/jpeg', 0.9);
+  });
+
+  function closeModalFunc() {
+    cropModal.classList.add('hidden');
+    cropModal.classList.remove('flex');
+    imageInput.value = '';
+  }
+
+  closeCrop?.addEventListener('click', closeModalFunc);
+
+  function updateGallery() {
+    imageGallery.innerHTML = '';
+    window.uploadedFiles.forEach((blob, index) => {
+      const div = document.createElement('div');
+      div.className = 'relative aspect-[3/4] rounded-xl overflow-hidden border border-stone-200 group';
+      div.innerHTML = `
+        <img src="${URL.createObjectURL(blob)}" class="w-full h-full object-cover">
+        <button type="button" onclick="removeImage(${index})" class="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        ${index === 0 ? '<div class="absolute bottom-0 left-0 right-0 bg-stone-900/60 text-white text-[8px] font-bold uppercase py-1 text-center backdrop-blur-[2px]">Primary</div>' : ''}
+      `;
+      imageGallery.appendChild(div);
+    });
+    imgCountText.textContent = `${window.uploadedFiles.length} / 3 images uploaded`;
+  }
+
+  window.removeImage = (index) => {
+    window.uploadedFiles.splice(index, 1);
+    updateGallery();
+  };
 
   const categorySelect = document.querySelector('select[name="category"]');
   const subcategorySelect = document.querySelector('select[name="subcategory"]');

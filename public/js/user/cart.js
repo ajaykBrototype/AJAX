@@ -59,7 +59,7 @@
                 const res = await axios.patch('/cart/update', { itemId, delta });
                 
                 if (!res.data.success) {
-                    // Revert if failed
+                   
                     qtyEl.innerText = currentQty;
                     recalculate();
                     ajaxToast("error", res.data.message);
@@ -83,14 +83,15 @@
                 const res = await axios.post('/cart/remove', { itemId });
 
                 if (res.data.success) {
-                    // Disappearing Animation
+                  
                     card.classList.add('item-exit');
+                     ajaxToast("success", "Item removed from bag");
                     
                     setTimeout(() => {
                         card.remove();
                         recalculate();
-                        ajaxToast("success", "Item removed from bag");
-                    }, 500);
+                       
+                    }, 1000);
                 } else {
                     ajaxToast("error", res.data.message);
                 }

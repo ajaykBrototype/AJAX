@@ -57,7 +57,7 @@ router.delete("/subcategories/:id", isAdminAuth, deleteSubCategory);
 
 router.get("/products", isAdminAuth, loadProductPage);
 router.get("/products/add", isAdminAuth, loadAddProductPage);
-router.post("/products/add", isAdminAuth, addProduct);
+router.post("/products/add", isAdminAuth, upload.array("images", 5), addProduct);
 
 
 router.get("/products/edit/:id", isAdminAuth, loadEditProductPage);

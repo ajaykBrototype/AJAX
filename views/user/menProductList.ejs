@@ -156,6 +156,73 @@ tailwind.config = {
   outline: none;
   margin: 1rem 0;
 }
+
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+
+  padding: 10px 36px 10px 14px;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: #1c1c1c;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+/* ✨ Hover */
+.sort-select:hover {
+  background: #f1f1f1;
+  border-color: #dcdcdc;
+}
+
+
+.sort-select:focus {
+  background: #ffffff;
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+
+/* ✨ Click feel */
+.sort-select:active {
+  transform: scale(0.98);
+}
+
+
+.sort-select + i {
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.sort-select + i {
+  position: absolute;
+  right: 8px;
+}
+
+/* rotate on focus */
+.sort-select:focus + i {
+  transform: rotate(180deg);
+}
+.sort-select option {
+  background: #ffffff;
+  color: #1c1c1c;
+  padding: 10px;
+}
+
+/* Optional: smooth click feel */
+.sort-select:active {
+  transform: scale(0.98);
+}
+
 .price-range-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
@@ -245,7 +312,7 @@ tailwind.config = {
       <!-- Sort -->
       <div class="flex items-center gap-4">
         <span class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] uppercase">Sort</span>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 relative">
           <select class="sort-select">
             <option value="newest">Newest</option>
             <option value="price-low">Price: Low - High</option>

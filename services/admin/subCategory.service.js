@@ -1,7 +1,7 @@
 import SubCategory from "../../models/admin/subCategoryModel.js";
 
 export const createSubCategoryService = async (data) => {
-  const { name, categoryId, isActive } = data;
+  let { name, categoryId, isActive } = data;
 
   name=name.trim().toLowerCase();
 
@@ -37,7 +37,7 @@ export const createSubCategoryService = async (data) => {
 };
 
 export const updateSubCategoryService = async (id, data) => {
-  const { name, categoryId, isActive } = data;
+  let { name, categoryId, isActive } = data;
 
   name=name.trim().toLowerCase();
 

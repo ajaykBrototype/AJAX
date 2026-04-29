@@ -47,7 +47,7 @@ export const addToCart = async (req, res) => {
 
     await cart.save();
 
-    res.json({ success: true });
+    res.json({ success: true, cartCount: cart.items.length });
 
   } catch (err) {
    console.log("SERVER ERROR:", err); // 👈 VERY IMPORTANT

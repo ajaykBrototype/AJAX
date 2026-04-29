@@ -104,20 +104,25 @@ export const loadAddProductPage = async (req, res) => {
 };
 export const addProduct = async (req, res) => {
   try {
-    const { name, category, subcategory, material, description, careGuide } = req.body;
+    const { 
+        name, category, subcategory, material, description, careGuide,
+        color, sku, price, stock, size 
+    } = req.body;
 
-    const categories = await Category.find({ isActive: true });
-    const subCategories = await SubCategory.find({ isActive: true });
+    const images = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
 
-    if (!name || !category || !subcategory) {
-      return res.render("admin/addProduct", {
-        error: "Required fields missing",
-        categories,
-        subCategories
-      });
+    if (!name || !category || !subcategory || !sku || !price || !color || !size) {
+        return res.status(400).json({ success: false, message: "Required fields missing" });
     }
 
-    await createProductService({
+    // 1. Check if SKU already exists
+    const existingVariant = await Variant.findOne({ sku });
+    if (existingVariant) {
+        return res.status(400).json({ success: false, message: "SKU already exists" });
+    }
+
+    // 2. Create Product
+    const newProduct = await Product.create({
       name,
       category,
       subcategory,
@@ -126,19 +131,23 @@ export const addProduct = async (req, res) => {
       careGuide
     });
 
-    res.redirect("/admin/products?created=true");
+    // 3. Create Default Variant
+    await Variant.create({
+      productId: newProduct._id,
+      color,
+      sku,
+      price,
+      stock,
+      size,
+      images,
+      isDefault: true
+    });
+
+    res.json({ success: true, message: "Product and primary variant created successfully" });
 
   } catch (err) {
-    console.log(err);
-
-    const categories = await Category.find({ isActive: true });
-    const subCategories = await SubCategory.find({ isActive: true });
-
-    res.render("admin/addProduct", {
-      error: "Something went wrong",
-      categories,
-      subCategories
-    });
+    console.error("ADD PRODUCT ERROR:", err);
+    res.status(500).json({ success: false, message: err.message || "Something went wrong" });
   }
 };
 

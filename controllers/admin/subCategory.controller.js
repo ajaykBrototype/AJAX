@@ -10,24 +10,39 @@ export const loadSubCategoryPage = async (req, res) => {
       const limit=5;
       const skip=(page-1)*limit;
 
-      let filter={};
-      if(search){
-        filter.name={$regex:search,$options:"i"};
-      }
+     let filter = {};
 
-      if (selectedCategory) {
-       filter.category = selectedCategory;
-       }
+if (search) {
+  filter.name = { 
+    $regex: search.trim(), 
+    $options: "i" 
+  };
+}
 
-      const total=await SubCategory.countDocuments(filter);
+if (selectedCategory && selectedCategory !== "all") {
+  filter.category = selectedCategory;
+}
 
-    const categories = await Category.find({ isActive: true });
-           
-      const subCategories = await SubCategory.find(filter)
-      .populate("category", "name").sort({createdAt:-1}).skip(skip).limit(limit);
+const total = await SubCategory.countDocuments(filter);
 
-      const activeCount=subCategories.filter(cat=>cat.isActive).length;
-      const inactiveCount=subCategories.filter(cat=>!cat.isActive).length;
+const subCategories = await SubCategory.find(filter)
+  .populate("category", "name")
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit);
+
+  const categories = await Category.find({ isActive: true });
+
+
+const activeCount = await SubCategory.countDocuments({
+  ...filter,
+  isActive: true
+});
+
+const inactiveCount = await SubCategory.countDocuments({
+  ...filter,
+  isActive: false
+});
 
       const totalPages=Math.ceil(total/limit);
 
@@ -39,7 +54,7 @@ export const loadSubCategoryPage = async (req, res) => {
       totalPages,
       total,
       selectedCategory,
-      totalSubCategory:subCategories.length,
+      totalSubCategory:total,
       activeCount,inactiveCount
     });
 

@@ -85,10 +85,23 @@ addBtn.addEventListener("click",async()=>{
          quantity:qty
        });
         if (res.data.success) {
-      window.location.href = "/cart"; 
-    } else {
-      ajaxToast("error", res.data.message);
-    }
+            // Update navbar cart count
+            const cartBadge = document.getElementById('cart-count-badge');
+            if (cartBadge && res.data.cartCount !== undefined) {
+                cartBadge.textContent = res.data.cartCount;
+                if (res.data.cartCount > 0) {
+                    cartBadge.classList.remove('hidden');
+                }
+            }
+            
+            if (res.data.alreadyInCart) {
+                ajaxToast("success", "Item already in bag (max reached)");
+            } else {
+                ajaxToast("success", "Successfully added to bag");
+            }
+        } else {
+            ajaxToast("error", res.data.message);
+        }
     }catch(err){
         console.log("CART ADD ERROR:", err);
         if (err.response && (err.response.status === 401 || err.response.status === 403)) {
@@ -192,6 +205,14 @@ addBtn.addEventListener("click",async()=>{
         
                 document.getElementById('productPrice').textContent = `₹${firstVariant.price}`;
                 document.getElementById('originalPrice').textContent = `₹${Math.round(firstVariant.price * 1.4)}`;
+
+                 updateStockDisplay(firstVariant.stock);
+
+        const stepper = document.querySelector('.quantity-stepper');
+        if (stepper) {
+            stepper.dataset.stock = firstVariant.stock;
+            stepper.dataset.variant = firstVariant._id;
+        }
 
                 renderSizeGrid(colorVariants);
                 

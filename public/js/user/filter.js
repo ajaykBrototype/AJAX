@@ -196,3 +196,8 @@ function renderProducts(products) {
     lucide.createIcons();
   }
 }
+
+
+
+
+

@@ -50,8 +50,22 @@ app.use("/uploads", express.static("public/uploads"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use((req, res, next) => {
+import Cart from "./models/user/cartModel.js";
+
+app.use(async (req, res, next) => {
   res.locals.user = req.session.userId || null;
+  res.locals.cartCount = 0;
+  
+  if (req.session.userId) {
+    try {
+      const cart = await Cart.findOne({ user: req.session.userId });
+      if (cart) {
+        res.locals.cartCount = cart.items.length;
+      }
+    } catch (err) {
+      console.error("Cart Count Middleware Error:", err);
+    }
+  }
   next();
 });
 
