@@ -3,6 +3,8 @@ import SubCategory from "../../models/admin/subCategoryModel.js";
 export const createSubCategoryService = async (data) => {
   const { name, categoryId, isActive } = data;
 
+  name=name.trim().toLowerCase();
+
   if (!categoryId) {
   return {
     success: false,
@@ -11,7 +13,7 @@ export const createSubCategoryService = async (data) => {
 }
 
   const existing = await SubCategory.findOne({
-    name,
+    name:{$regex:`^${name}$`,$options:"i"},
     category: categoryId
   });
 
@@ -37,8 +39,10 @@ export const createSubCategoryService = async (data) => {
 export const updateSubCategoryService = async (id, data) => {
   const { name, categoryId, isActive } = data;
 
+  name=name.trim().toLowerCase();
+
   const existing = await SubCategory.findOne({
-    name,
+    name:{$regex:`^${name}$`,$options:"i"},
     category: categoryId,
     _id: { $ne: id }
   });

@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => location.reload(), 1000);
             }
         } catch (err) {
+            window.closeModal();
             ajaxAlert('error', err.response?.data?.message || 'Failed to save category.');
         }
     };

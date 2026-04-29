@@ -9,7 +9,7 @@ export const loadMenPage = async (req, res) => {
     const limit = 8; 
     const skip = (page - 1) * limit;
 
-    const menCategory = await Category.findOne({ name: "Men" });
+    const menCategory = await Category.findOne({ name: "men" });
 
     if (!menCategory) {
       return res.render("user/menProductList", {
@@ -17,7 +17,8 @@ export const loadMenPage = async (req, res) => {
         subCategories: [],
         selectedSub: null,
         currentPage: 1,
-        totalPages: 1
+        totalPages: 1,
+        totalProducts: 0
       });
     }
     const subCategories = await SubCategory.find({
