@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AJAX — Your Favorites</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { 
+      extend: { 
+        fontFamily: { 
+          serif: ['Playfair Display','Georgia','serif'], 
+          sans: ['DM Sans','system-ui','sans-serif'] 
+        } 
+      } 
+    }
+  }
+</script>
+<%- include('../partials/navbar-styles') %>
+<style>
+  :root {
+    --dark: #1C1C1C;
+    --stone: #9B8E83;
+    --cream: #F5F0E8;
+    --warm: #FAFAF8;
+    --bdr: rgba(28,28,28,0.1);
+  }
+
+  body {
+    background-color: #ffffff; /* Reference image has a very white background */
+    color: var(--dark);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .wishlist-header {
+    text-align: center;
+    padding: 6rem 1.5rem 4rem;
+  }
+
+  .wishlist-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  .wishlist-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--stone);
+    font-weight: 500;
+  }
+
+  .wishlist-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid #f0f0f0;
+    margin-bottom: 2rem;
+  }
+
+  .item-count {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .clear-all {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--stone);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .clear-all:hover { color: var(--dark); }
+
+  /* PREMIUM PRODUCT CARD (REFERENCED) */
+  .fav-card {
+    position: relative;
+    border-radius: 20px; /* Highly curved as requested and seen in image */
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    cursor: pointer;
+    background: #f8f8f8;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fav-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .fav-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fav-card:hover .fav-img {
+    transform: scale(1.08);
+  }
+
+  .fav-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 40%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    color: #fff;
+    transition: background 0.4s;
+  }
+  .fav-card:hover .fav-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+  }
+
+  .fav-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .fav-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .fav-price {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .fav-desc {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 1rem;
+  }
+
+  .fav-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.3s;
+  }
+  .fav-btn:hover {
+    background: #fff;
+    color: var(--dark);
+    border-color: #fff;
+  }
+
+  .stock-badge {
+    position: absolute;
+    bottom: 4.5rem; /* Position above name */
+    right: 0;
+    background: #E35E5E; /* Premium red for out of stock */
+    color: #fff;
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 900;
+  }
+
+  .remove-fav {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+  }
+  .remove-fav:hover {
+    background: #fff;
+    color: #E35E5E;
+  }
+
+  /* EMPTY STATE */
+  .empty-wishlist {
+    text-align: center;
+    padding: 5rem 1.5rem;
+  }
+  .empty-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .btn-shop {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--dark);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    transition: opacity 0.3s;
+  }
+  .btn-shop:hover { opacity: 0.9; }
+
+  /* ANIMATIONS */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .delay-1 { transition-delay: 0.1s; }
+  .delay-2 { transition-delay: 0.2s; }
+  .delay-3 { transition-delay: 0.3s; }
+</style>
+<%- include('../partials/footer-styles') %>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<main class="max-w-[1400px] mx-auto px-6 md:px-12 mb-24">
+  
+  <!-- HEADER SECTION -->
+  <header class="wishlist-header reveal">
+    <h1 class="wishlist-title">Your Favorites</h1>
+    <p class="wishlist-subtitle">Curated by you, designed for your natural radiance</p>
+  </header>
+
+  <!-- TOOLBAR -->
+  <div class="wishlist-toolbar reveal delay-1">
+    <span class="item-count"><%= wishlistItems && wishlistItems.length > 0 ? wishlistItems.length : 0 %> Items Saved</span>
+    <a href="javascript:void(0)" class="clear-all" onclick="clearWishlist()">Clear All</a>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 reveal delay-2">
+    <% if (wishlistItems && wishlistItems.length > 0) { %>
+      <% wishlistItems.forEach((item, index) => { %>
+        <% const product = item.productId; %>
+        <% const variant = product.variants && product.variants[0]; %>
+        <div class="fav-card group" data-product="<%= product._id %>" data-variants='<%- JSON.stringify(product.variants || []) %>' onclick="window.location.href='/product/<%= product._id %>'">
+          <div class="remove-fav" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', this)">
+            <i data-lucide="x" size="16"></i>
+          </div>
+          
+          <img src="<%= variant ? variant.images[0] : 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800' %>" alt="<%= product.name %>" class="fav-img">
+          
+          <div class="fav-overlay">
+            <% if (variant && variant.stock <= 0) { %>
+              <div class="stock-badge">Out of Stock</div>
+            <% } %>
+            
+            <div class="fav-info-row">
+              <h3 class="fav-name"><%= product.name %></h3>
+              <p class="fav-price">₹<%= variant ? variant.price : '0.00' %></p>
+            </div>
+            
+            <p class="fav-desc"><%= product.subCategory ? product.subCategory.name : 'ESSENTIAL' %></p>
+            
+            <button class="fav-btn" 
+              <%= (variant && variant.stock <= 0) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : `onclick="event.stopPropagation(); addToBagFromWishlist('${product._id}', '${variant._id}', this)"` %>>
+              <%= (variant && variant.stock <= 0) ? 'Out of Stock' : 'Add to Bag' %>
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    <!-- <% } else { %> -->
+      
+    <% } %>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <% if (!wishlistItems || wishlistItems.length === 0) { %>
+    <div class="empty-wishlist reveal delay-3">
+       <div class="mb-6 opacity-20">
+         <i data-lucide="heart" size="64" class="mx-auto" stroke-width="1"></i>
+       </div>
+       <h2 class="empty-title">Your wishlist is empty</h2>
+       <p class="text-stone-400 mb-8 max-w-md mx-auto">Save items you love here. They'll be waiting for you when you're ready to make them yours.</p>
+       <a href="/menProductList" class="btn-shop">Start Exploring</a>
+    </div>
+  <% } else { %>
+    <div class="empty-wishlist reveal delay-3 hidden">
+       <div class="mb-6 opacity-20">
+         <i data-lucide="heart" size="64" class="mx-auto" stroke-width="1"></i>
+       </div>
+       <h2 class="empty-title">Your wishlist is empty</h2>
+       <p class="text-stone-400 mb-8 max-w-md mx-auto">Save items you love here. They'll be waiting for you when you're ready to make them yours.</p>
+       <a href="/menProductList" class="btn-shop">Start Exploring</a>
+    </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+
+  // Scroll reveal animation
+  document.addEventListener('DOMContentLoaded', () => {
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    reveals.forEach(el => observer.observe(el));
+  });
+
+  // Implement removeFromWishlist calling the toggle endpoint
+  async function removeFromWishlist(id, element) {
+    try {
+      const res = await axios.post("/wishlist/add", { productId: id });
+      if (res.data.success) {
+        Swal.fire({
+          title: 'Removed',
+          text: 'Item removed from your favorites',
+          icon: 'success',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000
+        });
+        
+        // Remove card from UI
+        const card = element.closest('.fav-card');
+        if (card) {
+          card.remove();
+        }
+
+        // Update badge
+        const badge = document.getElementById('wishlist-count-badge');
+        const countSpan = document.querySelector('.item-count');
+        if (badge) {
+          badge.innerText = res.data.count;
+          if (res.data.count > 0) {
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+        if (countSpan) {
+          countSpan.innerText = `${res.data.count} Items Saved`;
+        }
+
+        // Show empty state if count is 0
+        if (res.data.count === 0) {
+          const emptyState = document.querySelector('.empty-wishlist');
+          if (emptyState) emptyState.classList.remove('hidden');
+        }
+
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error removing item', showConfirmButton: false, timer: 3000 });
+    }
+  }
+
+  // Implement Add to Bag logic
+  async function addToBagFromWishlist(productId, variantId, element) {
+    try {
+      // Add to cart
+      const res = await axios.post("/cart/add", {
+        variantId: variantId,
+        quantity: 1
+      });
+
+      if (res.data.success) {
+        // Update cart badge
+        const cartBadge = document.getElementById('cart-count-badge');
+        if (cartBadge && res.data.cartCount !== undefined) {
+          cartBadge.textContent = res.data.cartCount;
+          if (res.data.cartCount > 0) {
+            cartBadge.classList.remove('hidden');
+          }
+        }
+        
+        if (res.data.alreadyInCart) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Already in the cart max limit', showConfirmButton: false, timer: 3000 });
+        } else {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Added to Bag', showConfirmButton: false, timer: 3000 });
+            // Remove from wishlist automatically
+            removeFromWishlist(productId, element);
+        }
+      } else {
+        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: res.data.message, showConfirmButton: false, timer: 3000 });
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+        window.location.href = `/login?returnTo=/wishlist`;
+        return;
+      }
+      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error adding to bag', showConfirmButton: false, timer: 3000 });
+    }
+  }
+
+  // Swap variants based on localStorage preference
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      const prefs = JSON.parse(localStorage.getItem('wishlistPrefs') || '{}');
+      
+      document.querySelectorAll('.fav-card').forEach(card => {
+        const productId = card.dataset.product;
+        const prefVariantId = prefs[productId];
+        
+        if (prefVariantId && card.dataset.variants) {
+          const variants = JSON.parse(card.dataset.variants);
+          const preferredVariant = variants.find(v => v._id === prefVariantId);
+          
+          if (preferredVariant) {
+            // Update Image
+            const img = card.querySelector('.fav-img');
+            if (img && preferredVariant.images && preferredVariant.images.length > 0) {
+              img.src = preferredVariant.images[0];
+            }
+            
+            // Update Price
+            const priceEl = card.querySelector('.fav-price');
+            if (priceEl) {
+              priceEl.textContent = '₹' + preferredVariant.price;
+            }
+            
+            // Update Stock/Bag logic
+            const btn = card.querySelector('.fav-btn');
+            if (btn) {
+              if (preferredVariant.stock <= 0) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.textContent = 'Out of Stock';
+                
+                // Show badge
+                let stockBadge = card.querySelector('.stock-badge');
+                if (!stockBadge) {
+                  stockBadge = document.createElement('div');
+                  stockBadge.className = 'stock-badge';
+                  stockBadge.textContent = 'Out of Stock';
+                  card.querySelector('.fav-overlay').insertBefore(stockBadge, card.querySelector('.fav-info-row'));
+                }
+              } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.textContent = 'Add to Bag';
+                btn.setAttribute('onclick', `event.stopPropagation(); addToBagFromWishlist('${productId}', '${preferredVariant._id}', this)`);
+                
+                // Hide badge
+                const stockBadge = card.querySelector('.stock-badge');
+                if (stockBadge) stockBadge.remove();
+              }
+            }
+          }
+        }
+      });
+    } catch(err) {
+      console.error('Error applying wishlist preferences:', err);
+    }
+  });
+
+  function clearWishlist() {
+    Swal.fire({
+      title: 'Clear all favorites?',
+
+      text: "This will remove all items from your wishlist",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#1C1C1C',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, clear all'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // Since there is no specific backend endpoint for clear all,
+        // loop through all items and remove them.
+        const buttons = document.querySelectorAll('.remove-fav');
+        for (let btn of buttons) {
+          btn.click();
+        }
+      }
+    })
+  }
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import Category from "../../models/admin/categoryModel.js";
 import SubCategory from "../../models/admin/subCategoryModel.js";
 import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import Wishlist from "../../models/user/wishlistModel.js";
 export const loadMenPage = async (req, res) => {
   try {
     const { sub, page = 1 } = req.query;
@@ -9,7 +10,7 @@ export const loadMenPage = async (req, res) => {
     const limit = 8; 
     const skip = (page - 1) * limit;
 
-    const menCategory = await Category.findOne({ name: "men" });
+    const menCategory = await Category.findOne({ name: { $regex: "^men$", $options: "i" } });
 
     if (!menCategory) {
       return res.render("user/menProductList", {
@@ -38,6 +39,8 @@ export const loadMenPage = async (req, res) => {
       filter.subcategory = { $in: subIds };
     }
 
+    const wishlist = await Wishlist.findOne({ user: req.session.userId });
+
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -63,7 +66,8 @@ export const loadMenPage = async (req, res) => {
       selectedSub: sub || null,
       currentPage: Number(page),
       totalPages,
-      totalProducts
+      totalProducts,
+      wishlist: wishlist?.products.map(p => p.toString()) || []
     });
   } catch (err) {
     console.log(err);

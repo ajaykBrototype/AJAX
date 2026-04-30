@@ -113,6 +113,23 @@ addBtn.addEventListener("click",async()=>{
     }
 })
 
+// Wishlist toggle
+const wishlistToggle = document.querySelector('.wishlist-toggle');
+if (wishlistToggle) {
+    wishlistToggle.addEventListener('click', async (e) => {
+        if (typeof currentProductId !== 'undefined' && typeof toggleWishlist === 'function') {
+            await toggleWishlist(currentProductId, e);
+            
+            // Save preferred variant
+            if (state.selectedVariant) {
+                let prefs = JSON.parse(localStorage.getItem('wishlistPrefs') || '{}');
+                prefs[currentProductId] = state.selectedVariant._id;
+                localStorage.setItem('wishlistPrefs', JSON.stringify(prefs));
+            }
+        }
+    });
+}
+
 
         lucide.createIcons();
 
