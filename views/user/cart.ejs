@@ -167,7 +167,7 @@
 
                 <% 
                   // Mock data check (replace with real items if passed from backend)
-                  const bagItems = typeof cart !== 'undefined' ? cart.items : [];
+                  const bagItems = cart && cart.items ? cart.items : [];
                 %>
 
                 <% if (bagItems.length > 0) { %>

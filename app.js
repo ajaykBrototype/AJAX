@@ -51,19 +51,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 import Cart from "./models/user/cartModel.js";
+import Wishlist from "./models/user/wishlistModel.js";
 
 app.use(async (req, res, next) => {
   res.locals.user = req.session.userId || null;
   res.locals.cartCount = 0;
+  res.locals.wishlistCount = 0;
   
   if (req.session.userId) {
     try {
-      const cart = await Cart.findOne({ user: req.session.userId });
-      if (cart) {
-        res.locals.cartCount = cart.items.length;
-      }
+      const [cart, wishlist] = await Promise.all([
+        Cart.findOne({ user: req.session.userId }),
+        Wishlist.findOne({ user: req.session.userId })
+      ]);
+      
+      if (cart) res.locals.cartCount = cart.items.length;
+      if (wishlist) res.locals.wishlistCount = wishlist.products.length;
     } catch (err) {
-      console.error("Cart Count Middleware Error:", err);
+      console.error("Locals Middleware Error:", err);
     }
   }
   next();
