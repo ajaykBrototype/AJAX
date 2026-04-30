@@ -361,15 +361,7 @@
       const res = await axios.post("/wishlist/add", { productId: id });
       if (res.data.success) {
         if (!silent) {
-          Swal.fire({
-            title: 'Removed',
-            text: 'Item removed from your favorites',
-            icon: 'success',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000
-          });
+          ajaxToast("success", "Item removed from favorites");
         }
         
         // Remove card from UI
@@ -403,7 +395,7 @@
       }
     } catch (err) {
       console.error(err);
-      if (!silent) Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error removing item', showConfirmButton: false, timer: 3000 });
+      if (!silent) ajaxToast("error", "Error removing item");
     }
   }
 
@@ -442,7 +434,7 @@
           }
         }
         
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.data.message, showConfirmButton: false, timer: 3000 });
+        ajaxToast("success", res.data.message);
         
         // Remove card from UI instantly with animation
         const card = element.closest('.fav-card');
@@ -453,7 +445,7 @@
         }
 
       } else {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: res.data.message, showConfirmButton: false, timer: 3000 });
+        ajaxToast("error", res.data.message);
       }
     } catch (err) {
       console.error(err);
@@ -461,7 +453,7 @@
         window.location.href = `/login?returnTo=/wishlist`;
         return;
       }
-      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error adding to bag', showConfirmButton: false, timer: 3000 });
+      ajaxToast("error", "Error adding to bag");
     }
   }
 
