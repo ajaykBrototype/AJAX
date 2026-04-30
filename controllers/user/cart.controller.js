@@ -32,14 +32,12 @@ export const addToCart = async (req, res) => {
     );
 
     if (existingItem) {
-      if (existingItem.quantity >= 5) {
-        // Already at max, just redirect to cart instead of showing error
-        return res.json({ success: true, alreadyInCart: true });
-      }
-      const newQty = Math.min(existingItem.quantity + quantity, 5);
-      existingItem.quantity = newQty;
+      if (existingItem.quantity >= 5) return res.json({ success: false, message: "Max limit reached ❌" });
+      existingItem.quantity = Math.min(existingItem.quantity + quantity, 5);
+      if (!existingItem.productId) existingItem.productId = variant.productId;
     } else {
       cart.items.push({
+        productId: variant.productId,
         variant: variantId,
         quantity: Math.min(quantity, 5)
       });

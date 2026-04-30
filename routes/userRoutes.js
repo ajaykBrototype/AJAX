@@ -11,7 +11,7 @@ import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
 import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
-import {loadWishlistPage,toggleWishlist  } from "../controllers/user/wishlist.controller.js";
+import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -82,5 +82,8 @@ router.patch("/cart/update", isLoggedIn, updateCartQty);
 router.post("/cart/remove", isLoggedIn, removeCartItem);
 
 router.get("/wishlist", isLoggedIn, loadWishlistPage);
+router.get("/wishlist/count", isLoggedIn, getWishlistCount);
 router.post("/wishlist/add", isLoggedIn, toggleWishlist);
+router.post("/cart/add-from-wishlist", isLoggedIn, addToBagFromWishlist);
+router.delete("/wishlist/clear", isLoggedIn, clearAllWishlist);
 export default router;

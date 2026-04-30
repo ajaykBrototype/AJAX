@@ -270,27 +270,35 @@
       <% wishlistItems.forEach((item, index) => { %>
         <% const product = item.productId; %>
         <% const variant = product.variants && product.variants[0]; %>
-        <div class="fav-card group" data-product="<%= product._id %>" data-variants='<%- JSON.stringify(product.variants || []) %>' onclick="window.location.href='/product/<%= product._id %>'">
-          <div class="remove-fav" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', this)">
+        <div class="fav-card group relative overflow-hidden" data-product="<%= product._id %>" data-variants='<%- JSON.stringify(product.variants || []) %>'>
+          <!-- REMOVE BUTTON -->
+          <div class="remove-fav z-50" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', this)">
             <i data-lucide="x" size="16"></i>
           </div>
           
-          <img src="<%= variant ? variant.images[0] : 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800' %>" alt="<%= product.name %>" class="fav-img">
-          
-          <div class="fav-overlay">
-            <% if (variant && variant.stock <= 0) { %>
-              <div class="stock-badge">Out of Stock</div>
-            <% } %>
+          <!-- PRODUCT LINK (Only covers image and info area) -->
+          <a href="/product/<%= product._id %>" class="block h-full relative">
+            <img src="<%= variant ? variant.images[0] : 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800' %>" alt="<%= product.name %>" class="fav-img">
             
-            <div class="fav-info-row">
-              <h3 class="fav-name"><%= product.name %></h3>
-              <p class="fav-price">₹<%= variant ? variant.price : '0.00' %></p>
+            <div class="fav-overlay">
+              <% if (variant && variant.stock <= 0) { %>
+                <div class="stock-badge">Out of Stock</div>
+              <% } %>
+              
+              <div class="fav-info-row">
+                <h3 class="fav-name"><%= product.name %></h3>
+                <p class="fav-price">₹<%= variant ? variant.price : '0.00' %></p>
+              </div>
+              
+              <p class="fav-desc"><%= product.subcategory ? product.subcategory.name : 'ESSENTIAL' %></p>
             </div>
-            
-            <p class="fav-desc"><%= product.subCategory ? product.subCategory.name : 'ESSENTIAL' %></p>
-            
-            <button class="fav-btn" 
-              <%= (variant && variant.stock <= 0) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : `onclick="event.stopPropagation(); addToBagFromWishlist('${product._id}', '${variant._id}', this)"` %>>
+          </a>
+
+          <!-- ACTION BUTTON (Absolute positioned over the card but separate from the link) -->
+          <div class="absolute bottom-6 left-6 right-6 z-50 pointer-events-auto">
+            <button class="fav-btn w-full" 
+              onclick="event.preventDefault(); event.stopPropagation(); addToBagFromWishlist('<%= product._id %>', '<%= variant ? variant._id : '' %>', this)"
+              <%= (variant && variant.stock <= 0) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' %>>
               <%= (variant && variant.stock <= 0) ? 'Out of Stock' : 'Add to Bag' %>
             </button>
           </div>
@@ -326,11 +334,13 @@
 
 <%- include('../partials/footer') %>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
   lucide.createIcons();
 
-  // Scroll reveal animation
+
   document.addEventListener('DOMContentLoaded', () => {
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
@@ -346,24 +356,28 @@
   });
 
   // Implement removeFromWishlist calling the toggle endpoint
-  async function removeFromWishlist(id, element) {
+  async function removeFromWishlist(id, element, silent = false) {
     try {
       const res = await axios.post("/wishlist/add", { productId: id });
       if (res.data.success) {
-        Swal.fire({
-          title: 'Removed',
-          text: 'Item removed from your favorites',
-          icon: 'success',
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000
-        });
+        if (!silent) {
+          Swal.fire({
+            title: 'Removed',
+            text: 'Item removed from your favorites',
+            icon: 'success',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+          });
+        }
         
         // Remove card from UI
         const card = element.closest('.fav-card');
         if (card) {
-          card.remove();
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => card.remove(), 300);
         }
 
         // Update badge
@@ -386,21 +400,20 @@
           const emptyState = document.querySelector('.empty-wishlist');
           if (emptyState) emptyState.classList.remove('hidden');
         }
-
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error removing item', showConfirmButton: false, timer: 3000 });
+      if (!silent) Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error removing item', showConfirmButton: false, timer: 3000 });
     }
   }
 
   // Implement Add to Bag logic
   async function addToBagFromWishlist(productId, variantId, element) {
     try {
-      // Add to cart
-      const res = await axios.post("/cart/add", {
-        variantId: variantId,
-        quantity: 1
+      // Add to cart atomically
+      const res = await axios.post("/cart/add-from-wishlist", {
+        productId: productId,
+        variantId: variantId
       });
 
       if (res.data.success) {
@@ -412,14 +425,33 @@
             cartBadge.classList.remove('hidden');
           }
         }
-        
-        if (res.data.alreadyInCart) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Already in the cart max limit', showConfirmButton: false, timer: 3000 });
-        } else {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Added to Bag', showConfirmButton: false, timer: 3000 });
-            // Remove from wishlist automatically
-            removeFromWishlist(productId, element);
+
+        // Update wishlist badge/count
+        const wishlistBadge = document.getElementById('wishlist-count-badge');
+        const countSpan = document.querySelector('.item-count');
+        if (res.data.wishlistCount !== undefined) {
+          if (wishlistBadge) {
+            wishlistBadge.textContent = res.data.wishlistCount;
+            if (res.data.wishlistCount === 0) wishlistBadge.classList.add('hidden');
+          }
+          if (countSpan) countSpan.textContent = `${res.data.wishlistCount} Items Saved`;
+          
+          if (res.data.wishlistCount === 0) {
+            const emptyState = document.querySelector('.empty-wishlist');
+            if (emptyState) emptyState.classList.remove('hidden');
+          }
         }
+        
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.data.message, showConfirmButton: false, timer: 3000 });
+        
+        // Remove card from UI instantly with animation
+        const card = element.closest('.fav-card');
+        if (card) {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => card.remove(), 300);
+        }
+
       } else {
         Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: res.data.message, showConfirmButton: false, timer: 3000 });
       }
@@ -481,7 +513,7 @@
                 btn.style.opacity = '1';
                 btn.style.cursor = 'pointer';
                 btn.textContent = 'Add to Bag';
-                btn.setAttribute('onclick', `event.stopPropagation(); addToBagFromWishlist('${productId}', '${preferredVariant._id}', this)`);
+                btn.setAttribute('onclick', `event.preventDefault(); event.stopPropagation(); addToBagFromWishlist('${productId}', '${preferredVariant._id}', this)`);
                 
                 // Hide badge
                 const stockBadge = card.querySelector('.stock-badge');
