@@ -7,31 +7,27 @@ export const loadWishlistPage = async (req, res) => {
     const userId = req.session.userId;
 
     const wishlist = await Wishlist.findOne({ user: userId }).populate({
-      path: "products",
+      path: "items.product",
       populate: { path: "subcategory" }
-    });
+    }).populate("items.variant");
 
     let wishlistItems = [];
 
-    if (wishlist && wishlist.products.length > 0) {
-      wishlistItems = await Promise.all(
-        wishlist.products.map(async (prod) => {
-          const variants = await Variant.find({ productId: prod._id, isActive: true }).lean();
-          return {
-            productId: {
-              ...prod.toObject(),
-              variants: variants
-            }
-          };
-        })
-      );
+    if (wishlist && wishlist.items.length > 0) {
+      wishlistItems = wishlist.items.map(item => {
+        if (!item.product || !item.variant) return null;
+        return {
+          productId: item.product,
+          variant: item.variant
+        };
+      }).filter(Boolean);
     }
 
     res.render("user/wishlist", {
       wishlistItems
     });
   } catch (err) {
-    console.error(err);
+    console.error("LOAD WISHLIST ERROR:", err);
     res.redirect("/");
   }
 }
@@ -39,28 +35,37 @@ export const loadWishlistPage = async (req, res) => {
 export const toggleWishlist = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { productId } = req.body;
-    if (!productId) return res.status(400).json({ success: false });
+    const { productId, variantId } = req.body;
+    
+    if (!productId || !variantId) {
+      return res.status(400).json({ success: false, message: "Missing product or variant info" });
+    }
 
     let wishlist = await Wishlist.findOne({ user: userId });
     let action = "added";
 
     if (!wishlist) {
-      wishlist = new Wishlist({ user: userId, products: [productId] });
+      wishlist = new Wishlist({ 
+        user: userId, 
+        items: [{ product: productId, variant: variantId }] 
+      });
     } else {
-      const index = wishlist.products.findIndex(p => p.toString() === productId);
+      const index = wishlist.items.findIndex(
+        item => item.product.toString() === productId && item.variant.toString() === variantId
+      );
+
       if (index > -1) {
-        wishlist.products.splice(index, 1);
+        wishlist.items.splice(index, 1);
         action = "removed";
       } else {
-        wishlist.products.push(productId);
+        wishlist.items.push({ product: productId, variant: variantId });
       }
     }
 
     await wishlist.save();
-    res.json({ success: true, action, count: wishlist.products.length });
+    res.json({ success: true, action, count: wishlist.items.length });
   } catch (err) {
-    console.error(err);
+    console.error("TOGGLE WISHLIST ERROR:", err);
     res.status(500).json({ success: false });
   }
 };
@@ -80,7 +85,7 @@ export const getWishlistCount = async (req, res) => {
     const userId = req.session.userId;
     if (!userId) return res.json({ success: true, count: 0 });
     const wishlist = await Wishlist.findOne({ user: userId });
-    res.json({ success: true, count: wishlist ? wishlist.products.length : 0 });
+    res.json({ success: true, count: wishlist ? wishlist.items.length : 0 });
   } catch (err) {
     res.status(500).json({ success: false });
   }
@@ -109,14 +114,20 @@ export const addToBagFromWishlist = async (req, res) => {
     }
 
     await cart.save();
-    await Wishlist.findOneAndUpdate({ user: userId }, { $pull: { products: productId } });
+    
+    // Remove specific product-variant pair from wishlist
+    await Wishlist.findOneAndUpdate(
+        { user: userId }, 
+        { $pull: { items: { product: productId, variant: variantId } } }
+    );
+    
     const updatedWishlist = await Wishlist.findOne({ user: userId });
 
     res.json({
       success: true,
       message: "Added to cart 🛒",
       cartCount: cart.items.length,
-      wishlistCount: updatedWishlist ? updatedWishlist.products.length : 0
+      wishlistCount: updatedWishlist ? updatedWishlist.items.length : 0
     });
   } catch (err) {
     console.error(err);

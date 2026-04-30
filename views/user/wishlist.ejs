@@ -269,8 +269,8 @@
     <% if (wishlistItems && wishlistItems.length > 0) { %>
       <% wishlistItems.forEach((item, index) => { %>
         <% const product = item.productId; %>
-        <% const variant = product.variants && product.variants[0]; %>
-        <div class="fav-card group relative overflow-hidden" data-product="<%= product._id %>" data-variants='<%- JSON.stringify(product.variants || []) %>'>
+        <% const variant = item.variant; %>
+        <div class="fav-card group relative overflow-hidden" data-product="<%= product._id %>">
           <!-- REMOVE BUTTON -->
           <div class="remove-fav z-50" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', this)">
             <i data-lucide="x" size="16"></i>

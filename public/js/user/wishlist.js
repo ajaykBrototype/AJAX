@@ -1,6 +1,13 @@
-async function toggleWishlist(productId, elementOrEvent) {
+async function toggleWishlist(productId, elementOrEvent, variantId = null) {
   try {
-    const res = await axios.post("/wishlist/add", { productId });
+    // If variantId is not provided, try to find it from the element's data attributes
+    const btn = elementOrEvent instanceof Event ? elementOrEvent.currentTarget : elementOrEvent;
+    const finalVariantId = variantId || btn.dataset.variantId;
+
+    const res = await axios.post("/wishlist/add", { 
+        productId, 
+        variantId: finalVariantId 
+    });
 
     if (res.data.success) {
       // Handle both inline 'this' and event listeners
@@ -11,10 +18,18 @@ async function toggleWishlist(productId, elementOrEvent) {
         ajaxToast("success", "Added to wishlist ❤️");
         btn.classList.add("favorited", "text-red-500");
         if (icon) icon.classList.add("fill-red-500");
+        // Update local wishlistedVariants if on product detail page
+        if (typeof wishlistedVariants !== 'undefined' && finalVariantId) {
+            wishlistedVariants.push(finalVariantId);
+        }
       } else {
         ajaxToast("success", "Removed from wishlist");
         btn.classList.remove("favorited", "text-red-500");
         if (icon) icon.classList.remove("fill-red-500");
+        // Update local wishlistedVariants if on product detail page
+        if (typeof wishlistedVariants !== 'undefined' && finalVariantId) {
+            wishlistedVariants = wishlistedVariants.filter(v => v !== finalVariantId);
+        }
       }
 
       // Update wishlist count badge in navbar

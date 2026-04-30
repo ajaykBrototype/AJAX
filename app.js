@@ -66,7 +66,7 @@ app.use(async (req, res, next) => {
       ]);
       
       if (cart) res.locals.cartCount = cart.items.length;
-      if (wishlist) res.locals.wishlistCount = wishlist.products.length;
+      if (wishlist) res.locals.wishlistCount = wishlist.items.length;
     } catch (err) {
       console.error("Locals Middleware Error:", err);
     }

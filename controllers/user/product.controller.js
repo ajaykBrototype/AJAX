@@ -67,7 +67,7 @@ export const loadMenPage = async (req, res) => {
       currentPage: Number(page),
       totalPages,
       totalProducts,
-      wishlist: wishlist?.products.map(p => p.toString()) || []
+      wishlist: wishlist?.items.map(i => i.product.toString()) || []
     });
   } catch (err) {
     console.log(err);
@@ -118,6 +118,10 @@ export const loadProductDetails = async (req, res) => {
 
     const stock=defaultVariant?.stock || 0;
 
+    const wishlistDoc = await Wishlist.findOne({ user: req.session.userId });
+    const wishlist = wishlistDoc?.items.map(i => i.product.toString()) || [];
+    const wishlistedVariants = wishlistDoc?.items.map(i => i.variant.toString()) || [];
+
     res.render("user/productDetails", {
       product,
       variants,
@@ -125,7 +129,9 @@ export const loadProductDetails = async (req, res) => {
       relatedProducts,
       category,
       subCategory,
-      stock
+      stock,
+      wishlist,
+      wishlistedVariants
     });
 
   } catch (err) {
@@ -241,7 +247,10 @@ export const loadFilteredProducts = async (req, res) => {
       productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
-    res.json({ success: true, products: productData });
+    const wishlistDoc = await Wishlist.findOne({ user: req.session.userId });
+    const wishlist = wishlistDoc?.items.map(i => i.product.toString()) || [];
+
+    res.json({ success: true, products: productData, wishlist });
 
   } catch (err) {
     console.log(err);

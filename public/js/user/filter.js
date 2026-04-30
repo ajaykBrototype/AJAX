@@ -142,7 +142,7 @@ window.applyFilters = async function () {
       return;
     }
 
-    renderProducts(res.data.products);
+    renderProducts(res.data.products, res.data.wishlist || []);
     toggleSidebar(false);
 
   } catch (err) {
@@ -155,7 +155,7 @@ window.clearAllFilters = function () {
   window.location.href = '/menProductList';
 };
 
-function renderProducts(products) {
+function renderProducts(products, wishlist = []) {
   const container = document.getElementById("productGrid");
 
   if (!products.length) {
@@ -167,26 +167,29 @@ function renderProducts(products) {
     const v = p.variants?.[0] || {};
     const primaryImg = v.images?.[0] || '';
     const secondaryImg = v.images?.[1] || '';
+    const isFavorited = wishlist.includes(p._id.toString());
 
     return `
-      <a href="/product/${p._id}" class="block">
-        <div class="product-card group">
-          <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
-            <button class="wishlist-btn absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onclick="event.preventDefault()">
-              <i data-lucide="heart" size="18" stroke-width="1.5"></i>
-            </button>
-            <img src="${primaryImg}" alt="${p.name}" class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
-            ${secondaryImg ? `<img src="${secondaryImg}" alt="${p.name}" class="secondary-img w-full h-full object-cover" />` : ''}
-            <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
-              <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
+        <div class="product-card group relative">
+          <button 
+            class="wishlist-btn absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 ${isFavorited ? 'favorited text-red-500' : ''}"
+            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p._id}', this, '${v._id}')">
+            <i data-lucide="heart" class="${isFavorited ? 'fill-red-500' : ''}"></i>
+          </button>
+          <a href="/product/${p._id}" class="block">
+            <div class="product-img-wrap relative bg-[#F9F9F7] aspect-[3/4] overflow-hidden mb-4">
+              <img src="${primaryImg}" alt="${p.name}" class="primary-img w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+              ${secondaryImg ? `<img src="${secondaryImg}" alt="${p.name}" class="secondary-img w-full h-full object-cover" />` : ''}
+              <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-white/80 backdrop-blur-sm">
+                <p class="text-[0.55rem] font-black tracking-[0.2em] text-center uppercase">Quick View</p>
+              </div>
             </div>
-          </div>
-          <div class="product-info space-y-1">
-            <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]">${p.name}</h3>
-            <p class="text-[0.75rem] font-medium text-stone-500">₹${v.price || ''}</p>
-          </div>
+            <div class="product-info space-y-1">
+              <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]">${p.name}</h3>
+              <p class="text-[0.75rem] font-medium text-stone-500">₹${v.price || ''}</p>
+            </div>
+          </a>
         </div>
-      </a>
     `;
   }).join("");
 

@@ -114,21 +114,27 @@ addBtn.addEventListener("click",async()=>{
 })
 
 // Wishlist toggle
-const wishlistToggle = document.querySelector('.wishlist-toggle');
-if (wishlistToggle) {
-    wishlistToggle.addEventListener('click', async (e) => {
-        if (typeof currentProductId !== 'undefined' && typeof toggleWishlist === 'function') {
-            await toggleWishlist(currentProductId, e);
-            
-            // Save preferred variant
-            if (state.selectedVariant) {
-                let prefs = JSON.parse(localStorage.getItem('wishlistPrefs') || '{}');
-                prefs[currentProductId] = state.selectedVariant._id;
-                localStorage.setItem('wishlistPrefs', JSON.stringify(prefs));
-            }
+document.addEventListener('click', async (e) => {
+    const wishlistBtn = e.target.closest('.wishlist-toggle, .btn-secondary');
+    if (!wishlistBtn) return;
+
+    if (typeof currentProductId !== 'undefined' && typeof toggleWishlist === 'function') {
+        const variantId = state.selectedVariant?._id || stepper.dataset.variant;
+        
+        if (!variantId) {
+            return ajaxToast("error", "Please select a color and size first");
         }
-    });
-}
+
+        await toggleWishlist(currentProductId, wishlistBtn, variantId);
+        
+        // Save preferred variant locally for quick loading
+        if (state.selectedVariant) {
+            let prefs = JSON.parse(localStorage.getItem('wishlistPrefs') || '{}');
+            prefs[currentProductId] = state.selectedVariant._id;
+            localStorage.setItem('wishlistPrefs', JSON.stringify(prefs));
+        }
+    }
+});
 
 
         lucide.createIcons();
@@ -178,8 +184,10 @@ if (wishlistToggle) {
 
         function updateActionButtons() {
             const btn = document.getElementById('addToBagBtn');
+            const wishlistBtns = document.querySelectorAll('.wishlist-toggle, .btn-secondary');
             const stock = state.selectedVariant ? parseInt(state.selectedVariant.stock) : 0;
             
+            // Update Add to Bag Button
             if (state.selectedColor && state.selectedVariant && stock > 0) {
                 btn.disabled = false;
                 btn.style.opacity = '1';
@@ -197,6 +205,21 @@ if (wishlistToggle) {
                 btn.style.cursor = 'not-allowed';
                 btn.innerHTML = 'Add to Bag <i data-lucide="arrow-right" size="14"></i>';
                 lucide.createIcons();
+            }
+
+            // Update Wishlist Buttons based on selected variant
+            if (state.selectedVariant && typeof wishlistedVariants !== 'undefined') {
+                const isFavorited = wishlistedVariants.includes(state.selectedVariant._id);
+                wishlistBtns.forEach(wBtn => {
+                    const heartIcon = wBtn.querySelector('i, svg');
+                    if (isFavorited) {
+                        wBtn.classList.add('favorited', 'text-red-500');
+                        if (heartIcon) heartIcon.classList.add('fill-red-500');
+                    } else {
+                        wBtn.classList.remove('favorited', 'text-red-500');
+                        if (heartIcon) heartIcon.classList.remove('fill-red-500');
+                    }
+                });
             }
         }
 
