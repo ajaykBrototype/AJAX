@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmPass = document.getElementById("confirm-password");
   const submitBtn = document.getElementById("submit-btn");
 
-  // ================= ERROR HANDLING =================
+  
 
 const showError = (key, msg) => {
   const errorEl = document.getElementById(`${key}-error`);
@@ -32,7 +32,7 @@ const showError = (key, msg) => {
     if (input) input.classList.remove("error");
   };
 
-  // ================= PASSWORD STRENGTH =================
+  
 
   const strengthBar = document.getElementById("strength-bar");
   const strengthLbl = document.getElementById("strength-label");
@@ -88,7 +88,7 @@ const showError = (key, msg) => {
     strengthLbl.textContent = "Strength: " + lvl.lbl;
   });
 
-  // ================= MATCH CHECK =================
+  
 
   const matchDot = document.getElementById("match-dot");
 
@@ -105,7 +105,7 @@ const showError = (key, msg) => {
     matchDot.className = "show " + (match ? "ok" : "bad");
   });
 
-  // ================= FORM SUBMIT =================
+  
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -113,7 +113,7 @@ const showError = (key, msg) => {
     clearError("new");
     clearError("confirm");
 
-    // FRONTEND VALIDATION
+  
     if (!newPass.value) {
       return showError("new", "Enter a new password");
     }
@@ -136,7 +136,12 @@ const showError = (key, msg) => {
       });
 
       if (res.data.success) {
-        window.location.href = res.data.redirect || "/login";
+         ajaxToast("success", "Password changed successfully");
+
+  
+  setTimeout(() => {
+    window.location.href = res.data.redirect || "/login";
+  }, 1500);
       }
 
     } catch (err) {
@@ -165,7 +170,7 @@ data?.errors?.confirmPassword?.[0]||
 
 });
 
-// ================= TOGGLE PASSWORD =================
+
 
 window.togglePassword = function (id, btn) {
   const input = document.getElementById(id);

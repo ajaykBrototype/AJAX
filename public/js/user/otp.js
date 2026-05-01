@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   startTimer();
 
-  // 🔹 INPUT HANDLING
+
   inputs.forEach((input, index) => {
 
     input.addEventListener("input", () => {
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     input.addEventListener("keydown", (e) => {
 
-      // 🔙 BACKSPACE
+
       if (e.key === "Backspace" && !input.value && index > 0) {
         inputs[index - 1].focus();
       }
@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// 🔹 GET OTP
 function getOtp() {
   return Array.from(document.querySelectorAll(".otp-box"))
     .map(input => input.value)
@@ -128,10 +127,13 @@ async function verifyOtp() {
   try {
     const res = await axios.post("/verify-otp", { otp });
 
-    if (res.data.success) {
-      window.location.href = res.data.redirect;
-      ajaxToast("success","Otp Verified")
-    }
+   
+      if (res.data.success) {
+        ajaxToast("success","Otp Verified");
+        setTimeout(()=>{
+           window.location.href = res.data.redirect;
+        })
+      }
 
   } catch (err) {
     const error = err.response?.data;

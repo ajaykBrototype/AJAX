@@ -95,7 +95,7 @@ const otpContainer = document.getElementById("otpContainer");
 inputs.forEach((input, index) => {
 
   input.addEventListener("input", () => {
-    // allow only numbers
+   
     input.value = input.value.replace(/[^0-9]/g, "");
 
     if (input.value && index < inputs.length - 1) {
@@ -167,7 +167,7 @@ async function verifyOtp() {
   }
 }
 
-// 🔥 BUTTON CLICK
+
 document.getElementById("verifyBtn").addEventListener("click", verifyOtp);
 
 // 🔁 TIMER
@@ -195,7 +195,7 @@ function startTimer() {
   }, 1000);
 }
 
-// Initial start
+
 startTimer();
 
 // 🔁 RESEND

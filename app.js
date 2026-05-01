@@ -8,6 +8,9 @@ import connectDB from "./config/db.js";
 import session from "express-session"; 
 import morgan from "morgan";
 import passport from "passport";
+import Cart from "./models/user/cartModel.js";
+import Wishlist from "./models/user/wishlistModel.js";
+
 
 
 console.log("ENV TEST:", process.env.GOOGLE_CLIENT_ID);
@@ -50,8 +53,6 @@ app.use("/uploads", express.static("public/uploads"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-import Cart from "./models/user/cartModel.js";
-import Wishlist from "./models/user/wishlistModel.js";
 
 app.use(async (req, res, next) => {
   res.locals.user = req.session.userId || null;

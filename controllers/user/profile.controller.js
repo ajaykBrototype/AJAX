@@ -121,7 +121,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // NORMAL UPDATE
     await User.findByIdAndUpdate(userId, {
       ...updateData,
       email

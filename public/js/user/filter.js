@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePriceSlider(); // Initial update
   }
 
-  // 🔍 SEARCH (sidebar)
+ 
   const searchInput = document.getElementById("sidebarSearch");
   const debouncedApply = debounce(() => applyFilters(), 500);
 
