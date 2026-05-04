@@ -4,10 +4,10 @@
         function recalculate() {
             let subtotal = 0;
             const items = document.querySelectorAll('.bag-card:not(.item-exit)');
+            const checkoutBtn = document.querySelector('.btn-checkout');
+            let hasOutOfStock = false;
             
-           
             if (items.length === 0) {
-              
                 const emptyState = document.querySelector('.empty-state-container');
                 if (!emptyState) {
                     window.location.reload();
@@ -16,7 +16,10 @@
             }
 
             items.forEach(card => {
-                if (card.classList.contains('grayscale')) return; // Skip out of stock
+                if (card.classList.contains('grayscale')) {
+                    hasOutOfStock = true;
+                    return; 
+                }
                 
                 const price = parseFloat(card.dataset.price) || 0;
                 const qtyVal = card.querySelector('.qty-val');
@@ -25,6 +28,15 @@
                     subtotal += price * qty;
                 }
             });
+
+           
+            if (checkoutBtn) {
+                if (hasOutOfStock) {
+                    checkoutBtn.classList.add('disabled');
+                } else {
+                    checkoutBtn.classList.remove('disabled');
+                }
+            }
 
             const subtotalDisplays = document.querySelectorAll('.subtotal-display');
             const totalDisplays = document.querySelectorAll('.total-display');
