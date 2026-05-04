@@ -1,4 +1,3 @@
-import { success } from "zod";
 import User from "../../models/user/userModel.js";
 import Otp from "../../models/user/otpModel.js";
 import { generateOTP } from "../../utils/generateOtp.js"; // adjust path
@@ -23,7 +22,7 @@ export const loadProfile = async (req, res) => {
 
   } catch (error) {
     console.log("❌ ERROR:", error);
-    res.send("Server Error"); // 👈 TEMP SHOW ERROR
+    res.send("Server Error"); 
   }
 };
 
@@ -53,25 +52,40 @@ export const loadEditProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    console.log("FILE:", req.file); 
     const userId = req.session.userId;
     const user = await User.findById(userId);
 
     const { name, email, phone, dob, gender, nationality } = req.body;
 
-    const updateData = { name, email, phone, dob, gender, nationality };
+    // VALIDATION
+    const phoneRegex = /^[0-9]{10}$/;
+    if (phone && !phoneRegex.test(phone)) {
+      return res.json({
+        success: false,
+        message: "Phone number must be exactly 10 digits"
+      });
+    }
+
+    let updateData = { name, phone, dob, gender, nationality };
 
     if (req.file) {
       updateData.profileImage = "/uploads/" + req.file.filename;
     }
-     if (user.googleId) {
+
+    // GOOGLE USER
+    if (user.googleId) {
       await User.findByIdAndUpdate(userId, updateData);
-      return res.json({ success: true });
+      return res.json({ success: true, message: "Profile updated" });
     }
 
+    // EMAIL CHANGE
     if (email !== user.email) {
 
-      const existingUser = await User.findOne({ email,  _id: { $ne: userId } });
+      const existingUser = await User.findOne({
+        email,
+        _id: { $ne: userId }
+      });
+
       if (existingUser) {
         return res.json({
           success: false,
@@ -80,36 +94,39 @@ export const updateProfile = async (req, res) => {
       }
 
       const otp = generateOTP();
-   req.session.newEmail = email;
-     await Otp.findOneAndUpdate(
-  { email: email, type: "email" },
-  {
-    $set: {
-      otp,
-      expiresAt: Date.now() + 2 * 60 * 1000,
-      type: "email"
-    }
-  },
-  { upsert: true }
-);
 
+      await Otp.findOneAndUpdate(
+        { email, type: "email" },
+        {
+          otp,
+          expiresAt: Date.now() + 2 * 60 * 1000,
+          type: "email"
+        },
+        { upsert: true }
+      );
+
+      // Store both for the verify page and the final update
+      req.session.newEmail = email;
       req.session.pendingProfileData = {
         ...updateData,
         email
       };
 
-      await sendOtpEmail(email, otp);
+      await sendOtpEmail(email, otp, "verify_email");
 
       return res.json({
-        success: true,
+        success: false,
         requireOtp: true,
         message: "OTP sent to new email"
       });
     }
-       updateData.email = email;
-    await User.findByIdAndUpdate(userId, updateData);
 
-    res.json({ success: true });
+    await User.findByIdAndUpdate(userId, {
+      ...updateData,
+      email
+    });
+
+    res.json({ success: true, message: "Profile updated successfully" });
 
   } catch (error) {
     console.log(error);
@@ -136,7 +153,7 @@ export const verifyEmailOtp = async (req, res) => {
 };
 
 export const loadChangePassword = (req, res) => {
-  res.render("user/changePassword"); // your EJS file name
+  res.render("user/changePassword"); 
 };
 
 

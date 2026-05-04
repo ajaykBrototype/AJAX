@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title><%= product.name %> — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- TAILWIND -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Plus Jakarta Sans', 'sans-serif']
+        },
+        colors: {
+          'luxury-bg': '#F8F6F0',
+          'luxury-accent': '#1C1C1C',
+          'luxury-text': '#111111',
+          'luxury-muted': '#737373',
+          'luxury-border': '#E5E5E5'
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { background-color: theme('colors.luxury-bg'); color: theme('colors.luxury-text'); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  
+  /* Sidebar */
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; transition: all 0.2s ease; position: relative; color: theme('colors.luxury-muted'); font-size: 14px; font-weight: 600; }
+  .sidebar-item:hover { color: theme('colors.luxury-text'); background: rgba(0,0,0,0.03); }
+  .sidebar-item.active { background-color: #fff; color: theme('colors.luxury-text'); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  
+  /* Premium Cards */
+  .detail-card { background: white; border-radius: 20px; border: 1px solid theme('colors.luxury-border'); box-shadow: 0 4px 20px rgba(0,0,0,0.01); }
+  
+  /* Badges */
+  .status-badge { padding: 6px 14px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: #F4F4F5; color: #111; }
+  .category-pill { background: #111; color: white; padding: 6px 14px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Modern Gallery Styles */
+  .gallery-main { width: 100%; aspect-ratio: 3/4; border-radius: 16px; overflow: hidden; background: #F4F4F5; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+  .gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .gallery-main:hover img { transform: scale(1.02); }
+  
+  .thumb-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px; margin-top: 16px; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
+  .thumb-scroller::-webkit-scrollbar { display: none; }
+  
+  .thumb-item { width: 80px; height: 100px; border-radius: 12px; overflow: hidden; flex-shrink: 0; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; background: #fff; }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+  .thumb-item:hover img { opacity: 1; }
+  .thumb-item.active { border-color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .thumb-item.active img { opacity: 1; }
+
+  /* Swatch */
+  .swatch { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px #E5E5E5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .swatch.active { box-shadow: 0 0 0 2px #111; transform: scale(1.05); }
+  .swatch:hover { transform: scale(1.1); }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  
+  /* Progress Bar */
+  .progress-bg { height: 6px; background: #E5E5E5; border-radius: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #111; border-radius: 10px; transition: width 1s ease; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+    <!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/products' }) %>
+
+  <!-- MAIN -->
+  <main class="flex-1 min-w-0 p-6 lg:p-14 pb-32">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-[11px] font-semibold text-luxury-muted mb-10 anim-fade-up">
+        <a href="/admin/products" class="hover:text-luxury-text transition-colors flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Products
+        </a>
+        <span class="text-luxury-border px-1">/</span>
+        <span class="text-luxury-text">Product Details</span>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12 anim-fade-up">
+        <div class="flex-1">
+            <div class="flex items-center gap-4 flex-wrap mb-4">
+                <span class="status-badge shadow-sm"><%= product.isActive ? "● Active" : "○ Inactive" %></span>
+                <p class="text-[11px] font-bold text-luxury-muted uppercase tracking-widest flex items-center gap-2">
+                    <span class="text-luxury-text"><%= product.category ? product.category.name : "Uncategorized" %></span>
+                    <span class="w-1 h-1 rounded-full bg-luxury-border"></span>
+                    ID: <%= product._id.toString().slice(-8).toUpperCase() %>
+                </p>
+            </div>
+            <h2 class="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-luxury-text"><%= product.name %></h2>
+        </div>
+        
+        <div class="flex items-center gap-3 mt-4 lg:mt-0">
+            <a href="/admin/products/<%= product._id %>/variants" class="px-6 py-3 border border-luxury-border rounded-xl text-xs font-bold text-luxury-text hover:bg-stone-50 transition-all shadow-sm">View Variants</a>
+            <a href="/admin/products/edit/<%= product._id %>" class="px-6 py-3 bg-luxury-text text-white rounded-xl text-xs font-bold hover:bg-stone-800 transition-all shadow-md flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Edit Product
+            </a>
+        </div>
+    </header>
+
+    <!-- CONTENT GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+        
+        <!-- LEFT COLUMN: Gallery & Logistics (Constraints the image size) -->
+        <div class="flex flex-col gap-6 anim-fade-up">
+            
+            <!-- Gallery Card -->
+            <div class="detail-card p-4">
+                <!-- HERO -->
+                <div class="gallery-main rounded-xl shadow-sm">
+                    <% if (defaultVariant && defaultVariant.images.length > 0) { %>
+                        <img id="mainHero" src="<%= defaultVariant.images[0] %>" alt="<%= product.name %>">
+                    <% } else { %>
+                        <div class="w-full h-full flex flex-col items-center justify-center text-luxury-muted bg-stone-50">
+                            <svg class="mb-4 opacity-30" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-stone-400">No Image</span>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- THUMBS -->
+                <% if (defaultVariant && defaultVariant.images.length > 1) { %>
+                    <div class="thumb-scroller">
+                        <% defaultVariant.images.forEach((img, idx) => { %>
+                            <div class="thumb-item <%= idx === 0 ? 'active' : '' %>" onclick="swapMedia('<%= img %>', this)">
+                                <img src="<%= img %>" alt="Detail <%= idx + 1 %>">
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Logistics Card -->
+            <div class="detail-card p-6">
+                <h4 class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-6">Additional Information</h4>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4 p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-white border border-stone-100 shadow-sm flex items-center justify-center shrink-0 text-luxury-text mt-0.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-luxury-text mb-1 uppercase tracking-widest">Care Guidelines</p>
+                            <p class="text-[12px] leading-relaxed text-stone-500"><%= product.careGuide || 'Standard care required.' %></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-white border border-stone-100 shadow-sm flex items-center justify-center shrink-0 text-luxury-text mt-0.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-luxury-text mb-1 uppercase tracking-widest">Added On</p>
+                            <p class="text-[12px] leading-relaxed text-stone-500"><%= new Date(product.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Pricing, Overview, Controls -->
+        <div class="lg:col-span-2 flex flex-col gap-6 anim-fade-up" style="animation-delay: 0.1s;">
+            
+            <!-- PRICING & VARIANTS CARD -->
+            <div class="detail-card p-6 lg:p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
+                    <svg width="160" height="160" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle cx="12" cy="12" r="5"/></svg>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8 relative">
+                    <!-- Left side: Pricing & Stock -->
+                    <div class="space-y-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-2">Base Price</p>
+                            <div class="flex items-end gap-3">
+                                <p class="text-5xl font-extrabold tracking-tight text-luxury-text">₹<%= defaultVariant ? defaultVariant.price.toLocaleString('en-IN') : '0' %></p>
+                                <span class="bg-gray-100 text-gray-800 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md mb-2">Current</span>
+                            </div>
+                        </div>
+
+                        <div class="p-5 bg-stone-50 border border-stone-100 rounded-xl">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest">Total Stock Allocation</p>
+                                <p class="text-lg font-bold"><%= defaultVariant ? defaultVariant.stock : '0' %> <span class="text-[10px] font-semibold text-luxury-muted">UNITS</span></p>
+                            </div>
+                           <div class="progress-fill" style="width: <%= defaultVariant ? Math.min(defaultVariant.stock, 100) : 0 %>%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right side: Swatches -->
+                    <div class="lg:border-l border-luxury-border lg:pl-8">
+                        <p class="text-[10px] font-bold text-luxury-muted uppercase tracking-widest mb-4">Available Palette (<%= variants ? variants.length : 0 %>)</p>
+                        
+                        <% if (variants && variants.length > 0) { %>
+                            <div class="flex flex-wrap gap-4">
+                                <% variants.forEach(variant => { %>
+                                    <div class="flex flex-col items-center gap-2 group cursor-pointer" onclick="window.location.href='/admin/products/<%= product._id %>?variant=<%= variant._id %>'">
+                                        <div class="swatch <%= defaultVariant && variant._id.toString() === defaultVariant._id.toString() ? 'active' : '' %>" style="background-color: <%= variant.color && variant.color.match(/^#|^rgb/) ? variant.color : 'transparent' %>; border: 2px solid <%= variant.color && !variant.color.match(/^#|^rgb/) ? 'transparent' : '#E5E5E5' %>">
+                                            <% if (!variant.color || !variant.color.match(/^#|^rgb/)) { %>
+                                                <span class="text-[8px] font-bold text-luxury-text leading-none text-center px-1"><%= (variant.color || 'N/A').substring(0, 3).toUpperCase() %></span>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest text-stone-500 group-hover:text-luxury-text transition-colors"><%= variant.color %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-xs text-luxury-muted italic">No distinct color variants added yet.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVERVIEW CARD -->
+            <div class="detail-card p-6 lg:p-8">
+                <div class="mb-6 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-luxury-text tracking-tight shrink-0">Product Overview</h3>
+                    <div class="h-px bg-luxury-border flex-1 ml-6"></div>
+                </div>
+                
+                <div class="p-6 bg-stone-50 border border-stone-100 rounded-xl mb-8">
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">Narrative</p>
+                    <div class="text-[13px] leading-relaxed text-stone-600 font-medium space-y-4">
+                        <p><%= product.description %></p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-stone-50 border border-stone-100 rounded-xl">
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Category</p>
+                        <p class="text-xs font-semibold text-luxury-text"><%= product.category ? product.category.name : 'Unknown' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Material</p>
+                        <p class="text-xs font-semibold text-luxury-text"><%= product.material || 'Organic' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">SKU</p>
+                        <p class="text-xs font-semibold <%= product.isActive ? 'text-green-600' : 'text-stone-400' %>">
+                            <%= defaultVariant?.sku || 'NONE' %>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-2">Product ID</p>
+                        <p class="text-[11px] font-mono font-medium text-stone-500"><%= product._id.toString().slice(-8).toUpperCase() %></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+  </main>
+
+  <script>
+    function swapMedia(src, thumbEl) {
+        const hero = document.getElementById('mainHero');
+        if (!hero) return;
+
+        // Update Active Class
+        document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
+        if (thumbEl) thumbEl.classList.add('active');
+
+        // Transition Animation
+        hero.style.opacity = '0';
+        hero.style.transform = 'scale(1.01)';
+        
+        setTimeout(() => {
+            hero.src = src;
+            hero.style.opacity = '1';
+            hero.style.transform = 'scale(1.0)';
+        }, 200);
+    }
+  </script>
+</body>
+</html>

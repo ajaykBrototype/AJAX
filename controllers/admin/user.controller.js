@@ -1,6 +1,4 @@
-import { tr } from "zod/locales";
 import User from "../../models/user/userModel.js";
-import { success } from "zod";
 export const getAllUsers = async (req, res) => {
     try {
         const searchQuery = req.query.search || "";

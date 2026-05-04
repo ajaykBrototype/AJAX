@@ -9,8 +9,6 @@ import {
   loginService,
   resetPasswordService
 } from "../../services/user/auth.service.js";
-import { success } from "zod";
-import { fa } from "zod/locales";
 
 export const loadSignup = (req, res) => {
   res.render("user/signup");
@@ -67,10 +65,10 @@ await Otp.findOneAndUpdate(
   { upsert: true }
 );
 
-await sendOtpEmail(email, otp);
+await sendOtpEmail(email, otp, "reset");
 
-// store ONLY email in session (optional)
-
+  req.session.resetEmail = email;
+  req.session.type = "reset";
 
   console.log("Reset OTP:", otp);
 
@@ -137,12 +135,12 @@ export const logoutUser = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
-      return res.redirect("/home");
+      return res.redirect("/");
     }
 
     res.clearCookie("connect.sid");
 
-    return res.redirect("/login");
+    return res.redirect("/");
   });
 };
 export const googleCallback = (req, res) => {
@@ -168,5 +166,5 @@ export const loadResetPassword = (req, res) => {
 };
 
 export const loadHome = (req, res) => {
-  res.render("user/home");
+  res.render("user/home", { user: req.session.userId });
 };

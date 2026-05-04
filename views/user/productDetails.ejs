@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><%= (typeof product !== 'undefined' && product) ? product.name + ' — AJAX' : 'Sky Linen Shirt — AJAX' %></title>
+    
+    <!-- Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { serif: ['Playfair Display','serif'], sans: ['DM Sans','sans-serif'] } } }
+        }
+    </script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <%- include('../partials/navbar-styles') %>
+<%- include('../partials/footer-styles') %>
+<style>
+        
+        :root {
+            --bg-color: #FFFFFF; 
+            --surface-color: #F9F9F8;
+            --text-primary: #121212;
+            --text-secondary: #4A4A4A;
+            --text-muted: #8E8E8E;
+            --border-color: rgba(0,0,0,0.06);
+            --accent-color: #000000;
+            --font-main: 'DM Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        
+        /* --- Main Layout --- */
+        main {
+            padding-top: 100px; 
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 80px;
+            padding-left: 40px;
+            padding-right: 40px;
+            align-items: start;
+        }
+
+        /* --- Product Images Section --- */
+        .product-images {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .main-image-column {
+            min-width: 0;
+        }
+
+        .thumbnail-strip {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .thumbnail {
+            width: 70px;
+            height: 94px;
+            background: var(--surface-color);
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+        }
+
+        .thumbnail.active-thumb {
+            border-color: var(--accent-color);
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.02);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .main-image-container {
+            width: 100%;
+            aspect-ratio: 0.82;
+            background: var(--surface-color);
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.02);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .main-image-container:hover {
+            cursor: zoom-in;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        .wishlist-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 43px;
+            height: 41.18px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+
+        .wishlist-toggle:hover {
+            background: #ffffff;
+        }
+
+        /* --- Product Details Right Panel --- */
+        .product-details {
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+            position: sticky;
+            top: 140px;
+        }
+
+        .editorial-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .product-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .product-price {
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .price-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .original-price {
+            font-size: 16px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-weight: 300;
+        }
+
+        .discount-badge {
+            background: #EBF7EE;
+            color: #1B7A3D;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .rating-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2px;
+            cursor: pointer;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stock-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .stock-in { color: #1B7A3D; }
+        .stock-in .stock-dot { background: #1B7A3D; }
+        .stock-low { color: #B04040; }
+        .stock-low .stock-dot { background: #B04040; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .offers-container {
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .offer-card {
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .offer-card:hover {
+            border-color: var(--accent-color);
+            background: #fafafa;
+        }
+
+        .offer-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .offer-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .short-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .long-desc {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-weight: 300;
+        }
+
+        /* Option Selectors */
+        .option-group {
+            margin-bottom: 32px;
+        }
+
+        .option-label {
+            font-size: 11px;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .swatches {
+            display: flex;
+            gap: 16px;
+        }
+
+        .swatch {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            position: relative;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+        }
+
+        .swatch.active::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 1px solid var(--accent-color);
+            border-radius: 50%;
+            padding: 4px;
+        }
+
+        .size-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .size-btn {
+            height: 52px;
+            border: 1px solid var(--border-color);
+            background: none;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--text-secondary);
+        }
+
+        .size-btn:hover {
+            border-color: var(--accent-color);
+        }
+
+        .size-btn.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+        }
+
+        .size-guide-link {
+            font-size: 10px;
+            text-decoration: underline;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* Quantity Stepper */
+        .quantity-stepper {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            width: 120px;
+            height: 48px;
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qty-btn {
+            flex: 1;
+            height: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .qty-val {
+            width: 48px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .btn-primary {
+            height: 54px;
+            background: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary:hover {
+            background: #222;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            height: 54px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-color);
+            background: #fafafa;
+        }
+
+        /* Accordions */
+        .accordions {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .accordion-item {
+            border-top: 1px solid var(--border-color);
+            padding: 24px 0;
+        }
+
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .accordion-title {
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .accordion-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            padding-bottom: 24px;
+            max-width: 90%;
+        }
+
+        .accordion-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .accordion-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bullet {
+            width: 6px;
+            height: 6px;
+            background: #D4D4D8;
+        }
+
+        /* --- Related Products Section --- */
+        .related-section {
+            background: var(--surface-color);
+            padding: 96px 48px;
+            margin-top: 96px;
+        }
+
+        .related-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 64px;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .card-img {
+            aspect-ratio: 266/354;
+            background: #ffffff;
+            margin-bottom: 24px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .product-card:hover .card-img img {
+            transform: scale(1.05);
+        }
+
+        .card-category {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .card-price {
+            font-size: 14px;
+            color: #71717A;
+        }
+
+        /* --- Customer Reviews Section --- */
+        .reviews-section {
+            padding: 48px 48px 96px;
+            background: #ffffff;
+            border-top: 1px solid #F4F4F5;
+            display: grid;
+            grid-template-columns: 341px 1fr;
+            gap: 80px;
+        }
+
+        .reviews-summary h2 {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .reviews-summary h3 {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .rating-hero {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .rating-val {
+            font-family: var(--font-serif);
+            font-size: 48px;
+            font-weight: 300;
+        }
+
+        .stars-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .stars-row svg {
+            display: block;
+        }
+
+        .rating-count {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            width: 64px;
+            font-size: 11px;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+        }
+
+        .filter-bar-bg {
+            flex: 1;
+            height: 2px;
+            background: #F4F4F5;
+            position: relative;
+        }
+
+        .filter-bar-fill {
+            position: absolute;
+            height: 100%;
+            background: var(--accent-color);
+        }
+
+        .filter-percent {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 64px;
+        }
+
+        .review-card {
+            border-bottom: 1px solid #F4F4F5;
+            padding-bottom: 48px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .review-stars {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #000;
+        }
+
+        .review-title {
+            font-family: var(--font-serif);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .review-author {
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .verified-badge {
+            background: #FAFAFA;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .review-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(26, 28, 28, 0.7);
+            max-width: 672px;
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 48px 48px 96px;
+            background: var(--bg-color);
+            border-top: 1px solid rgba(228, 228, 231, 0.2);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr;
+            gap: 48px;
+            margin-bottom: 96px;
+        }
+
+        .footer-brand h2 {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 22px;
+        }
+
+        .footer-brand p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 384px;
+            margin-bottom: 24px;
+        }
+
+        .footer-links h4 {
+            font-size: 11px;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .footer-nav {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .footer-nav a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .newsletter-input {
+            border: none;
+            border-bottom: 1px solid var(--accent-color);
+            padding: 8px 0;
+            width: 100%;
+            background: none;
+            font-family: var(--font-main);
+            font-size: 14px;
+            margin-top: 16px;
+            outline: none;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #F4F4F5;
+            padding-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* --- Animations --- */
+        .reveal {
+            /* Removed initial hidden state for reliability */
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main>
+
+
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: category?.name || "Category", url: "/menProductList" },
+              { name: subCategory?.name || "Subcategory", url: "/menProductList?sub=" + subCategory?._id },
+              { name: product.name }
+          ] 
+      }) %>
+
+
+
+        <section class="product-images">
+            <div class="thumbnail-strip">
+                <% if (variant && variant.images && variant.images.length > 0) { %>
+                    <% variant.images.forEach((img, idx) => { %>
+                        <div class="thumbnail <%= idx === 0 ? 'active-thumb' : '' %>" onclick="switchImage('<%= img %>', this)">
+                            <img src="<%= img %>" alt="View <%= idx + 1 %>">
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+            <div class="main-image-column">
+                <div class="main-image-container">
+                    <img id="mainImage" src="<%= variant?.images?.[0] %>" alt="Product Image" class="main-image" style="opacity: 1 !important;">
+                    <button class="wishlist-toggle <%= (locals.wishlist || []).includes(product._id.toString()) ? 'favorited text-red-500' : '' %>">
+                        <i data-lucide="heart" size="19" class="<%= (locals.wishlist || []).includes(product._id.toString()) ? 'fill-red-500' : '' %>"></i>
+                    </button>
+                </div>
+                
+                <!-- Accordions strictly below the image -->
+                <div class="accordions reveal" style="transition-delay: 0.6s; margin-top: 40px; border-top: 1px solid var(--border-color);">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span class="accordion-title">Material</span>
+                            <i data-lucide="plus" size="14"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="accordion-list">
+                                <li><div class="bullet"></div> <%= product.material%></li>
+                              
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span class="accordion-title">Care guide</span>
+                            <i data-lucide="plus" size="14"></i>
+                        </div>
+                        <div class="accordion-content">
+                         <%=product.careGuide%>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-details">
+            <div class="reveal" style="transition-delay: 0.2s;">
+                <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
+                <h1 class="product-title"><%= product.name %></h1>
+                
+                <div class="rating-summary">
+                    <div class="rating-stars">
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="#000"></i>
+                        <i data-lucide="star" size="14" fill="none" stroke="#000"></i>
+                    </div>
+                    <span class="rating-text">4.8 (128 Reviews)</span>
+                </div>
+
+                <div class="price-wrapper">
+                    <p class="product-price" id="productPrice">₹<%= variant?.price %></p>
+                    <p class="original-price" id="originalPrice">₹<%= Math.round(variant?.price * 1.4) %></p>
+                    <div class="discount-badge">40% OFF</div>
+                </div>
+
+                <div id="stockInfoContainer" class="stock-info <%= (variant?.stock || 0) < 5 ? 'stock-low' : 'stock-in' %>">
+                    <div class="stock-dot"></div>
+                    <span id="stockStatus"><%= (variant?.stock || 0) < 5 ? 'Limited Stock: Only ' + variant.stock + ' left' : 'In Stock & Ready to Ship' %></span>
+                </div>
+            </div>
+
+            <div class="reveal" style="transition-delay: 0.3s;">
+                <!-- <p class="short-desc">"Lightweight comfort meets effortless style"</p> -->
+                <p class="long-desc">
+                    <%= product.description %>
+                </p>
+            </div>
+
+            <% 
+              // Group variants by color for clean rendering
+              const colorGroups = {};
+              variants.forEach(v => {
+                if (!colorGroups[v.color]) {
+                  colorGroups[v.color] = [];
+                }
+                colorGroups[v.color].push(v);
+              });
+              const uniqueColors = Object.keys(colorGroups);
+            %>
+
+            <div class="option-group reveal" style="transition-delay: 0.4s;">
+                <div class="option-label" id="colorLabel">Select Color</div>
+               <div class="swatches">
+                   <% uniqueColors.forEach(color => { 
+                       const group = colorGroups[color];
+                       // Use the first variant of the group as the representative for images/prices
+                       const rep = group[0];
+                   %>
+                   <div 
+                      class="swatch"
+                      style="background:<%= color %>"
+                      data-color="<%= color %>"
+                      data-variants='<%= JSON.stringify(group) %>'
+                   >
+                   </div>
+                   <% }) %>
+             </div>
+            </div>
+
+            <div class="option-group reveal" style="transition-delay: 0.5s;">
+                <div class="option-label">
+                    <span>Select Size</span>
+                    <span class="size-guide-link">Size Guide</span>
+                </div>
+                <div class="size-grid" id="sizeGrid">
+                    <!-- Sizes will be populated dynamically based on color selection -->
+                    <p class="text-[10px] text-stone-400 uppercase tracking-widest py-4">Please select a color first</p>
+                </div>
+            </div>
+
+            <div class="reveal" style="transition-delay: 0.6s;">
+                <div class="option-label">Quantity</div>
+                <div class="quantity-stepper" data-stock="0" data-variant="">
+                    <button class="qty-btn" id="decrease">-</button>
+                 <div class="qty-val" id="qtyValue">1</div>
+                 <button class="qty-btn" id="increase">+</button>
+                </div>
+
+                <div class="option-label">Available Offers</div>
+                <div class="offers-container">
+                    <div class="offer-card">
+                        <span class="offer-tag">New User</span>
+                        <p class="offer-title">Flat ₹500 OFF on first order</p>
+                    </div>
+                    <div class="offer-card">
+                        <span class="offer-tag">Seasonal</span>
+                        <p class="offer-title">Extra 10% OFF on ₹2,499+</p>
+                    </div>
+                </div>
+
+                <div class="action-btns">
+                    <button class="btn-primary" id="addToBagBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Add to Bag <i data-lucide="arrow-right" size="14"></i>
+                    </button>
+                    <button class="btn-secondary <%= (locals.wishlist || []).includes(product._id.toString()) ? 'favorited text-red-500' : '' %>">
+                        <i data-lucide="heart" size="14" class="mr-2 <%= (locals.wishlist || []).includes(product._id.toString()) ? 'fill-red-500' : '' %>"></i>
+                        Wishlist
+                    </button>
+                </div>
+
+                <div style="background: #f8f8f8; padding: 20px; border-radius: 8px; display: flex; align-items: center; gap: 14px; margin-bottom: 32px; border: 1px solid #f0f0f0;">
+                    <i data-lucide="truck" size="18" stroke-width="1.5" color="#666"></i>
+                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #444; font-weight: 500;">Complimentary standard shipping on all orders</span>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+
+    <section class="reviews-section">
+        <div class="reviews-summary reveal">
+            <h2>Feedback</h2>
+            <h3>Customer Reviews</h3>
+            <div class="rating-hero">
+                <div class="rating-val">4.8</div>
+                <div>
+                    <div class="stars-row">
+                        <i data-lucide="star" size="16" fill="#000"></i>
+                        <i data-lucide="star" size="16" fill="#000"></i>
+                        <i data-lucide="star" size="16" fill="#000"></i>
+                        <i data-lucide="star" size="16" fill="#000"></i>
+                        <i data-lucide="star" size="16" fill="#000" stroke-opacity="0.2"></i>
+                    </div>
+                    <div class="rating-count">Based on 128 Reviews</div>
+                </div>
+            </div>
+            <div class="filters">
+                <div class="filter-row">
+                    <span class="filter-label">5 Stars</span>
+                    <div class="filter-bar-bg"><div class="filter-bar-fill" style="width: 80%;"></div></div>
+                    <span class="filter-percent">80%</span>
+                </div>
+                <div class="filter-row" style="opacity: 0.5;">
+                    <span class="filter-label">4 Stars</span>
+                    <div class="filter-bar-bg"><div class="filter-bar-fill" style="width: 15%;"></div></div>
+                    <span class="filter-percent">15%</span>
+                </div>
+                <div class="filter-row" style="opacity: 0.5;">
+                    <span class="filter-label">3 Stars</span>
+                    <div class="filter-bar-bg"><div class="filter-bar-fill" style="width: 5%;"></div></div>
+                    <span class="filter-percent">5%</span>
+                </div>
+            </div>
+            <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn-primary" style="height: 47px; font-size: 10px;">Write a Review</button>
+                <button class="btn-secondary" style="height: 49px; font-size: 10px;">Ask a Question</button>
+            </div>
+        </div>
+        <div class="review-list">
+            <div class="review-card reveal">
+                <div class="review-header">
+                    <div>
+                        <div class="review-stars">
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                        </div>
+                        <h4 class="review-title">Exceptional Quality</h4>
+                        <p class="review-author">Marcus R. — April 12, 2024</p>
+                    </div>
+                    <div class="verified-badge">
+                        <i data-lucide="check" size="10"></i>
+                        Verified Purchase
+                    </div>
+                </div>
+                <p class="review-text">
+                    The linen is remarkably soft right out of the box. The fit is exactly what I was looking for — relaxed but still structured enough for dinner.
+                </p>
+            </div>
+            <div class="review-card reveal">
+                <div class="review-header">
+                    <div>
+                        <div class="review-stars">
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                            <i data-lucide="star" size="12" fill="#000"></i>
+                        </div>
+                        <h4 class="review-title">Perfect Summer Essential</h4>
+                        <p class="review-author">Elena G. — March 28, 2024</p>
+                    </div>
+                    <div class="verified-badge">
+                        <i data-lucide="check" size="10"></i>
+                        Verified Purchase
+                    </div>
+                </div>
+                <p class="review-text">
+                    Bought this for my husband and he hasn't stopped wearing it. It breathes so well in the heat. We'll be ordering more colors soon.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    
+    <section class="related-section">
+        <div class="related-header reveal">
+            <div>
+                <p class="editorial-label" style="margin-bottom: 8px;">Recommendation</p>
+                <h3 style="font-family: var(--font-serif); font-size: 36px; letter-spacing: -0.9px;">Completing the Look</h3>
+            </div>
+            <a href="#" class="nav-link" style="text-decoration: underline;">View All</a>
+        </div>
+      <div class="related-grid">
+
+    <% relatedProducts.forEach(r => { %>
+
+      <a href="/product/<%= r._id %>" class="product-card">
+
+        <div class="card-img">
+          <img src="<%= r.image || '/fallback.png' %>">
+        </div>
+
+        <h4 class="card-title"><%= r.name %></h4>
+        <p class="card-price">₹<%= r.price || '' %></p>
+
+      </a>
+
+    <% }) %>
+
+  </div>
+
+    </section>
+
+    <%- include('../partials/footer') %>
+
+    
+   <!-- 1. Axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script>
+    const currentProductId = '<%= product._id %>';
+    let wishlistedVariants = <%- JSON.stringify(wishlistedVariants || []) %>;
+</script>
+<script src="/js/user/productDetail.js"></script>
+<script src="/js/user/wishlist.js"></script>
+</body>
+</html>

@@ -6,13 +6,16 @@ import * as profileController from "../controllers/user/profile.controller.js";
 import * as emailController from "../controllers/user/email.controller.js";
 import * as addressController from "../controllers/user/address.controller.js";
 
-import { isLoggedIn, isLoggedOut } from "../middleware/userAuth.js";
+import { isLoggedIn, isLoggedOut, checkBlocked } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
+import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
+import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
+import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 
 const router = express.Router();
+router.use(checkBlocked);
 
-/* ================= AUTH ================= */
 
 router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
 router.post("/signup", authController.registerUser);
@@ -23,7 +26,7 @@ router.get("/auth/google",
 
 router.get("/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  authController.googleCallback // 🔥 move logic to controller
+  authController.googleCallback 
 );
 
 router.get("/otp", authController.loadOtpPage);
@@ -35,7 +38,6 @@ router.post("/login", isLoggedOut, authController.loginUser);
 
 router.get("/logout", noCache, authController.logoutUser);
 
-/* ================= PASSWORD ================= */
 
 router.get("/forgot-password", authController.loadForgotPassword);
 router.post("/forgot-password", authController.forgotPassword);
@@ -43,34 +45,23 @@ router.post("/forgot-password", authController.forgotPassword);
 router.get("/reset-password", authController.loadResetPassword);
 router.post("/reset-password", authController.resetPassword);
 
-/* ================= HOME ================= */
 
-router.get("/home", isLoggedIn, authController.loadHome);
+router.get("/home", authController.loadHome);
+router.get("/", authController.loadHome);
 
-/* ================= PROFILE ================= */
 
 router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);
 router.get("/edit-profile", noCache, isLoggedIn, profileController.loadEditProfile);
 
-router.post(
-  "/profile/update",
-  isLoggedIn,
-  upload.single("profileImage"),
-  profileController.updateProfile
-);
-
-/* ================= EMAIL OTP ================= */
+router.patch( "/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
 
 router.get("/profile/email/verify", isLoggedIn, emailController.loadVerifyEmailPage);
 router.post("/profile/email/verify", isLoggedIn, emailController.verifyEmailOtp);
 router.post("/profile/email/resend-otp", isLoggedIn, emailController.resendEmailOtp);
 
-/* ================= PASSWORD CHANGE ================= */
-
 router.get("/change-password", noCache, isLoggedIn, profileController.loadChangePassword);
 router.post("/change-password", isLoggedIn, profileController.changePassword);
 
-/* ================= ADDRESS ================= */
 
 router.get("/address", noCache, isLoggedIn, addressController.loadAddressPage);
 router.get("/add-address", noCache, isLoggedIn, addressController.loadAddAddressPage);
@@ -78,6 +69,21 @@ router.post("/address/add", isLoggedIn, addressController.addAddress);
 router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
-router.post("/edit-address/:id", isLoggedIn, addressController.updateAddress);
+router.put("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
+router.get("/menProductList",loadMenPage);
+router.get("/api/products",loadFilteredProducts);
+
+router.get("/product/:id", loadProductDetails);
+router.post("/check-quantity", checkQuantity);
+router.post("/cart/add", isLoggedIn, addToCart);
+router.get("/cart", isLoggedIn, loadCartPage);
+router.patch("/cart/update", isLoggedIn, updateCartQty);
+router.post("/cart/remove", isLoggedIn, removeCartItem);
+
+router.get("/wishlist", isLoggedIn, loadWishlistPage);
+router.get("/wishlist/count", isLoggedIn, getWishlistCount);
+router.post("/wishlist/add", isLoggedIn, toggleWishlist);
+router.post("/cart/add-from-wishlist", isLoggedIn, addToBagFromWishlist);
+router.delete("/wishlist/clear", isLoggedIn, clearAllWishlist);
 export default router;

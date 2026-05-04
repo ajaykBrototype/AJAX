@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create New Product — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Cropper.js CSS MUST come before Tailwind so Tailwind doesn't reset it -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"/>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Playfair Display', 'serif'],
+          sans: ['Plus Jakarta Sans', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+
+
+
+  /* --- Reset & Base --- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FAFAFA; color: #1C1C1C; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+  /* --- Sidebar --- */
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; font-size: 14px; font-weight: 600; color: #8E8E8E; position: relative; transition: color .2s, background .2s; border-radius: 12px; }
+  .sidebar-item:hover { color: #111; background: rgba(0,0,0,.03); }
+  .sidebar-item.active { background: #fff; color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+  /* --- Sticky footer --- */
+  .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.98); border-top: 1px solid #E5E5E5; padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 200; box-shadow: 0 -4px 12px rgba(0,0,0,0.02); }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .anim { animation: fadeUp .55s cubic-bezier(.16,1,.3,1) both; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/products' }) %>
+
+
+<main class="flex-1 min-w-0 pb-28">
+
+  <!-- Top bar (mobile) -->
+  <div class="lg:hidden sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-stone-200 px-5 py-4 flex items-center gap-3">
+    <button id="sidebarToggle" class="p-2 hover:bg-stone-100 rounded-lg">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="font-bold text-sm">Add Product</span>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 lg:px-12 pt-10">
+
+    <!-- Title Section -->
+    <nav class="flex items-center gap-2 text-[12px] font-semibold text-stone-500 mb-2 anim">
+      <a href="/admin/products" class="hover:text-stone-800 transition-colors">Products</a>
+      <span>›</span>
+      <span class="text-stone-800">Create</span>
+    </nav>
+    <h2 class="text-3xl font-extrabold text-stone-800 leading-tight anim" style="animation-delay: 50ms;">Create Product</h2>
+    <p class="text-[13px] font-medium text-stone-500 mt-1 anim" style="animation-delay: 100ms;">Initialize the base product profile before adding visual variants.</p>
+
+    <!-- ── FORM ── -->
+    <form id="productForm" method="POST" action="/admin/products/add" class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
+
+      <!-- LEFT COLUMN -->
+      <div class="flex-1 space-y-6">
+          <!-- Detailed Description -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-4">Detailed Description</h3>
+              <textarea name="description" rows="5" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."></textarea>
+          </div>
+
+          <!-- Default Variant Media -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Product Media (Default Variant)</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Minimum 3 high-fidelity images required for the primary variant.</p>
+              
+              <div class="border-2 border-dashed border-stone-200 rounded-2xl p-8 text-center cursor-pointer hover:bg-stone-50 transition-all" id="uploadTrigger">
+                  <svg class="mx-auto mb-3 text-stone-300" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <p class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">Upload Images</p>
+                  <input type="file" id="imageInput" class="hidden" accept="image/*">
+              </div>
+
+              <div id="imageGallery" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-6">
+                  <!-- Thumbnails -->
+              </div>
+              <p class="text-[10px] font-bold text-stone-400 tracking-widest uppercase mt-4" id="imgCountText">0 / 3 images uploaded</p>
+          </div>
+
+          <!-- Material / Ingredients -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Material Composition</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Separated by commas, descending order of prominence.</p>
+              <textarea name="material" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. 100% Organic Cotton..."></textarea>
+          </div>
+
+          <!-- Care Guide -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Care Guidelines</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Specific washing and maintenance instructions.</p>
+              <textarea name="careGuide" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Dry clean only. Iron inside out..."></textarea>
+          </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="w-full lg:w-[400px] space-y-6 shrink-0 lg:sticky lg:top-8 self-start">
+          <!-- General Information -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-6">General Information</h3>
+              
+              <div class="space-y-5">
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Product Name <span class="text-red-500">*</span></label>
+                      <input type="text" name="name" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. The Executive Oxford">
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Category <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                          <select name="category" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
+                              <option value="">Select category</option>
+                              <% categories.forEach(cat => { %>
+                              <option value="<%= cat._id %>"><%= cat.name %></option>
+                              <% }) %>
+                          </select>
+                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Subcategory <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                          <select name="subcategory" class="w-full p-3.5 pr-10 bg-stone-50 text-stone-500 border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-not-allowed" disabled>
+                              <option value="">Select category first</option>
+                          </select>
+                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Default Variant Details -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-6">Default Variant Details</h3>
+              <input type="hidden" name="size" id="sizeInput">
+              
+              <div class="space-y-5">
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Primary Color <span class="text-red-500">*</span></label>
+                      <input type="text" name="color" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Midnight Black">
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">SKU Identifier <span class="text-red-500">*</span></label>
+                      <input type="text" name="sku" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. AJAX-OXFORD-BLK">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                      <div>
+                          <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Price (₹) <span class="text-red-500">*</span></label>
+                          <input type="number" name="price" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="0">
+                      </div>
+                      <div>
+                          <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Stock <span class="text-red-500">*</span></label>
+                          <input type="number" name="stock" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="0">
+                      </div>
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Size <span class="text-red-500">*</span></label>
+                      <div class="flex flex-wrap gap-2">
+                          <% ['S', 'M', 'L', 'XL', 'XXL', '3XL'].forEach(size => { %>
+                              <button type="button" class="size-btn px-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-[11px] font-bold text-stone-500 hover:border-stone-800 hover:text-stone-800 transition-all" data-size="<%= size %>"><%= size %></button>
+                          <% }) %>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Product Visibility -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-[15px] font-extrabold text-stone-800">Product Visibility</h3>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="isActive" class="sr-only peer" checked value="true">
+                    <div class="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+              </div>
+              <p class="text-[12px] font-medium text-stone-500">Enable to show on store front immediately.</p>
+          </div>
+      </div>
+    </form>
+  </div>
+</main>
+
+
+  <div id="global-toast" class="global-toast">
+  <div id="toast-indicator"></div>
+  <p id="global-toast-msg"></p>
+</div>
+
+<div id="cropModal" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-[24px] w-full max-w-[700px] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-stone-100 flex items-center justify-between">
+            <h4 class="text-lg font-serif font-bold">Refine Product Image</h4>
+            <button id="closeCrop" class="p-2 text-stone-400 hover:text-stone-900 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="w-full h-[450px] bg-stone-100 relative overflow-hidden">
+            <img id="cropImage" class="max-w-full">
+        </div>
+        <div class="p-6 bg-stone-50 flex justify-end gap-3">
+            <button id="applyCrop" class="px-10 py-3 bg-stone-900 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-lg">Apply Crop</button>
+        </div>
+    </div>
+</div>
+
+<div class="sticky-bar">
+  <div class="flex items-center gap-2.5 ml-4">
+    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+    <span class="text-[10px] font-bold tracking-widest text-stone-400 uppercase">Input Live</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/admin/products" class="px-6 py-3 text-[12px] font-bold text-stone-600 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-all shadow-sm">Discard</a>
+    <button type="submit" form="productForm" class="px-8 py-3 text-[12px] font-bold text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">Complete Setup</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="/js/admin/product.js"></script>
+
+<script>
+
+  // --- Size Selection ---
+  const sizeButtons = document.querySelectorAll('.size-btn');
+  const sizeInput = document.getElementById('sizeInput');
+  
+  sizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeButtons.forEach(b => b.classList.remove('border-stone-800', 'text-stone-800', 'bg-stone-100'));
+      btn.classList.add('border-stone-800', 'text-stone-800', 'bg-stone-100');
+      sizeInput.value = btn.dataset.size;
+    });
+  });
+
+  // --- Image Cropping Logic ---
+  const uploadTrigger = document.getElementById('uploadTrigger');
+  const imageInput = document.getElementById('imageInput');
+  const imageGallery = document.getElementById('imageGallery');
+  const cropModal = document.getElementById('cropModal');
+  const cropImage = document.getElementById('cropImage');
+  const applyCrop = document.getElementById('applyCrop');
+  const closeCrop = document.getElementById('closeCrop');
+  const imgCountText = document.getElementById('imgCountText');
+  
+  let cropper;
+  window.uploadedFiles = [];
+
+  uploadTrigger?.addEventListener('click', () => imageInput.click());
+
+  imageInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        cropImage.src = event.target.result;
+        cropModal.classList.remove('hidden');
+        cropModal.classList.add('flex');
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 3/4,
+          viewMode: 2,
+          autoCropArea: 1
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  applyCrop?.addEventListener('click', () => {
+    const canvas = cropper.getCroppedCanvas({ width: 1200, height: 1600 });
+    canvas.toBlob((blob) => {
+      window.uploadedFiles.push(blob);
+      updateGallery();
+      closeModalFunc();
+    }, 'image/jpeg', 0.9);
+  });
+
+  function closeModalFunc() {
+    cropModal.classList.add('hidden');
+    cropModal.classList.remove('flex');
+    imageInput.value = '';
+  }
+
+  closeCrop?.addEventListener('click', closeModalFunc);
+
+  function updateGallery() {
+    imageGallery.innerHTML = '';
+    window.uploadedFiles.forEach((blob, index) => {
+      const div = document.createElement('div');
+      div.className = 'relative aspect-[3/4] rounded-xl overflow-hidden border border-stone-200 group';
+      div.innerHTML = `
+        <img src="${URL.createObjectURL(blob)}" class="w-full h-full object-cover">
+        <button type="button" onclick="removeImage(${index})" class="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        ${index === 0 ? '<div class="absolute bottom-0 left-0 right-0 bg-stone-900/60 text-white text-[8px] font-bold uppercase py-1 text-center backdrop-blur-[2px]">Primary</div>' : ''}
+      `;
+      imageGallery.appendChild(div);
+    });
+    imgCountText.textContent = `${window.uploadedFiles.length} / 3 images uploaded`;
+  }
+
+  window.removeImage = (index) => {
+    window.uploadedFiles.splice(index, 1);
+    updateGallery();
+  };
+
+  const categorySelect = document.querySelector('select[name="category"]');
+  const subcategorySelect = document.querySelector('select[name="subcategory"]');
+
+  categorySelect.addEventListener('change', async (e) => {
+    const catId = e.target.value;
+    if (!catId) {
+      subcategorySelect.innerHTML = '<option value="">Select category first</option>';
+      subcategorySelect.disabled = true;
+      subcategorySelect.classList.add('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
+      subcategorySelect.classList.remove('bg-white', 'text-stone-900', 'cursor-pointer');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/admin/subcategories/by-category/${catId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        subcategorySelect.disabled = false;
+        subcategorySelect.classList.remove('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
+        subcategorySelect.classList.add('bg-white', 'text-stone-900', 'cursor-pointer');
+        subcategorySelect.innerHTML = '<option value="">Select subcategory</option>';
+        data.subcategories.forEach(sub => {
+          const opt = document.createElement('option');
+          opt.value = sub._id;
+          opt.textContent = sub.name;
+          subcategorySelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching subcategories:', err);
+    }
+  });
+
+  // Mobile sidebar
+  const sidebarEl = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => sidebarEl.classList.toggle('-translate-x-full'));
+  }
+</script>
+</body>
+</html>

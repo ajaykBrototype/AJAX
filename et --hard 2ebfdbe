@@ -1,0 +1,18 @@
+[33m295d116[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mweek2[m[33m)[m change the user navbar and footer to partials
+[33m17782fe[m[33m ([m[1;31morigin/week2[m[33m)[m Change the admin sidebar to partials
+[33m2ebfdbe[m last i complete the men product list
+[33m4f9f105[m Fix the block unblock issue
+[33md468074[m fix the validations in the  addvariant and the edit variant and the toast also logout
+[33mdbe31de[m Add the validations and the toast in the product variants
+[33m813213e[m changes in the add product product details and the product variants
+[33m9a04bc7[m product add variant adding
+[33m5cf3f77[m changed the design and some additional improvement in the ui admin
+[33m1a3b638[m add  subCategory
+[33mc15892e[m update the category details
+[33m0bce71c[m added the category management
+[33m1ca0f49[m[33m ([m[1;31morigin/week1[m[33m, [m[1;32mweek1[m[33m)[m some changes due to pendings
+[33mcd3601e[m change the profile updation
+[33m520a486[m new some add
+[33m64d2504[m add some logic
+[33md8cbccb[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m Initial commit: removed sensitive files
+[33m85534d8[m AJAX project first commit

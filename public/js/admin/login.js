@@ -19,7 +19,6 @@ try {
 } catch (err) {
   const errors = err.response?.data?.errors;
 
-  // clear old
   emailError.innerText = "";
   passwordError.innerText = "";
 

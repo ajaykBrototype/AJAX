@@ -1,0 +1,177 @@
+/* 
+ * AJAX BRAND DESIGN SYSTEM
+ * -----------------------
+ * A refined luxury aesthetic for the Autumn/Winter 2026 Collection.
+ */
+
+:root {
+    --brand-dark: #1C1C1C;
+    --brand-cream: #F5F0E8;
+    --brand-warm: #FAFAF8;
+    --brand-stone: #9B8E83;
+    --brand-mist: #EAE5DC;
+    --brand-border: rgba(28, 28, 28, 0.08);
+    --brand-error: #B04040;
+    --brand-success: #5C8C6A;
+}
+
+/* ── GLOBAL ANIMATIONS ── */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(24px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes drawLine {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+/* ── UTILITY CLASSES ── */
+
+.page-in {
+    animation: fadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease both;
+}
+
+/* Delay modifiers */
+.d-1 { animation-delay: 0.1s; }
+.d-2 { animation-delay: 0.2s; }
+.d-3 { animation-delay: 0.3s; }
+.d-4 { animation-delay: 0.4s; }
+.d-5 { animation-delay: 0.5s; }
+
+/* ── PREMIUM COMPONENTS ── */
+
+/* Branded Input */
+.ajax-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: 1px solid var(--brand-border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    color: var(--brand-dark);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+}
+
+.ajax-input:focus {
+    border-color: var(--brand-dark);
+    background: rgba(28, 28, 28, 0.02);
+}
+
+/* Branded Button */
+.ajax-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background: var(--brand-dark);
+    color: #fff;
+    border: 1px solid var(--brand-dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.ajax-btn:hover {
+    background: transparent;
+    color: var(--brand-dark);
+}
+
+.ajax-btn-secondary {
+    background: transparent;
+    color: var(--brand-dark);
+    border: 1px solid var(--brand-border);
+}
+
+.ajax-btn-secondary:hover {
+    border-color: var(--brand-dark);
+}
+
+/* ── TABLE MODERNIZATION ── */
+
+.ajax-table-container {
+    background: #fff;
+    border: 1px solid var(--brand-border);
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ajax-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ajax-table th {
+    background: #FCFCFC;
+    padding: 1.25rem 2rem;
+    text-align: left;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brand-stone);
+    border-bottom: 1px solid var(--brand-border);
+}
+
+.ajax-table td {
+    padding: 1.5rem 2rem;
+    font-size: 0.85rem;
+    color: var(--brand-dark);
+    border-bottom: 1px solid rgba(28, 28, 28, 0.03);
+    transition: background 0.3s;
+}
+
+.ajax-table tr:hover td {
+    background: rgba(28, 28, 28, 0.01);
+}
+
+/* ── SCROLLBAR ── */
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--brand-warm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--brand-mist);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-stone);
+}
+
+/* ── RESPONSIVE UTILS ── */
+
+@media (max-width: 768px) {
+    .hide-mobile { display: none !important; }
+    .w-full-mobile { width: 100% !important; }
+    .p-mobile { padding: 1.5rem !important; }
+}

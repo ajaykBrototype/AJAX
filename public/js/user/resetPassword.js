@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.data.success) {
         submitBtn.innerHTML = "Saved";
         if (typeof showToast === "function") {
-          showToast("success", "Password updated successfully.");
+          ajaxToast("success", "Password updated successfully.");
         }
         setTimeout(() => {
           window.location.href = "/profile";

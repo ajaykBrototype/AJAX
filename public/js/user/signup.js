@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await axios.post("/signup", data);
 
-      showToast('success', res.data.message || 'Account created successfully!');
+      ajaxToast('success', res.data.message || 'Account created successfully!');
       setTimeout(() => {
         window.location.href = res.data.redirect || '/';
       }, 1500);
@@ -41,14 +41,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // ✅ FIELD ERRORS (priority)
   if (error?.errors) {
     for (let key in error.errors) {
-      showError(key + "Error", error.errors[key][0]);
+      ajaxError(key + "Error", error.errors[key][0]);
     }
     return; // 🚨 stop here (no Swal)
   }
 
 
   const fallbackMsg = error?.message || err.message || "Registration failed. Please try again.";
-  showToast('error', fallbackMsg);
+  ajaxToast('error', fallbackMsg);
 }
   });
 

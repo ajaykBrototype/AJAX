@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   startTimer();
 
-  // 🔹 INPUT HANDLING
+
   inputs.forEach((input, index) => {
 
     input.addEventListener("input", () => {
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     input.addEventListener("keydown", (e) => {
 
-      // 🔙 BACKSPACE
+
       if (e.key === "Backspace" && !input.value && index > 0) {
         inputs[index - 1].focus();
       }
@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// 🔹 GET OTP
 function getOtp() {
   return Array.from(document.querySelectorAll(".otp-box"))
     .map(input => input.value)
@@ -76,7 +75,7 @@ function getOtp() {
 
 
 let interval = null;
-let time = 30;
+let time = 60;
 
 function startTimer() {
   const timerEl = document.getElementById("timer");
@@ -84,8 +83,7 @@ function startTimer() {
 
   if (!timerEl || !resendBtn) return;
 
-
-  time = 30;
+  time = 60;
 
   if (interval) {
     clearInterval(interval);
@@ -100,7 +98,9 @@ function startTimer() {
   interval = setInterval(() => {
     time--;
 
-    timerEl.textContent = `Resend code in ${time}s`;
+    if (time >= 0) {
+      timerEl.textContent = `Resend code in ${time}s`;
+    }
 
     if (time <= 0) {
       clearInterval(interval);
@@ -127,9 +127,13 @@ async function verifyOtp() {
   try {
     const res = await axios.post("/verify-otp", { otp });
 
-    if (res.data.success) {
-      window.location.href = res.data.redirect;
-    }
+   
+      if (res.data.success) {
+        ajaxToast("success","Otp Verified");
+        setTimeout(()=>{
+           window.location.href = res.data.redirect;
+        })
+      }
 
   } catch (err) {
     const error = err.response?.data;
@@ -161,11 +165,19 @@ async function resendOtp() {
     const res = await axios.post("/resend-otp");
 
     if (res.data.success) {
-      showToast?.("success", "OTP resent successfully");
+      if (typeof ajaxToast === "function") {
+        ajaxToast("success", res.data.message || "OTP resent successfully");
+      }
       startTimer();
+    } else {
+      if (typeof ajaxToast === "function") {
+        ajaxToast("error", res.data.message || "Failed to resend OTP");
+      }
     }
 
   } catch (err) {
-    showToast?.("error", "Resending OTP failed");
+    if (typeof ajaxToast === "function") {
+      ajaxToast("error", err.response?.data?.message || "Resending OTP failed");
+    }
   }
 }

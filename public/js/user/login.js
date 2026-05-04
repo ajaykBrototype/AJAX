@@ -10,17 +10,22 @@ if (loginForm) {
       const res = await axios.post("/login", data);
 
       if (res.data.success) {
-        showToast('success', res.data.message || 'Login successful!');
+        ajaxToast('success', res.data.message || 'Login successful!');
+        
+        // Get returnTo from URL if exists
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnTo = urlParams.get('returnTo');
+
         setTimeout(() => {
-          window.location.href = res.data.redirect || '/';
+          window.location.href = returnTo || res.data.redirect || '/';
         }, 1500);
       } else {
-        showToast('warning', res.data.message || 'Unexpected response.');
+        ajaxToast('warning', res.data.message || 'Unexpected response.');
       }
 
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Login Failed";
-      showToast('error', errorMsg);
+      ajaxToast('error', errorMsg);
     }
   });
 }

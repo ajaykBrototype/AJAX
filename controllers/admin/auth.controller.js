@@ -1,4 +1,3 @@
-import { success } from "zod";
 import * as adminService from "../../services/admin/auth.service.js";
 import { adminLoginSchema } from "../../validators/adminValidator.js";
 
@@ -16,7 +15,7 @@ export const loginAdmin = async (req, res) => {
       });
     }
     const { email, password } = result.data;
-    const admin = await adminService.loginAdmin(email, password);
+    const admin = await adminService.loginAdminService(email, password);
 
     req.session.adminId = admin._id;
     console.log("SESSION SAVED:", req.session.adminId);
@@ -48,7 +47,15 @@ export const loginAdmin = async (req, res) => {
 // };
 
 export const logoutAdmin = (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed"
+      });
+    }
+
+    res.clearCookie("connect.sid");
     res.redirect("/admin/login");
   });
 };

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Edit <%= product ? product.name : 'Product' %> — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Plus Jakarta Sans', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* --- Reset & Base --- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FAFAFA; color: #1C1C1C; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+  /* --- Sidebar --- */
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; font-size: 14px; font-weight: 600; color: #8E8E8E; position: relative; transition: color .2s, background .2s; border-radius: 12px; }
+  .sidebar-item:hover { color: #111; background: rgba(0,0,0,.03); }
+  .sidebar-item.active { background: #fff; color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+  /* --- Sticky footer --- */
+  .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.98); border-top: 1px solid #E5E5E5; padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 200; box-shadow: 0 -4px 12px rgba(0,0,0,0.02); }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .anim { animation: fadeUp .55s cubic-bezier(.16,1,.3,1) both; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- ═══════════════════════════════════════ SIDEBAR ═══ -->
+<!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/products' }) %>
+
+
+<main class="flex-1 min-w-0 pb-28">
+
+  <!-- Top bar (mobile) -->
+  <div class="lg:hidden sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-stone-200 px-5 py-4 flex items-center gap-3">
+    <button id="sidebarToggle" class="p-2 hover:bg-stone-100 rounded-lg">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="font-bold text-sm">Edit Product</span>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 lg:px-12 pt-10">
+
+    <!-- Title Section -->
+    <nav class="flex items-center gap-2 text-[12px] font-semibold text-stone-500 mb-2 anim">
+      <a href="/admin/products" class="hover:text-stone-800 transition-colors">Products</a>
+      <span>›</span>
+      <span class="text-stone-800"><%= product ? product.name : 'Edit' %></span>
+    </nav>
+    <h2 class="text-3xl font-extrabold text-stone-800 leading-tight anim" style="animation-delay: 50ms;">Edit Product</h2>
+    <p class="text-[13px] font-medium text-stone-500 mt-1 anim" style="animation-delay: 100ms;">Updating: <%= product ? product.name : '' %></p>
+
+    <!-- ── FORM ── -->
+    <form id="productForm" method="POST" action="/admin/products/edit/<%= product._id %>"  class="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 anim" style="animation-delay: 150ms;">
+
+      <!-- LEFT COLUMN -->
+      <div class="flex-1 space-y-6">
+          <!-- Detailed Description -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-4">Detailed Description</h3>
+              <textarea name="description" rows="5" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."><%= product ? product.description : '' %></textarea>
+          </div>
+
+          <!-- Material / Ingredients -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Material Composition</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Separated by commas, descending order of prominence.</p>
+              <textarea name="material" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. 100% Organic Cotton..."><%= product ? product.material : '' %></textarea>
+          </div>
+
+          <!-- Care Guide -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Care Guidelines</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-4">Specific washing and maintenance instructions.</p>
+              <textarea name="careGuide" rows="3" class="w-full p-4 bg-white border border-stone-200 rounded-xl text-[13px] text-stone-700 font-medium leading-relaxed focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. Dry clean only. Iron inside out..."><%= product ? product.careGuide : '' %></textarea>
+          </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="w-full lg:w-[400px] space-y-6 shrink-0 lg:sticky lg:top-8 self-start">
+          <!-- General Information -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-6">General Information</h3>
+              
+              <div class="space-y-5">
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Product Name <span class="text-red-500">*</span></label>
+                      <input type="text" name="name" value="<%= product ? product.name : '' %>" class="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all placeholder:text-stone-400" placeholder="e.g. The Executive Oxford">
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Category <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                          <select name="category" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
+                              <option value="">Select category</option>
+                              <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                  <option value="<%= cat._id %>" <%= product && product.category && product.category.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }) %>
+                              <% } %>
+                          </select>
+                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                  </div>
+
+                  <div>
+                      <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Subcategory <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                          <!-- If we have subcategories passed along, populate them. Else script fetches -->
+                          <select name="subcategory" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
+                              <option value="">Select subcategory</option>
+                              <% if (typeof subCategories !== 'undefined' && subCategories.length > 0) { %>
+                                <% subCategories.forEach(sub => { %>
+                                  <option value="<%= sub._id %>" <%= product && product.subcategory && product.subcategory.toString() === sub._id.toString() ? 'selected' : '' %>><%= sub.name %></option>
+                                <% }) %>
+                              <% } %>
+                          </select>
+                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Pricing & Inventory Status -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <h3 class="text-[15px] font-extrabold text-stone-800 mb-1">Pricing & Inventory</h3>
+              <p class="text-[12px] font-medium text-stone-500 mb-5">Managed per variant separately.</p>
+              
+              <div class="p-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl flex items-start flex-col gap-3 shadow-sm">
+                  <div class="flex gap-4">
+                      <div class="bg-emerald-100 p-1.5 rounded-lg shrink-0 text-emerald-600 mt-0.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <p class="text-[12px] leading-relaxed font-semibold">Images, pricing, and stock are managed inside the variants tab.</p>
+                  </div>
+                  <a href="/admin/products/<%= product ? product._id : '' %>/variants" class="mt-2 text-[11px] font-bold uppercase tracking-widest text-emerald-700 bg-white border border-emerald-200 px-4 py-2 rounded-lg hover:bg-emerald-50 transition w-full text-center">Manage Variants &rarr;</a>
+              </div>
+          </div>
+
+          <!-- Product Visibility -->
+          <div class="bg-white border border-stone-200 rounded-[20px] p-6 lg:p-8 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-[15px] font-extrabold text-stone-800">Product Visibility</h3>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="isActive" class="sr-only peer" value="true" <%= product && product.isActive ? 'checked' : '' %>>
+                    <div class="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+              </div>
+              <p class="text-[12px] font-medium text-stone-500">Enable to show on store front.</p>
+          </div>
+      </div>
+    </form>
+  </div>
+</main>
+
+ <div id="global-toast" class="global-toast">
+  <div id="toast-indicator"></div>
+  <p id="global-toast-msg"></p>
+</div>
+
+<div class="sticky-bar">
+  <div class="flex items-center gap-2.5 ml-4">
+    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+    <span class="text-[10px] font-bold tracking-widest text-stone-400 uppercase">Edit Live</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/admin/products" class="px-6 py-3 text-[12px] font-bold text-stone-600 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-all shadow-sm">Cancel changes</a>
+    <button type="submit" form="productForm" class="px-8 py-3 text-[12px] font-bold text-white bg-stone-900 rounded-xl hover:bg-stone-800 transition-all shadow-md">Update Product</button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/js/admin/product.js"></script>
+
+<script>
+  // Dynamic Subcategory Loading with refined UI states
+  const categorySelect = document.querySelector('select[name="category"]');
+  const subcategorySelect = document.querySelector('select[name="subcategory"]');
+
+  categorySelect.addEventListener('change', async (e) => {
+    const catId = e.target.value;
+    if (!catId) {
+      subcategorySelect.innerHTML = '<option value="">Select category first</option>';
+      subcategorySelect.disabled = true;
+      subcategorySelect.classList.add('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
+      subcategorySelect.classList.remove('bg-white', 'text-stone-900', 'cursor-pointer');
+      return;
+    }
+
+    // Set loading state
+    subcategorySelect.disabled = true;
+    subcategorySelect.innerHTML = '<option value="">Loading...</option>';
+
+    try {
+      const response = await fetch(`/admin/subcategories/by-category/${catId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        subcategorySelect.disabled = false;
+        subcategorySelect.classList.remove('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
+        subcategorySelect.classList.add('bg-white', 'text-stone-900', 'cursor-pointer');
+        subcategorySelect.innerHTML = '<option value="">Select subcategory</option>';
+        data.subcategories.forEach(sub => {
+          const opt = document.createElement('option');
+          opt.value = sub._id;
+          opt.textContent = sub.name;
+          subcategorySelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching subcategories:', err);
+    }
+  });
+
+  // Mobile sidebar
+  const sidebarEl = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => sidebarEl.classList.toggle('-translate-x-full'));
+  }
+</script>
+</body>
+</html>

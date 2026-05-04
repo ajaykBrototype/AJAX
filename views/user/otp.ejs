@@ -5,6 +5,10 @@
   <title>OTP</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- 2. Then your helper -->
+<script src="/js/utils/swal-helper.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
@@ -49,7 +53,7 @@
 
       <!-- RESEND -->
       <div class="flex justify-between mt-4 text-sm text-gray-400">
-        <span id="timer">Resend code in 30s</span>
+        <span id="timer">Resend code in 60s</span>
         <button id="resendBtn" onclick="resendOtp()" class="text-black font-semibold">
           RESEND
         </button>
@@ -71,8 +75,9 @@
 }
 </style>
 
-
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/utils/swal-helper.js"></script>
   <script src="/js/user/otp.js"></script>
-
 </body>
 </html>
