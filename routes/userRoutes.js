@@ -12,7 +12,7 @@ import { noCache } from "../middleware/noCache.js";
 import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
-import {loadCheckoutPage } from "../controllers/user/checkout.controller.js";
+import {loadCheckoutPage,saveAddress } from "../controllers/user/checkout.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -90,4 +90,5 @@ router.delete("/wishlist/clear", isLoggedIn, clearAllWishlist);
 
 
 router.get("/checkout",isLoggedIn,loadCheckoutPage);
+router.post("/address/save",isLoggedIn, saveAddress);
 export default router;
