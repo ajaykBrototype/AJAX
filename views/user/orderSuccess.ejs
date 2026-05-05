@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX — Order Confirmed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#1C1C1C',
+                            cream: '#F5F0E8',
+                            warm: '#FAFAF8',
+                            stone: '#9B8E83',
+                            mist: '#EAE5DC',
+                            success: '#5C8C6A'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <%- include('../partials/navbar-styles') %>
+    <%- include('../partials/footer-styles') %>
+    <style>
+        :root {
+            --brand-dark: #1C1C1C;
+            --brand-cream: #F5F0E8;
+            --brand-warm: #FAFAF8;
+            --brand-stone: #9B8E83;
+            --brand-mist: #EAE5DC;
+            --brand-success: #5C8C6A;
+        }
+        body {
+            background-color: var(--brand-warm);
+            font-family: 'Outfit', sans-serif;
+            color: var(--brand-dark);
+            overflow-x: hidden;
+        }
+
+        .success-card {
+            background: #ffffff;
+            border-radius: 2rem;
+            border: 1px solid rgba(28,28,28,0.04);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.02);
+            animation: cardReveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Success Icon Animation */
+        .checkmark-circle {
+            width: 64px;
+            height: 64px;
+            background: var(--brand-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(92, 140, 106, 0.15);
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .checkmark-icon {
+            color: white;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: drawCheck 0.5s 0.7s ease forwards;
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Progress Steps */
+        .step-node {
+            position: relative;
+            z-index: 10;
+        }
+        .step-line {
+            height: 1px;
+            background: var(--brand-mist);
+            flex-grow: 1;
+            margin: 0 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .step-line-active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background: var(--brand-success);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: fillLine 0.8s 1.2s ease forwards;
+        }
+
+        @keyframes fillLine {
+            to { transform: scaleX(1); }
+        }
+
+        .step-circle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1.5px solid var(--brand-mist);
+            background: #fff;
+            transition: all 0.4s ease;
+        }
+        .step-circle.active {
+            border-color: var(--brand-success);
+            background: var(--brand-success);
+            box-shadow: 0 0 0 3px rgba(92, 140, 106, 0.08);
+        }
+
+        .editorial-title {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0.02em;
+        }
+
+        .product-img-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            width: 80px;
+            height: 100px;
+        }
+
+        .btn-premium {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti" class="confetti-canvas"></canvas>
+    <%- include('../partials/navbar') %>
+
+    <main class="min-h-screen pt-28 pb-20 px-6">
+        <div class="max-w-[640px] mx-auto">
+            
+            <!-- Success Animation & Header -->
+            <div class="text-center mb-12">
+                <div class="checkmark-circle mb-6">
+                    <svg class="checkmark-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h1 class="editorial-title text-4xl md:text-5xl font-medium mb-3">A Journey Begins.</h1>
+                <p class="text-[0.6rem] tracking-[0.3em] font-bold text-stone-400 uppercase">Your order has been successfully placed</p>
+            </div>
+
+            <!-- Main Order Card -->
+            <div class="success-card p-8 md:p-10 mb-8">
+                
+                <!-- Order ID & Delivery Date -->
+                <div class="grid grid-cols-2 gap-4 pb-6 border-b border-brand-mist/20 mb-8">
+                    <div>
+                        <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-1">Order Number</p>
+                        <h3 class="text-sm font-bold tracking-tight text-brand-dark uppercase">#ORD-KSXY5ZJOEP</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-1">Est. Delivery</p>
+                        <h3 class="text-sm font-bold tracking-tight text-brand-dark">May 07 – May 11, 2026</h3>
+                    </div>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div class="mb-10 px-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="step-node flex flex-col items-center gap-3">
+                            <div class="step-circle active"></div>
+                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-brand-success uppercase">Confirmed</span>
+                        </div>
+                        <div class="step-line step-line-active"></div>
+                        <div class="step-node flex flex-col items-center gap-3">
+                            <div class="step-circle active" style="animation-delay: 1.2s;"></div>
+                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-brand-success uppercase">Processing</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-node flex flex-col items-center gap-3 opacity-25">
+                            <div class="step-circle"></div>
+                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-stone-400 uppercase">Shipped</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-node flex flex-col items-center gap-3 opacity-25">
+                            <div class="step-circle"></div>
+                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-stone-400 uppercase">Delivered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Preview -->
+                <div class="bg-brand-warm/[0.4] rounded-2xl p-5 border border-brand-mist/10 mb-8">
+                    <div class="flex items-center gap-6">
+                        <div class="product-img-container bg-white flex-shrink-0">
+                            <img src="https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b4adc56?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Product Image">
+                        </div>
+                        <div class="flex-grow">
+                            <p class="text-[0.55rem] font-black tracking-widest text-brand-stone uppercase mb-1">Items Confirmed</p>
+                            <h4 class="text-sm font-bold mb-0.5">New Collection Essential</h4>
+                            <p class="text-stone-400 text-[0.7rem] mb-2">100ml • Signature Variant</p>
+                            <p class="text-sm font-black">₹399.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Totals -->
+                <div class="space-y-3 pt-6 border-t border-brand-mist/20">
+                    <div class="flex justify-between items-center text-[0.75rem]">
+                        <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Subtotal</span>
+                        <span class="font-bold">₹399.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[0.75rem]">
+                        <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Shipping</span>
+                        <span class="font-bold text-brand-success">FREE</span>
+                    </div>
+                    <div class="flex justify-between items-end pt-4">
+                        <div>
+                            <p class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-0.5">Total Paid</p>
+                            <p class="text-[0.45rem] font-bold text-stone-200 uppercase tracking-widest">Cash on Delivery</p>
+                        </div>
+                        <p class="text-4xl font-serif tracking-tight">₹399.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="/menProductList" class="btn-premium flex-1 bg-brand-dark text-white py-4.5 py-5 rounded-2xl text-[0.65rem] font-black tracking-[0.2em] uppercase text-center shadow-lg shadow-brand-dark/5">
+                    Continue Shopping
+                </a>
+                <a href="/profile?tab=orders" class="btn-premium flex-1 bg-white text-brand-dark border border-brand-dark/10 py-5 rounded-2xl text-[0.65rem] font-black tracking-[0.2em] uppercase text-center">
+                    Track Orders
+                </a>
+            </div>
+
+            <!-- Support Link -->
+            <p class="text-center mt-10 text-[0.55rem] font-bold text-stone-300 uppercase tracking-[0.2em]">
+                Questions? <a href="/support" class="text-brand-dark underline underline-offset-4 decoration-brand-mist/50">Contact Concierge</a>
+            </p>
+
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // Refined Confetti (more subtle)
+            const duration = 2 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 0, colors: ['#5C8C6A', '#1C1C1C', '#EAE5DC'] };
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                const particleCount = 40 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } });
+            }, 300);
+        });
+    </script>
+</body>
+</html>

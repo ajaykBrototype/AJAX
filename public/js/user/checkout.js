@@ -9,8 +9,14 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.style.backgroundColor = 'white';
         btn.style.color = 'transparent';
 
+
         setTimeout(() => {
             ajaxToast("success", "Order Placed Successfully!");
+
+              setTimeout(() => {
+            window.location.href =  `/order-success/${orderId}`;
+        }, 800);
+
         }, 2000);
     };
 
@@ -198,3 +204,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+async function placeOrder() {
+    try {
+       const addressInput = document.getElementById("selectedAddressId");
+
+         const selectedAddress = addressInput ? addressInput.value : null;
+
+        if (!selectedAddress) {
+            return ajaxToast("error", "Please select address");
+        }
+
+        const paymentMethod = document.querySelector(
+            'input[name="payment"]:checked'
+        ).value;
+
+        const res = await axios.post("/order/place", {
+            addressId: selectedAddress,
+            paymentMethod
+        });
+
+        if (res.data.success) {
+            handleOrderCompletion(res.data.orderId); // animation
+            setTimeout(() => {
+                window.location.href = `/order-success/${res.data.orderId}`;
+            }, 2000);
+        } else {
+            ajaxToast("error", res.data.message || "Order failed");
+        }
+
+    } catch (err) {
+        console.log(err);
+        ajaxToast("error", "Something went wrong");
+    }
+}
