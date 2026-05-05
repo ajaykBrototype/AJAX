@@ -5,8 +5,17 @@ import mongoose from "mongoose";
 
 
 export const loadOrderPage=async (req,res)=>{
-    const orderId = req.params.id;
-    res.render("user/orderSuccess",{orderId});
+    try {
+        const orderId = req.params.id;
+
+        const order = await Order.findById(orderId);
+
+        res.render("user/orderSuccess", { order });
+
+    } catch (err) {
+        console.log("ORDER PAGE ERROR:", err);
+        res.redirect("/home");
+    }
 }
 
 
@@ -57,7 +66,8 @@ export const placeOrder = async (req, res) => {
                 variantId: item.variant._id,
                 name: item.variant.productId.name,
                 price: item.variant.price,
-                quantity: item.quantity
+                quantity: item.quantity,
+                image:item.variant.images[0]
             };
         });
 
