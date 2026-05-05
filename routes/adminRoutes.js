@@ -26,7 +26,7 @@ import {
   loadVariantPage, loadAddVariantPage, addVariant, toggleVariantStatus,
   loadEditVariantPage, updateVariant, deleteVariant, setDefaultVariant
 } from "../controllers/admin/variant.controller.js";
-import { loadAdminOrders } from "../controllers/admin/order.controller.js";
+import { loadAdminOrders, loadOrderDetails } from "../controllers/admin/order.controller.js";
 
 const router = express.Router();
 
@@ -41,6 +41,7 @@ router.patch("/toggleblockuser/:id", isAdminAuth, toggleBlockUser);
 
 
 router.get("/orders", noCache, isAdminAuth, loadAdminOrders);
+router.get("/orders/:id", noCache, isAdminAuth, loadOrderDetails);
 
 
 router.get("/categories", isAdminAuth, loadCategoryPage);

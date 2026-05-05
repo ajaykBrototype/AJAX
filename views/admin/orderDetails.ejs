@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order Detail — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=DM+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Playfair Display', 'serif'],
+          sans: ['DM Sans', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  :root {
+    --admin-bg: #f8fafc;
+    --admin-card: #ffffff;
+    --admin-border: #e5e7eb;
+    --admin-text-dark: #111827;
+    --admin-text-muted: #6b7280;
+    --brand-green: #2d5a3a;
+    --brand-green-light: #f0fdf4;
+  }
+
+  body { background: var(--admin-bg); color: var(--admin-text-dark); font-family: 'DM Sans', sans-serif; }
+  
+  .sidebar-item { display: flex !important; align-items: center !important; gap: 12px !important; padding: 12px 16px !important; border-radius: 0px !important; transition: all 0.2s ease !important; position: relative !important; color: #888888 !important; font-size: 14px !important; font-weight: 500 !important; }
+  .sidebar-item:hover { color: #1C1C1C !important; }
+  .sidebar-item.active { background-color: #EBEAE4 !important; color: #1C1C1C !important; }
+  .sidebar-item.active::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background-color: #1C1C1C !important; }
+
+  #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  @media(max-width:1024px) {
+    #sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 1001; width: 280px; }
+    #sidebar.open { transform: translateX(0); }
+  }
+
+  .order-card { background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: #e5e7eb; position: relative; z-index: 10; }
+  .timeline-dot.active { background: #22c55e; box-shadow: 0 0 0 4px #f0fdf4; }
+  .timeline-line { position: absolute; left: 5px; top: 12px; bottom: -12px; width: 2px; background: #f3f4f6; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- ── SIDEBAR (PARTIAL) ── -->
+  <%- include('partials/sidebar', { currentPath: '/admin/orders' }) %>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto max-h-screen">
+    
+    <!-- Top Nav -->
+    <header class="h-16 bg-white border-b border-[var(--admin-border)] flex items-center justify-between px-8 sticky top-0 z-50">
+      <div class="flex items-center gap-4">
+        <button id="sidebarToggle" class="lg:hidden p-2 hover:bg-stone-100 rounded-lg text-stone-400">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="flex items-center gap-2 text-xs text-[var(--admin-text-muted)]">
+          <a href="/admin/orders" class="hover:text-[var(--admin-text-dark)]">ORDERS</a>
+          <span>/</span>
+          <span class="font-bold text-[var(--admin-text-dark)] tracking-wider uppercase">#<%= order._id.toString().toUpperCase().slice(-10) %></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-8">
+      
+      <!-- Premium Banner Header -->
+      <div class="bg-[var(--brand-green)] rounded-2xl p-8 mb-8 relative overflow-hidden text-white shadow-xl">
+        <!-- Abstract Pattern Overlay -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+          <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 Q 25 50 50 100 T 100 100" fill="none" stroke="white" stroke-width="0.5"/><path d="M0 80 Q 25 30 50 80 T 100 80" fill="none" stroke="white" stroke-width="0.5"/></svg>
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h1 class="text-4xl font-serif font-bold mb-2 tracking-tight">Order Detail</h1>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm opacity-80 font-medium">
+              <span>#<%= order._id.toString().toUpperCase().slice(-10) %></span>
+              <span class="w-1 h-1 bg-white/40 rounded-full"></span>
+              <span><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></span>
+              <span class="w-1 h-1 bg-white/40 rounded-full"></span>
+              <span><%= new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+             <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-center border border-white/10">
+                <p class="text-[10px] uppercase tracking-widest opacity-60 mb-1">Items</p>
+                <p class="text-xl font-bold"><%= order.items.length %></p>
+             </div>
+             <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-center border border-white/10">
+                <p class="text-[10px] uppercase tracking-widest opacity-60 mb-1">Total</p>
+                <p class="text-xl font-bold">₹<%= Math.floor(order.totalAmount) %></p>
+             </div>
+             <div class="bg-blue-500 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                <%= order.status %>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Column 1 & 2 (Main Info) -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Order Info -->
+            <div class="order-card">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+                </div>
+                <h3 class="font-bold text-sm tracking-widest uppercase">Order Info</h3>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-center py-2 border-b border-stone-50">
+                  <span class="text-xs text-[var(--admin-text-muted)]">Order ID</span>
+                  <span class="text-xs font-bold bg-stone-100 px-2 py-1 rounded">#<%= order._id.toString().toUpperCase().slice(-10) %></span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-stone-50">
+                  <span class="text-xs text-[var(--admin-text-muted)]">Placed On</span>
+                  <span class="text-sm font-bold"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }) %></span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-stone-50">
+                  <span class="text-xs text-[var(--admin-text-muted)]">Total Items</span>
+                  <span class="text-sm font-bold"><%= order.items.length %></span>
+                </div>
+                <div class="flex justify-between items-center pt-2 mt-4 bg-green-50/50 p-4 rounded-xl">
+                  <span class="text-sm font-bold text-green-800">Total Amount</span>
+                  <span class="text-xl font-bold text-green-700">₹<%= order.totalAmount.toFixed(2) %></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer -->
+            <div class="order-card">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h3 class="font-bold text-sm tracking-widest uppercase">Customer</h3>
+              </div>
+              
+              <div class="flex items-center gap-4 mb-6 group cursor-pointer">
+                <div class="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
+                  <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(order.address.name) %>&background=random" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1">
+                  <p class="font-bold text-lg"><%= order.address.name %></p>
+                  <p class="text-xs text-[var(--admin-text-muted)] truncate"><%= order.userId?.email || 'Guest User' %></p>
+                </div>
+                <div class="text-stone-300 group-hover:text-stone-600 transition-colors">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                 <div class="flex items-center gap-3 text-sm text-[var(--admin-text-muted)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <%= order.address.phone %>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Update Status Card (Figma Action Section) -->
+          <div class="order-card border-l-4 border-green-500">
+             <p class="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-4">Action Required: Update Status</p>
+             <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                   <select class="w-full h-12 bg-white border border-stone-200 rounded-xl px-4 appearance-none outline-none focus:border-green-500 transition-all text-sm font-medium">
+                      <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                      <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                      <option value="Out for Delivery" <%= order.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                      <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                      <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                   </select>
+                   <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                   </div>
+                </div>
+                <button class="bg-[var(--brand-green)] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#1a3b25] transition-all shadow-md">
+                   Update Status
+                </button>
+             </div>
+          </div>
+
+          <!-- Shipping & Payment Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div class="order-card">
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <h3 class="font-bold text-sm tracking-widest uppercase">Shipping Address</h3>
+                </div>
+                <div class="space-y-1">
+                   <p class="font-bold text-base"><%= order.address.name %></p>
+                   <p class="text-sm text-[var(--admin-text-muted)]"><%= order.address.street %>, <%= order.address.area %></p>
+                   <p class="text-sm text-[var(--admin-text-muted)]"><%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %></p>
+                   <p class="text-sm text-[var(--admin-text-muted)]"><%= order.address.country %></p>
+                </div>
+             </div>
+
+             <div class="order-card">
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  </div>
+                  <h3 class="font-bold text-sm tracking-widest uppercase">Payment Info</h3>
+                </div>
+                <div class="space-y-4">
+                   <div class="flex justify-between items-center">
+                      <div class="flex items-center gap-3">
+                         <span class="text-xs font-bold text-stone-400 uppercase">Method</span>
+                         <span class="text-sm font-bold flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <%= order.paymentMethod %>
+                         </span>
+                      </div>
+                      <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest"><%= order.status === 'Cancelled' ? 'VOID' : 'PENDING' %></span>
+                   </div>
+                   <div class="pt-4 border-t border-stone-50 flex justify-between items-center">
+                      <span class="text-xs text-[var(--admin-text-muted)]">Amount Paid</span>
+                      <span class="text-base font-bold">₹<%= order.totalAmount.toFixed(2) %></span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+        </div>
+
+        <!-- Column 3 (Timeline) -->
+        <div class="space-y-8">
+           <div class="order-card p-0 overflow-hidden">
+              <div class="bg-[var(--brand-green)] p-5 text-white flex items-center gap-3">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                 <h3 class="text-xs font-bold uppercase tracking-widest">Tracking History</h3>
+              </div>
+              <div class="p-8 space-y-10 relative">
+                 
+                 <!-- Step 1 (Active) -->
+                 <div class="flex gap-6 relative">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-dot active"></div>
+                    <div class="flex-1 -mt-1">
+                       <p class="text-sm font-bold mb-1">Confirmed</p>
+                       <p class="text-[10px] text-[var(--admin-text-muted)] uppercase tracking-tighter"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                       <p class="text-[10px] text-[var(--admin-text-muted)]">9:06 P.M.</p>
+                    </div>
+                 </div>
+
+                 <!-- Step 2 -->
+                 <div class="flex gap-6 relative">
+                    <div class="timeline-dot"></div>
+                    <div class="flex-1 -mt-1 opacity-50">
+                       <p class="text-sm font-bold mb-1">Pending</p>
+                       <p class="text-[10px] text-[var(--admin-text-muted)] uppercase tracking-tighter"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
+                       <p class="text-[10px] text-[var(--admin-text-muted)]">9:06 P.M.</p>
+                    </div>
+                 </div>
+
+              </div>
+           </div>
+        </div>
+
+      </div>
+
+      <!-- Order Items Section -->
+      <div class="order-card mt-8">
+         <div class="flex justify-between items-center mb-8">
+            <h3 class="text-[10px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest">Order Items</h3>
+            <span class="text-[10px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest"><%= order.items.length %> ITEM</span>
+         </div>
+
+         <div class="space-y-6 mb-10">
+            <% order.items.forEach(item => { %>
+               <div class="flex flex-col md:flex-row items-center gap-6 py-6 border-b border-stone-50 last:border-0">
+                  <div class="w-32 h-40 bg-stone-50 rounded-2xl border border-stone-100 overflow-hidden flex-shrink-0 shadow-sm">
+                     <img src="<%= item.image %>" alt="<%= item.name %>" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-1">
+                     <h4 class="text-2xl font-serif font-bold text-[var(--admin-text-dark)] mb-3"><%= item.name %></h4>
+                     <div class="flex flex-wrap gap-3">
+                        <div class="bg-stone-100 px-3 py-1.5 rounded-lg text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                           SIZE: <span class="text-[var(--admin-text-dark)]"><%= item.size || 'N/A' %></span>
+                        </div>
+                        <div class="bg-stone-100 px-3 py-1.5 rounded-lg text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                           QTY: <span class="text-[var(--admin-text-dark)]"><%= item.quantity %></span>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="text-right">
+                     <p class="text-xs text-[var(--admin-text-muted)] mb-1">ITEM TOTAL</p>
+                     <p class="text-stone-300 text-xs line-through mb-1">₹<%= (item.price * item.quantity).toFixed(2) %></p>
+                     <p class="text-2xl font-bold text-[var(--admin-text-dark)] tracking-tighter">₹<%= (item.price * item.quantity).toFixed(2) %></p>
+                  </div>
+               </div>
+            <% }) %>
+         </div>
+
+         <div class="flex flex-col md:flex-row justify-end pt-10 border-t border-stone-100">
+            <div class="w-full md:w-80 space-y-4">
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-[var(--admin-text-muted)] font-medium">Subtotal</span>
+                  <span class="font-bold">₹<%= order.totalAmount.toFixed(2) %></span>
+               </div>
+               <div class="flex justify-between items-center text-sm">
+                  <span class="text-[var(--admin-text-muted)] font-medium">Delivery Fee</span>
+                  <span class="font-bold">₹100.00</span>
+               </div>
+               <div class="pt-6 border-t border-stone-100 flex justify-between items-end">
+                  <div>
+                    <p class="text-[10px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest mb-1">Total Amount</p>
+                    <p class="text-[10px] text-stone-400 italic">Including all taxes</p>
+                  </div>
+                  <p class="text-4xl font-bold text-[var(--brand-green)] tracking-tighter">₹<%= (order.totalAmount + 100).toFixed(2) %></p>
+               </div>
+            </div>
+         </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden"></div>
+
+  <script>
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('hidden');
+      });
+    }
+
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>

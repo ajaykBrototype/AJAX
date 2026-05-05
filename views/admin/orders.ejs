@@ -184,7 +184,9 @@
                 <% orders.forEach(order => { %>
                   <tr class="table-row">
                     <td class="px-6 py-5 text-sm font-bold text-[var(--admin-text-dark)]">
-                      #<%= order._id.toString().toUpperCase().slice(-10) %>
+                      <a href="/admin/orders/<%= order._id %>" class="hover:text-[var(--brand-green)] transition-colors">
+                        #<%= order._id.toString().toUpperCase().slice(-10) %>
+                      </a>
                     </td>
                     <td class="px-6 py-5">
                       <div class="flex items-center gap-3">
@@ -249,9 +251,15 @@
                       </div>
                     </td>
                     <td class="px-6 py-5 text-right">
-                      <button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors border border-transparent hover:border-[var(--admin-border)]">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-stone-400"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </button>
+                      <a href="/admin/orders/<%= order._id %>" 
+                     class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-stone-100 transition-colors border border-transparent hover:border-[var(--admin-border)]">
+   
+                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                      </svg>
+
+                      </a>
                     </td>
                   </tr>
                 <% }) %>

@@ -10,7 +10,6 @@ export const loadAdminOrders = async (req, res) => {
 
         let filter = {};
         if (searchQuery) {
-            
             filter = {
                 $or: [
                     { "address.name": { $regex: searchQuery, $options: "i" } },
@@ -18,7 +17,6 @@ export const loadAdminOrders = async (req, res) => {
                 ]
             };
             
-           
             if (searchQuery.match(/^[0-9a-fA-F]{24}$/)) {
                 filter.$or.push({ _id: searchQuery });
             }
@@ -55,5 +53,27 @@ export const loadAdminOrders = async (req, res) => {
     } catch (err) {
         console.log("ADMIN ORDER ERROR:", err);
         res.redirect("/admin");
+    }
+};
+
+export const loadOrderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId)
+            .populate("userId", "name email phone")
+            .exec();
+
+        if (!order) {
+            return res.redirect("/admin/orders");
+        }
+
+        res.render("admin/orderDetails", { 
+            order,
+            currentPath: "/admin/orders"
+        });
+
+    } catch (err) {
+        console.log("ADMIN ORDER DETAILS ERROR:", err);
+        res.redirect("/admin/orders");
     }
 };
