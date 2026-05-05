@@ -578,25 +578,29 @@
                         <!-- Full Name -->
                         <div class="space-y-3">
                             <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">Full Name *</label>
-                            <input type="text" name="name" class="form-input" placeholder="e.g. Ajay K" required>
+                            <input type="text" name="name" class="form-input" placeholder="Name" >
+                            <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                         </div>
 
                         <!-- Street Address -->
                         <div class="space-y-3">
                             <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">Street Address *</label>
-                            <input type="text" name="street" class="form-input" placeholder="House/Flat No., Building, Street, Area" required>
+                            <input type="text" name="street" class="form-input" placeholder="House/Flat No., Building, Street, Area" >
+                            <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-6">
                             <!-- Pincode -->
                             <div class="space-y-3">
                                 <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">Pincode *</label>
-                                <input type="text" name="pincode" class="form-input" placeholder="e.g. 676105" required>
+                                <input type="text" name="pincode" class="form-input" placeholder="e.g. 676105" >
+                                <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                             </div>
                             <!-- City -->
                             <div class="space-y-3">
                                 <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">City / Locality *</label>
-                                <input type="text" name="city" class="form-input" placeholder="Enter city or locality" required>
+                                <input type="text" name="city" class="form-input" placeholder="Enter city or locality" >
+                                <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                             </div>
                         </div>
 
@@ -606,13 +610,15 @@
                               <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">
                               Area / Landmark *
                                </label>
-                               <input type="text" name="area" class="form-input" placeholder="Nearby landmark or area" required>
+                               <input type="text" name="area" class="form-input" placeholder="Nearby landmark or area" >
+                               <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                               </div>
                             
                             <!-- State -->
                             <div class="space-y-3">
                                 <label class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase">State *</label>
-                                <input type="text" name="state" class="form-input" placeholder="Type to search state" required>
+                                <input type="text" name="state" class="form-input" placeholder="Type to search state" >
+                                <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                             </div>
                         </div>
 
@@ -624,8 +630,10 @@
                                     <div class="absolute left-0 top-0 bottom-0 px-4 flex items-center border-r border-brand-mist/20 text-[0.65rem] font-black text-stone-300">
                                         IN +91
                                     </div>
-                                    <input type="tel" name="phone" class="form-input pl-20" placeholder="98765 43210" required>
+                                    <input type="tel" name="phone" class="form-input pl-20" placeholder="98765 43210">
+
                                 </div>
+                                <p class="text-red-500 text-xs mt-1 hidden error-msg"></p>
                             </div>
                             <!-- Country -->
                             <div class="space-y-3">
@@ -660,115 +668,8 @@
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        lucide.createIcons();
-        
-        function handleOrderCompletion(event) {
-            const btn = document.getElementById('completeOrderBtn');
-            const btnText = btn.querySelector('.btn-text');
-            
-            // Start Animation
-            btn.classList.add('order-btn-loading');
-            btn.style.backgroundColor = 'white'; // Keep white for truck visibility
-            btn.style.color = 'transparent';
-            
-            // We'll give it enough time for the truck to cross (2.5s as per CSS)
-            setTimeout(() => {
-                // Here you would normally submit the form or redirect
-                // For now, we'll just show the next state or alert
-                ajaxToast("success","Order Placed Successfully!");
-                // window.location.href = '/order-success'; 
-            }, 2000);
-        }
-
-        
-        function toggleAddressModal(show) {
-            const modal = document.getElementById('addressModal');
-            if (show) {
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            } else {
-                modal.classList.remove('active');
-                if (!document.getElementById('addressFormModal').classList.contains('active')) {
-                    document.body.style.overflow = '';
-                }
-            }
-        }
-
-        function toggleAddressFormModal(show) {
-            const modal = document.getElementById('addressFormModal');
-            if (show) {
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            } else {
-                modal.classList.remove('active');
-                if (!document.getElementById('addressModal').classList.contains('active')) {
-                    document.body.style.overflow = '';
-                }
-            }
-        }
-
-        function closeAllModals() {
-            toggleAddressModal(false);
-            toggleAddressFormModal(false);
-        }
-
-        function setLabel(label) {
-            const input = document.getElementById('addressLabelInput');
-            input.value = label;
-            
-            
-            document.querySelectorAll('.label-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`label-${label}`).classList.add('active');
-        }
-
-        function openAddressForm(addressDataStr = null) {
-            const title = document.getElementById('addressFormTitle');
-            const form = document.getElementById('addressForm');
-            
-            if (addressDataStr) {
-                const data = JSON.parse(addressDataStr);
-                title.innerText = 'Edit Address';
-                form.name.value = data.name || '';
-                form.street.value = data.street || '';
-                form.area.value = data.area || '';
-                form.pincode.value = data.pincode || '';
-                form.city.value = data.city || '';
-                form.state.value = data.state || '';
-                form.phone.value = data.phone || '';
-                 form.addressId.value = data._id; 
-                setLabel(data.type || 'Home');
-                form.isDefault.checked = data.isDefault || false;
-            } else {
-                title.innerText = 'Add New Address';
-                form.reset();
-                 form.addressId.value = "";
-                setLabel('Home');
-            }
-            
-            toggleAddressFormModal(true);
-        }
-
-        function selectAddress(addressId) {
-            // Logic to update the selected address would go here
-            // For now, we'll just reload or handle via AJAX
-            window.location.href = `/checkout?addressId=${addressId}`;
-        }
-
-        // UI logic for radio buttons
-        const options = document.querySelectorAll('.payment-option');
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                const radio = option.querySelector('input');
-                if (radio.disabled) return;
-                
-                options.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                radio.checked = true;
-            });
-        });
-    </script>
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/utils/swal-helper.js"></script>
+    <script src="/js/user/checkout.js"></script>
 </body>
 </html>
