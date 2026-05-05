@@ -2,21 +2,60 @@ import Order from "../../models/user/orderModel.js";
 import Cart from "../../models/user/cartModel.js";
 import Address from "../../models/user/addressModel.js";
 import mongoose from "mongoose";
+import User from "../../models/user/userModel.js";
 
 
 export const loadOrderPage=async (req,res)=>{
     try {
         const orderId = req.params.id;
-
         const order = await Order.findById(orderId);
-
         res.render("user/orderSuccess", { order });
-
     } catch (err) {
         console.log("ORDER PAGE ERROR:", err);
         res.redirect("/home");
     }
 }
+
+export const loadOrdersList = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        
+        // Fetch orders for the logged-in user, sorted by newest first
+        const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+
+        res.render("user/orders", { 
+            user,
+            orders,
+            activePage: 'orders'
+        });
+    } catch (err) {
+        console.log("LOAD ORDERS ERROR:", err);
+        res.redirect("/profile");
+    }
+};
+
+export const loadOrderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        
+        const order = await Order.findOne({ _id: orderId, userId });
+
+        if (!order) {
+            return res.redirect("/orders");
+        }
+
+        res.render("user/orderDetails", { 
+            user,
+            order,
+        });
+    } catch (err) {
+        console.log("LOAD ORDER DETAILS ERROR:", err);
+        res.redirect("/orders");
+    }
+};
 
 
 
@@ -67,6 +106,7 @@ export const placeOrder = async (req, res) => {
                 name: item.variant.productId.name,
                 price: item.variant.price,
                 quantity: item.quantity,
+                size:item.variant.size,
                 image:item.variant.images[0]
             };
         });
