@@ -22,13 +22,72 @@ export const loadOrderPage = async (req, res) => {
 };
 
 export const loadOrdersList = async (req, res) => {
+
     try {
 
         const userId = req.session.userId;
 
         const user = await User.findById(userId);
 
-        const orders = await Order.find({ userId })
+        const search = req.query.search || "";
+
+        const sort = req.query.sort || "all";
+
+        let filter = {
+            userId
+        };
+
+        const now = new Date();
+
+    if (sort === "30days") {
+
+    const last30Days = new Date();
+
+    last30Days.setDate(
+        now.getDate() - 30
+    );
+
+    filter.createdAt = {
+        $gte: last30Days
+    };
+
+}
+
+
+     if (sort === "6months") {
+
+    const last6Months = new Date();
+
+    last6Months.setMonth(
+        now.getMonth() - 6
+    );
+
+    filter.createdAt = {
+        $gte: last6Months
+    };
+
+}
+
+
+if (sort === "2025") {
+
+    filter.createdAt = {
+        $gte: new Date("2025-01-01"),
+        $lte: new Date("2025-12-31")
+    };
+
+}
+
+        if (search) {
+
+            filter["items.name"] = {
+                $regex: search,
+                $options: "i"
+            };
+
+        }
+
+        const orders = await Order.find(filter)
             .sort({ createdAt: -1 });
 
         res.render("user/orders", {
@@ -40,7 +99,8 @@ export const loadOrdersList = async (req, res) => {
     } catch (err) {
 
         console.log("LOAD ORDERS ERROR:", err);
-        res.redirect("/profile");
+
+        res.redirect("/menProductList");
 
     }
 };
