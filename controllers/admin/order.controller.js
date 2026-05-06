@@ -77,3 +77,79 @@ export const loadOrderDetails = async (req, res) => {
         res.redirect("/admin/orders");
     }
 };
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+        const statusFlow=[
+            "Placed",
+            "Confirmed",
+            "Processing",
+            "Shipped",
+            "Out for Delivery",
+            "Delivered"
+        ];
+
+        const currentIndex=statusFlow.indexOf(order.status);
+        const newIndex=statusFlow.indexOf(status);
+
+        if(order.status===status){
+             return res.status(400).json({
+                success: false,
+                message: "Status already updated"
+            });
+        }
+
+        if(newIndex!==currentIndex+1){
+            if(status!=="Cancelled"){
+                   return res.status(400).json({
+                    success: false,
+                    message: `Order must move to ${
+                        statusFlow[currentIndex + 1]
+                    } first`
+                });
+            }
+        }
+
+         if (order.status === "Delivered") {
+            return res.status(400).json({
+                success: false,
+                message: "Delivered order cannot be changed"
+            });
+        }
+
+
+        order.status = status;
+
+        order.statusHistory.push({
+            status,
+            updatedAt: new Date()
+        });
+
+        await order.save();
+
+        res.json({
+            success: true
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+};

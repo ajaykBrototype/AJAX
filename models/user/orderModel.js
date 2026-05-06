@@ -40,9 +40,30 @@ const orderSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["Pending", "Placed", "Cancelled"],
+    enum: [ 
+      "Pending",
+      "Placed",
+      "Confirmed",
+      "Processing",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled"
+    ],
     default: "Placed"
-  }
+  },
+   statusHistory: [
+    {
+      status: {
+        type: String
+      },
+
+      updatedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 
 }, { timestamps: true });
 

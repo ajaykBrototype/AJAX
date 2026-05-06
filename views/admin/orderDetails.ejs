@@ -183,27 +183,61 @@
           </div>
 
           <!-- Update Status Card (Figma Action Section) -->
-          <div class="order-card border-l-4 border-black">
-             <p class="text-[10px] font-bold text-black uppercase tracking-widest mb-4">Action Required: Update Status</p>
-             <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1 relative">
-                   <select class="w-full h-12 bg-white border border-stone-200 rounded-xl px-4 appearance-none outline-none focus:border-black transition-all text-sm font-medium">
-                      <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-                      <option value="processing" <%= order.status === 'processig' ? 'selected' : '' %>>processing</option>
-                      <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                      <option value="Out for Delivery" <%= order.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
-                      <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                      <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                   </select>
-                   <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                   </div>
-                </div>
-                <button class="bg-black text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-900 transition-all shadow-md">
-                   Update Status
-                </button>
-             </div>
+        <% if(order.status !== "Delivered") { %>
+
+           <div class="order-card border-l-4 border-black">
+            <p class="text-[10px] font-bold text-black uppercase tracking-widest mb-4">
+            Action Required: Update Status
+           </p>
+
+         <div class="flex flex-col md:flex-row gap-4">
+
+              <div class="flex-1 relative">
+
+         <%
+          const nextStatuses = {
+          Placed: ["Confirmed", "Cancelled"],
+          Confirmed: ["Processing", "Cancelled"],
+          Processing: ["Shipped", "Cancelled"],
+          Shipped: ["Out for Delivery"],
+          "Out for Delivery": ["Delivered"],
+          Delivered: [],
+          Cancelled: []
+        };
+
+            const availableStatuses = nextStatuses[order.status] || [];
+          %>
+
+          <select id="statusSelect"
+          class="w-full h-12 bg-white border border-stone-200 rounded-xl px-4 appearance-none outline-none focus:border-black transition-all text-sm font-medium">
+
+     <% availableStatuses.forEach(status => { %>
+
+      <option value="<%= status %>">
+          <%= status %>
+      </option>
+
+    <% }) %>
+
+    </select>
+
+         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <polyline points="6 9 12 15 18 9"/>
+            </svg>
+         </div>
+
+      </div>
+
+      <button id="updateStatusBtn"
+         class="bg-black text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-900 transition-all shadow-md">
+         Update Status
+      </button>
+
+   </div>
           </div>
+
+       <% } %>
 
           <!-- Shipping & Payment Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -258,27 +292,43 @@
                  <h3 class="text-xs font-bold uppercase tracking-widest text-black">Tracking History</h3>
               </div>
               <div class="p-8 space-y-10 relative">
-                 
-                 <!-- Step 1 (Active) -->
-                 <div class="flex gap-6 relative">
-                    <div class="timeline-line"></div>
-                    <div class="timeline-dot active"></div>
-                    <div class="flex-1 -mt-1">
-                       <p class="text-sm font-bold mb-1">Confirmed</p>
-                       <p class="text-[10px] text-[var(--admin-text-muted)] uppercase tracking-tighter"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-                       <p class="text-[10px] text-[var(--admin-text-muted)]">9:06 P.M.</p>
-                    </div>
-                 </div>
+                 <% order.statusHistory.slice().reverse().forEach((history, index) => { %>
 
-                 <!-- Step 2 -->
-                 <div class="flex gap-6 relative">
-                    <div class="timeline-dot"></div>
-                    <div class="flex-1 -mt-1 opacity-50">
-                       <p class="text-sm font-bold mb-1">Pending</p>
-                       <p class="text-[10px] text-[var(--admin-text-muted)] uppercase tracking-tighter"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></p>
-                       <p class="text-[10px] text-[var(--admin-text-muted)]">9:06 P.M.</p>
-                    </div>
-                 </div>
+   <div class="flex gap-6 relative">
+
+    <% if(index !== order.statusHistory.length - 1) { %>
+      <div class="timeline-line"></div>
+    <% } %>
+
+    <div class="timeline-dot <%= index === 0 ? 'active' : '' %>"></div>
+
+    <div class="flex-1 -mt-1 <%= index !== 0 ? 'opacity-50' : '' %>">
+
+       <p class="text-sm font-bold mb-1">
+          <%= history.status %>
+       </p>
+
+       <p class="text-[10px] text-[var(--admin-text-muted)] uppercase tracking-tighter">
+          <%= new Date(history.updatedAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }) %>
+       </p>
+
+       <p class="text-[10px] text-[var(--admin-text-muted)]">
+          <%= new Date(history.updatedAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) %>
+       </p>
+
+    </div>
+
+</div>
+
+<% }) %>
+                
 
               </div>
            </div>
@@ -367,5 +417,37 @@
       });
     }
   </script>
+
+  <script>
+
+const updateBtn = document.getElementById("updateStatusBtn");
+
+updateBtn.addEventListener("click", async () => {
+
+  const status = document.getElementById("statusSelect").value;
+
+  try {
+
+    const response = await axios.patch(
+      "/admin/orders/<%= order._id %>/status",
+      { status }
+    );
+
+    if(response.data.success){
+      window.location.reload();
+    }
+
+  } catch (error) {
+
+    Swal.fire({
+      icon: "error",
+      title: "Failed to update status"
+    });
+
+  }
+
+});
+
+</script>
 </body>
 </html>

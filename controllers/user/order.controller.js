@@ -130,7 +130,15 @@ export const placeOrder = async (req, res) => {
                 country: address.country
             },
             paymentMethod:normalizedPayment,
-            totalAmount: total
+            totalAmount: total,
+             status: "Placed",
+
+    statusHistory: [
+        {
+            status: "Placed",
+            updatedAt: new Date()
+        }
+       ]
         });
 
         cart.items = [];
@@ -143,3 +151,4 @@ export const placeOrder = async (req, res) => {
         res.json({ success: false, message: err.message });
     }
 };
+
