@@ -120,7 +120,7 @@ body {
       
       <%- include('../partials/breadcrumbs', { 
           breadcrumbs: [
-              { name: "My Profile", url: "/profile" },
+              { name: "MenProduct", url: "/menProductList" },
               { name: "Order History" }
           ] 
       }) %>
@@ -168,10 +168,14 @@ body {
                     <p class="text-xs font-bold text-brand-dark">#ORD-<%= order._id.toString().slice(-8).toUpperCase() %></p>
                   </div>
                 </div>
-                <div>
+                <div class="flex items-center gap-4">
                   <span class="status-badge <%= order.status === 'Delivered' ? 'status-delivered' : (order.status === 'Cancelled' ? 'status-cancelled' : 'status-confirmed') %>">
                     <%= order.status %>
                   </span>
+                  <a href="/orders/<%= order._id %>" class="btn-premium bg-white text-brand-dark border border-brand-dark/10 hover:bg-brand-warm flex items-center gap-2">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    Order Details
+                  </a>
                 </div>
               </div>
 
@@ -208,10 +212,6 @@ body {
                           Buy Again
                         </button>
                       <% } %>
-                      <a href="/orders/<%= order._id %>" class="flex-1 md:flex-none btn-premium bg-white text-brand-dark border border-brand-dark/10 hover:bg-brand-warm flex items-center gap-2">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        Order Details
-                      </a>
                     </div>
                   </div>
                 <% }) %>

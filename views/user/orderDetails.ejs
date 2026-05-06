@@ -152,13 +152,62 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-in { animation: fadeIn 0.6s ease-out both; }
+
+/* Cancellation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.active {
+  display: flex;
+}
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 2rem;
+  padding: 3rem;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.reason-btn {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #F0EEE9;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #1C1C1C;
+  transition: all 0.2s ease;
+}
+.reason-btn.active {
+  background: #1C1C1C;
+  color: white;
+  border-color: #1C1C1C;
+}
 </style>
 </head>
 <body>
 
 <%- include('../partials/navbar', { hasSidebarToggle: true }) %>
 
+
+
 <div style="padding-top:80px; min-height:100vh;">
+   <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: "OrderHistory", url: "/orders" },
+              { name: "OrderDetails" }
+          ] 
+      }) %>
   <div style="max-width:1440px; margin:0 auto;" class="px-8 md:px-16 py-12">
     
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
@@ -409,6 +458,45 @@ body {
 
 <%- include('../partials/footer') %>
 
+<!-- Cancellation Modal -->
+<div id="cancelModal" class="modal-overlay">
+  <div class="modal-content fade-in">
+    <button onclick="closeCancelModal()" class="absolute top-6 right-6 text-stone-300 hover:text-stone-600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    
+    <h3 class="editorial-title text-3xl mb-4">Cancel Order</h3>
+    <p class="text-stone-400 text-[0.85rem] leading-relaxed mb-8">
+      Are you sure you want to cancel <span id="cancelTargetName">the entire order</span>? This action cannot be undone.
+    </p>
+
+    <div class="space-y-6">
+      <div>
+        <label class="text-[0.65rem] font-black uppercase tracking-widest text-stone-300 mb-4 block">Reason for Cancellation</label>
+        <div class="flex flex-wrap gap-3" id="reasonContainer">
+          <button type="button" class="reason-btn" onclick="selectReason(this)">Changed my mind</button>
+          <button type="button" class="reason-btn" onclick="selectReason(this)">Ordered by mistake</button>
+          <button type="button" class="reason-btn" onclick="selectReason(this)">Better price</button>
+          <button type="button" class="reason-btn" onclick="selectReason(this)">Slow delivery</button>
+          <button type="button" class="reason-btn" onclick="selectReason(this)">Wrong item</button>
+        </div>
+      </div>
+
+      <div>
+        <textarea id="cancelNote" placeholder="Add a note (optional)..." class="w-full bg-[#F9F9F7] border-none rounded-2xl p-6 text-[0.85rem] outline-none min-h-[120px] focus:ring-1 focus:ring-brand-dark/10 transition-all"></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 pt-4">
+        <button onclick="closeCancelModal()" class="py-4 bg-[#F9F9F7] text-[#1C1C1C] rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-[#F0EEE9] transition-all">
+          Keep Order
+        </button>
+        <button id="confirmCancelBtn" class="py-4 bg-[#1C1C1C] text-white rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-black transition-all">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

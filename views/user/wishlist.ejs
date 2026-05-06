@@ -272,7 +272,7 @@
         <% const variant = item.variant; %>
         <div class="fav-card group relative overflow-hidden" data-product="<%= product._id %>">
           <!-- REMOVE BUTTON -->
-          <div class="remove-fav z-50" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', this)">
+          <div class="remove-fav z-50" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>', '<%= variant ? variant._id : '' %>', this)">
             <i data-lucide="x" size="16"></i>
           </div>
           
@@ -356,9 +356,12 @@
   });
 
   // Implement removeFromWishlist calling the toggle endpoint
-  async function removeFromWishlist(id, element, silent = false) {
+  async function removeFromWishlist(id, variantId, element, silent = false) {
     try {
-      const res = await axios.post("/wishlist/add", { productId: id });
+      const res = await axios.post("/wishlist/add", { 
+        productId: id,
+        variantId: variantId
+      });
       if (res.data.success) {
         if (!silent) {
           ajaxToast("success", "Item removed from favorites");

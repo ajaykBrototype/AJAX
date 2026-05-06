@@ -224,6 +224,7 @@ export const cancelOrderItem=async(req,res)=>{
 
      try {
     const {orderId,itemId}=req.params;
+    const {reason, note} = req.body;
 
     const userId=req.session.userId;
 
@@ -282,6 +283,8 @@ if (!item) {
      }
 
      item.status="Cancelled";
+     item.cancellationReason = reason;
+     item.cancellationNote = note;
      order.markModified('items');
 
      await order.save();
@@ -292,10 +295,14 @@ if (!item) {
 
      if(allCancelled){
         order.status="Cancelled"
+        order.cancellationReason = reason;
+        order.cancellationNote = note;
 
         order.statusHistory.push({
             status:"Cancelled",
-            updatedAt:new Date()
+            updatedAt:new Date(),
+            reason,
+            note
         });
 
         await order.save();

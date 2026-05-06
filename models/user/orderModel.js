@@ -19,7 +19,9 @@ const orderSchema = new mongoose.Schema({
       status: {
         type: String,
         default: "Placed"
-      }
+      },
+      cancellationReason: String,
+      cancellationNote: String
     }
   ],
 
@@ -65,9 +67,13 @@ const orderSchema = new mongoose.Schema({
       updatedAt: {
         type: Date,
         default: Date.now
-      }
+      },
+      reason: String,
+      note: String
     }
-  ]
+  ],
+  cancellationReason: String,
+  cancellationNote: String
 
 }, { timestamps: true });
 

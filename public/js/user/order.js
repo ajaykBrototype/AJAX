@@ -1,51 +1,93 @@
-async function cancelItem(orderId, itemId) {
-    const btn = document.getElementById(`btn-cancel-${itemId}`);
-    
-    
-    if (btn && (btn.disabled || btn.getAttribute('data-processing') === 'true')) return;
+let currentCancelTarget = null; // { type: 'item'|'order', orderId, itemId, itemIds }
+let selectedReason = '';
 
-    const result = await ajaxConfirm({
-        text: "Are you sure you want to cancel this item?"
-    });
+function selectReason(btn) {
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedReason = btn.innerText;
+}
 
-    if (!result.isConfirmed) return;
+function openCancelModal(target) {
+    currentCancelTarget = target;
+    selectedReason = '';
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('cancelNote').value = '';
+    
+    const targetName = document.getElementById('cancelTargetName');
+    if (target.type === 'item') {
+        targetName.innerText = 'this item';
+    } else {
+        targetName.innerText = 'the entire order';
+    }
+    
+    document.getElementById('cancelModal').classList.add('active');
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('active');
+    currentCancelTarget = null;
+}
+
+// Attach event listener to confirm button
+document.addEventListener('DOMContentLoaded', () => {
+    const confirmBtn = document.getElementById('confirmCancelBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = handleModalConfirm;
+    }
+});
+
+async function handleModalConfirm() {
+    if (!selectedReason) {
+        ajaxToast("warning", "Please select a reason for cancellation");
+        return;
+    }
+
+    const note = document.getElementById('cancelNote').value;
+    const { type, orderId, itemId, itemIds } = currentCancelTarget;
+    const btn = document.getElementById('confirmCancelBtn');
 
     try {
-        if (btn) {
-            btn.disabled = true;
-            btn.setAttribute('data-processing', 'true');
-            btn.innerHTML = 'Cancelling...';
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
 
-        const response = await axios.patch(
-            `/orders/${orderId}/items/${itemId}/cancel`
-        );
+        if (type === 'item') {
+            const response = await axios.patch(`/orders/${orderId}/items/${itemId}/cancel`, {
+                reason: selectedReason,
+                note: note
+            });
 
-        if (response.data.success) {
-            ajaxToast("success", "Item cancelled successfully");
-            
-           
-            if (btn) {
-                btn.innerHTML = 'Cancelled';
-                btn.classList.remove('text-red-400', 'hover:text-red-600', 'hover:bg-red-50');
-                btn.classList.add('text-red-500', 'bg-red-50', 'opacity-60');
+            if (response.data.success) {
+                ajaxToast("success", "Item cancelled successfully");
+                closeCancelModal();
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                throw new Error(response.data.message || "Failed to cancel");
             }
-
-            setTimeout(() => window.location.reload(), 1500);
         } else {
-            throw new Error(response.data.message || "Failed to cancel");
+            // Bulk cancellation
+            ajaxToast("info", "Processing entire order cancellation...");
+            for (const id of itemIds) {
+                await axios.patch(`/orders/${orderId}/items/${id}/cancel`, {
+                    reason: selectedReason,
+                    note: note
+                });
+            }
+            ajaxToast("success", "Order cancelled successfully");
+            closeCancelModal();
+            setTimeout(() => window.location.reload(), 1500);
         }
-
     } catch (err) {
-        if (btn) {
-            btn.disabled = false;
-            btn.setAttribute('data-processing', 'false');
-            btn.innerHTML = 'Cancel Item';
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-        ajaxToast("error", err.response?.data?.message || err.message || "Failed to cancel item");
+        ajaxToast("error", err.response?.data?.message || err.message || "Operation failed");
+        btn.disabled = false;
+        btn.innerHTML = 'Confirm';
     }
+}
+
+async function cancelItem(orderId, itemId) {
+    const btn = document.getElementById(`btn-cancel-${itemId}`);
+    if (btn && (btn.disabled || btn.getAttribute('data-processing') === 'true')) return;
+    
+    openCancelModal({ type: 'item', orderId, itemId });
 }
 
 async function cancelAllItems(orderId, itemIds, btnElement) {
@@ -54,44 +96,7 @@ async function cancelAllItems(orderId, itemIds, btnElement) {
     const btn = btnElement || event?.currentTarget;
     if (btn && (btn.disabled || btn.getAttribute('data-processing') === 'true')) return;
 
-    const result = await ajaxConfirm({
-        text: "Are you sure you want to cancel the entire order?"
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-        if (btn) {
-            btn.disabled = true;
-            btn.setAttribute('data-processing', 'true');
-            btn.innerHTML = 'Processing Cancellation...';
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-
-        ajaxToast("info", "Processing cancellation...");
-        
-        for (const itemId of itemIds) {
-            await axios.patch(`/orders/${orderId}/items/${itemId}/cancel`);
-        }
-
-        ajaxToast("success", "Order cancelled successfully");
-        
-        if (btn) {
-            btn.innerHTML = 'Cancelled';
-        }
-
-        setTimeout(() => window.location.reload(), 1500);
-
-    } catch (err) {
-        if (btn) {
-            btn.disabled = false;
-            btn.setAttribute('data-processing', 'false');
-            btn.innerHTML = 'Cancel Entire Order';
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-        ajaxToast("error", "An error occurred during order cancellation.");
-        setTimeout(() => window.location.reload(), 2000);
-    }
+    openCancelModal({ type: 'order', orderId, itemIds });
 }
 
 async function returnItem(orderId, itemId) {
