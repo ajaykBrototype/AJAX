@@ -13,7 +13,7 @@ import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } fro
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress } from "../controllers/user/checkout.controller.js";
-import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails } from "../controllers/user/order.controller.js";
+import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem } from "../controllers/user/order.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -95,9 +95,8 @@ router.post("/address/save",isLoggedIn, saveAddress);
 
 router.get("/order-success/:id",isLoggedIn, loadOrderPage);
 router.post("/order/place", isLoggedIn, placeOrder);
-
 router.get("/orders", isLoggedIn, loadOrdersList);
-
 router.get("/orders/:id",isLoggedIn,loadOrderDetails);
+router.patch("/orders/:orderId/items/:itemId/cancel",isLoggedIn,cancelOrderItem);
 
 export default router;

@@ -4,6 +4,7 @@ import Address from "../../models/user/addressModel.js";
 import mongoose from "mongoose";
 import User from "../../models/user/userModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import { success } from "zod";
 
 export const loadOrderPage = async (req, res) => {
     try {
@@ -151,7 +152,9 @@ export const placeOrder = async (req, res) => {
                 price: item.variant.price,
                 quantity: item.quantity,
                 size: item.variant.size,
-                image: item.variant.images[0]
+                image: item.variant.images[0],
+
+                status: "Placed"
             });
 
         }
@@ -216,4 +219,100 @@ export const placeOrder = async (req, res) => {
         });
 
     }
+};
+
+export const cancelOrderItem=async(req,res)=>{
+
+     try {
+    const {orderId,itemId}=req.params;
+
+    const userId=req.session.userId;
+
+const order = await Order.findOne({
+    _id: orderId,
+    userId
+});
+
+if (!order) {
+
+    return res.status(404).json({
+        success: false,
+        message: "Order not found"
+    });
+
+}
+
+const item = order.items.find(
+    item => item._id.toString() === itemId
+);
+
+if (!item) {
+
+    return res.status(404).json({
+        success: false,
+        message: "Item not found"
+    });
+
+}
+
+    if(item.status==="Cancelled"){
+        return res.status(400).json({
+            success:false,
+            message:"Item already cancelled"
+    })
+}
+
+   if (
+   order.status === "Delivered" ||
+   order.status === "Cancelled"
+) {
+
+   return res.status(400).json({
+      success: false,
+      message: "Already Cancelled"
+   });
+
+}
+
+   const variant=await Variant.findById(item.variantId);
+
+     if(variant){
+        variant.stock+=item.quantity;
+
+        await variant.save();
+     }
+
+     item.status="Cancelled";
+
+     await order.save();
+
+     const allCancelled=order.items.every(
+        item=>item.status==="Cancelled"
+     )
+
+     if(allCancelled){
+        order.status="Cancelled"
+
+        order.statusHistory.push({
+            status:"Cancelled",
+            updatedAt:new Date()
+        });
+
+        await order.save();
+     }
+         res.json({
+         success: true
+
+         })
+}catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+
+    }
+
 };

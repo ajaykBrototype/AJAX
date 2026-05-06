@@ -297,8 +297,23 @@ body {
                   <p class="text-[0.65rem] font-bold text-[#B2B2B2] mb-6"><%= item.size || 'L' %></p>
                   <div class="flex justify-between items-center">
                     <p class="text-[0.65rem] font-black text-[#B2B2B2] uppercase tracking-widest">QTY: <%= item.quantity %></p>
-                    <button class="text-[0.55rem] font-black text-[#D1CFCA] hover:text-brand-dark uppercase tracking-widest transition-colors">Cancel Item</button>
-                  </div>
+                   <% if(item.status !== "Cancelled") { %>
+
+                 <button
+                  onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
+                 class="text-[0.55rem] font-black text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors">
+
+                  Cancel Item
+
+               </button>
+
+                <% } else { %>
+
+                <p class="text-[0.55rem] font-black text-red-500 uppercase tracking-widest">
+                  Cancelled
+                </p>
+
+              <% } %>
                 </div>
               </div>
             <% }) %>
@@ -344,6 +359,12 @@ body {
 </div>
 
 <%- include('../partials/footer') %>
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="/js/user/order.js"></script>
 
 </body>
 </html>
