@@ -153,7 +153,6 @@ export const placeOrder = async (req, res) => {
                 quantity: item.quantity,
                 size: item.variant.size,
                 image: item.variant.images[0],
-
                 status: "Placed"
             });
 
@@ -283,6 +282,7 @@ if (!item) {
      }
 
      item.status="Cancelled";
+     order.markModified('items');
 
      await order.save();
 
