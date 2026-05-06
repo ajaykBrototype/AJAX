@@ -205,7 +205,32 @@ body {
                   <div class="flex justify-between items-start mb-2">
                     <h3 class="editorial-title text-2xl font-normal leading-none"><%= statusTitles[status] %></h3>
                     <% if (index <= currentIndex) { %>
-                      <span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %> — 6:00 PM</span>
+                      <%
+const historyItem = order.statusHistory.find(
+   item => item.status === status
+);
+%>
+
+<% if(historyItem) { %>
+
+<span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
+
+   <%= new Date(historyItem.updatedAt).toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+   }) %>
+
+   —
+      
+        <%= new Date(historyItem.updatedAt).toLocaleTimeString([], {
+         hour: '2-digit',
+         minute: '2-digit'
+         }) %>
+
+        </span>
+
+          <% } %>
                     <% } %>
                   </div>
                   <% if (index <= currentIndex) { %>
