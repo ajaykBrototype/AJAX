@@ -104,7 +104,7 @@
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--admin-text-muted)]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="searchInput" value="<%= searchQuery || '' %>" placeholder="Search orders..." class="w-full pl-10 pr-4 py-2 bg-white border border-[var(--admin-border)] rounded-full text-sm outline-none focus:ring-2 focus:ring-stone-100 transition-all shadow-sm">
         </div>
-        <button onclick="handleSearch()" class="bg-[#22c55e] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#16a34a] transition-all shadow-sm uppercase tracking-tight">Search</button>
+        <button onclick="handleSearch()" class="bg-black text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-stone-900 transition-all shadow-sm uppercase tracking-tight">Search</button>
       </div>
     </header>
 
@@ -127,10 +127,10 @@
           <div class="flex justify-between items-start">
             <div>
               <p class="text-[10px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest mb-1">Pending</p>
-              <h3 class="text-3xl font-bold text-[#f97316]"><%= stats.pending %></h3>
+              <h3 class="text-3xl font-bold text-stone-500"><%= stats.pending %></h3>
             </div>
-            <div class="p-2 bg-orange-50 rounded-lg">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#f97316]"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="p-2 bg-stone-50 rounded-lg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-stone-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
           </div>
         </div>
@@ -138,10 +138,10 @@
           <div class="flex justify-between items-start">
             <div>
               <p class="text-[10px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest mb-1">Completed</p>
-              <h3 class="text-3xl font-bold text-[#22c55e]"><%= stats.completed %></h3>
+              <h3 class="text-3xl font-bold text-black"><%= stats.completed %></h3>
             </div>
-            <div class="p-2 bg-green-50 rounded-lg">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#22c55e]"><polyline points="20 6 9 17 4 12"/></svg>
+            <div class="p-2 bg-stone-100 rounded-lg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-black"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
           </div>
         </div>
@@ -229,17 +229,17 @@
                         let label = order.status;
 
                         if (order.status === 'Delivered') {
-                          badgeClass = 'bg-green-50 text-green-700';
-                          dotClass = 'bg-green-500';
+                          badgeClass = 'bg-black text-white';
+                          dotClass = 'bg-white';
                         } else if (order.status === 'Cancelled') {
-                          badgeClass = 'bg-red-50 text-red-700';
-                          dotClass = 'bg-red-500';
+                          badgeClass = 'bg-stone-100 text-stone-400 border border-stone-200';
+                          dotClass = 'bg-stone-300';
                         } else if (['Pending', 'Placed'].includes(order.status)) {
-                          badgeClass = 'bg-orange-50 text-orange-700';
-                          dotClass = 'bg-orange-500';
+                          badgeClass = 'bg-stone-100 text-stone-600';
+                          dotClass = 'bg-stone-400';
                         } else if (order.status === 'Confirmed') {
-                          badgeClass = 'bg-blue-50 text-blue-700';
-                          dotClass = 'bg-blue-500';
+                          badgeClass = 'bg-stone-800 text-white';
+                          dotClass = 'bg-stone-200';
                         } else {
                           badgeClass = 'bg-stone-50 text-stone-700';
                           dotClass = 'bg-stone-500';
