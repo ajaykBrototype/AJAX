@@ -1,5 +1,9 @@
 import Order from "../../models/user/orderModel.js";
 import User from "../../models/user/userModel.js";
+import Variant from "../../models/admin/variantModel.js";
+
+
+
 
 export const loadAdminOrders = async (req, res) => {
     try {
@@ -127,6 +131,30 @@ export const updateOrderStatus = async (req, res) => {
                 success: false,
                 message: "Delivered order cannot be changed"
             });
+        }
+
+         if (order.status === "Cancelled") {
+
+            return res.status(400).json({
+                success: false,
+                message: "Order already cancelled"
+            });
+
+        }
+        
+
+        if(status==="Cancelled"){
+            for(const item of order.items){
+                const variant=await Variant.findById(
+                    item.variantId
+                );
+
+                if(variant){
+                    variant.stock+=item.quantity;
+
+                    await variant.save();
+                }
+            }
         }
 
 

@@ -206,20 +206,20 @@ body {
                     <h3 class="editorial-title text-2xl font-normal leading-none"><%= statusTitles[status] %></h3>
                     <% if (index <= currentIndex) { %>
                       <%
-const historyItem = order.statusHistory.find(
-   item => item.status === status
-);
-%>
+            const historyItem = order.statusHistory.find(
+            item => item.status === status
+            );
+             %>
 
-<% if(historyItem) { %>
+      <% if(historyItem) { %>
 
-<span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
+       <span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
 
-   <%= new Date(historyItem.updatedAt).toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric'
-   }) %>
+       <%= new Date(historyItem.updatedAt).toLocaleDateString('en-US', {
+         month: 'short',
+         day: '2-digit',
+         year: 'numeric'
+             }) %>
 
    —
       
