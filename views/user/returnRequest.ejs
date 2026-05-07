@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Return Request — AJAX</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { 
+    extend: { 
+      fontFamily: { 
+        serif: ['Playfair Display', 'serif'], 
+        sans: ['Outfit', 'sans-serif'] 
+      },
+      colors: {
+        brand: {
+          dark: '#1C1C1C',
+          cream: '#F5F0E8',
+          warm: '#F5F2EA',
+          stone: '#9B8E83',
+          mist: '#EAE5DC'
+        }
+      }
+    } 
+  }
+}
+</script>
+<%- include('../partials/navbar-styles') %>
+<%- include('../partials/footer-styles') %>
+<style>
+:root {
+  --brand-dark: #1C1C1C;
+  --brand-cream: #F5F0E8;
+  --brand-warm: #F5F2EA;
+  --brand-stone: #9B8E83;
+  --brand-mist: #EAE5DC;
+}
+
+body {
+  background-color: #FFFFFF;
+  font-family: 'Outfit', sans-serif;
+  color: var(--brand-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+.editorial-title {
+  font-family: 'Playfair Display', serif;
+}
+
+.return-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.02);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  background: #F5F2EA;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #1C1C1C;
+}
+
+.return-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%3C1C1C1C' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.5rem center;
+  padding-right: 3rem;
+}
+
+.upload-zone {
+  border: 1px dashed #D1CFCA;
+  border-radius: 2rem;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: #1C1C1C;
+  background: #FAFAF8;
+}
+
+.preview-card {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 120px;
+    background: #F9F9F7;
+    border: 1px solid #ECEAE4;
+}
+
+.preview-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.remove-image-btn:hover {
+    background: black;
+    transform: scale(1.05);
+}
+
+.upload-zone.drag-active {
+    border-color: #1C1C1C;
+    background: #FAFAF8;
+    transform: scale(1.01);
+}
+
+
+
+.refund-option {
+  border: 2px solid #F0EEE9;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refund-option.active {
+  border-color: #3D2E28;
+  background: #F9F9F7;
+}
+
+.submit-return-btn {
+  background: #3D2E28;
+  color: white;
+  padding: 1.5rem 3rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.submit-return-btn:hover {
+  background: #2D211D;
+  transform: translateY(-2px);
+}
+</style>
+</head>
+<body>
+
+<%- include('../partials/navbar', { hasSidebarToggle: true }) %>
+
+<div style="padding-top:60px; min-height:100vh;">
+  <div style="max-width:1440px; margin:0 auto;" class="px-6 md:px-12 py-8">
+    <div class="max-w-3xl mx-auto w-full">
+      <%- include('../partials/breadcrumbs', { 
+          breadcrumbs: [
+              { name: "Order History", url: "/orders" },
+              { name: "Order Details", url: "/orders/" + order._id },
+              { name: "Return Request" }
+          ] 
+      }) %>
+
+      <div class="text-center mb-10">
+        <h2 class="editorial-title text-5xl md:text-6xl mb-4">
+          <% if (typeof itemId !== 'undefined' && itemId) { %>
+            Return Product
+          <% } else { %>
+            Return Entire Order
+          <% } %>
+        </h2>
+        <p class="text-[0.75rem] tracking-[0.2em] font-bold text-stone-400 uppercase">
+          Initiating return for Order <span class="text-brand-dark">#ORD-<%= order._id.toString().slice(-8).toUpperCase() %></span>
+        </p>
+      </div>
+
+      <!-- Step 1: Items to Return -->
+      <div class="return-card">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="step-number">1</div>
+          <h3 class="text-[0.65rem] font-black uppercase tracking-[0.2em]">Items to Return</h3>
+        </div>
+
+        <div class="space-y-4">
+          <% 
+            const itemsToDisplay = itemId 
+              ? order.items.filter(i => i._id.toString() === itemId)
+              : order.items.filter(i => i.status === 'Delivered');
+            
+            itemsToDisplay.forEach(item => { 
+          %>
+            <div class="flex items-center justify-between p-4 bg-[#F9F9F7] rounded-2xl">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-18 bg-white rounded-xl overflow-hidden flex-shrink-0">
+                        <img src="<%= item.image || '/images/default-product.png' %>" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h4 class="text-[0.7rem] font-bold uppercase tracking-tight mb-0.5"><%= item.name %></h4>
+                        <p class="text-[0.6rem] text-[#B2B2B2] font-bold uppercase tracking-widest"><%= item.size || 'M' %> | QTY:<%= item.quantity %></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[0.8rem] font-bold">₹<%= item.price.toFixed(2) %></p>
+                    <p class="text-[0.5rem] font-black text-[#9B8E83] uppercase tracking-widest mt-0.5">Refund Value</p>
+                </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Step 2: Reason for Return -->
+      <div class="return-card">
+        <div class="flex items-center gap-4 mb-10">
+          <div class="step-number">2</div>
+          <h3 class="text-[0.65rem] font-black uppercase tracking-[0.2em]">Reason for Return</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div class="space-y-4">
+            <label class="text-[0.65rem] font-black uppercase tracking-widest">Why are you returning this? <span class="text-red-400">*</span></label>
+            <select id="returnReason" class="return-select w-full bg-[#F9F9F7] border-none rounded-2xl p-6 text-[0.85rem] outline-none focus:ring-1 focus:ring-brand-dark/10 transition-all">
+              <option value="" disabled selected>Select a reason</option>
+              <option>Changed my mind</option>
+              <option>Ordered by mistake</option>
+              <option>Better price elsewhere</option>
+              <option>Product not as described</option>
+              <option>Damaged or defective</option>
+            </select>
+            <p id="reasonError" class="hidden text-red-500 text-[0.65rem] font-semibold mt-2">Please select a return reason</p>
+          </div>
+          <div class="space-y-4">
+            <label class="text-[0.65rem] font-black uppercase tracking-widest">Condition of item <span class="text-red-400">*</span></label>
+            <select id="itemCondition" class="return-select w-full bg-[#F9F9F7] border-none rounded-2xl p-6 text-[0.85rem] outline-none focus:ring-1 focus:ring-brand-dark/10 transition-all">
+              <option value="" disabled selected>Select condition</option>
+              <option>Unopened / Original Packaging</option>
+              <option>Opened / Box Damaged</option>
+              <option>Used / Missing tags</option>
+            </select>
+            <p id="conditionError" class="hidden text-red-500 text-[0.65rem] font-semibold mt-2">Please select item condition</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-12">
+          <div class="flex justify-between items-end">
+            <label class="text-[0.65rem] font-black uppercase tracking-widest">Additional Comments <span class="text-red-400">*</span></label>
+            <span class="text-[0.6rem] text-[#B2B2B2] font-bold uppercase">(min. 10 characters)</span>
+          </div>
+         <textarea id="returnComment" placeholder="Please provide any additional details about your return request..." class="w-full bg-[#F9F9F7] border-none rounded-2xl p-8 text-[0.85rem] outline-none min-h-[160px] focus:ring-1 focus:ring-brand-dark/10 transition-all"
+       maxlength="500"></textarea>
+       <div class="flex items-center justify-between mt-3">
+    <p id="commentError"
+       class="hidden text-red-500 text-[0.65rem] font-semibold">
+       Comment must be at least 20 characters
+    </p>
+
+    <p class="text-[0.65rem] text-[#9B8E83] font-bold ml-auto">
+       <span id="charCount">0</span>/500
+    </p>
+    </div>
+</div>
+        </div>
+
+        <div class="space-y-6">
+          <label class="text-[0.65rem] font-black uppercase tracking-widest">Upload Photos (Optional)</label>
+           <input type="file" id="returnImages" multiple accept="image/jpeg,image/png,image/webp"class="hidden">
+          <div   id="uploadZone" class="upload-zone">
+            <div class="w-16 h-16 rounded-full bg-[#F5F2EA] flex items-center justify-center mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9B8E83" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <p class="text-[0.9rem] font-bold mb-1">Upload photos</p>
+            <p class="text-[0.7rem] text-[#B2B2B2] uppercase tracking-widest">or drag and drop here</p>
+          </div>
+          <p class="text-center text-[0.6rem] text-[#B2B2B2] font-bold italic">Helpful for damaged or incorrect items.JPG, PNG, WEBP • Max 5 images • 5MB each</p>
+        </div>
+        <p id="imageError" class="hidden text-red-500 text-[0.65rem] font-semibold"></p>
+         <div id="previewContainer" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+      </div>
+
+      <!-- Step 3: Refund Destination -->
+      <div class="return-card">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="step-number">3</div>
+          <h3 class="text-[0.65rem] font-black uppercase tracking-[0.2em]">Refund Destination</h3>
+        </div>
+
+        <div class="refund-option active flex items-center justify-between">
+          <div class="flex items-center gap-6">
+            <div class="w-6 h-6 border-2 border-[#3D2E28] rounded-full flex items-center justify-center">
+              <div class="w-3 h-3 bg-[#3D2E28] rounded-full"></div>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-[#3D2E28] flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div>
+              <h4 class="text-[0.85rem] font-bold">Glowé Wallet — Instant Refund</h4>
+              <p class="text-[0.75rem] text-[#B2B2B2] leading-relaxed">Your refund will be credited to your Glowé Wallet immediately after pickup is completed.</p>
+            </div>
+          </div>
+          <span class="bg-[#F5F2EA] px-4 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest text-[#B2B2B2]">Instant</span>
+        </div>
+        <p class="text-center text-[0.65rem] text-[#B2B2B2] font-bold mt-6">All refunds are processed to your Glowé Wallet regardless of original payment method.</p>
+      </div>
+
+      <div class="flex items-center justify-between mt-12 px-4">
+        <a href="/orders/<%= order._id %>" class="text-[0.65rem] font-black uppercase tracking-[0.2em] border-b border-brand-dark/20 pb-1 hover:border-brand-dark transition-all">
+          Cancel Request
+        </a>
+        <button id="submitReturnBtn" onclick="submitReturnRequest()" class="submit-return-btn">
+         <span id="submitBtnText">Submit Full Return  </span>
+          <svg id="submitBtnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script src="/js/user/return.js"></script>
+
+</body>
+</html>

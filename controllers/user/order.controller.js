@@ -135,6 +135,7 @@ export const loadOrderDetails = async (req, res) => {
     }
 };
 
+
 export const placeOrder = async (req, res) => {
 
     try {
@@ -193,14 +194,12 @@ export const placeOrder = async (req, res) => {
                 throw new Error("Invalid cart item");
             }
 
-            // CHECK STOCK
             if (item.variant.stock < item.quantity) {
                 throw new Error(
                     `${item.variant.productId.name} is out of stock`
                 );
             }
 
-            // DECREMENT STOCK
             item.variant.stock -= item.quantity;
 
             await item.variant.save();
@@ -395,3 +394,79 @@ if (!item) {
     }
 
 };
+
+
+export const loadReturnRequest = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const itemId = req.query.itemId; 
+        const userId = req.session.userId;
+
+        const order = await Order.findOne({ _id: orderId, userId });
+        if (!order) return res.redirect("/orders");
+
+        res.render("user/returnRequest", { order, itemId });
+    } catch (err) {
+        console.log("LOAD RETURN REQUEST ERROR:", err);
+        res.redirect("/orders");
+    }
+};
+
+
+export const submitReturnRequest=async(req,res)=>{
+    try{
+      const userId=req.session.userId;
+
+      const {reason,condition,comment}=req.body;
+
+      if(!reason || !condition || !comment){
+        return  res.status(500).json({
+            success:false,
+            message:"All fields are required"
+      })
+      }
+
+       if (
+        comment.trim().length < 20
+    ) {
+
+        return res.status(400).json({
+            success: false,
+            message:
+              "Comment must be at least 20 characters"
+        });
+
+    }
+
+     const images = req.files.map(file =>
+        `/uploads/returns/${file.filename}`
+    );
+
+
+
+    console.log({
+        reason,
+        condition,
+        comment,
+        images
+    });
+   
+     return res.json({
+        success: true
+    });
+
+
+    }catch(err){
+ 
+        console.log(
+        "RETURN REQUEST ERROR:",
+        err
+    );
+
+    return res.status(500).json({
+        success: false,
+        message: "Server Error"
+    });
+
+    }
+}

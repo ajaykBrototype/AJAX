@@ -64,7 +64,7 @@ async function handleModalConfirm() {
                 throw new Error(response.data.message || "Failed to cancel");
             }
         } else {
-            // Bulk cancellation
+            
             ajaxToast("info", "Processing entire order cancellation...");
             for (const id of itemIds) {
                 await axios.patch(`/orders/${orderId}/items/${id}/cancel`, {
@@ -99,22 +99,3 @@ async function cancelAllItems(orderId, itemIds, btnElement) {
     openCancelModal({ type: 'order', orderId, itemIds });
 }
 
-async function returnItem(orderId, itemId) {
-    const result = await ajaxConfirm({
-        text: "Are you sure you want to return this item?"
-    });
-
-    if (result.isConfirmed) {
-        ajaxToast("success", "Return request initiated. Our team will contact you soon.");
-    }
-}
-
-async function returnAllItems(orderId) {
-    const result = await ajaxConfirm({
-        text: "Are you sure you want to return the entire order?"
-    });
-
-    if (result.isConfirmed) {
-        ajaxToast("success", "Order return request initiated. Our team will contact you soon.");
-    }
-}

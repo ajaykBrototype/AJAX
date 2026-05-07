@@ -201,7 +201,8 @@ body {
 
 
 
-<div style="padding-top:80px; min-height:100vh;">
+
+<div id="orderDetailsView" style="padding-top:80px; min-height:100vh;">
    <%- include('../partials/breadcrumbs', { 
           breadcrumbs: [
               { name: "OrderHistory", url: "/orders" },
@@ -367,11 +368,11 @@ body {
             </div>
           <% } else if (order.status === 'Delivered') { %>
             <div class="mb-10">
-              <button 
-                onclick="returnAllItems('<%= order._id %>')"
-                class="w-full py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
+              <a 
+                href="/orders/<%= order._id %>/return"
+                class="w-full inline-block text-center py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
                 Return Entire Order
-              </button>
+              </a>
             </div>
           <% } %>
 
@@ -392,11 +393,11 @@ body {
                     <div class="flex items-center gap-2">
                       <% if(item.status !== "Cancelled") { %>
                         <% if(order.status === 'Delivered') { %>
-                          <button
-                            onclick="returnItem('<%= order._id %>', '<%= item._id %>')"
+                          <a
+                            href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
                             class="px-4 py-2 bg-white border border-brand-dark/10 rounded-full text-[0.55rem] font-black text-brand-dark hover:bg-brand-warm uppercase tracking-widest transition-all">
                             Return Item
-                          </button>
+                          </a>
                         <% } else { %>
                           <button
                             id="btn-cancel-<%= item._id %>"
@@ -513,6 +514,7 @@ body {
     </div>
   </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
