@@ -418,13 +418,29 @@ body {
           </div>
 
           <div class="pt-10 border-t border-[#f2f2f2] space-y-6">
+
+                  <%
+            const activeItems = order.items.filter(
+            item => item.status !== "Cancelled"
+           );
+
+          const subtotal = activeItems.reduce(
+            (sum, item) =>
+            sum + (item.price * item.quantity), 0);
+
+             const shipping =
+          subtotal > 1000 || subtotal === 0 ? 0 : 100;
+
+          const finalTotal = subtotal + shipping;
+           %>
+
             <div class="flex justify-between items-center">
               <span class="label-grey">Order Subtotal</span>
-              <span class="text-sm font-bold">₹<%= order.totalAmount - (order.totalAmount > 1000 ? 0 : 100) %></span>
+              <span class="text-sm font-bold">₹<%= subtotal %></span>
             </div>
             <div class="flex justify-between items-center">
               <span class="label-grey">Shipping Fee</span>
-              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest">Complimentary</span>
+              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping %></span>
             </div>
             <div class="flex justify-between items-end pt-4">
               <div>
@@ -433,7 +449,7 @@ body {
               </div>
               <div class="flex items-baseline gap-1">
                 <span class="text-3xl font-serif">₹</span>
-                <span class="text-4xl font-serif tracking-tighter"><%= order.totalAmount %></span>
+                <span class="text-4xl font-serif tracking-tighter"><%= finalTotal %></span>
               </div>
             </div>
           </div>

@@ -329,7 +329,7 @@ if (!item) {
 
    return res.status(400).json({
       success: false,
-      message: "Already Cancelled"
+      message: "Cannot cancel this order"
    });
 
 }
@@ -347,7 +347,19 @@ if (!item) {
      item.cancellationNote = note;
      order.markModified('items');
 
-     await order.save();
+     const activeItems=order.items.filter(
+        item=>item.status!=="Cancelled"
+     )
+
+     let newTotal=activeItems.reduce((sum,item)=>
+      sum+(item.price*item.quantity),0
+    );
+
+    const shipping=newTotal>1000 || newTotal===0?0:100;
+
+    order.totalAmount = newTotal + shipping;
+
+     
 
      const allCancelled=order.items.every(
         item=>item.status==="Cancelled"
