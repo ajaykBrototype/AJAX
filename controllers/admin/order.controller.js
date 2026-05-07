@@ -56,7 +56,7 @@ export const loadAdminOrders = async (req, res) => {
 
     } catch (err) {
         console.log("ADMIN ORDER ERROR:", err);
-        res.redirect("/admin");
+        res.redirect("/admin/orders");
     }
 };
 
@@ -181,3 +181,4 @@ export const updateOrderStatus = async (req, res) => {
 
     }
 };
+

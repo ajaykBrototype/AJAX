@@ -27,6 +27,7 @@ import {
   loadEditVariantPage, updateVariant, deleteVariant, setDefaultVariant
 } from "../controllers/admin/variant.controller.js";
 import { loadAdminOrders, loadOrderDetails,updateOrderStatus } from "../controllers/admin/order.controller.js";
+import { loadReturnManagement, loadReturnDetails } from "../controllers/admin/return.controller.js";
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.get("/login", isLoggedOut, noCache, loadLogin);
 router.post("/login", isLoggedOut, loginAdmin);
 router.get("/logout",isAdminAuth, logoutAdmin);
 
+router.get("/", isAdminAuth, (req, res) => res.redirect("/admin/users"));
 
 router.get("/users", noCache, isAdminAuth, getAllUsers);
 router.patch("/toggleblockuser/:id", isAdminAuth, toggleBlockUser);
@@ -43,6 +45,9 @@ router.patch("/toggleblockuser/:id", isAdminAuth, toggleBlockUser);
 router.get("/orders", noCache, isAdminAuth, loadAdminOrders);
 router.get("/orders/:id", noCache, isAdminAuth, loadOrderDetails);
 router.patch("/orders/:orderId/status",isAdminAuth, updateOrderStatus);
+
+router.get("/returns", noCache, isAdminAuth, loadReturnManagement);
+router.get("/returns/:id", noCache, isAdminAuth, loadReturnDetails);
 
 router.get("/categories", isAdminAuth, loadCategoryPage);
 router.get("/categories/all", isAdminAuth, getCategories);

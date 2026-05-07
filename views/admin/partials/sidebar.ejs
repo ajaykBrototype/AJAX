@@ -1,4 +1,33 @@
 <!-- ── SIDEBAR ── -->
+<style>
+  .sidebar-item { 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 12px !important; 
+    padding: 12px 16px !important; 
+    border-radius: 0px !important; 
+    transition: all 0.2s ease !important; 
+    position: relative !important; 
+    color: #888888 !important; 
+    font-size: 14px !important; 
+    font-weight: 500 !important; 
+    cursor: pointer;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .sidebar-item:hover { color: #1C1C1C !important; }
+  .sidebar-item.active { background-color: #EBEAE4 !important; color: #1C1C1C !important; font-weight: 700 !important; }
+  .sidebar-item.active::after { 
+    content: ''; 
+    position: absolute; 
+    right: 0; 
+    top: 0; 
+    bottom: 0; 
+    width: 3px; 
+    background-color: #1C1C1C !important; 
+  }
+</style>
 <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200 transition-transform lg:translate-x-0 lg:static lg:inset-0 -translate-x-full">
   <div class="h-full flex flex-col p-6">
     <!-- Logo -->
@@ -14,10 +43,23 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         Dashboard
       </a>
-      <a href="/admin/orders" class="sidebar-item <%= typeof currentPath !== 'undefined' && currentPath === '/admin/orders' ? 'active' : '' %>">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        Orders
-      </a>
+      <div class="space-y-1">
+        <button onclick="toggleOrdersMenu()" class="sidebar-item w-full flex items-center justify-between <%= typeof currentPath !== 'undefined' && (currentPath === '/admin/orders' || currentPath === '/admin/returns') ? 'active' : '' %>">
+          <div class="flex items-center gap-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Orders
+          </div>
+          <svg id="ordersArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform <%= typeof currentPath !== 'undefined' && (currentPath === '/admin/orders' || currentPath === '/admin/returns') ? 'rotate-180' : '' %>"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div id="ordersMenu" class="<%= typeof currentPath !== 'undefined' && (currentPath === '/admin/orders' || currentPath === '/admin/returns') ? '' : 'hidden' %> pl-10 space-y-1 mt-1">
+          <a href="/admin/orders" class="sidebar-item py-2 text-xs <%= typeof currentPath !== 'undefined' && currentPath === '/admin/orders' ? 'active' : '' %>">
+            Order Management
+          </a>
+          <a href="/admin/returns" class="sidebar-item py-2 text-xs <%= typeof currentPath !== 'undefined' && currentPath === '/admin/returns' ? 'active' : '' %>">
+            Return Management
+          </a>
+        </div>
+      </div>
       <a href="/admin/products" class="sidebar-item <%= typeof currentPath !== 'undefined' && currentPath === '/admin/products' ? 'active' : '' %>">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
         Products
@@ -71,6 +113,13 @@
 </aside>
 
 <script>
+  function toggleOrdersMenu() {
+    const menu = document.getElementById('ordersMenu');
+    const arrow = document.getElementById('ordersArrow');
+    menu.classList.toggle('hidden');
+    arrow.classList.toggle('rotate-180');
+  }
+
   function confirmAdminLogout(e) {
     e.preventDefault();
     if (typeof ajaxConfirm === 'function') {
