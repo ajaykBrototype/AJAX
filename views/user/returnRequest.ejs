@@ -272,7 +272,7 @@ body {
         <div class="space-y-4 mb-12">
           <div class="flex justify-between items-end">
             <label class="text-[0.65rem] font-black uppercase tracking-widest">Additional Comments <span class="text-red-400">*</span></label>
-            <span class="text-[0.6rem] text-[#B2B2B2] font-bold uppercase">(min. 10 characters)</span>
+            <span class="text-[0.6rem] text-[#B2B2B2] font-bold uppercase">(min. 20 characters)</span>
           </div>
          <textarea id="returnComment" placeholder="Please provide any additional details about your return request..." class="w-full bg-[#F9F9F7] border-none rounded-2xl p-8 text-[0.85rem] outline-none min-h-[160px] focus:ring-1 focus:ring-brand-dark/10 transition-all"
        maxlength="500"></textarea>
@@ -348,6 +348,13 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/utils/swal-helper.js"></script>
+<script>
+
+const orderId ="<%= order._id %>";
+
+const itemId ="<%= itemId || '' %>";
+
+</script>
 <script src="/js/user/return.js"></script>
 
 </body>

@@ -4,6 +4,7 @@ import Address from "../../models/user/addressModel.js";
 import mongoose from "mongoose";
 import User from "../../models/user/userModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import Return from "../../models/user/returnModel.js";
 import { success } from "zod";
 
 export const loadOrderPage = async (req, res) => {
@@ -413,60 +414,212 @@ export const loadReturnRequest = async (req, res) => {
 };
 
 
-export const submitReturnRequest=async(req,res)=>{
-    try{
-      const userId=req.session.userId;
+export const submitReturnRequest = async (req, res) => {
 
-      const {reason,condition,comment}=req.body;
+    try {
 
-      if(!reason || !condition || !comment){
-        return  res.status(500).json({
-            success:false,
-            message:"All fields are required"
-      })
-      }
+        const userId = req.session.userId;
 
-       if (
-        comment.trim().length < 20
-    ) {
+        const {
+            orderId,
+            itemId,
+            reason,
+            condition,
+            comment
+        } = req.body;
 
-        return res.status(400).json({
-            success: false,
+
+        if (
+            !orderId ||
+            !reason ||
+            !condition ||
+            !comment
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
+
+        }
+
+
+
+        if (
+            comment.trim().length < 20
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Comment must be at least 20 characters"
+            });
+
+        }
+
+        const order = await Order.findOne({
+            _id: orderId,
+            userId
+        });
+
+        if (!order) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+
+        }
+
+        if (order.status !== "Delivered") {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Only delivered orders can be returned"
+            });
+
+        }
+
+
+        let itemsToReturn = [];
+
+
+        if (itemId) {
+
+            const item = order.items.find(
+                item =>
+                    item._id.toString() === itemId
+            );
+
+            if (!item) {
+
+                return res.status(404).json({
+                    success: false,
+                    message: "Item not found"
+                });
+
+            }
+
+            itemsToReturn.push(item);
+
+        }
+
+
+        else {
+
+            itemsToReturn = order.items.filter(
+                item =>
+                    item.status !== "Cancelled"
+            );
+
+        }
+
+        const images = req.files
+            ? req.files.map(
+                file =>
+                    `/uploads/returns/${file.filename}`
+              )
+            : [];
+
+
+        let createdCount = 0;
+
+
+
+        for (const item of itemsToReturn) {
+
+            if (
+                item.status === "Cancelled"
+            ) {
+                continue;
+            }
+
+
+
+            const existingReturn =
+            await Return.findOne({
+                itemId: item._id
+            });
+
+            if (existingReturn) {
+                continue;
+            }
+
+
+
+            await Return.create({
+
+                orderId,
+
+                itemId: item._id,
+
+                userId,
+
+                reason,
+
+                condition,
+
+                comment,
+
+                images,
+
+                refundAmount:
+                    item.price * item.quantity
+
+            });
+
+
+
+            /* UPDATE ITEM STATUS */
+
+            item.status =
+                "Return Requested";
+
+
+
+            createdCount++;
+
+        }
+
+
+        if (createdCount === 0) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Return already requested"
+            });
+
+        }
+
+
+        order.markModified("items");
+
+        await order.save();
+
+
+
+        return res.status(200).json({
+            success: true,
             message:
-              "Comment must be at least 20 characters"
+                "Return request submitted successfully"
+        });
+
+
+
+    } catch (err) {
+
+        console.log(
+            "RETURN REQUEST ERROR:",
+            err
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Server Error"
         });
 
     }
 
-     const images = req.files.map(file =>
-        `/uploads/returns/${file.filename}`
-    );
-
-
-
-    console.log({
-        reason,
-        condition,
-        comment,
-        images
-    });
-   
-     return res.json({
-        success: true
-    });
-
-
-    }catch(err){
- 
-        console.log(
-        "RETURN REQUEST ERROR:",
-        err
-    );
-
-    return res.status(500).json({
-        success: false,
-        message: "Server Error"
-    });
-
-    }
-}
+};
