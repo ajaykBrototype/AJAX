@@ -64,8 +64,8 @@
 
         /* Success Icon Animation */
         .checkmark-circle {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             background: var(--brand-success);
             border-radius: 50%;
             display: flex;
@@ -136,6 +136,13 @@
             border-color: var(--brand-success);
             background: var(--brand-success);
             box-shadow: 0 0 0 3px rgba(92, 140, 106, 0.08);
+            animation: blink 2s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0% { box-shadow: 0 0 0 0 rgba(92, 140, 106, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(92, 140, 106, 0); transform: scale(1.1); }
+            100% { box-shadow: 0 0 0 0 rgba(92, 140, 106, 0.4); transform: scale(1); }
         }
 
         .editorial-title {
@@ -147,8 +154,8 @@
             position: relative;
             overflow: hidden;
             border-radius: 1rem;
-            width: 80px;
-            height: 100px;
+            width: 60px;
+            height: 75px;
         }
 
         .btn-premium {
@@ -176,25 +183,25 @@
     <canvas id="confetti" class="confetti-canvas"></canvas>
     <%- include('../partials/navbar') %>
 
-    <main class="min-h-screen pt-28 pb-20 px-6">
-        <div class="max-w-[640px] mx-auto">
+    <main class="min-h-screen pt-12 pb-12 px-6">
+        <div class="max-w-[580px] mx-auto">
             
             <!-- Success Animation & Header -->
-            <div class="text-center mb-12">
-                <div class="checkmark-circle mb-6">
+            <div class="text-center mb-8">
+                <div class="checkmark-circle mb-4">
                     <svg class="checkmark-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                 </div>
-                <h1 class="editorial-title text-4xl md:text-5xl font-medium mb-3">A Journey Begins.</h1>
-                <p class="text-[0.6rem] tracking-[0.3em] font-bold text-stone-400 uppercase">Your order has been successfully placed</p>
+                <h1 class="editorial-title text-3xl md:text-4xl font-medium mb-2">A Journey Begins.</h1>
+                <p class="text-[0.55rem] tracking-[0.25em] font-bold text-stone-400 uppercase">Your order has been successfully placed</p>
             </div>
 
             <!-- Main Order Card -->
-            <div class="success-card p-8 md:p-10 mb-8">
+            <div class="success-card p-6 md:p-8 mb-6">
                 
                 <!-- Order ID & Delivery Date -->
-                <div class="grid grid-cols-2 gap-4 pb-6 border-b border-brand-mist/20 mb-8">
+                <div class="grid grid-cols-2 gap-4 pb-4 border-b border-brand-mist/20 mb-6">
                     <div>
                         <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-1">Order Number</p>
                         <h3 class="text-sm font-bold tracking-tight text-brand-dark uppercase">#ORD-<%= order._id.toString().slice(-8).toUpperCase() %></h3>
@@ -212,16 +219,16 @@
                 </div>
 
                 <!-- Progress Tracker -->
-                <div class="mb-10 px-2">
+                <div class="mb-8 px-2">
                     <div class="flex items-center justify-between mb-2">
                         <div class="step-node flex flex-col items-center gap-3">
                             <div class="step-circle active"></div>
                             <span class="text-[0.45rem] font-black tracking-[0.1em] text-brand-success uppercase">Confirmed</span>
                         </div>
-                        <div class="step-line step-line-active"></div>
-                        <div class="step-node flex flex-col items-center gap-3">
-                            <div class="step-circle active" style="animation-delay: 1.2s;"></div>
-                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-brand-success uppercase">Processing</span>
+                        <div class="step-line"></div>
+                        <div class="step-node flex flex-col items-center gap-3 opacity-25">
+                            <div class="step-circle"></div>
+                            <span class="text-[0.45rem] font-black tracking-[0.1em] text-stone-400 uppercase">Processing</span>
                         </div>
                         <div class="step-line"></div>
                         <div class="step-node flex flex-col items-center gap-3 opacity-25">
@@ -237,7 +244,7 @@
                 </div>
 
                 <!-- Product Preview -->
-                <div class="bg-brand-warm/[0.4] rounded-2xl p-5 border border-brand-mist/10 mb-8">
+                <div class="bg-brand-warm/[0.4] rounded-2xl p-4 border border-brand-mist/10 mb-6">
                     <% order.items.forEach(item => { %>
               <div class="flex items-center gap-6 mb-4">
                 <div class="product-img-container bg-white flex-shrink-0">
@@ -262,7 +269,7 @@
                 </div>
 
                 <!-- Totals -->
-                <div class="space-y-3 pt-6 border-t border-brand-mist/20">
+                <div class="space-y-2 pt-4 border-t border-brand-mist/20">
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Subtotal</span>
                         <span class="font-bold">₹<%= order.totalAmount.toFixed(2) %></span>
@@ -271,12 +278,12 @@
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Shipping</span>
                         <span class="font-bold text-brand-success"><%= order.totalAmount > 1000 ? "FREE" : "₹100" %></span>
                     </div>
-                    <div class="flex justify-between items-end pt-4">
+                    <div class="flex justify-between items-end pt-2">
                         <div>
-                            <p class="text-[0.55rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-0.5">Total Paid</p>
-                            <p class="text-[0.45rem] font-bold text-stone-200 uppercase tracking-widest"><%= order.paymentMethod %></p>
+                            <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-0.5">Total Paid</p>
+                            <p class="text-[0.4rem] font-bold text-stone-200 uppercase tracking-widest"><%= order.paymentMethod %></p>
                         </div>
-                        <p class="text-4xl font-serif tracking-tight">₹<%= order.totalAmount.toFixed(2) %></p>
+                        <p class="text-3xl font-serif tracking-tight">₹<%= order.totalAmount.toFixed(2) %></p>
                     </div>
                 </div>
             </div>

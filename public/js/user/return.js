@@ -210,31 +210,17 @@ async function submitReturnRequest() {
 
 
     setTimeout(() => {
-
-        Swal.fire({
-            icon: "success",
-            title: "Return Request Submitted",
-            text: "We’ll notify you once approved.",
-            confirmButtonColor: "#1C1C1C"
-        }).then(() => {
-
+        ajaxToast("success", "Return request submitted successfully");
+        setTimeout(() => {
             window.location.href = "/orders";
-
-        });
-
-    }, 1200);
+        }, 1500);
+    }, 800);
 
 } catch (err) {
 
     console.log(err);
 
-    Swal.fire({
-        icon: "error",
-        title: "Something went wrong",
-        text:
-            err.response?.data?.message ||
-            "Please try again."
-    });
+    ajaxToast("error", err.response?.data?.message || "Please try again.");
 
     submitBtn.disabled = false;
 
