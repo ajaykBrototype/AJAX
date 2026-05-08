@@ -358,15 +358,22 @@ body {
             <span class="text-[0.65rem] font-bold px-3 py-1 bg-[#F5F2EA] rounded-full text-[#B2B2B2] uppercase tracking-widest"><%= order.items.length %> Items</span>
           </div>
 
+          <% 
+            const returnableItems = order.items.filter(i => 
+              i.status !== 'Cancelled' && 
+              i.status !== 'Return Requested' && 
+              i.status !== 'Returned'
+            );
+          %>
           <% if (order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
             <div class="mb-10">
               <button 
-                onclick="cancelAllItems('<%= order._id %>', <%= JSON.stringify(order.items.filter(i => i.status !== 'Cancelled').map(i => i._id)) %>, this)"
+                onclick='cancelAllItems("<%= order._id %>", <%= JSON.stringify(order.items.filter(i => i.status !== "Cancelled").map(i => i._id)) %>, this)'
                 class="w-full py-4 bg-white border border-red-100 text-red-400 hover:bg-red-50 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
                 Cancel Entire Order
               </button>
             </div>
-          <% } else if (order.status === 'Delivered') { %>
+          <% } else if (order.status === 'Delivered' && returnableItems.length > 0) { %>
             <div class="mb-10">
               <a 
                 href="/orders/<%= order._id %>/return"
@@ -391,7 +398,7 @@ body {
                   <div class="flex justify-between items-center">
                     <p class="text-[0.65rem] font-black text-[#B2B2B2] uppercase tracking-widest">QTY: <%= item.quantity %></p>
                     <div class="flex items-center gap-2">
-                      <% if(item.status !== "Cancelled") { %>
+                      <% if(item.status !== "Cancelled" && item.status !== "Return Requested" && item.status !== "Returned") { %>
                         <% if(order.status === 'Delivered') { %>
                           <a
                             href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
@@ -408,7 +415,7 @@ body {
                         <% } %>
                       <% } else { %>
                         <button disabled class="px-4 py-2 bg-red-50 rounded-full text-[0.55rem] font-black text-red-500 uppercase tracking-widest opacity-60 cursor-not-allowed">
-                          Cancelled
+                          <%= item.status === 'Cancelled' ? 'Cancelled' : 'Returned' %>
                         </button>
                       <% } %>
                     </div>
@@ -422,7 +429,7 @@ body {
 
                   <%
             const activeItems = order.items.filter(
-            item => item.status !== "Cancelled"
+            item => item.status !== "Cancelled" && item.status !== "Return Requested" && item.status !== "Returned"
            );
 
           const subtotal = activeItems.reduce(

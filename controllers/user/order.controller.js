@@ -376,9 +376,9 @@ if (!item) {
             reason,
             note
         });
-
-        await order.save();
      }
+     
+     await order.save();
          res.json({
          success: true
 
