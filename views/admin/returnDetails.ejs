@@ -65,10 +65,18 @@
   </style>
 </head>
 <%
-  const st = returnItem.status;
-  const addr = returnItem.orderId?.address;
-  const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-  const totalRefund = allReturnsInOrder.reduce((acc, r) => acc + (r.refundAmount || 0), 0);
+  var st = returnItem.status;
+  var addr = returnItem.orderId?.address;
+  var fmt = d => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  
+  // Totals for Invoice
+  var order = returnItem.orderId;
+  var returns = allReturnsInOrder;
+  var activeItems = order?.items?.filter(i => i.status !== 'Cancelled') || [];
+  var subtotal = activeItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  var shipping = subtotal > 1000 || subtotal === 0 ? 0 : 100;
+  var finalTotal = subtotal + shipping;
+  var totalRefund = allReturnsInOrder.reduce((acc, r) => acc + (r.refundAmount || 0), 0);
 %>
 <body class="flex min-h-screen">
 
@@ -92,9 +100,11 @@
             <p class="text-white/60 text-sm">Manage and review return request</p>
           </div>
           
-          <div class="status-pill">
-            <div class="status-dot"></div>
-            <%= st === 'Requested' ? 'Pending Review' : st %>
+          <div class="flex flex-col items-end gap-3">
+            <div class="status-pill">
+              <div class="status-dot"></div>
+              <%= st === 'Requested' ? 'Pending Review' : st %>
+            </div>
           </div>
         </div>
       </div>
@@ -396,7 +406,8 @@
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/js/admin/returnDetails.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/admin/returnDetails.js"></script>
 </body>
 </html>
 
