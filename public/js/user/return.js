@@ -1,4 +1,5 @@
 
+
 const reasonSelect = document.getElementById("returnReason");
 const conditionSelect = document.getElementById("itemCondition");
 const commentBox = document.getElementById("returnComment");

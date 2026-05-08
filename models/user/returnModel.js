@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const returnSchema = new mongoose.Schema({
@@ -20,11 +21,6 @@ const returnSchema = new mongoose.Schema({
     },
 
 
-
-    /* =========================
-       RETURN DETAILS
-    ========================= */
-
     reason: {
         type: String,
         required: true,
@@ -45,22 +41,11 @@ const returnSchema = new mongoose.Schema({
     },
 
 
-
-    /* =========================
-       IMAGES
-    ========================= */
-
     images: [
         {
             type: String
         }
     ],
-
-
-
-    /* =========================
-       RETURN STATUS
-    ========================= */
 
     status: {
         type: String,
@@ -77,10 +62,6 @@ const returnSchema = new mongoose.Schema({
 
 
 
-    /* =========================
-       ADMIN SECTION
-    ========================= */
-
     adminNote: {
         type: String,
         default: ""
@@ -92,10 +73,6 @@ const returnSchema = new mongoose.Schema({
     },
 
 
-
-    /* =========================
-       REFUND
-    ========================= */
 
     refundAmount: {
         type: Number,
@@ -113,10 +90,6 @@ const returnSchema = new mongoose.Schema({
 
 
 
-    /* =========================
-       TIMESTAMPS
-    ========================= */
-
     requestedAt: {
         type: Date,
         default: Date.now
@@ -125,6 +98,21 @@ const returnSchema = new mongoose.Schema({
     approvedAt: Date,
 
     rejectedAt: Date,
+
+    pickupDate: Date,
+
+    pickupTime: String,
+
+    pickupStatus: {
+      type: String,
+      enum: [
+        "Pending",
+        "Scheduled",
+        "Picked Up"
+    ],
+    default: "Pending"
+},
+
 
     pickedUpAt: Date,
 
@@ -143,3 +131,4 @@ const Return = mongoose.model(
 );
 
 export default Return;
+
