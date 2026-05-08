@@ -284,7 +284,9 @@ body {
                 'Cancelled': 'This order has been cancelled.',
                 'Requested': 'Your return request has been submitted and is pending approval.',
                 'Approved': 'Your return request has been approved. We are preparing for pickup.',
-                'Rejected': 'Your return request has been rejected. Please contact support.',
+                'Rejected': (typeof returns !== 'undefined' && returns && returns.find(r => r.status === 'Rejected')?.rejectionReason) 
+                           ? `Return Rejected: ${returns.find(r => r.status === 'Rejected').rejectionReason}`
+                           : 'Your return request has been rejected. Please contact support.',
                 'Pickup Scheduled': 'A pickup has been scheduled for your returned item.',
                 'Picked Up': 'The item has been successfully picked up.',
                 'Refund Processed': 'The refund has been processed and credited to your wallet.'
