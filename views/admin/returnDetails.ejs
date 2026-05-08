@@ -62,6 +62,18 @@
     .animate-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
     .product-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; background: #f8fafc; }
+    
+    /* Rejection Modal */
+    .modal-backdrop { 
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-card { 
+      background: #fff; width: 100%; max-width: 450px; border-radius: 24px; overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px); transition: all 0.3s ease;
+    }
+    .modal-backdrop.open .modal-card { transform: translateY(0); }
   </style>
 </head>
 <%
@@ -393,6 +405,26 @@
 
     </div>
   </main>
+
+  <!-- Rejection Modal -->
+  <div id="rejectionModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="p-8">
+        <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <h3 class="text-xl font-serif font-bold text-slate-900 mb-2">Reject Return</h3>
+        <p class="text-sm text-slate-500 mb-6 font-medium">Please provide a clear and professional reason for rejecting this return request. This will be shared with the customer.</p>
+        
+        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Rejection Reason</label>
+        <textarea id="rejectionReasonInput" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-rose-100 outline-none transition-all placeholder:text-slate-300" placeholder="e.g. Product shows signs of wear and is not in original packaging..."></textarea>
+      </div>
+      <div class="p-6 bg-slate-50 flex gap-3">
+        <button onclick="closeRejectionModal()" class="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+        <button id="confirmRejectBtn" class="flex-[2] py-4 bg-rose-500 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20">Confirm Rejection</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Sidebar logic

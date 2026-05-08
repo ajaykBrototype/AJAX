@@ -52,51 +52,53 @@ try{
 
 
 
-/* =========================
-   REJECT
-========================= */
-
 if(rejectBtn){
+  const modal = document.getElementById('rejectionModal');
+  const confirmBtn = document.getElementById('confirmRejectBtn');
+  const reasonInput = document.getElementById('rejectionReasonInput');
 
-rejectBtn.addEventListener(
-"click",
-async ()=>{
+  window.closeRejectionModal = () => {
+    modal.classList.remove('open');
+    reasonInput.value = '';
+  };
 
-try{
+  rejectBtn.addEventListener("click", () => {
+    modal.classList.add('open');
+  });
 
-   const reason =
-   prompt(
-      "Enter rejection reason"
-   );
+  confirmBtn.addEventListener("click", async () => {
+    try {
+      const reason = reasonInput.value.trim();
 
-   if(!reason) return;
+      if (!reason) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Reason Required',
+          text: 'Please provide a reason for the rejection.',
+          confirmButtonColor: '#1C1C1C'
+        });
+        return;
+      }
 
-   await axios.patch(
-      `/admin/returns/${
-         rejectBtn.dataset.id
-      }/reject`,
-      { reason }
-   );
+      await axios.patch(
+        `/admin/returns/${rejectBtn.dataset.id}/reject`,
+        { reason }
+      );
 
-   window.location.reload();
-
-}catch(err){
-
-   console.log(err);
-
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Action Failed',
+        text: 'Could not process the rejection. Please try again.',
+        confirmButtonColor: '#1C1C1C'
+      });
+    }
+  });
 }
-
-});
-}
-
-
-
-/* =========================
-   SCHEDULE PICKUP
-========================= */
 
 if(schedulePickupBtn){
-
 schedulePickupBtn
 .addEventListener(
 "click",
@@ -104,26 +106,16 @@ async ()=>{
 
 try{
 
-   const pickupDate =
-   document.getElementById(
+   const pickupDate =document.getElementById(
       "pickupDate"
    ).value;
 
-   const pickupTime =
-   document.getElementById(
+   const pickupTime =document.getElementById(
       "pickupTime"
    ).value;
 
     if (!pickupDate || !pickupTime) {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'warning',
-        title: 'Date and time are mandatory',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true
-      });
+     ajaxToast("error","Date and time mandatory")
       return;
     }
 
@@ -149,16 +141,9 @@ try{
 }
 
 
-
-/* =========================
-   MARK PICKED UP
-========================= */
-
 if(pickedUpBtn){
 
-pickedUpBtn.addEventListener(
-"click",
-async ()=>{
+pickedUpBtn.addEventListener("click",async ()=>{
 
 try{
 
