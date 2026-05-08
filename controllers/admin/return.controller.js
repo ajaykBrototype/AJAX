@@ -65,37 +65,59 @@ export const loadReturnDetails = async (req, res) => {
 };
 
 
- export const approveReturn=async(req,res)=>{
-   try{
-     const returnId=req.params.id;
+export const approveReturn =
+async (req, res) => {
 
-     const returnRequest=await Return.findById(returnId);
+try {
 
-     if(!returnRequest){
-        res.status(404).json({
+    const returnId =
+        req.params.id;
+
+
+
+    const currentReturn =
+    await Return.findById(returnId);
+
+    if(!currentReturn){
+
+        return res.status(404).json({
             success:false,
             message:"No return request"
-     })
-     }
+        });
 
-     returnRequest.status="Approved";
+    }
 
-     returnRequest.approvedAt=new Date();
-     await returnRequest.save();
 
-     return res.json({
+
+    await Return.updateMany(
+        {
+            orderId:
+            currentReturn.orderId
+        },
+        {
+            $set:{
+                status:"Approved",
+                approvedAt:new Date()
+            }
+        }
+    );
+
+
+
+    return res.json({
         success:true
     });
 
-     
-       }catch(err){
-       console.log(err);
+} catch(err){
+
+    console.log(err);
 
     res.status(500).json({
         success:false
     });
-   }
+
 }
+};
 
 
 export const rejectReturn =
@@ -111,10 +133,10 @@ try {
 
 
 
-    const returnRequest =
+    const currentReturn =
     await Return.findById(returnId);
 
-    if(!returnRequest){
+    if(!currentReturn){
 
         return res.status(404).json({
             success:false
@@ -124,18 +146,19 @@ try {
 
 
 
-    returnRequest.status =
-        "Rejected";
-
-    returnRequest.rejectionReason =
-        reason;
-
-    returnRequest.rejectedAt =
-        new Date();
-
-
-
-    await returnRequest.save();
+    await Return.updateMany(
+        {
+            orderId:
+            currentReturn.orderId
+        },
+        {
+            $set:{
+                status:"Rejected",
+                rejectionReason:reason,
+                rejectedAt:new Date()
+            }
+        }
+    );
 
 
 
@@ -169,10 +192,22 @@ try {
 
 
 
-    const returnRequest =
+    if(!pickupDate || !pickupTime){
+
+        return res.status(400).json({
+            success:false,
+            message:
+            "Pickup date and time required"
+        });
+
+    }
+
+
+
+    const currentReturn =
     await Return.findById(returnId);
 
-    if(!returnRequest){
+    if(!currentReturn){
 
         return res.status(404).json({
             success:false
@@ -182,13 +217,27 @@ try {
 
 
 
-    returnRequest.pickupDate =pickupDate;
+    await Return.updateMany(
+        {
+            orderId:
+            currentReturn.orderId
+        },
+        {
+            $set:{
+                pickupDate:
+                    new Date(pickupDate),
 
-    returnRequest.pickupTime =pickupTime;
+                pickupTime,
 
-    returnRequest.pickupStatus ="Scheduled";
+                pickupStatus:
+                    "Scheduled",
 
-    await returnRequest.save();
+                status:
+                    "Pickup Scheduled"
+            }
+        }
+    );
+
 
 
     return res.json({
@@ -206,15 +255,20 @@ try {
 }
 };
 
-export const markPickedUp =async (req, res) => {
+export const markPickedUp =
+async (req, res) => {
 
 try {
 
-    const returnId =req.params.id;
+    const returnId =
+        req.params.id;
 
-    const returnRequest =await Return.findById(returnId);
 
-    if(!returnRequest){
+
+    const currentReturn =
+    await Return.findById(returnId);
+
+    if(!currentReturn){
 
         return res.status(404).json({
             success:false
@@ -224,11 +278,26 @@ try {
 
 
 
-    returnRequest.pickupStatus = "Picked Up";
+    await Return.updateMany(
+        {
+            orderId:
+            currentReturn.orderId
+        },
+        {
+            $set:{
+                pickupStatus:
+                    "Picked Up",
 
-    returnRequest.pickedUpAt = new Date();
+                status:
+                    "Picked Up",
 
-    await returnRequest.save();
+                pickedUpAt:
+                    new Date()
+            }
+        }
+    );
+
+
 
     return res.json({
         success:true

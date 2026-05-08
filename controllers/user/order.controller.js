@@ -123,9 +123,12 @@ export const loadOrderDetails = async (req, res) => {
             return res.redirect("/orders");
         }
 
+        const returns = await Return.find({ orderId: order._id });
+        
         res.render("user/orderDetails", {
             user,
-            order
+            order,
+            returns
         });
 
     } catch (err) {

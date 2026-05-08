@@ -222,8 +222,7 @@ body {
           
           <div class="timeline-container space-y-10">
             <div class="timeline-line"></div>
-            
-            <% 
+                        <% 
               const baseStatuses = ['Placed', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
               let statuses = [...baseStatuses];
               
@@ -234,7 +233,13 @@ body {
                 'Shipped': 'Shipped',
                 'Out for Delivery': 'Out for Delivery',
                 'Delivered': 'Delivered',
-                'Cancelled': 'Order Cancelled'
+                'Cancelled': 'Order Cancelled',
+                'Requested': 'Return Requested',
+                'Approved': 'Return Approved',
+                'Rejected': 'Return Rejected',
+                'Pickup Scheduled': 'Pickup Scheduled',
+                'Picked Up': 'Item Picked Up',
+                'Refund Processed': 'Refund Processed'
               };
               
               const statusDescriptions = {
@@ -244,8 +249,27 @@ body {
                 'Shipped': 'Your package has been dispatched from our central facility.',
                 'Out for Delivery': 'Your package is on its way to your final destination.',
                 'Delivered': 'Your order has been arrived at your doorstep safely.',
-                'Cancelled': 'This order has been cancelled.'
+                'Cancelled': 'This order has been cancelled.',
+                'Requested': 'Your return request has been submitted and is pending approval.',
+                'Approved': 'Your return request has been approved. We are preparing for pickup.',
+                'Rejected': 'Your return request has been rejected. Please contact support.',
+                'Pickup Scheduled': 'A pickup has been scheduled for your returned item.',
+                'Picked Up': 'The item has been successfully picked up.',
+                'Refund Processed': 'The refund has been processed and credited to your wallet.'
               };
+
+              // Find most advanced return status if any
+              let returnStatus = null;
+              if (typeof returns !== 'undefined' && returns && returns.length > 0) {
+                  const priority = { 'Requested': 1, 'Approved': 2, 'Pickup Scheduled': 3, 'Picked Up': 4, 'Refund Processed': 5, 'Rejected': 1.5 };
+                  let maxP = 0;
+                  returns.forEach(r => {
+                      if (priority[r.status] > maxP) {
+                          maxP = priority[r.status];
+                          returnStatus = r.status;
+                      }
+                  });
+              }
 
               // If order is cancelled, adjust the timeline
               if (order.status === 'Cancelled') {
@@ -253,10 +277,36 @@ body {
                 const lastIndex = baseStatuses.indexOf(lastValidStatus);
                 statuses = baseStatuses.slice(0, lastIndex + 1);
                 statuses.push('Cancelled');
+              } else if (returnStatus) {
+                const returnJourney = ['Requested', 'Approved', 'Pickup Scheduled', 'Picked Up', 'Refund Processed'];
+                if (returnStatus === 'Rejected') {
+                    statuses.push('Rejected');
+                } else {
+                    const limit = returnJourney.indexOf(returnStatus) + 1;
+                    statuses.push(...returnJourney.slice(0, limit));
+                }
               }
               
-              const currentIndex = statuses.indexOf(order.status || 'Placed');
+              const displayStatus = returnStatus || order.status || 'Placed';
+              const currentIndex = statuses.indexOf(displayStatus);
+
+              const getStatusDate = (status, order, returns) => {
+                const historyItem = order.statusHistory.find(h => h.status === status);
+                if (historyItem) return historyItem.updatedAt;
+                
+                if (typeof returns !== 'undefined' && returns && returns.length > 0) {
+                    const r = returns.find(ret => ret.status === status) || returns[0];
+                    if (status === 'Requested') return r.requestedAt || r.createdAt;
+                    if (status === 'Approved') return r.approvedAt;
+                    if (status === 'Rejected') return r.rejectedAt;
+                    if (status === 'Pickup Scheduled') return r.updatedAt;
+                    if (status === 'Picked Up') return r.pickedUpAt;
+                    if (status === 'Refund Processed') return r.refundedAt || r.updatedAt;
+                }
+                return null;
+              };
             %>
+
 
             <% statuses.forEach((status, index) => { %>
               <div class="timeline-step relative flex items-start gap-8 <%= index > currentIndex ? 'future' : '' %>">
@@ -268,7 +318,7 @@ body {
                   </div>
                 <% } else if (index === currentIndex) { %>
                   <!-- Current Step -->
-                  <div class="timeline-node current <%= status === 'Cancelled' ? 'cancelled' : '' %>">
+                  <div class="timeline-node current <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
                     <div class="dot"></div>
                   </div>
                 <% } else { %>
@@ -276,36 +326,34 @@ body {
                   <div class="timeline-node future"></div>
                 <% } %>
 
-                <div class="flex-grow pt-1 <%= status === 'Cancelled' ? 'cancelled' : '' %>">
+                <div class="flex-grow pt-1 <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
                   <div class="flex justify-between items-start mb-2">
                     <h3 class="editorial-title text-2xl font-normal leading-none"><%= statusTitles[status] %></h3>
                     <% if (index <= currentIndex) { %>
                       <%
-            const historyItem = order.statusHistory.find(
-            item => item.status === status
-            );
+            const historyDate = getStatusDate(status, order, returns);
              %>
 
-      <% if(historyItem) { %>
-
-       <span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
-
-       <%= new Date(historyItem.updatedAt).toLocaleDateString('en-US', {
-         month: 'short',
-         day: '2-digit',
-         year: 'numeric'
-             }) %>
-
-   —
-      
-        <%= new Date(historyItem.updatedAt).toLocaleTimeString([], {
-         hour: '2-digit',
-         minute: '2-digit'
-         }) %>
-
-        </span>
-
-          <% } %>
+      <% if(historyDate) { %>
+ 
+        <span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
+ 
+        <%= new Date(historyDate).toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric'
+              }) %>
+ 
+    —
+       
+         <%= new Date(historyDate).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+          }) %>
+ 
+         </span>
+ 
+           <% } %>
                     <% } %>
                   </div>
                   <% if (index <= currentIndex) { %>
@@ -429,7 +477,7 @@ body {
 
                   <%
             const activeItems = order.items.filter(
-            item => item.status !== "Cancelled" && item.status !== "Return Requested" && item.status !== "Returned"
+            item => item.status !== "Cancelled"
            );
 
           const subtotal = activeItems.reduce(
