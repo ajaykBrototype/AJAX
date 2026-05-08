@@ -216,6 +216,8 @@
                 <p class="text-sm font-bold text-slate-800"><%= returnItem.condition %></p>
               </div>
             </div>
+
+
             <% if(returnItem.comment) { %>
             <div class="mt-4">
               <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-3">Customer Description</p>
@@ -230,8 +232,11 @@
 
       </div>
 
-      <!-- Right Column: Admin Actions -->
+      <!-- Right Column: Admin Actions & Gallery -->
       <div class="lg:col-span-4 animate-up" style="animation-delay: 0.5s">
+        
+        <!-- Inspection Gallery -->
+        
         <div class="card overflow-hidden border-none shadow-xl">
           <div class="bg-[#2a4034] p-6 flex items-center gap-4">
             <div class="icon-box bg-white/10 text-white">
@@ -399,6 +404,40 @@
 </div>
 
 <% } %>
+          </div>
+        </div>
+        <div class="card mb-6 overflow-hidden mt-6">
+          <div class="card-header bg-indigo-50/30">
+            <div class="icon-box bg-indigo-100 text-indigo-600">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <span class="lbl-title">Inspection Gallery</span>
+          </div>
+          <div class="p-6">
+            <% if(returnItem.images && returnItem.images.length > 0) { %>
+              <div class="flex items-center justify-between mb-4">
+                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer Uploads</p>
+                 <% if(returnItem.images.length > 1) { %>
+                   <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase rounded tracking-tighter">Multi-Shot</span>
+                 <% } %>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <% returnItem.images.forEach(img => { 
+                    let returnImgPath = img && !img.startsWith('/') && !img.startsWith('http') ? '/' + img : img;
+                    // Fix path issue: handle both /uploads/ and /uploads/returns/
+                    returnImgPath = returnImgPath.replace('/uploads/returns/', '/uploads/');
+                %>
+                  <div class="aspect-square rounded-xl overflow-hidden border border-slate-100 group cursor-zoom-in shadow-sm">
+                    <img src="<%= returnImgPath %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="py-12 flex flex-col items-center justify-center text-center opacity-40">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                <p class="text-[10px] font-black uppercase tracking-widest">No Image Provided</p>
+              </div>
+            <% } %>
           </div>
         </div>
       </div>

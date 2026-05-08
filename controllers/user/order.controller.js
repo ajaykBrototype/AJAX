@@ -521,7 +521,7 @@ export const submitReturnRequest = async (req, res) => {
         const images = req.files
             ? req.files.map(
                 file =>
-                    `/uploads/returns/${file.filename}`
+                    `/uploads/${file.filename}`
               )
             : [];
 
