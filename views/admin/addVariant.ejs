@@ -118,7 +118,7 @@
                     <svg class="mx-auto mb-4 text-stone-300" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     <p class="text-[10px] font-bold text-stone-900 mb-1 leading-none uppercase tracking-widest">Add Product Image</p>
                     <p class="text-[9px] text-stone-400 mb-4">Minimum 3 images required</p>
-                    <input type="file" id="imageInput" class="hidden" accept="image/*">
+                    <input type="file" id="imageInput" class="hidden" accept=".jpg, .jpeg, .png">
                 </div>
 
                 <div id="imageGallery" class="thumb-container">
@@ -229,6 +229,11 @@
     imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
+            ajaxToast("error","Invalid file type");
+                imageInput.value = '';
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 cropImage.src = event.target.result;
