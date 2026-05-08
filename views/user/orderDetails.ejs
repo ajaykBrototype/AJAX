@@ -441,6 +441,22 @@ body {
           </div>
 
           <% 
+            let deliveredDate = null;
+            const deliveredHistory = order.statusHistory.find(h => h.status === 'Delivered');
+            if (deliveredHistory) {
+              deliveredDate = new Date(deliveredHistory.updatedAt);
+            }
+            
+            let isReturnExpired = false;
+            if (deliveredDate) {
+              const now = new Date();
+              const diffTime = now - deliveredDate;
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              if (diffDays >= 7) {
+                isReturnExpired = true;
+              }
+            }
+
             const returnableItems = order.items.filter(i => 
               i.status !== 'Cancelled' && 
               i.status !== 'Return Requested' && 
@@ -457,11 +473,17 @@ body {
             </div>
           <% } else if (order.status === 'Delivered' && returnableItems.length > 0) { %>
             <div class="mb-10">
-              <a 
-                href="/orders/<%= order._id %>/return"
-                class="w-full inline-block text-center py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
-                Return Entire Order
-              </a>
+              <% if (isReturnExpired) { %>
+                <button disabled class="w-full py-4 bg-slate-50 border border-slate-100 text-slate-300 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl cursor-not-allowed">
+                  Due to 7 day return policy
+                </button>
+              <% } else { %>
+                <a 
+                  href="/orders/<%= order._id %>/return"
+                  class="w-full inline-block text-center py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
+                  Return Entire Order
+                </a>
+              <% } %>
             </div>
           <% } %>
 
@@ -482,11 +504,15 @@ body {
                     <div class="flex items-center gap-2">
                       <% if(item.status !== "Cancelled" && item.status !== "Return Requested" && item.status !== "Returned") { %>
                         <% if(order.status === 'Delivered') { %>
-                          <a
-                            href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
-                            class="px-4 py-2 bg-white border border-brand-dark/10 rounded-full text-[0.55rem] font-black text-brand-dark hover:bg-brand-warm uppercase tracking-widest transition-all">
-                            Return Item
-                          </a>
+                          <% if (isReturnExpired) { %>
+                            <span class="text-[0.55rem] font-black text-slate-300 uppercase tracking-widest">Policy Expired</span>
+                          <% } else { %>
+                            <a
+                              href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
+                              class="px-4 py-2 bg-white border border-brand-dark/10 rounded-full text-[0.55rem] font-black text-brand-dark hover:bg-brand-warm uppercase tracking-widest transition-all">
+                              Return Item
+                            </a>
+                          <% } %>
                         <% } else { %>
                           <button
                             id="btn-cancel-<%= item._id %>"

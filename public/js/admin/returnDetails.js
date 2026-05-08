@@ -20,11 +20,6 @@ document.getElementById(
 );
 
 
-
-/* =========================
-   APPROVE
-========================= */
-
 if(approveBtn){
 
 approveBtn.addEventListener(
