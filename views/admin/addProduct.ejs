@@ -48,7 +48,111 @@
   /* Animations */
   @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
   .anim { animation: fadeUp .55s cubic-bezier(.16,1,.3,1) both; }
+  .custom-admin-dropdown { position: relative; width: 100%; z-index: 50; }
+  .admin-dropdown-trigger { width: 100%; padding: 14px 20px; background: #fff; border: 1.5px solid #E5E7EB; border-radius: 28px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .admin-dropdown-trigger:hover { border-color: #111; }
+  .admin-dropdown-trigger.disabled { background: #F9FAFB; cursor: not-allowed; opacity: 0.7; }
+  .admin-dropdown-trigger span { font-size: 13px; font-weight: 600; color: #1c1c1c; }
+  .admin-dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff; border: 1px solid #E5E7EB; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: none; z-index: 100; padding: 10px; max-height: 280px; overflow-y: auto; }
+  .admin-dropdown-menu.show { display: block; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .admin-dropdown-item { padding: 12px 18px; font-size: 13px; font-weight: 600; color: #4B5563; border-radius: 18px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 2px; display: flex; align-items: center; gap: 12px; }
+  .admin-dropdown-item:last-child { margin-bottom: 0; }
+  .admin-dropdown-item:hover { background: #F9FAFB; color: #111; }
+  .admin-dropdown-item.active { background: #111827; color: #fff; }
 </style>
+
+<script>
+  // --- Global Dropdown Logic ---
+  window.toggleDropdown = function(id, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    const dropdown = document.getElementById(id);
+    if (!dropdown) return;
+    
+    const menu = dropdown.querySelector('.admin-dropdown-menu');
+    if (!menu) return;
+    
+    const isShow = menu.classList.contains('show');
+    
+    // Reset all
+    document.querySelectorAll('.admin-dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.custom-admin-dropdown').forEach(d => d.style.zIndex = '50');
+    
+    if (!isShow) {
+      menu.classList.add('show');
+      dropdown.style.zIndex = '100';
+    }
+  };
+
+  window.selectOption = async function(dropdownId, value, text) {
+    const dropdown = document.getElementById(dropdownId);
+    const input = dropdown.querySelector('input[type="hidden"]');
+    const triggerText = dropdown.querySelector('.admin-dropdown-trigger span');
+    const menu = dropdown.querySelector('.admin-dropdown-menu');
+    
+    if (input) input.value = value;
+    if (triggerText) triggerText.textContent = text;
+    
+    if (menu) menu.classList.remove('show');
+    if (dropdown) dropdown.style.zIndex = '50';
+
+    // Specific logic for Category -> Subcategory
+    if (dropdownId === 'categoryDropdown') {
+      const subTrigger = document.getElementById('subcategoryTrigger');
+      const subMenu = document.getElementById('subcategoryMenu');
+      const subInput = document.getElementById('subcategoryInput');
+      const subTriggerText = subTrigger.querySelector('span');
+
+      if (subInput) subInput.value = '';
+      if (subTriggerText) subTriggerText.textContent = 'Loading...';
+      if (subTrigger) {
+          subTrigger.classList.add('disabled');
+          subTrigger.removeAttribute('onclick');
+      }
+      if (subMenu) subMenu.innerHTML = '';
+
+      try {
+        const response = await fetch(`/admin/subcategories/by-category/${value}`);
+        const data = await response.json();
+        
+        if (data.success && data.subcategories.length > 0) {
+          subTrigger.classList.remove('disabled');
+          subTrigger.setAttribute('onclick', "toggleDropdown('subcategoryDropdown', event)");
+          subTriggerText.textContent = 'Select subcategory';
+          
+          data.subcategories.forEach(sub => {
+            const item = document.createElement('div');
+            item.className = 'admin-dropdown-item';
+            item.onclick = (e) => {
+              e.stopPropagation();
+              selectOption('subcategoryDropdown', sub._id, sub.name);
+            };
+            item.innerHTML = `
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              ${sub.name}
+            `;
+            subMenu.appendChild(item);
+          });
+        } else {
+          subTriggerText.textContent = 'No subcategories found';
+        }
+      } catch (err) {
+        console.error('Error fetching subcategories:', err);
+        subTriggerText.textContent = 'Error loading items';
+      }
+    }
+  };
+
+  // Close dropdowns on click outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.admin-dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.custom-admin-dropdown').forEach(d => d.style.zIndex = '50');
+  });
+</script>
 </head>
 <body class="flex min-h-screen">
 
@@ -134,24 +238,34 @@
 
                   <div>
                       <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Category <span class="text-red-500">*</span></label>
-                      <div class="relative">
-                          <select name="category" class="w-full p-3.5 pr-10 bg-white border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-pointer">
-                              <option value="">Select category</option>
+                      <div class="custom-admin-dropdown" id="categoryDropdown">
+                          <div class="admin-dropdown-trigger" onclick="toggleDropdown('categoryDropdown', event)">
+                              <span>Select category</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                          </div>
+                          <div class="admin-dropdown-menu">
                               <% categories.forEach(cat => { %>
-                              <option value="<%= cat._id %>"><%= cat.name %></option>
+                                  <div class="admin-dropdown-item" onclick="selectOption('categoryDropdown', '<%= cat._id %>', '<%= cat.name %>')">
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                      <%= cat.name %>
+                                  </div>
                               <% }) %>
-                          </select>
-                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                          </div>
+                          <input type="hidden" name="category" id="categoryInput">
                       </div>
                   </div>
 
                   <div>
                       <label class="block text-[10px] font-extrabold text-stone-500 uppercase tracking-widest mb-2">Subcategory <span class="text-red-500">*</span></label>
-                      <div class="relative">
-                          <select name="subcategory" class="w-full p-3.5 pr-10 bg-stone-50 text-stone-500 border border-stone-200 rounded-xl text-[13px] font-medium focus:border-stone-800 focus:ring-1 focus:ring-stone-800 outline-none transition-all appearance-none cursor-not-allowed" disabled>
-                              <option value="">Select category first</option>
-                          </select>
-                          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                      <div class="custom-admin-dropdown" id="subcategoryDropdown">
+                          <div class="admin-dropdown-trigger disabled" id="subcategoryTrigger">
+                              <span>Select category first</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                          </div>
+                          <div class="admin-dropdown-menu" id="subcategoryMenu">
+                              <!-- Dynamically populated -->
+                          </div>
+                          <input type="hidden" name="subcategory" id="subcategoryInput">
                       </div>
                   </div>
               </div>
@@ -282,10 +396,10 @@
   imageInput?.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
+     
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
-         ajaxToast("error","Invalid file type");")
+        ajaxToast("error","Invalid file type");
         imageInput.value = '';
         return;
       }
@@ -344,40 +458,6 @@
     window.uploadedFiles.splice(index, 1);
     updateGallery();
   };
-
-  const categorySelect = document.querySelector('select[name="category"]');
-  const subcategorySelect = document.querySelector('select[name="subcategory"]');
-
-  categorySelect.addEventListener('change', async (e) => {
-    const catId = e.target.value;
-    if (!catId) {
-      subcategorySelect.innerHTML = '<option value="">Select category first</option>';
-      subcategorySelect.disabled = true;
-      subcategorySelect.classList.add('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
-      subcategorySelect.classList.remove('bg-white', 'text-stone-900', 'cursor-pointer');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/admin/subcategories/by-category/${catId}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        subcategorySelect.disabled = false;
-        subcategorySelect.classList.remove('bg-stone-50', 'text-stone-500', 'cursor-not-allowed');
-        subcategorySelect.classList.add('bg-white', 'text-stone-900', 'cursor-pointer');
-        subcategorySelect.innerHTML = '<option value="">Select subcategory</option>';
-        data.subcategories.forEach(sub => {
-          const opt = document.createElement('option');
-          opt.value = sub._id;
-          opt.textContent = sub.name;
-          subcategorySelect.appendChild(opt);
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching subcategories:', err);
-    }
-  });
 
   // Mobile sidebar
   const sidebarEl = document.getElementById('sidebar');
