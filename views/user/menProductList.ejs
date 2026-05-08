@@ -222,36 +222,39 @@ tailwind.config = {
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 8px;
+  margin-top: 12px;
   background: white;
   border: 1px solid rgba(28, 28, 28, 0.05);
-  border-radius: 12px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  padding: 8px 0;
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+  padding: 10px;
   z-index: 100;
   visibility: hidden;
   opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  min-width: 180px;
+  transform: translateY(15px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 220px;
 }
 .dropdown-menu.show {
   visibility: visible;
   opacity: 1;
-  transform: translateY(4px);
+  transform: translateY(8px);
 }
 .dropdown-item {
-  padding: 10px 20px;
-  font-size: 0.65rem;
+  padding: 12px 20px;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #1c1c1c;
   cursor: pointer;
+  border-radius: 18px;
   transition: all 0.2s ease;
+  margin-bottom: 4px;
 }
+.dropdown-item:last-child { margin-bottom: 0; }
 .dropdown-item:hover { background: #F9F9F7; }
-.dropdown-item.active { background: #F0EEE9; }
+.dropdown-item.active { background: #111827; color: white; }
 </style>
 <%- include('../partials/footer-styles') %>
 </head>

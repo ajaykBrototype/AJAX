@@ -24,4 +24,57 @@ body{font-family:'DM Sans',sans-serif;background:#FAFAF8;color:#1C1C1C;overflow-
 #mob-close:hover{opacity:1}
 .mob-link{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;color:var(--dark);text-decoration:none;transition:opacity .25s}
 .mob-link:hover{opacity:.35}
+/* ACCOUNT DROPDOWN */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  width: 260px;
+  background: #fff !important;
+  border: 1px solid var(--bdr);
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+  border-radius: 28px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
+  padding: 12px;
+}
+.dropdown-menu.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1c1c1c !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  border-radius: 18px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 4px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.dropdown-item:last-child { margin-bottom: 0; }
+.dropdown-item:hover {
+  background: #111827 !important;
+  color: #fff !important;
+  transform: translateX(4px);
+}
+.dropdown-divider {
+  height: 1px;
+  background: var(--bdr);
+  margin: 8px 12px;
+}
 </style>

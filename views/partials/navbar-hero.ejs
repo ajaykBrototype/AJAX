@@ -52,28 +52,27 @@
           <circle cx="12" cy="7" r="4"/>
         </svg>
       </button>
-      <div id="accountDropdown" class="absolute right-0 mt-4 w-60 bg-white border border-[var(--bdr)] shadow-[0_12px_48px_rgba(28,28,28,0.08)] opacity-0 invisible translate-y-[-8px] transition-all duration-300 z-50 py-2">
-        <div class="px-5 py-4 border-b border-[var(--bdr)] mb-1">
-          <p class="text-[0.52rem] tracking-[0.25em] uppercase text-[var(--stone)] mb-1.5">Quick Access</p>
-          <p class="font-serif text-[1.15rem] text-[var(--dark)] leading-tight">My Account</p>
+      <div id="accountDropdown" class="dropdown-menu">
+        <div style="padding:1rem 1.15rem;border-bottom:1px solid var(--bdr);margin-bottom:0.4rem">
+          <p style="font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--stone);margin-bottom:0.35rem">Quick Access</p>
+          <p style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--dark);line-height:1.2;font-style:italic">My Account</p>
         </div>
-        <a href="/profile" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <a href="/profile" class="dropdown-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Overview
         </a>
-        <a href="/address" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <a href="/address" class="dropdown-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Addresses
         </a>
-        <a href="/orders" class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[var(--dark)] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <a href="/orders" class="dropdown-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           My Orders
         </a>
-        <div class="h-px bg-[var(--bdr)] my-1.5"></div>
-        <button id="logoutBtn" style="all:unset; cursor:pointer; width:100%;">
-          <div class="flex items-center gap-3 px-5 py-3 text-[0.72rem] font-light text-[#B04040] hover:bg-[var(--cream)] hover:translate-x-1 transition-all duration-250">
-            Sign out
-          </div>
+        <div class="dropdown-divider"></div>
+        <button id="logoutBtn" class="dropdown-item" style="color:#B04040 !important">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
         </button>
       </div>
       <% } else { %>
@@ -125,13 +124,11 @@ const accDrop = document.getElementById('accountDropdown');
 if (accBtn && accDrop) {
   accBtn.addEventListener('click', e => {
     e.stopPropagation();
-    accDrop.classList.toggle('opacity-0');
-    accDrop.classList.toggle('invisible');
-    accDrop.classList.toggle('translate-y-[-8px]');
+    accDrop.classList.toggle('open');
   });
   document.addEventListener('click', e => {
     if (!accDrop.contains(e.target) && !accBtn.contains(e.target)) {
-      accDrop.classList.add('opacity-0', 'invisible', 'translate-y-[-8px]');
+      accDrop.classList.remove('open');
     }
   });
 }
