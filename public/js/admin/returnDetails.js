@@ -114,7 +114,20 @@ try{
       "pickupTime"
    ).value;
 
-   await axios.patch(
+    if (!pickupDate || !pickupTime) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'warning',
+        title: 'Date and time are mandatory',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+      return;
+    }
+
+    await axios.patch(
       `/admin/returns/${
          schedulePickupBtn.dataset.id
       }/schedule-pickup`,
@@ -122,7 +135,7 @@ try{
          pickupDate,
          pickupTime
       }
-   );
+    );
 
    window.location.reload();
 
