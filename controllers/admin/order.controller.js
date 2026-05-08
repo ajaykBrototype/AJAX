@@ -8,6 +8,7 @@ import Variant from "../../models/admin/variantModel.js";
 export const loadAdminOrders = async (req, res) => {
     try {
         const searchQuery = req.query.search || "";
+        const currentStatus = req.query.status || "all";
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
@@ -24,6 +25,19 @@ export const loadAdminOrders = async (req, res) => {
             if (searchQuery.match(/^[0-9a-fA-F]{24}$/)) {
                 filter.$or.push({ _id: searchQuery });
             }
+        }
+
+        if (currentStatus && currentStatus !== "all") {
+            // Map simple status to actual DB status if needed
+            const statusMap = {
+                'pending': 'Pending',
+                'placed': 'Placed',
+                'confirmed': 'Confirmed',
+                'shipped': 'Shipped',
+                'delivered': 'Delivered',
+                'cancelled': 'Cancelled'
+            };
+            filter.status = statusMap[currentStatus] || currentStatus;
         }
 
         const [orders, totalOrders, pendingOrders, completedOrders, totalFilteredOrders] = await Promise.all([
@@ -51,6 +65,7 @@ export const loadAdminOrders = async (req, res) => {
             currentPage: page,
             totalPages,
             totalFilteredOrders,
+            currentStatus,
             currentPath: "/admin/orders"
         });
 

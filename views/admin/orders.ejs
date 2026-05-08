@@ -72,6 +72,63 @@
   /* Custom Transitions */
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .animate-fade { animation: fadeIn 0.4s ease-out both; }
+  /* Custom Dropdown Styles */
+  .custom-admin-dropdown {
+    position: relative;
+    min-width: 160px;
+  }
+  .admin-dropdown-trigger {
+    background: #ffffff;
+    border: 1px solid var(--admin-border);
+    border-radius: 9999px;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .admin-dropdown-trigger:hover { background: #f9fafb; border-color: #d1d5db; }
+
+  .admin-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: white;
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 8px;
+    z-index: 100;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 180px;
+  }
+  .admin-dropdown-menu.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(4px);
+  }
+  .admin-dropdown-item {
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--admin-text-dark);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+  .admin-dropdown-item:hover { background: #f3f4f6; color: #000; }
+  .admin-dropdown-item.active { background: #111827; color: #fff; }
 </style>
 </head>
 <body class="flex min-h-screen">
@@ -149,17 +206,24 @@
 
       <!-- Filter Bar -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="relative">
-          <select id="statusFilter" class="appearance-none pl-4 pr-10 py-2 bg-white border border-[var(--admin-border)] rounded-full text-xs font-semibold text-[var(--admin-text-dark)] outline-none cursor-pointer hover:bg-stone-50 transition-colors shadow-sm">
-            <option value="all">All Orders</option>
-            <option value="pending">Pending</option>
-            <option value="placed">Placed</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--admin-text-muted)]"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="custom-admin-dropdown" id="statusDropdown">
+          <button type="button" class="admin-dropdown-trigger" id="statusTrigger">
+            <span id="currentStatusLabel"><%= currentStatus ? currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1) : 'All Orders' %></span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="transition-transform duration-300" id="statusArrow">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <div class="admin-dropdown-menu" id="statusMenu">
+            <div class="admin-dropdown-item <%= !currentStatus || currentStatus === 'all' ? 'active' : '' %>" data-value="all">All Orders</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'pending' ? 'active' : '' %>" data-value="pending">Pending</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'placed' ? 'active' : '' %>" data-value="placed">Placed</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'confirmed' ? 'active' : '' %>" data-value="confirmed">Confirmed</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'shipped' ? 'active' : '' %>" data-value="shipped">Shipped</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'delivered' ? 'active' : '' %>" data-value="delivered">Delivered</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'cancelled' ? 'active' : '' %>" data-value="cancelled">Cancelled</div>
           </div>
+          <input type="hidden" id="statusFilter" value="<%= currentStatus || 'all' %>">
         </div>
       </div>
 
@@ -319,8 +383,33 @@
     });
 
     // Status filter support
-    document.getElementById('statusFilter').addEventListener('change', (e) => {
-      console.log('Filter by:', e.target.value);
+    const statusTrigger = document.getElementById('statusTrigger');
+    const statusMenu = document.getElementById('sortMenu'); // Wait, I used statusMenu ID
+    const statusArrow = document.getElementById('statusArrow');
+    const statusLabel = document.getElementById('currentStatusLabel');
+    const statusItems = document.querySelectorAll('.admin-dropdown-item');
+    const statusInput = document.getElementById('statusFilter');
+
+    // Real statusMenu from HTML
+    const realStatusMenu = document.getElementById('statusMenu');
+
+    statusTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      realStatusMenu.classList.toggle('show');
+      statusArrow.classList.toggle('rotate-180');
+    });
+
+    document.addEventListener('click', () => {
+      realStatusMenu.classList.remove('show');
+      statusArrow.classList.remove('rotate-180');
+    });
+
+    statusItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const value = item.getAttribute('data-value');
+        const search = document.getElementById('searchInput').value;
+        window.location.href = `/admin/orders?status=${value}&search=${encodeURIComponent(search)}`;
+      });
     });
 
     // Sidebar toggle for mobile

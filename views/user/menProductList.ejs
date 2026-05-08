@@ -192,6 +192,66 @@ tailwind.config = {
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }
+
+/* Custom Dropdown Styles */
+.custom-sort-dropdown {
+  position: relative;
+  min-width: 140px;
+}
+.dropdown-trigger {
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1c1c1c;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: 100%;
+}
+.dropdown-trigger:hover { background: #f1f1f1; border-color: #dcdcdc; }
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid rgba(28, 28, 28, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 180px;
+}
+.dropdown-menu.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(4px);
+}
+.dropdown-item {
+  padding: 10px 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1c1c1c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dropdown-item:hover { background: #F9F9F7; }
+.dropdown-item.active { background: #F0EEE9; }
 </style>
 <%- include('../partials/footer-styles') %>
 </head>
@@ -212,7 +272,7 @@ tailwind.config = {
     <% }) %>
   </div>
 
-  <div class="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[var(--bdr)] mb-12 fade-in-up delay-1">
+  <div class="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[var(--bdr)] mb-12 fade-in-up delay-1 relative z-50">
     <div class="flex items-center">
       <button class="toolbar-link flex items-center gap-2" onclick="toggleSidebar(true)">FILTER <i data-lucide="plus" size="12" stroke-width="3"></i></button>
     </div>
@@ -221,19 +281,25 @@ tailwind.config = {
         <input type="text" id="toolbarSearch" placeholder="SEARCH..." class="search-input">
         <button id="toolbarSearchBtn" class="toolbar-link flex items-center gap-2" onclick="triggerToolbarSearch()"><i data-lucide="search" size="14" stroke-width="2.5"></i></button>
       </div>
-      <div class="flex items-center gap-4">
-        <span class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] uppercase">Sort</span>
-        <div class="flex items-center gap-1 relative">
-          <select class="sort-select">
-            <option value="newest">Newest</option>
-            <option value="price-low">Price: Low - High</option>
-            <option value="price-high">Price: High - Low</option>
-            <option value="name-az">A - Z</option>
-            <option value="name-za">Z - A</option>
-          </select>
-          <i data-lucide="chevron-down" size="10" class="text-stone-400 absolute right-3 pointer-events-none"></i>
+        <div class="flex items-center gap-4">
+          <span class="text-[0.6rem] tracking-[0.2em] text-[var(--stone)] uppercase">Sort</span>
+          <div class="custom-sort-dropdown" id="sortDropdownContainer">
+            <button type="button" class="dropdown-trigger" id="sortTrigger">
+              <span id="currentSortLabel">Newest</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="transition-transform duration-300" id="sortArrow">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="sortMenu">
+              <div class="dropdown-item active" data-value="newest">Newest</div>
+              <div class="dropdown-item" data-value="price-low">Price: Low - High</div>
+              <div class="dropdown-item" data-value="price-high">Price: High - Low</div>
+              <div class="dropdown-item" data-value="name-az">A - Z</div>
+              <div class="dropdown-item" data-value="name-za">Z - A</div>
+            </div>
+            <input type="hidden" id="sortSelect" value="newest">
+          </div>
         </div>
-      </div>
     </div>
   </div>
 
@@ -338,5 +404,45 @@ tailwind.config = {
 <script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/filter.js"></script>
 <script src="/js/user/wishlist.js"></script>
+<script>
+  // Custom Sort Dropdown Logic
+  const sortTrigger = document.getElementById('sortTrigger');
+  const sortMenu = document.getElementById('sortMenu');
+  const sortArrow = document.getElementById('sortArrow');
+  const currentSortLabel = document.getElementById('currentSortLabel');
+  const sortItems = document.querySelectorAll('.dropdown-item');
+  const sortInput = document.getElementById('sortSelect');
+
+  sortTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sortMenu.classList.toggle('show');
+    sortArrow.classList.toggle('rotate-180');
+  });
+
+  document.addEventListener('click', () => {
+    sortMenu.classList.remove('show');
+    sortArrow.classList.remove('rotate-180');
+  });
+
+  sortItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const value = item.getAttribute('data-value');
+      const label = item.innerText;
+
+      // Update Label and State
+      currentSortLabel.innerText = label;
+      window.filters.sort = value;
+      
+      // Update Active State
+      sortItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      // Trigger Filtering
+      if (typeof applyFilters === 'function') {
+        applyFilters();
+      }
+    });
+  });
+</script>
 </body>
 </html>

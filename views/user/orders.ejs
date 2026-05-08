@@ -105,6 +105,33 @@ body {
 }
 
 .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Custom Dropdown */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: white;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(28, 28, 28, 0.05);
+}
+.dropdown-menu.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(4px);
+}
+.dropdown-item:hover {
+  background-color: #F9F9F7;
+}
+.dropdown-item.active {
+  background-color: #F0EEE9;
+}
 </style>
 </head>
 <body>
@@ -126,7 +153,7 @@ body {
       }) %>
 
       <!-- Header Section -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12 fade-in-up">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12 fade-in-up relative z-50">
         <div>
           <h1 class="editorial-title text-4xl md:text-5xl font-medium mb-3">Order History</h1>
           <p class="text-[0.6rem] tracking-[0.3em] font-bold text-stone-400 uppercase">Manage your recent orders & tracking information</p>
@@ -137,24 +164,22 @@ body {
             <input id="searchInput" type="text" placeholder="Search orders..." class="w-full bg-white border border-brand-mist/30 rounded-2xl px-6 py-3.5 text-[0.7rem] font-medium focus:ring-1 focus:ring-brand-dark focus:border-brand-dark transition-all outline-none pl-12">
             <svg class="absolute left-5 top-1/2 -translate-y-1/2 text-stone-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </div>
-          <select id="sortSelect" class="bg-white border border-brand-mist/30 rounded-2xl px-6 py-3.5 text-[0.65rem] font-black uppercase tracking-widest outline-none focus:border-brand-dark transition-all cursor-pointer">
-             <option value="all">
-        All Time
-    </option>
-
-    <option value="30days">
-        Last 30 Days
-    </option>
-
-    <option value="6months">
-        Last 6 Months
-    </option>
-
-    <option value="2025">
-        2025 Orders
-    </option>
-
-          </select>
+          <div class="relative w-full md:w-56" id="customSort">
+            <button type="button" class="w-full bg-white border border-brand-mist/30 rounded-2xl px-6 py-3.5 flex items-center justify-between text-[0.65rem] font-black uppercase tracking-widest outline-none hover:border-brand-dark transition-all" id="dropdownTrigger">
+              <span id="sortValueLabel">All Time</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="transition-transform duration-300" id="dropdownArrow">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            
+            <div class="dropdown-menu mt-2 rounded-2xl py-2" id="dropdownList">
+              <div class="dropdown-item px-6 py-3.5 text-[0.65rem] font-black uppercase tracking-widest cursor-pointer transition-all active text-brand-dark" data-value="all">All Time</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.65rem] font-black uppercase tracking-widest cursor-pointer transition-all text-brand-dark" data-value="30days">Last 30 Days</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.65rem] font-black uppercase tracking-widest cursor-pointer transition-all text-brand-dark" data-value="6months">Last 6 Months</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.65rem] font-black uppercase tracking-widest cursor-pointer transition-all text-brand-dark" data-value="2025">2025 Orders</div>
+            </div>
+            <input type="hidden" id="sortSelect" value="all">
+          </div>
         </div>
       </div>
 
@@ -313,10 +338,40 @@ searchInput.addEventListener("input", () => {
 });
 
 
-sortSelect.addEventListener(
-    "change",
-    fetchOrders
-);
+const dropdownTrigger = document.getElementById("dropdownTrigger");
+const dropdownList = document.getElementById("dropdownList");
+const dropdownArrow = document.getElementById("dropdownArrow");
+const sortValueLabel = document.getElementById("sortValueLabel");
+const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+dropdownTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownList.classList.toggle("show");
+    dropdownArrow.classList.toggle("rotate-180");
+});
+
+document.addEventListener("click", () => {
+    dropdownList.classList.remove("show");
+    dropdownArrow.classList.remove("rotate-180");
+});
+
+dropdownItems.forEach(item => {
+    item.addEventListener("click", (e) => {
+        const value = item.getAttribute("data-value");
+        const label = item.innerText;
+        
+        // Update Label and Input
+        sortValueLabel.innerText = label;
+        sortSelect.value = value;
+        
+        // Update active state
+        dropdownItems.forEach(i => i.classList.remove("active"));
+        item.classList.add("active");
+        
+        // Fetch Orders
+        fetchOrders();
+    });
+});
 
 </script>
 

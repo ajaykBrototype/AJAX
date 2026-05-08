@@ -53,6 +53,64 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-up { animation: fadeIn 0.5s ease-out both; }
+
+    /* Custom Admin Dropdown Styles */
+    .custom-admin-dropdown {
+      position: relative;
+      min-width: 160px;
+    }
+    .admin-dropdown-trigger {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #111827;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .admin-dropdown-trigger:hover { background: #f9fafb; border-color: #d1d5db; }
+
+    .admin-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 8px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 8px;
+      z-index: 100;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      min-width: 180px;
+    }
+    .admin-dropdown-menu.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(4px);
+    }
+    .admin-dropdown-item {
+      padding: 10px 16px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #111827;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+    .admin-dropdown-item:hover { background: #f3f4f6; color: #000; }
+    .admin-dropdown-item.active { background: #111827; color: #fff; }
   </style>
 </head>
 <body class="flex min-h-screen">
@@ -120,17 +178,41 @@
 
       <!-- Filters & Search -->
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-          <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors">
-            <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-            All Status
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        <div class="custom-admin-dropdown" id="statusDropdown">
+          <button type="button" class="admin-dropdown-trigger" id="statusTrigger">
+            <span id="currentStatusLabel">
+              <% 
+                const statusLabels = {
+                  'all': 'All Status',
+                  'pending': 'Pending Requests',
+                  'approved': 'Approved Requests',
+                  'rejected': 'Rejected Requests',
+                  'pickup-scheduled': 'Pickup Scheduled',
+                  'picked-up': 'Picked Up',
+                  'refunded': 'Refunded'
+                };
+              %>
+              <%= statusLabels[currentStatus] || 'All Status' %>
+            </span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300" id="statusArrow">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
           </button>
+          
+          <div class="admin-dropdown-menu" id="statusMenu">
+            <div class="admin-dropdown-item <%= !currentStatus || currentStatus === 'all' ? 'active' : '' %>" data-value="all">All Status</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'pending' ? 'active' : '' %>" data-value="pending">Pending Requests</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'approved' ? 'active' : '' %>" data-value="approved">Approved Requests</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'rejected' ? 'active' : '' %>" data-value="rejected">Rejected Requests</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'pickup-scheduled' ? 'active' : '' %>" data-value="pickup-scheduled">Pickup Scheduled</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'picked-up' ? 'active' : '' %>" data-value="picked-up">Picked Up</div>
+            <div class="admin-dropdown-item <%= currentStatus === 'refunded' ? 'active' : '' %>" data-value="refunded">Refunded</div>
+          </div>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <div class="relative w-full sm:w-64">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" placeholder="Search returns..." class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/5 transition-all">
+            <input id="searchInput" value="<%= search || '' %>" type="text" placeholder="Search returns..." class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/5 transition-all">
           </div>
           <button class="px-5 py-2 bg-[#1a2e23] text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors">Search</button>
         </div>
@@ -235,18 +317,106 @@
         </div>
 
         <!-- Pagination Footer -->
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-center gap-2">
-          <button class="p-2 text-gray-400 hover:text-gray-900 transition-colors"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <button class="w-8 h-8 flex items-center justify-center bg-black text-white text-xs font-bold rounded-lg shadow-lg shadow-black/10">1</button>
-          <button class="w-8 h-8 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50 rounded-lg transition-colors">2</button>
-          <button class="w-8 h-8 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50 rounded-lg transition-colors">3</button>
-          <button class="p-2 text-gray-400 hover:text-gray-900 transition-colors"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-4">
+          <p class="text-xs text-gray-500 font-medium">
+            Showing <span class="font-bold text-gray-900"><%= (currentPage - 1) * 8 + 1 %></span> to 
+            <span class="font-bold text-gray-900"><%= Math.min(currentPage * 8, totalFilteredReturns) %></span> 
+            of <span class="font-bold text-gray-900"><%= totalFilteredReturns %></span> results
+          </p>
+
+          <div class="flex items-center gap-2">
+            <% if (currentPage > 1) { %>
+              <a href="/admin/returns?page=<%= currentPage - 1 %>&status=<%= currentStatus %>&search=<%= searchQuery %>" 
+                 class="p-2 text-gray-400 hover:text-gray-900 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </a>
+            <% } %>
+
+            <% for(let i = 1; i <= totalPages; i++) { %>
+              <% if (i === currentPage) { %>
+                <span class="w-8 h-8 flex items-center justify-center bg-black text-white text-xs font-bold rounded-lg shadow-lg shadow-black/10">
+                  <%= i %>
+                </span>
+              <% } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                <a href="/admin/returns?page=<%= i %>&status=<%= currentStatus %>&search=<%= searchQuery %>" 
+                   class="w-8 h-8 flex items-center justify-center text-gray-500 text-xs font-bold hover:bg-gray-50 rounded-lg transition-colors">
+                  <%= i %>
+                </a>
+              <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+                <span class="text-gray-400">...</span>
+              <% } %>
+            <% } %>
+
+            <% if (currentPage < totalPages) { %>
+              <a href="/admin/returns?page=<%= currentPage + 1 %>&status=<%= currentStatus %>&search=<%= searchQuery %>" 
+                 class="p-2 text-gray-400 hover:text-gray-900 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            <% } %>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
   <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden"></div>
+
+
+
+
+
+  <script>
+
+const searchInput =
+document.getElementById("searchInput");
+
+let debounceTimer;
+
+if(searchInput){
+
+searchInput.addEventListener("input",(e)=>{
+
+clearTimeout(
+   debounceTimer
+);
+
+debounceTimer =
+setTimeout(()=>{
+
+   const query =e.target.value.trim();
+
+   const params =
+   new URLSearchParams(
+      window.location.search
+   );
+
+
+
+   if(query){
+
+      params.set(
+         "search",
+         query
+      );
+
+   } else {
+
+      params.delete(
+         "search"
+      );
+
+   }
+   window.location.href =
+   `/admin/returns?${
+      params.toString()
+   }`;
+
+},500);
+
+});
+}
+
+</script>
 
   <script>
     const sidebar = document.getElementById('sidebar');
@@ -268,6 +438,30 @@
         overlay.classList.add('hidden');
       });
     }
+
+    // Status Filter Logic
+    const statusTrigger = document.getElementById('statusTrigger');
+    const statusMenu = document.getElementById('statusMenu');
+    const statusArrow = document.getElementById('statusArrow');
+    const statusItems = document.querySelectorAll('.admin-dropdown-item');
+
+    statusTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      statusMenu.classList.toggle('show');
+      statusArrow.classList.toggle('rotate-180');
+    });
+
+    document.addEventListener('click', () => {
+      statusMenu.classList.remove('show');
+      statusArrow.classList.remove('rotate-180');
+    });
+
+    statusItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const value = item.getAttribute('data-value');
+        window.location.href = `/admin/returns?status=${value}`;
+      });
+    });
   </script>
 
 

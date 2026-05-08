@@ -3,8 +3,51 @@ import Return from "../../models/user/returnModel.js";
 
 export const loadReturnManagement = async (req, res) => {
     try {
-        const allReturns = await Return.find().populate("userId").populate("orderId").sort({ createdAt: -1 });
+        const currentStatus = req.query.status || "all";
+        const search = req.query.search || "";
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;
+        const skip = (page - 1) * limit;
         
+        let filter = {};
+        if (currentStatus && currentStatus !== "all") {
+            const statusMap = {
+                'pending': 'Requested',
+                'approved': 'Approved',
+                'rejected': 'Rejected',
+                'pickup-scheduled': 'Pickup Scheduled',
+                'picked-up': 'Picked Up',
+                'refunded': 'Refunded'
+            };
+            filter.status = statusMap[currentStatus] || currentStatus;
+        }
+
+        let allReturns = await Return.find(filter).populate("userId").populate("orderId").sort({ createdAt: -1 });
+        
+        if(search.trim()){
+
+    const q =search.toLowerCase();
+
+    allReturns =allReturns.filter(r => {
+
+        const customerName = r.userId?.name ?.toLowerCase() ?.includes(q);
+
+        const customerEmail = r.userId?.email ?.toLowerCase() ?.includes(q);
+
+        const returnId = r._id.toString() .toLowerCase() .includes(q);
+
+        const orderId = r.orderId?._id?.toString()?.toLowerCase()?.includes(q);
+
+        return (
+            customerName ||
+            customerEmail ||
+            returnId ||
+            orderId
+        );
+
+    });
+
+}
        
         const seenOrders = new Map();
         allReturns.forEach(r => {
@@ -16,7 +59,10 @@ export const loadReturnManagement = async (req, res) => {
                 seenOrders.get(oid).itemCount += 1;
             }
         });
-        const returns = Array.from(seenOrders.values());
+        const returnsArray = Array.from(seenOrders.values());
+        const totalFilteredReturns = returnsArray.length;
+        const totalPages = Math.ceil(totalFilteredReturns / limit);
+        const returns = returnsArray.slice(skip, skip + limit);
 
         const totalReturns = await Return.countDocuments();
         const pendingReturns = await Return.countDocuments({ status: "Requested" });
@@ -28,7 +74,13 @@ export const loadReturnManagement = async (req, res) => {
             totalReturns,
             pendingReturns,
             approvedReturns,
-            rejectedReturns
+            rejectedReturns,
+            currentStatus,
+            searchQuery: search,
+            currentPage: page,
+            totalPages,
+            totalFilteredReturns,
+            search
         });
     } catch (err) {
         console.log("ADMIN RETURN MANAGEMENT ERROR:", err);
@@ -52,7 +104,8 @@ export const loadReturnDetails = async (req, res) => {
 
         // Fetch all items that are part of this return request (same order)
         const allReturnsInOrder = await Return.find({ orderId: returnItem.orderId?._id })
-            .populate("userId");
+            .populate("userId")
+            .populate("orderId");
 
         res.render("admin/returnDetails", {
             returnItem,
@@ -65,8 +118,7 @@ export const loadReturnDetails = async (req, res) => {
 };
 
 
-export const approveReturn =
-async (req, res) => {
+export const approveReturn =async (req, res) => {
 
 try {
 
@@ -75,8 +127,7 @@ try {
 
 
 
-    const currentReturn =
-    await Return.findById(returnId);
+    const currentReturn =await Return.findById(returnId);
 
     if(!currentReturn){
 
@@ -120,8 +171,7 @@ try {
 };
 
 
-export const rejectReturn =
-async (req, res) => {
+export const rejectReturn =async (req, res) => {
 
 try {
 
@@ -177,8 +227,7 @@ try {
 }
 };
 
-export const schedulePickup =
-async (req, res) => {
+export const schedulePickup =async (req, res) => {
 
 try {
 
@@ -255,8 +304,7 @@ try {
 }
 };
 
-export const markPickedUp =
-async (req, res) => {
+export const markPickedUp =async (req, res) => {
 
 try {
 
@@ -265,8 +313,7 @@ try {
 
 
 
-    const currentReturn =
-    await Return.findById(returnId);
+    const currentReturn =await Return.findById(returnId);
 
     if(!currentReturn){
 
