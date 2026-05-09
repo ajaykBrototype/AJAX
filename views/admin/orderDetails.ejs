@@ -12,6 +12,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/btn-loader.js"></script>
 
 <script>
   tailwind.config = {
@@ -453,29 +454,44 @@
 const updateBtn = document.getElementById("updateStatusBtn");
 
 updateBtn.addEventListener("click", async () => {
+  const statusSelect = document.getElementById("statusSelect");
+  const status = statusSelect.value;
 
-  const status = document.getElementById("statusSelect").value;
+  // Show premium loader
+  if (window.btnLoader) {
+    window.btnLoader.show(updateBtn, "UPDATING...");
+  } else {
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = "Updating...";
+  }
 
   try {
-
     const response = await axios.patch(
       "/admin/orders/<%= order._id %>/status",
       { status }
     );
 
-    if(response.data.success){
-      window.location.reload();
+    if (response.data.success) {
+      // Small delay for visual feedback before reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
-
   } catch (error) {
+    // Hide loader on error
+    if (window.btnLoader) {
+      window.btnLoader.hide(updateBtn);
+    } else {
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = "Update Status";
+    }
 
     Swal.fire({
       icon: "error",
-      title: "Failed to update status"
+      title: "Failed to update status",
+      text: error.response?.data?.message || "An error occurred while updating the order status."
     });
-
   }
-
 });
 
 </script>
