@@ -556,8 +556,31 @@ body {
             </div>
             <div class="flex justify-between items-center">
               <span class="label-grey">Shipping Fee</span>
-              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping %></span>
+              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping === 0 ? 'FREE' : '₹' + shipping %></span>
             </div>
+
+            <% 
+              let refundedTotal = 0;
+              if (typeof returns !== 'undefined' && returns) {
+                refundedTotal = returns.reduce((sum, r) => {
+                  if (r.status !== 'Requested' && r.status !== 'Rejected') {
+                    return sum + (r.refundAmount || 0);
+                  }
+                  return sum;
+                }, 0);
+              }
+            %>
+
+            <% if (refundedTotal > 0) { %>
+              <div class="flex justify-between items-center p-4 bg-orange-50/50 rounded-2xl border border-orange-100/30">
+                <div class="flex items-center gap-2">
+                  <span class="w-1 h-1 bg-orange-400 rounded-full"></span>
+                  <span class="label-grey !text-orange-600 font-black">Refunded</span>
+                </div>
+                <span class="text-sm font-bold text-orange-600">- ₹<%= refundedTotal %></span>
+              </div>
+            <% } %>
+
             <div class="flex justify-between items-end pt-4">
               <div>
                 <p class="label-grey mb-1">Total Settlement</p>
@@ -565,7 +588,7 @@ body {
               </div>
               <div class="flex items-baseline gap-1">
                 <span class="text-2xl font-serif">₹</span>
-                <span class="text-3xl font-serif tracking-tighter"><%= finalTotal %></span>
+                <span class="text-3xl font-serif tracking-tighter"><%= finalTotal - refundedTotal %></span>
               </div>
             </div>
           </div>

@@ -102,7 +102,6 @@ export const loadReturnDetails = async (req, res) => {
             return res.redirect("/admin/returns");
         }
 
-        // Fetch all items that are part of this return request (same order)
         const allReturnsInOrder = await Return.find({ orderId: returnItem.orderId?._id })
             .populate("userId")
             .populate("orderId");
@@ -122,10 +121,7 @@ export const approveReturn =async (req, res) => {
 
 try {
 
-    const returnId =
-        req.params.id;
-
-
+    const returnId =req.params.id;
 
     const currentReturn =await Return.findById(returnId);
 
@@ -142,8 +138,7 @@ try {
 
     await Return.updateMany(
         {
-            orderId:
-            currentReturn.orderId
+            orderId: currentReturn.orderId
         },
         {
             $set:{
@@ -175,16 +170,11 @@ export const rejectReturn =async (req, res) => {
 
 try {
 
-    const returnId =
-        req.params.id;
+    const returnId =req.params.id;
 
-    const { reason } =
-        req.body;
+    const { reason } =req.body;
 
-
-
-    const currentReturn =
-    await Return.findById(returnId);
+    const currentReturn = await Return.findById(returnId);
 
     if(!currentReturn){
 
@@ -194,12 +184,9 @@ try {
 
     }
 
-
-
     await Return.updateMany(
         {
-            orderId:
-            currentReturn.orderId
+            orderId:currentReturn.orderId
         },
         {
             $set:{

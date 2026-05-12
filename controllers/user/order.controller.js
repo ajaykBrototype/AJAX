@@ -293,7 +293,7 @@ export const cancelOrderItem=async(req,res)=>{
 
 const order = await Order.findOne({
     _id: orderId,
-    userId
+     userId
 });
 
 if (!order) {
@@ -574,7 +574,6 @@ export const submitReturnRequest = async (req, res) => {
 
 
 
-            /* UPDATE ITEM STATUS */
 
             item.status =
                 "Return Requested";

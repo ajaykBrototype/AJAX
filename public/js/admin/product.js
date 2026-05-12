@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (!material.value.trim()) error = "Material composition is required";
             else if (!careGuide.value.trim()) error = "Care guidelines are required";
             
-            // Only validate variant fields if they exist (Add Product page)
+
             if (!error && color) {
                 if (!color.value.trim()) error = "Primary color is required";
                 else if (!sku.value.trim()) error = "SKU is required";
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let res;
 
                 if (isEdit) {
-                    // Send as JSON for edit page
+                    
                     const data = {
                         name: name.value.trim(),
                         category: category.value,
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🔍 SEARCH DEBOUNCE
+
     const searchInput = document.querySelector('input[name="search"]');
     if (searchInput) {
         let timer;

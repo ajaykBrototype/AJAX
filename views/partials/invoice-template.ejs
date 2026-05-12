@@ -154,7 +154,13 @@
         <% 
           let refundedTotal = 0;
           if (typeof returns !== 'undefined' && returns) {
-            refundedTotal = returns.reduce((sum, r) => sum + (r.refundAmount || 0), 0);
+            // Only show refund amount if return is approved or beyond
+            refundedTotal = returns.reduce((sum, r) => {
+              if (r.status !== 'Requested' && r.status !== 'Rejected') {
+                return sum + (r.refundAmount || 0);
+              }
+              return sum;
+            }, 0);
           }
         %>
         
