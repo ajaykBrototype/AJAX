@@ -46,7 +46,7 @@ export const createCoupon=async (req,res)=>{
             status
         } = req.body;
 
-        const existingCoupon=await Coupon.find({code:code.toUpperCase()})
+        const existingCoupon=await Coupon.findOne({code:code.toUpperCase()})
           if (existingCoupon) {
                return res.status(400).json({
                 success: false,
@@ -98,7 +98,7 @@ export const createCoupon=async (req,res)=>{
 
 
     }catch(err){
-        console.log(error);
+        console.log(err);
 
         res.status(500).json({
             success: false,
@@ -112,10 +112,10 @@ export const toggleCouponStatus =async(req,res)=>{
     try{
         const {id}=req.params;
 
-        const coupon=await Coupon.find(id);
+        const coupon=await Coupon.findById(id);
 
         if(!coupon){
-            res.staus(404).json({
+          return res.status(404).json({
                 success:false
             });
         }
@@ -128,13 +128,91 @@ export const toggleCouponStatus =async(req,res)=>{
             status: coupon.status
         });
     }catch(err){
-        console.log(error);
+        console.log(err);
 
         res.status(500).json({
             success: false
     })
 }
 }
+
+
+export const updateCoupon = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            code,
+            discountType,
+            discountAmount,
+            minOrder,
+            maxDiscount,
+            maxUsage,
+            userLimit,
+            startDate,
+            endDate,
+            status
+        } = req.body;
+
+
+        const existingCoupon =await Coupon.findOne({
+
+                code: code.toUpperCase(),
+
+                _id: { $ne: id }
+
+            });
+
+
+
+        if (existingCoupon) {
+
+            return res.status(400).json({
+                success: false,
+                message:"Coupon code already exists"
+
+            });
+        }
+
+        await Coupon.findByIdAndUpdate(id, {
+
+            code,
+
+            discountType,
+
+            discountAmount,
+
+            minOrder,
+
+            maxDiscount,
+
+            maxUsage,
+
+            userLimit,
+
+            startDate,
+
+            endDate,
+
+            status
+
+        });
+
+        res.json({
+            success: true
+        });
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.status(500).json({
+            success: false
+        });
+    }
+};
 
 export const deleteCoupon = async (req, res) => {
 
@@ -156,5 +234,23 @@ export const deleteCoupon = async (req, res) => {
         res.status(500).json({
             success: false
         });
+    }
+};
+
+export const getSingleCoupon = async (req, res) => {
+
+    try {
+
+        const coupon =
+            await Coupon.findById(req.params.id);
+
+        res.json({
+            success: true,
+            coupon
+        });
+
+    } catch (err) {
+
+        console.log(err);
     }
 };

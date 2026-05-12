@@ -21,7 +21,7 @@ const couponSchema = new mongoose.Schema({
         required: true
     },
 
-    minOrderAmount: {
+    minOrder: {
         type: Number,
         required: true
     },
@@ -31,14 +31,19 @@ const couponSchema = new mongoose.Schema({
         default: 0
     },
 
-    usageLimit: {
+    maxUsage: {
         type: Number,
         default: 1
     },
 
-    usedCount: {
+    usageCount: {
         type: Number,
         default: 0
+    },
+
+    userLimit: {
+        type: Number,
+        default: 1
     },
 
     startDate: {
@@ -46,19 +51,17 @@ const couponSchema = new mongoose.Schema({
         required: true
     },
 
-    expiryDate: {
+    endDate: {
         type: Date,
         required: true
     },
 
     status: {
         type: String,
-        enum: ["active", "inactive", "expired"],
+        enum: ["active", "inactive"],
         default: "active"
     }
 
 }, { timestamps: true });
 
-const Coupon = mongoose.model("Coupon", couponSchema);
-
-export default Coupon;
+export default mongoose.model("Coupon", couponSchema);
