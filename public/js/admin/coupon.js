@@ -207,13 +207,8 @@ async function createCoupon() {
 
 
     try {
-
         let response;
-
-
-
         const couponData = {
-
             code,
             discountType,
             discountAmount,
@@ -227,100 +222,78 @@ async function createCoupon() {
         };
 
         if (editingCouponId) {
-
             response = await axios.put(
-
                 `/admin/coupons/update/${editingCouponId}`,
-
                 couponData
             );
-
-        }
-
-        else {
-
+        } else {
             response = await axios.post(
-
                 "/admin/coupons/create",
-
                 couponData
             );
         }
-
-
 
         if (response.data.success) {
-
             editingCouponId = null;
-
-            window.location.reload();
+            if (typeof closeCouponModal === 'function') closeCouponModal();
+            ajaxToast('success', response.data.message || 'Action completed successfully');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
-
     } catch (err) {
-
         if (err.response?.data?.message) {
-
             showError(
                 "codeError",
                 err.response.data.message
             );
+            ajaxToast('error', err.response.data.message);
         }
-
         console.log(err);
     }
 }
 
-
-
 async function deleteCoupon(id) {
-
     try {
+        const result = await ajaxConfirm({
+            title: "Delete Coupon?",
+            text: "Are you sure you want to remove this coupon?",
+            confirmText: "DELETE",
+            icon: "warning"
+        });
 
-        const confirmDelete =
-            ajaxConfirm("Delete this coupon?");
-
-        if (!confirmDelete) return;
-
-
+        if (!result.isConfirmed) return;
 
         const response = await axios.delete(
-
             `/admin/coupons/delete/${id}`
         );
 
-
-
         if (response.data.success) {
-
-            window.location.reload();
+            ajaxToast('success', 'Coupon deleted successfully');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
-
     } catch (err) {
-
+        ajaxToast('error', 'Failed to delete coupon');
         console.log(err);
     }
 }
 
-
-
 async function toggleCouponStatus(id) {
-
     try {
-
         const response = await axios.patch(
-
             `/admin/coupons/toggle/${id}`
         );
 
-
-
         if (response.data.success) {
-
-            window.location.reload();
+            ajaxToast('success', response.data.message || 'Status updated');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
-
     } catch (err) {
-
+        ajaxToast('error', 'Failed to update status');
         console.log(err);
     }
 }

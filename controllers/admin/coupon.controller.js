@@ -2,28 +2,40 @@ import Coupon from "../../models/admin/couponModel.js";
 
 export const loadCouponPage = async (req, res) => {
     try {
-       const search=req.query.search || "";
-      
-       const page=parseInt(req.query.page)||1;
-       const limit=5
-       const skip=(page-1)*limit;
+        const search = req.query.search || "";
+        const status = req.query.status || "";
+        const sort = req.query.sort || "newest";
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
 
-       const filter={
-        code:{$regex:search,$options:"i"}
-    };
+        const filter = {
+            code: { $regex: search, $options: "i" }
+        };
 
-    const coupons=await Coupon.find(filter).sort({createdAt:-1}).skip(skip).limit(limit);
+        if (status) {
+            filter.status = status;
+        }
 
-    const totalCoupons=await Coupon.countDocuments(filter);
-    const totalPage=Math.ceil(totalCoupons/limit);
+        let sortQuery = { createdAt: -1 };
+        if (sort === "oldest") sortQuery = { createdAt: 1 };
+        if (sort === "discount-high") sortQuery = { discountAmount: -1 };
+        if (sort === "discount-low") sortQuery = { discountAmount: 1 };
 
+        const coupons = await Coupon.find(filter).sort(sortQuery).skip(skip).limit(limit);
+
+        const totalCoupons = await Coupon.countDocuments(filter);
+        const totalPage = Math.ceil(totalCoupons / limit);
 
         res.render("admin/coupons", {
             coupons,
             currentPath: "/admin/coupons",
             totalPage,
             currentPage: page,
-            search
+            search,
+            status,
+            sort
         });
     } catch (error) {
         console.error("Error loading coupon page:", error);

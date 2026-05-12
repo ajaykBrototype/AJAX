@@ -116,17 +116,24 @@
         <div class="bg-white p-5 rounded-[28px] mb-8 border border-stone-100 shadow-sm flex flex-col lg:flex-row items-center gap-4">
             <div class="relative flex-1 w-full">
                 <svg class="absolute left-5 top-1/2 -translate-y-1/2 text-stone-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="Search by coupon code..." class="search-input">
+                <input type="text" id="couponSearch" value="<%= search %>" placeholder="Search by coupon code..." class="search-input">
             </div>
             
             <div class="flex items-center gap-4 w-full lg:w-auto">
-                <select class="bg-stone-50 border border-stone-200 rounded-2xl px-6 py-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-stone-100 transition-all appearance-none cursor-pointer pr-12 relative">
-                    <option>All Status</option>
-                    <option>Active</option>
-                    <option>Inactive</option>
+                <select id="statusFilter" onchange="applyFilters()" class="bg-stone-50 border border-stone-200 rounded-2xl px-6 py-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-stone-100 transition-all appearance-none cursor-pointer pr-12 relative">
+                    <option value="" <%= status === '' ? 'selected' : '' %>>All Status</option>
+                    <option value="active" <%= status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                </select>
+
+                <select id="sortFilter" onchange="applyFilters()" class="bg-stone-50 border border-stone-200 rounded-2xl px-6 py-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-stone-100 transition-all appearance-none cursor-pointer pr-12 relative">
+                    <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                    <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+                    <option value="discount-high" <%= sort === 'discount-high' ? 'selected' : '' %>>High Discount</option>
+                    <option value="discount-low" <%= sort === 'discount-low' ? 'selected' : '' %>>Low Discount</option>
                 </select>
                 
-                <p class="text-xs font-bold text-stone-400 whitespace-nowrap ml-2">Total Results: <span class="text-stone-900"><%= coupons.length %></span></p>
+                <p class="text-xs font-bold text-stone-400 whitespace-nowrap ml-2">Results: <span class="text-stone-900"><%= coupons.length %></span></p>
             </div>
         </div>
 
@@ -208,14 +215,35 @@
                 </table>
             </div>
 
-            <!-- Pagination Placeholder -->
-            <div class="px-8 py-6 border-t border-stone-50 flex items-center justify-center gap-2">
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-luxury-text text-white font-bold text-xs shadow-lg">1</button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-50 text-stone-500 font-bold text-xs transition-all">2</button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-50 text-stone-500 transition-all">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
+            <!-- Pagination -->
+            <% if (coupons.length > 0) { %>
+            <div class="px-8 py-6 border-t border-stone-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.2em]">
+                    Page <%= currentPage %> of <%= totalPage || 1 %>
+                </p>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="changePage(<%= Math.max(1, currentPage - 1) %>)" 
+                            <%= currentPage <= 1 ? 'disabled' : '' %>
+                            class="w-10 h-10 flex items-center justify-center rounded-xl border border-stone-100 hover:bg-stone-50 text-stone-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+
+                    <% for(let i = 1; i <= totalPage; i++) { %>
+                    <button onclick="changePage(<%= i %>)" 
+                            class="w-10 h-10 flex items-center justify-center rounded-xl <%= currentPage === i ? 'bg-luxury-text text-white shadow-lg' : 'hover:bg-stone-50 text-stone-500' %> font-bold text-xs transition-all">
+                        <%= i %>
+                    </button>
+                    <% } %>
+
+                    <button onclick="changePage(<%= Math.min(totalPage || 1, currentPage + 1) %>)" 
+                            <%= currentPage >= totalPage || totalPage <= 1 ? 'disabled' : '' %>
+                            class="w-10 h-10 flex items-center justify-center rounded-xl border border-stone-100 hover:bg-stone-50 text-stone-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
+            <% } %>
         </div>
     </main>
 
@@ -368,19 +396,57 @@
             discountSymbol.textContent = '₹';
         });
 
-        // Simple search simulation
-        const searchInput = document.querySelector('.search-input');
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const code = row.querySelector('.coupon-badge').textContent.toLowerCase();
-                if (code.includes(query)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+        // Debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        const debouncedSearch = debounce(applyFilters, 600);
+        document.getElementById('couponSearch').addEventListener('input', (e) => {
+            // Only search if length > 0 or it was cleared
+            if (e.target.value.length >= 0) {
+                debouncedSearch();
+            }
+        });
+
+        // Apply filters (Search, Status, Sort)
+        function applyFilters() {
+            const search = document.getElementById('couponSearch').value;
+            const status = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            
+            const url = new URL(window.location.href);
+            if (search) url.searchParams.set('search', search);
+            else url.searchParams.delete('search');
+            
+            if (status) url.searchParams.set('status', status);
+            else url.searchParams.delete('status');
+            
+            if (sort) url.searchParams.set('sort', sort);
+            else url.searchParams.delete('sort');
+            
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }
+
+        // Change page while preserving filters
+        function changePage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+
+        // Refocus search on reload
+        window.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('couponSearch');
+            if (searchInput.value) {
+                searchInput.focus();
+                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+            }
         });
 
         // Tab switching simulation
