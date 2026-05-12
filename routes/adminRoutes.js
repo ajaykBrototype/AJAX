@@ -28,6 +28,8 @@ import {
 } from "../controllers/admin/variant.controller.js";
 import { loadAdminOrders, loadOrderDetails,updateOrderStatus } from "../controllers/admin/order.controller.js";
 import { loadReturnManagement, loadReturnDetails,approveReturn,rejectReturn,schedulePickup,markPickedUp } from "../controllers/admin/return.controller.js";
+import { loadCouponPage,createCoupon,toggleCouponStatus,deleteCoupon } from "../controllers/admin/coupon.controller.js";
+
 
 const router = express.Router();
 
@@ -53,6 +55,12 @@ router.patch("/returns/:id/approve",approveReturn);
 router.patch("/returns/:id/reject",rejectReturn);
 router.patch("/returns/:id/schedule-pickup",schedulePickup);
 router.patch("/returns/:id/picked-up",markPickedUp);
+
+router.get("/coupons", noCache, isAdminAuth, loadCouponPage);
+router.post("/create",isAdminAuth, createCoupon);
+router.patch("/toggle/:id",isAdminAuth, toggleCouponStatus);
+router.delete("/delete/:id",isAdminAuth, deleteCoupon);
+
 
 router.get("/categories", isAdminAuth, loadCategoryPage);
 router.get("/categories/all", isAdminAuth, getCategories);
