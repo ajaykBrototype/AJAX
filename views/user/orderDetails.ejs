@@ -569,26 +569,33 @@ body {
           </div>
 
           <div class="pt-10 border-t border-[#f2f2f2] space-y-6">
-
-                  <%
-            var activeItems = order.items.filter(
+                   <%
+          var activeItems = order.items.filter(
             item => item.status !== "Cancelled"
-           );
+          );
 
           var subtotal = activeItems.reduce(
-            (sum, item) =>
-            sum + (item.price * item.quantity), 0);
+            (sum, item) => sum + (item.price * item.quantity), 0);
 
-             var shipping =
-          subtotal > 1000 || subtotal === 0 ? 0 : 100;
-
-          var finalTotal = subtotal + shipping;
-           %>
+          var shipping = subtotal > 1000 || subtotal === 0 ? 0 : 100;
+          
+          // Use the stored discount from the order
+          var couponDiscount = order.discount || 0;
+          var finalTotal = order.totalAmount;
+          %>
 
             <div class="flex justify-between items-center">
               <span class="label-grey">Order Subtotal</span>
               <span class="text-sm font-bold">₹<%= subtotal %></span>
             </div>
+
+            <% if (couponDiscount > 0) { %>
+            <div class="flex justify-between items-center">
+              <span class="label-grey text-green-600">Coupon Discount</span>
+              <span class="text-sm font-bold text-green-600">- ₹<%= couponDiscount.toFixed(2) %></span>
+            </div>
+            <% } %>
+
             <div class="flex justify-between items-center">
               <span class="label-grey">Shipping Fee</span>
               <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping === 0 ? 'FREE' : '₹' + shipping %></span>
@@ -623,9 +630,10 @@ body {
               </div>
               <div class="flex items-baseline gap-1">
                 <span class="text-2xl font-serif">₹</span>
-                <span class="text-3xl font-serif tracking-tighter"><%= finalTotal - refundedTotal %></span>
+                <span class="text-3xl font-serif tracking-tighter"><%= (order.totalAmount - refundedTotal).toFixed(2) %></span>
               </div>
             </div>
+      </div>
           </div>
         </div>
 

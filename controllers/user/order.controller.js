@@ -8,6 +8,7 @@ import Variant from "../../models/admin/variantModel.js";
 import Return from "../../models/user/returnModel.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
+import Coupon from "../../models/admin/couponModel.js";
 
 export const loadOrderPage = async (req, res) => {
     try {
@@ -162,7 +163,7 @@ export const placeOrder = async (req, res) => {
 
         const userId = new mongoose.Types.ObjectId(req.session.userId);
 
-        const { addressId, paymentMethod } = req.body;
+        const { addressId, paymentMethod, couponCode } = req.body;
 
         const normalizedPayment = paymentMethod.toUpperCase();
 
@@ -237,14 +238,55 @@ export const placeOrder = async (req, res) => {
 
         }
 
-        let total = orderItems.reduce(
+        const subtotal = orderItems.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0
         );
 
-        const shipping = total > 1000 ? 0 : 100;
+        let discount = 0;
+        let appliedCoupon = null;
 
-        total += shipping;
+        if (couponCode) {
+            const today = new Date();
+            appliedCoupon = await Coupon.findOne({
+                code: couponCode.toUpperCase(),
+                status: "active",
+                startDate: { $lte: today },
+                endDate: { $gte: today }
+            });
+
+            if (appliedCoupon && subtotal >= appliedCoupon.minOrder) {
+                if (appliedCoupon.discountType === "flat") {
+                    discount = appliedCoupon.discountAmount;
+                } else {
+                    discount = (subtotal * appliedCoupon.discountAmount) / 100;
+                    if (appliedCoupon.maxDiscount > 0 && discount > appliedCoupon.maxDiscount) {
+                        discount = appliedCoupon.maxDiscount;
+                    }
+                }
+                
+                // Check usage limits (treat 0 or null as unlimited)
+                const globalLimitMet = !appliedCoupon.maxUsage || appliedCoupon.usageCount < appliedCoupon.maxUsage;
+                
+                const userUsage = await Order.countDocuments({
+                    userId,
+                    couponCode: appliedCoupon.code,
+                    status: { $ne: "Cancelled" }
+                });
+                const userLimitMet = !appliedCoupon.userLimit || userUsage < appliedCoupon.userLimit;
+
+                if (globalLimitMet && userLimitMet) {
+                    appliedCoupon.usageCount += 1;
+                    await appliedCoupon.save();
+                } else {
+                    discount = 0; // Usage limit reached
+                    appliedCoupon = null;
+                }
+            }
+        }
+
+        const shipping = subtotal > 1000 ? 0 : 100;
+        const total = subtotal + shipping - discount;
 
         const order = await Order.create({
             userId,
@@ -261,6 +303,8 @@ export const placeOrder = async (req, res) => {
             },
             paymentMethod: normalizedPayment,
             totalAmount: total,
+            discount: discount,
+            couponCode: appliedCoupon ? appliedCoupon.code : null,
             status: normalizedPayment === "RAZORPAY" ? "Pending" : "Placed",
             statusHistory: [
                 {

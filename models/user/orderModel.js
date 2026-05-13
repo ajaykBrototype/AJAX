@@ -43,6 +43,14 @@ const orderSchema = new mongoose.Schema({
   },
 
   totalAmount: Number,
+  discount: {
+    type: Number,
+    default: 0
+  },
+  couponCode: {
+    type: String,
+    uppercase: true
+  },
 
   status: {
     type: String,

@@ -12,7 +12,7 @@ import { noCache } from "../middleware/noCache.js";
 import { loadMenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
-import {loadCheckoutPage,saveAddress } from "../controllers/user/checkout.controller.js";
+import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../controllers/user/checkout.controller.js";
 import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem, loadReturnRequest,submitReturnRequest, verifyOrderPayment, loadPaymentFailure } from "../controllers/user/order.controller.js";
 import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment} from "../controllers/user/wallet.controller.js";
 
@@ -103,6 +103,9 @@ router.get("/orders/:id",isLoggedIn,loadOrderDetails);
 router.get("/orders/:id/return", isLoggedIn, loadReturnRequest);
 router.patch("/orders/:orderId/items/:itemId/cancel",isLoggedIn,cancelOrderItem);
 router.post("/return-request",upload.array("images",5),submitReturnRequest);
+
+router.get("/coupons/available",isLoggedIn,getAvailableCoupons);
+router.post("/checkout/apply-coupon", isLoggedIn, applyCoupon);
 
 
 router.get("/wallet",isLoggedIn,loadWalletPage);

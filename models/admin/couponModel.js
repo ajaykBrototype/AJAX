@@ -33,7 +33,7 @@ const couponSchema = new mongoose.Schema({
 
     maxUsage: {
         type: Number,
-        default: 1
+        default: 0
     },
 
     usageCount: {
@@ -43,7 +43,7 @@ const couponSchema = new mongoose.Schema({
 
     userLimit: {
         type: Number,
-        default: 1
+        default: 0
     },
 
     startDate: {

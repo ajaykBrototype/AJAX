@@ -49,9 +49,139 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    window.toggleCouponsModal = async function (show) {
+        const modal = document.getElementById('couponsModal');
+        const container = document.getElementById('couponContainer');
+
+        if (show) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Fetch Coupons
+            try {
+                const subtotal = document.getElementById('checkoutSubtotal').value;
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 text-stone-300">
+                        <div class="w-8 h-8 border-2 border-dark/10 border-t-dark rounded-full animate-spin mb-4"></div>
+                        <p class="text-[0.6rem] font-black tracking-widest uppercase">Fetching available offers...</p>
+                    </div>
+                `;
+
+                const res = await axios.get(`/coupons/available?subtotal=${subtotal}`);
+                
+                if (res.data.success && res.data.coupons.length > 0) {
+                    container.innerHTML = res.data.coupons.map(coupon => `
+                        <div class="relative group ${!coupon.eligible ? 'opacity-80' : ''}" 
+                             ${coupon.eligible ? `onclick="selectCoupon('${coupon.code}')"` : ''}>
+                            <div class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#FAF9F6] border-r border-brand-mist/30 rounded-full z-10"></div>
+                            <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#FAF9F6] border-l border-brand-mist/30 rounded-full z-10"></div>
+                            
+                            <div class="bg-white border border-brand-mist/30 rounded-[1.5rem] p-6 transition-all ${coupon.eligible ? 'hover:shadow-lg hover:shadow-dark/5 cursor-pointer' : ''} overflow-hidden relative">
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="px-4 py-1.5 bg-brand-warm border border-brand-mist/30 rounded-lg text-[0.6rem] font-black tracking-widest uppercase font-sans">${coupon.code}</span>
+                                    <span class="text-[0.45rem] font-black tracking-widest ${coupon.eligible ? 'text-green-500 bg-green-50' : 'text-red-400 bg-red-50'} uppercase px-2 py-0.5 rounded-md font-sans">
+                                        ${coupon.eligible ? 'Requirement met' : 'NOT ELIGIBLE'}
+                                    </span>
+                                </div>
+                                
+                                <h4 class="text-xl font-bold tracking-tight mb-1 font-sans ${!coupon.eligible ? 'text-stone-300' : 'text-brand-dark'}">
+                                    ${coupon.discountType === 'flat' ? `₹${coupon.discountAmount}` : `${coupon.discountAmount}%`} OFF
+                                </h4>
+                                <p class="text-[0.65rem] font-medium text-stone-300 mb-6 font-sans">Save on your order with this exclusive coupon.</p>
+                                
+                                <div class="pt-4 border-t border-dashed border-brand-mist/30 flex justify-between items-center">
+                                    <p class="text-[0.55rem] font-black text-stone-200 uppercase tracking-widest font-sans">Min. Purchase: ₹${coupon.minOrder}</p>
+                                    ${!coupon.eligible ? `<span class="text-[0.5rem] font-black text-red-300 uppercase tracking-widest font-sans">Minimum not met</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-20 px-10">
+                            <i data-lucide="ticket-x" class="mx-auto text-stone-200 mb-4" size="32"></i>
+                            <p class="text-[0.6rem] font-black tracking-widest text-stone-300 uppercase">No coupons available at this time</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p class="text-red-400 text-center py-10 text-xs">Failed to load coupons</p>`;
+            }
+        } else {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.selectCoupon = function (code) {
+        const input = document.getElementById('couponCodeInput');
+        if (input) {
+            input.value = code;
+            toggleCouponsModal(false);
+            applyCoupon(); // Auto-apply when selected from modal
+        }
+    };
+
+    let originalTotal = parseFloat(document.getElementById('checkoutTotalRaw').value);
+    let currentDiscount = 0;
+
+    window.applyCoupon = async function () {
+        const code = document.getElementById('couponCodeInput').value.trim();
+        const subtotal = parseFloat(document.getElementById('checkoutSubtotal').value);
+
+        if (!code) {
+            return ajaxToast("error", "Please enter a coupon code");
+        }
+
+        try {
+            const res = await axios.post('/checkout/apply-coupon', { code, subtotal });
+
+            if (res.data.success) {
+                currentDiscount = res.data.discount;
+                const newTotal = originalTotal - currentDiscount;
+
+                // Update UI
+                document.getElementById('discountRow').classList.remove('hidden');
+                document.getElementById('discountValue').innerText = `-₹ ${currentDiscount.toFixed(2)}`;
+                document.getElementById('totalPrice').innerText = `₹ ${newTotal.toFixed(2)}`;
+                document.getElementById('orderBtnText').innerText = `Complete Order — ₹${newTotal.toFixed(2)}`;
+                
+                document.getElementById('applyCouponBtn').classList.add('hidden');
+                document.getElementById('removeCouponBtn').classList.remove('hidden');
+                document.getElementById('couponCodeInput').readOnly = true;
+
+                ajaxToast("success", res.data.message);
+            } else {
+                ajaxToast("error", res.data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            ajaxToast("error", "Something went wrong while applying coupon");
+        }
+    };
+
+    window.removeCoupon = function () {
+        currentDiscount = 0;
+        
+        // Update UI
+        document.getElementById('discountRow').classList.add('hidden');
+        document.getElementById('totalPrice').innerText = `₹ ${originalTotal.toFixed(2)}`;
+        document.getElementById('orderBtnText').innerText = `Complete Order — ₹${originalTotal.toFixed(2)}`;
+        
+        document.getElementById('applyCouponBtn').classList.remove('hidden');
+        document.getElementById('removeCouponBtn').classList.add('hidden');
+        document.getElementById('couponCodeInput').readOnly = false;
+        document.getElementById('couponCodeInput').value = '';
+
+        ajaxToast("success", "Coupon removed");
+    };
+
     window.closeAllModals = function () {
         toggleAddressModal(false);
         toggleAddressFormModal(false);
+        toggleCouponsModal(false);
     };
 
   
@@ -219,9 +349,14 @@ async function placeOrder() {
             'input[name="payment"]:checked'
         ).value;
 
+        const couponCodeInput = document.getElementById('couponCodeInput');
+        const removeBtn = document.getElementById('removeCouponBtn');
+        const couponCode = (removeBtn && !removeBtn.classList.contains('hidden')) ? couponCodeInput.value.trim() : null;
+
         const res = await axios.post("/order/place", {
             addressId: selectedAddress,
-            paymentMethod
+            paymentMethod,
+            couponCode
         });
 
         if (res.data.success) {
@@ -275,5 +410,115 @@ async function placeOrder() {
     } catch (err) {
         console.log(err);
         ajaxToast("error", "Something went wrong");
+    }
+
+}
+
+
+
+
+
+
+
+
+
+async function loadCoupons() {
+
+    try {
+
+        const subtotal =
+            Number(
+                document
+                .getElementById(
+                    "checkoutSubtotal"
+                ).value
+            );
+
+        const response =
+            await axios.get(
+
+            `/coupons/available?subtotal=${subtotal}`
+        );
+
+        const coupons =
+            response.data.coupons;
+
+        const container =
+            document.getElementById(
+                "couponContainer"
+            );
+
+        container.innerHTML = "";
+
+        coupons.forEach(coupon => {
+            const isEligible = coupon.eligible;
+            const alreadyUsed = coupon.alreadyUsed;
+            const reason = coupon.reason;
+
+            container.innerHTML += `
+            <div class="relative group ${!isEligible ? "opacity-60" : ""}">
+                <div class="bg-white border border-brand-mist/30 rounded-[1.5rem] p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="px-4 py-1.5 bg-brand-warm border border-brand-mist/30 rounded-lg text-[0.6rem] font-black tracking-widest uppercase">
+                            ${coupon.code}
+                        </span>
+                        <span class="text-[0.45rem] font-black tracking-widest uppercase px-2 py-0.5 rounded-md
+                        ${alreadyUsed ? "text-orange-500 bg-orange-50" : (isEligible ? "text-green-500 bg-green-50" : "text-red-400 bg-red-50")}">
+                            ${reason}
+                        </span>
+                    </div>
+
+                    <h4 class="text-xl font-bold tracking-tight mb-1">
+                        ${coupon.discountType === "percentage" ? `${coupon.discountAmount}% OFF` : `₹${coupon.discountAmount} OFF`}
+                    </h4>
+                    <p class="text-[0.65rem] font-medium text-stone-300 mb-6">
+                        Save instantly on your order with this exclusive coupon.
+                    </p>
+
+                    <div class="pt-4 border-t border-dashed border-brand-mist/30 flex justify-between items-center">
+                        <p class="text-[0.55rem] font-black text-stone-200 uppercase tracking-widest">
+                            Min. Purchase: ₹${coupon.minOrder}
+                        </p>
+                        <span class="text-[0.45rem] font-black tracking-widest uppercase ${isEligible ? "text-green-500" : "text-red-400"}">
+                            ${isEligible ? "Eligible" : reason}
+                        </span>
+                    </div>
+
+                    <div class="mt-4">
+
+    ${isEligible?
+
+        `
+        <button
+            onclick="selectCoupon('${coupon.code}')"
+
+            class="w-full bg-black text-white py-3 rounded-xl text-[0.6rem] font-black tracking-widest uppercase hover:bg-stone-800 transition-all">
+
+            Apply Coupon
+        </button>
+        `
+
+        :
+
+        `
+        <button
+            disabled
+
+            class="w-full bg-stone-100 text-stone-400 py-3 rounded-xl text-[0.6rem] font-black tracking-widest uppercase cursor-not-allowed">
+
+            ${reason}
+        </button>
+        `
+    }
+
+</div>
+                </div>
+            </div>
+            `;
+        });
+
+    } catch (err) {
+
+        console.log(err);
     }
 }
