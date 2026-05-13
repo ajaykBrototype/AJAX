@@ -24,6 +24,20 @@ export const loadOrderPage = async (req, res) => {
     }
 };
 
+export const loadPaymentFailure = async (req, res) => {
+    try {
+        const orderId = req.query.orderId;
+        const message = req.query.message;
+        const order = await Order.findById(orderId);
+
+        res.render("user/paymentFailure", { order, message });
+
+    } catch (err) {
+        console.log("PAYMENT FAILURE PAGE ERROR:", err);
+        res.redirect("/checkout");
+    }
+};
+
 export const loadOrdersList = async (req, res) => {
 
     try {

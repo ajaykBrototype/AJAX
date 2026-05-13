@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX — Payment Failed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#1C1C1C',
+                            cream: '#F5F0E8',
+                            warm: '#FAFAF8',
+                            stone: '#9B8E83',
+                            mist: '#EAE5DC',
+                            failure: '#D9534F'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <%- include('../partials/navbar-styles') %>
+    <%- include('../partials/footer-styles') %>
+    <style>
+        :root {
+            --brand-dark: #000000;
+            --brand-warm: #FAFAF9;
+            --brand-failure: #EF4444;
+            --brand-mist: #F3F4F6;
+        }
+        body {
+            background-color: var(--brand-warm);
+            font-family: 'Outfit', sans-serif;
+            color: var(--brand-dark);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .failure-container {
+            max-width: 540px;
+            width: 90%;
+            margin: auto;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .editorial-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 500;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .order-subtext {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: #9CA3AF;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .rest-assured-box {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #F3F4F6;
+        }
+
+        .timer-badge {
+            background: #FFF1F2;
+            color: #E11D48;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+            width: 100%;
+            justify-content: center;
+            border: 1px solid #FFE4E6;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-dark {
+            background: black;
+            color: white;
+        }
+        .btn-dark:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-dark:disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: white;
+            color: black;
+            border: 1px solid #E5E7EB;
+        }
+        .btn-outline:hover {
+            background: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+
+        .footer-note {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #9CA3AF;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2.5rem;
+        }
+
+        .footer-note a {
+            color: black;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="failure-container">
+        <!-- Icon -->
+        <div class="icon-box">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+
+        <h1 class="editorial-title">Payment Unsuccessful</h1>
+        
+        <p class="order-subtext">
+            We couldn't process your transaction for order <br>
+            <span class="text-black">#ORD-<%= order ? order._id.toString().slice(-10).toUpperCase() : 'UNKNOWN' %></span>
+        </p>
+
+        <div class="rest-assured-box">
+            <p class="text-[0.65rem] leading-relaxed text-stone-500">
+                <strong class="text-black">Rest assured:</strong> If any amount was debited, it will be automatically refunded by your bank within 5-7 business days.
+            </p>
+        </div>
+
+        <div class="timer-badge" id="timerBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            RETRY EXPIRES IN <span id="countdown">05:00</span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <button id="retryBtn" onclick="retryPayment('<%= order ? order._id : '' %>')" class="btn-action btn-dark">
+                Retry Payment
+            </button>
+            <a href="/orders" class="btn-action btn-outline inline-block text-center">
+                View Order
+            </a>
+        </div>
+
+        <p class="footer-note">
+            Need help? Contact our concierge at <a href="mailto:support@ajax.com">SUPPORT@AJAX.COM</a>
+        </p>
+    </div>
+
+    <script>
+        let timeLeft = 300; // 5 minutes in seconds
+        const countdownEl = document.getElementById('countdown');
+        const retryBtn = document.getElementById('retryBtn');
+        const timerBadge = document.getElementById('timerBadge');
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            countdownEl.innerHTML = `${minutes}:${seconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                retryBtn.disabled = true;
+                timerBadge.style.opacity = '0.5';
+                countdownEl.innerHTML = 'EXPIRED';
+            }
+            timeLeft--;
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        function retryPayment(orderId) {
+            if (!orderId) {
+                window.location.href = '/checkout';
+                return;
+            }
+            window.location.href = '/checkout';
+        }
+    </script>
+</body>
+</html>
+</body>
+</html>

@@ -246,11 +246,16 @@ async function placeOrder() {
                             if (verifyRes.data.success) {
                                 handleOrderCompletion(res.data.orderId);
                             } else {
-                                ajaxToast("error", verifyRes.data.message || "Payment verification failed");
+                                window.location.href = `/payment-failure?orderId=${res.data.orderId}&message=${verifyRes.data.message || 'Payment verification failed'}`;
                             }
                         } catch (err) {
                             console.log(err);
-                            ajaxToast("error", "Payment verification failed");
+                            window.location.href = `/payment-failure?orderId=${res.data.orderId}&message=Something went wrong during verification`;
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            window.location.href = `/payment-failure?orderId=${res.data.orderId}&message=Payment was cancelled`;
                         }
                     },
                     theme: {
