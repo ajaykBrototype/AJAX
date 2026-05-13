@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lucide.createIcons();
 
-    window.handleOrderCompletion = function () {
+    window.handleOrderCompletion = function (orderId) {
         const btn = document.getElementById('completeOrderBtn');
 
         btn.classList.add('order-btn-loading');
@@ -13,9 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             ajaxToast("success", "Order Placed Successfully!");
 
-              setTimeout(() => {
-            window.location.href =  `/order-success/${orderId}`;
-        }, 800);
+            setTimeout(() => {
+                window.location.href = `/order-success/${orderId}`;
+            }, 2500); // Increased delay for toast visibility
 
         }, 2000);
     };
@@ -225,10 +225,44 @@ async function placeOrder() {
         });
 
         if (res.data.success) {
-            handleOrderCompletion(res.data.orderId); // animation
-            setTimeout(() => {
-                window.location.href = `/order-success/${res.data.orderId}`;
-            }, 2000);
+            if (res.data.razorpayOrder) {
+                // HANDLE RAZORPAY
+                const options = {
+                    key: "rzp_test_SoheRfzN69tfvZ", // Use the same key as in wallet.js
+                    amount: res.data.razorpayOrder.amount,
+                    currency: res.data.razorpayOrder.currency,
+                    name: "AJAX Store",
+                    description: "Order Payment",
+                    order_id: res.data.razorpayOrder.id,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await axios.post("/order/verify-payment", {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: res.data.orderId
+                            });
+
+                            if (verifyRes.data.success) {
+                                handleOrderCompletion(res.data.orderId);
+                            } else {
+                                ajaxToast("error", verifyRes.data.message || "Payment verification failed");
+                            }
+                        } catch (err) {
+                            console.log(err);
+                            ajaxToast("error", "Payment verification failed");
+                        }
+                    },
+                    theme: {
+                        color: "#1C1C1C"
+                    }
+                };
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                // COD or WALLET
+                handleOrderCompletion(res.data.orderId);
+            }
         } else {
             ajaxToast("error", res.data.message || "Order failed");
         }

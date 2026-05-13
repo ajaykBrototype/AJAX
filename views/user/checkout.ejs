@@ -291,17 +291,19 @@
                     
                     <div class="grid grid-cols-1 gap-4">
                         <!-- Wallet Option -->
-                        <label class="payment-option checkout-card p-6 flex items-center gap-6 cursor-pointer hover:bg-brand-warm/20 transition-all border border-transparent group opacity-60 grayscale cursor-not-allowed">
-                            <input type="radio" name="payment" value="wallet" disabled>
+                        <label class="payment-option checkout-card p-6 flex items-center gap-6 cursor-pointer hover:bg-brand-warm/20 transition-all border border-transparent group <%= (wallet && wallet.balance >= total) ? '' : 'opacity-60 grayscale cursor-not-allowed' %>">
+                            <input type="radio" name="payment" value="wallet" <%= (wallet && wallet.balance >= total) ? '' : 'disabled' %>>
                             <div class="radio-custom flex-shrink-0"></div>
                             <div class="w-12 h-12 rounded-2xl bg-[#E8F3F1] flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i data-lucide="wallet" class="text-[#2D8A7E]" size="20"></i>
                             </div>
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold">Wallet Balance</h4>
-                                <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">₹0.00 Available</p>
+                                <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">₹<%= wallet ? wallet.balance.toFixed(2) : '0.00' %> Available</p>
                             </div>
-                            <span class="px-3 py-1 bg-red-50 text-red-400 text-[0.5rem] font-black tracking-widest uppercase rounded">Insufficient</span>
+                            <% if (!wallet || wallet.balance < total) { %>
+                                <span class="px-3 py-1 bg-red-50 text-red-400 text-[0.5rem] font-black tracking-widest uppercase rounded">Insufficient</span>
+                            <% } %>
                         </label>
 
                         <!-- Razorpay Option -->
@@ -672,6 +674,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/utils/swal-helper.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/user/checkout.js"></script>
 </body>
 </html>

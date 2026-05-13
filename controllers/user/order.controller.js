@@ -6,7 +6,8 @@ import mongoose from "mongoose";
 import User from "../../models/user/userModel.js";
 import Variant from "../../models/admin/variantModel.js";
 import Return from "../../models/user/returnModel.js";
-import { success } from "zod";
+import razorpay from "../../config/razorpay.js";
+import crypto from "crypto";
 
 export const loadOrderPage = async (req, res) => {
     try {
@@ -232,11 +233,8 @@ export const placeOrder = async (req, res) => {
         total += shipping;
 
         const order = await Order.create({
-
             userId,
-
             items: orderItems,
-
             address: {
                 name: address.name,
                 phone: address.phone,
@@ -247,24 +245,51 @@ export const placeOrder = async (req, res) => {
                 pincode: address.pincode,
                 country: address.country
             },
-
             paymentMethod: normalizedPayment,
-
             totalAmount: total,
-
             status: "Placed",
-
             statusHistory: [
                 {
                     status: "Placed",
                     updatedAt: new Date()
                 }
             ]
-
         });
 
-        cart.items = [];
+        if (normalizedPayment === "WALLET") {
+            const wallet = await Wallet.findOne({ userId });
+            if (!wallet || wallet.balance < total) {
+                throw new Error("Insufficient wallet balance");
+            }
+            wallet.balance -= total;
+            wallet.transactions.push({
+                transactionId: "PAY" + Date.now(),
+                orderId: order._id,
+                type: "debit",
+                amount: total,
+                description: "Payment for Order #" + order._id.toString().slice(-6),
+                date: new Date()
+            });
+            await wallet.save();
+        }
 
+        if (normalizedPayment === "RAZORPAY") {
+            const options = {
+                amount: Math.round(total * 100),
+                currency: "INR",
+                receipt: "order_" + order._id.toString()
+            };
+
+            const rzpOrder = await razorpay.orders.create(options);
+
+            return res.json({
+                success: true,
+                razorpayOrder: rzpOrder,
+                orderId: order._id
+            });
+        }
+
+        cart.items = [];
         await cart.save();
 
         res.json({
@@ -273,14 +298,64 @@ export const placeOrder = async (req, res) => {
         });
 
     } catch (err) {
-
         console.log("ORDER ERROR FULL:", err);
-
         res.json({
             success: false,
             message: err.message
         });
+    }
+};
 
+export const verifyOrderPayment = async (req, res) => {
+    try {
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+            orderId
+        } = req.body;
+
+        const generatedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest("hex");
+
+        if (generatedSignature !== razorpay_signature) {
+            return res.json({
+                success: false,
+                message: "Payment verification failed"
+            });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        order.status = "Placed";
+        order.paymentStatus = "Paid"; // Adding a payment status if helpful
+        await order.save();
+
+        const userId = req.session.userId;
+        const cart = await Cart.findOne({ user: userId });
+        if (cart) {
+            cart.items = [];
+            await cart.save();
+        }
+
+        res.json({
+            success: true
+        });
+
+    } catch (err) {
+        console.log("VERIFY PAYMENT ERROR:", err);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
     }
 };
 

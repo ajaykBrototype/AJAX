@@ -1,5 +1,6 @@
 import Cart from "../../models/user/cartModel.js";
 import Address from "../../models/user/addressModel.js";
+import Wallet from "../../models/user/walletModel.js";
 import mongoose from "mongoose";
 
 export const loadCheckoutPage = async (req, res) => {
@@ -32,7 +33,9 @@ export const loadCheckoutPage = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        res.render("user/checkout", { cart, address, addresses });
+        const wallet = await Wallet.findOne({ userId });
+
+        res.render("user/checkout", { cart, address, addresses, wallet });
 
     } catch (err) {
         console.log("CHECKOUT ERROR:", err);

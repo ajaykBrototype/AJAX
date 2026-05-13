@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("summaryAmount");
 
     const presetBtns =
-
-
+        document.querySelectorAll(".preset-btn");
     window.openAddMoneyModal = function () {
         modal.classList.add("open");
         document.body.style.overflow = "hidden";
@@ -114,7 +113,7 @@ async function () {
         const options = {
 
             key:
-                rzp_test_SoheRfzN69tfvZ,
+                "rzp_test_SoheRfzN69tfvZ",
 
             amount:
                 order.amount,
