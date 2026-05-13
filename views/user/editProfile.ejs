@@ -8,166 +8,242 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
-      theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+      theme: { 
+        extend: { 
+            fontFamily: { 
+                serif: ['Playfair Display', 'serif'], 
+                sans: ['Outfit', 'sans-serif'] 
+            } 
+        } 
+      }
     }
   </script>
 
   <%- include('../partials/navbar-styles') %>
+  <%- include('../partials/footer-styles') %>
 <style>
-
-    /* ── SIDEBAR ── */
-    .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-left:2px solid transparent;transition:all .25s}
-    .sidebar-link:hover{color:var(--dark);background:rgba(28,28,28,.03)}
-    .sidebar-link.active{color:var(--dark);border-left-color:var(--dark);background:rgba(28,28,28,.04);font-weight:500}
-
-    /* ── FORM INPUTS ── */
-    input:disabled {
-  background: #f5f5f5;
-  cursor: not-allowed;
-}
-    .input-field {
-      width: 100%; border: 1px solid var(--bdr); background: #fff; padding: .85rem 1rem;
-      font-size: .85rem; transition: all .3s ease; font-family: 'DM Sans', sans-serif;
+    body {
+        background-color: #F8F6F2;
+        color: #1C1C1C;
+        font-family: 'Outfit', sans-serif;
     }
-    .input-field:focus { outline: none; border-color: var(--dark); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-
-    /* ── PAGE ANIMATION ── */
-    @keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    .page-in{animation:pageIn .7s cubic-bezier(.16,1,.3,1) both}
-
+    .modern-card {
+        background: #fff;
+        border-radius: 2.5rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    .input-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #9B8E83;
+        margin-left: 0.5rem;
+    }
+    .modern-input {
+        width: 100%;
+        background: #FBF9F6;
+        border: 1px solid rgba(0,0,0,0.05);
+        padding: 1.1rem 1.5rem;
+        border-radius: 1.25rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .modern-input:focus {
+        outline: none;
+        background: #fff;
+        border-color: #1C1C1C;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    }
+    .modern-input:disabled {
+        background: #F3F1ED;
+        cursor: not-allowed;
+        color: #BDB7B1;
+    }
+    .avatar-wrapper {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        padding: 6px;
+        background: #F8F6F2;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-cover: cover;
+        border: 4px solid #fff;
+    }
+    .primary-btn {
+        background: #1C1C1C;
+        color: white;
+        padding: 1.4rem;
+        border-radius: 1.5rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .primary-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        background: #000;
+    }
+    .primary-btn:active {
+        transform: translateY(-1px);
+    }
 </style>
-<%- include('../partials/footer-styles') %>
 </head>
 
-<%- include('../partials/navbar', { hasSidebarToggle: true }) %>
-<!-- <%- include('../partials/sidebar-drawer', { activePage: 'profile' }) %> -->
+<body class="bg-[#F8F6F2]">
+<%- include('../partials/navbar', { hasSidebarToggle: false }) %>
 
-<div style="padding-top:65px; min-height:100vh;">
-  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
+<div class="pt-24 min-h-screen pb-24">
+    <main class="max-w-[1440px] mx-auto px-6 md:px-12 pt-6">
+        
+        <div class="max-w-3xl mx-auto">
+            <%- include('../partials/breadcrumbs', { 
+                breadcrumbs: [
+                    { name: "My Profile", url: "/profile" },
+                    { name: "Edit Profile" }
+                ] 
+            }) %>
+            
+            <header class="mt-6 mb-8 text-center">
+                <p class="text-[0.6rem] font-black uppercase tracking-[0.4em] text-stone-400 mb-2">Account Settings</p>
+                <h1 class="font-serif text-5xl md:text-6xl font-medium italic">Edit Profile</h1>
+            </header>
 
-    <%- include('../partials/sidebar', { activePage: 'profile' }) %>
+            <!-- Card UI Container -->
+            <div class="modern-card p-8 md:p-16">
+                <form id="editForm" enctype="multipart/form-data" class="space-y-12">
+                    
+                    <!-- Avatar Upload Section -->
+                    <div class="flex flex-col md:flex-row items-center gap-10 pb-12 border-b border-stone-100">
+                        <div class="avatar-wrapper">
+                            <img id="previewImage"
+                                src="<%= user.profileImage || '/images/default-user.png' %>"
+                                alt="Profile"
+                                class="avatar-img">
+                        </div>
+                        
+                        <div class="flex flex-col gap-4 text-center md:text-left">
+                            <h4 class="font-bold text-xl">Profile Picture</h4>
+                            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                                <label class="cursor-pointer bg-[#1C1C1C] text-white px-8 py-4 rounded-2xl text-[0.6rem] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-black/10">
+                                    Change Photo
+                                    <input type="file" id="imageInput" name="profileImage" class="hidden" />
+                                </label>
+                                <button type="button" onclick="removeImage()" class="px-8 py-4 border border-stone-200 rounded-2xl text-[0.6rem] font-black uppercase tracking-widest hover:bg-stone-50 transition-all">
+                                    Remove
+                                </button>
+                            </div>
+                            <p class="text-[0.65rem] font-bold text-stone-300 uppercase tracking-widest">
+                                JPG or PNG, Max 2MB
+                            </p>
+                        </div>
+                    </div>
 
-<main class="page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
-  
-  <%- include('../partials/breadcrumbs', { 
-      breadcrumbs: [
-          { name: "My Profile", url: "/profile" },
-          { name: "Edit Profile" }
-      ] 
-  }) %>
-  
-  <header style="margin-bottom:3rem;">
-    <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">
-      Account Settings
-    </p>
-    <h1 style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);">
-      Edit Profile
-    </h1>
-  </header>
+                    <!-- Personal Information Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                        <div class="input-group">
+                            <label class="input-label">Full Name</label>
+                            <input type="text" name="name" value="<%= user.name %>" class="modern-input" placeholder="Enter your full name" />
+                        </div>
 
-  <!-- 🔥 FORM START -->
-  <form id="editForm" enctype="multipart/form-data"
-    class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8"
-    style="max-width:800px;">
+                        <div class="input-group">
+                            <label class="input-label">Email Address</label>
+                            <input type="email" name="email" value="<%= user.email %>" class="modern-input" <%= user.googleId ? "readonly disabled" : "" %> placeholder="yourname@example.com" />
+                            <% if (user.googleId) { %>
+                                <p class="text-[0.6rem] text-stone-400 font-medium italic mt-1 ml-2">Email linked to Google Account</p>
+                            <% } %>
+                        </div>
 
-    <!-- 🔥 IMAGE SECTION (NOW INSIDE FORM) -->
-    <div class="md:col-span-2"
-      style="display:flex;align-items:center;gap:2.5rem;margin-bottom:2rem;background:#fff;border:1px solid var(--bdr);padding:2rem;">
-      
-      <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--bdr);">
-        <img id="previewImage"
-          src="<%= user.profileImage || 'https://via.placeholder.com/150' %>"
-          class="w-full h-full object-cover">
-      </div>
+                        <div class="input-group">
+                            <label class="input-label">Phone Number</label>
+                            <input type="text" name="phone" value="<%= user.phone || '' %>" class="modern-input" placeholder="+91 00000 00000" />
+                        </div>
 
-      <div>
-        <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
-          
-          <label style="background:var(--dark);color:#fff;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;cursor:pointer;">
-            Change Photo
-            <input type="file" id="imageInput" name="profileImage" class="hidden" />
-          </label>
+                        <div class="input-group">
+                            <label class="input-label">Date of Birth</label>
+                            <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="modern-input" />
+                        </div>
 
-          <button type="button" onclick="removeImage()"
-            style="background:none;border:1px solid var(--bdr);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.5rem;">
-            Remove
-          </button>
+                        <div class="input-group">
+                            <label class="input-label">Gender</label>
+                            <select name="gender" class="modern-input appearance-none" style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27 fill=%27none%27 viewBox=%270%200%2020%2020%27%3E%3Cpath stroke=%27%239B8E83%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6%208%204%204%204-4%27%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1.5rem center; background-size: 1.25rem;">
+                                <option value="">Select Gender</option>
+                                <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
+                                <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
+                                <option value="Other" <%= user.gender === "Other" ? "selected" : "" %>>Other</option>
+                            </select>
+                        </div>
 
+                        <div class="input-group">
+                            <label class="input-label">Nationality</label>
+                            <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="modern-input" placeholder="e.g. Indian" />
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="pt-8">
+                        <button type="submit" id="submitBtn" class="primary-btn w-full flex items-center justify-center gap-4">
+                            <span id="btnText">Save Changes —</span>
+                            <span id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <p style="font-size:0.65rem;color:var(--stone);text-transform:uppercase;">
-          JPG or PNG, Max 2MB
-        </p>
-      </div>
-    </div>
-
-    <!-- YOUR EXISTING INPUTS -->
-
-    <div class="flex flex-col">
-      <label class="label">Full Name</label>
-      <input type="text" name="name" value="<%= user.name %>" class="input-field" />
-    </div>
-
-    <div class="flex flex-col">
-      <label class="label">Email</label>
-      <input type="email" name="email" value="<%= user.email %>" class="input-field"  <%= user.googleId ? "readonly" : "" %>/>
-      <% if (user.googleId) { %>
-    <p class="text-xs text-gray-500 mt-1">
-    Email cannot be changed for Google accounts</p>
-   <% } %>
-      
-    </div>
-
-    <div class="flex flex-col">
-      <label class="label">Phone</label>
-      <input type="text" name="phone" value="<%= user.phone || '' %>" class="input-field" />
-    </div>
-
-    <div class="flex flex-col">
-      <label class="label">DOB</label>
-      <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="input-field" />
-    </div>
-
-    <div class="flex flex-col">
-      <label class="label">Gender</label>
-      <select name="gender" class="input-field">
-        <option value="">Select</option>
-        <option value="Male" <%= user.gender === "Male" ? "selected" : "" %>>Male</option>
-        <option value="Female" <%= user.gender === "Female" ? "selected" : "" %>>Female</option>
-      </select>
-    </div>
-
-    <div class="flex flex-col">
-      <label class="label">Nationality</label>
-      <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="input-field" />
-    </div>
-
-    <div class="md:col-span-2 mt-4">
-      <button type="submit" id="submitBtn"
-  style="width:100%;background:var(--dark);color:#fff;padding:1.2rem;"
-  class="flex items-center justify-center gap-3">
-
-  <span id="btnText">Save Changes →</span>
-
-  <!-- 🔥 Spinner -->
-  <span id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-
-</button>
-    </div>
-
-  </form>
-</main>
-  </div>
+    </main>
 </div>
 
 <%- include('../partials/footer') %>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/js/utils/swal-helper.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/profile.js"></script>
+
+<script>
+    // Preview image locally before upload
+    const imageInput = document.getElementById('imageInput');
+    const previewImage = document.getElementById('previewImage');
+    
+    if(imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    function removeImage() {
+        // Since logic shouldn't be touched, we just trigger the preview update
+        // The actual backend logic remains in /js/user/profile.js
+        previewImage.src = '/images/default-user.png';
+        if(imageInput) imageInput.value = '';
+    }
+</script>
+
 </body>
 </html>
