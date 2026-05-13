@@ -1,5 +1,6 @@
 
 import Return from "../../models/user/returnModel.js";
+import Wallet from "../../models/user/walletModel.js";
 
 export const loadReturnManagement = async (req, res) => {
     try {
@@ -300,14 +301,20 @@ try {
 
 
 
-    const currentReturn =await Return.findById(returnId);
+    const currentReturn =await Return.findById(returnId) .populate("orderId").populate("userId");;
 
     if(!currentReturn){
 
         return res.status(404).json({
             success:false
         });
+    }
+     if (currentReturn.isRefunded) {
 
+        return res.status(400).json({
+            success: false,
+            message:"Refund already processed"
+        });
     }
 
 
@@ -319,33 +326,59 @@ try {
         },
         {
             $set:{
-                pickupStatus:
-                    "Picked Up",
-
-                status:
-                    "Picked Up",
-
-                pickedUpAt:
-                    new Date()
+                pickupStatus:"Picked Up",
+                status:"Refunded",
+                pickedUpAt:new Date(),
+                isRefunded: true
             }
         }
     );
 
+    const userId=currentReturn.userId._id;
 
+    const wallet=await Wallet.findOne({userId});
 
-    return res.json({
-        success:true
+    if(!wallet){
+        await Wallet.create({
+            userId,
+            balance:0,
+            transactions:[]
+     });
+    }
+
+     const refundAmount=currentReturn.refundAmount||0;
+
+     wallet.balance+=refundAmount;
+
+ wallet.transactions.push({
+
+        transactionId:"REFUND_" + Date.now(),
+
+        orderId:currentReturn.orderId._id,
+
+        type:"credit",
+
+        amount:refundAmount,
+
+        description:"Refund for returned product",
+
+        date:new Date()
     });
 
-} catch(err){
+    await wallet.save();
+
+    return res.json({
+
+        success: true
+    });
+
+} catch (err) {
 
     console.log(err);
 
     res.status(500).json({
-        success:false
-    });
 
+        success: false
+    });
 }
 };
-
-

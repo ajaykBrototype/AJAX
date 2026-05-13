@@ -112,6 +112,11 @@ const returnSchema = new mongoose.Schema({
     ],
     default: "Pending"
 },
+    isRefunded: {
+
+    type: Boolean,
+    default: false
+ },
 
 
     pickedUpAt: Date,
