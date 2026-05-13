@@ -1,243 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Profile — AJAX</title>
-<meta name="description" content="Your AJAX account profile — personal details, security status and shopping region."/>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
-<script>
-tailwind.config = {
-  theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
-}
-</script>
-<%- include('../partials/navbar-styles') %>
-<style>
-
-/* ── PAGE FADE-IN ── */
-@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.page-in{animation:pageIn .7s cubic-bezier(.16,1,.3,1) both}
-.d1{animation-delay:.06s}.d2{animation-delay:.14s}.d3{animation-delay:.22s}.d4{animation-delay:.30s}
-
-/* ── SIDEBAR ── */
-.sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-left:2px solid transparent;transition:color .25s,border-color .25s,background .25s}
-.sidebar-link:hover{color:var(--dark);background:rgba(28,28,28,.03)}
-.sidebar-link.active{color:var(--dark);border-left-color:var(--dark);background:rgba(28,28,28,.04);font-weight:500}
-
-/* ── BUTTONS ── */
-.btn-dark{display:inline-flex;align-items:center;gap:.5rem;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:#fff;background:var(--dark);border:1px solid var(--dark);padding:.82rem 1.8rem;transition:background .3s;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;text-decoration:none}
-.btn-dark:hover{background:#333}
-.btn-ghost{display:inline-flex;align-items:center;gap:.5rem;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dark);background:none;border:1px solid var(--bdr);padding:.82rem 1.8rem;transition:border-color .3s;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;text-decoration:none}
-.btn-ghost:hover{border-color:var(--dark)}
-
-/* ── BADGE ── */
-.badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--bdr);padding:.3rem .75rem;color:var(--stone)}
-.badge-gold{border-color:rgba(180,140,60,.4);color:rgba(150,115,35,1);background:rgba(180,140,60,.06)}
-
-/* ── DETAIL FIELD ── */
-.detail-field{padding:1.5rem 0;border-bottom:1px solid var(--bdr)}
-.detail-field:last-child{border-bottom:none}
-.field-label{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem}
-.field-value{font-size:.88rem;font-weight:300;color:var(--dark)}
-
-/* ── MOBILE SIDEBAR DRAWER ── */
-#sidebar-drawer{display:none;position:fixed;inset:0;z-index:997}
-#sidebar-drawer.open{display:block}
-.drawer-bg{position:absolute;inset:0;background:rgba(28,28,28,.4);backdrop-filter:blur(4px)}
-.drawer-panel{position:absolute;left:0;top:0;bottom:0;width:72vw;max-width:280px;background:#fff;padding:2rem 1.25rem;animation:drawerIn .35s cubic-bezier(.16,1,.3,1) both;border-right:1px solid var(--bdr)}
-@keyframes drawerIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
-
-/* ── RESPONSIVE ── */
-@media(max-width:960px){
-  .top-grid{grid-template-columns:1fr !important}
-}
-@media(max-width:640px){
-  .details-grid{grid-template-columns:1fr 1fr !important}
-  .main-pad{padding:2.5rem 1.25rem !important}
-  .header-row{flex-direction:column;align-items:flex-start !important}
-}
-@media(max-width:400px){
-  .details-grid{grid-template-columns:1fr !important}
-}
-</style>
-<%- include('../partials/footer-styles') %>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — AJAX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#1C1C1C',
+                            cream: '#F5F0E8',
+                            warm: '#FAFAF8',
+                            stone: '#9B8E83',
+                            mist: '#EAE5DC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <%- include('../partials/navbar-styles') %>
+    <%- include('../partials/footer-styles') %>
+    <style>
+        body {
+            background-color: #FBF9F6;
+            color: #1C1C1C;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 2.5rem;
+            border: 1px solid rgba(28,28,28,0.04);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.04);
+            border-color: rgba(28,28,28,0.08);
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #9B8E83;
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background: rgba(28,28,28,0.03);
+            color: #1C1C1C;
+        }
+        .sidebar-item.active {
+            background: #F5F0E8;
+            color: #1C1C1C;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #1C1C1C 0%, #2D2D2D 100%);
+            border-radius: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .editorial-title {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-[#FBF9F6]">
+    <%- include('../partials/navbar') %>
 
-<%- include('../partials/navbar', { hasSidebarToggle: true }) %>
-<%- include('../partials/sidebar-drawer', { activePage: 'profile' }) %>
+    <main class="max-w-[1440px] mx-auto px-6 md:px-12 pt-32 pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            
+            <!-- Left Sidebar -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- User Profile Card -->
+                <div class="dashboard-card p-8 text-center md:text-left">
+                    <div class="flex flex-col items-center md:items-start gap-6">
+                        <div class="relative group">
+                            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-brand-warm shadow-inner">
+                                <img src="<%= user.profileImage || '/images/default-user.png' %>" alt="Profile" class="w-full h-full object-cover">
+                            </div>
+                            <a href="/edit-profile" class="absolute bottom-0 right-0 w-8 h-8 bg-brand-dark text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                                <i data-lucide="camera" size="14"></i>
+                            </a>
+                        </div>
+                        <div class="space-y-1">
+                            <h2 class="editorial-title text-2xl font-bold"><%= user.name %></h2>
+                            <p class="text-[0.65rem] font-bold text-stone-300 uppercase tracking-widest">Member</p>
+                        </div>
+                        <div class="w-full pt-6 border-t border-brand-mist/20 space-y-4">
+                            <div class="flex items-center gap-3 text-stone-400">
+                                <i data-lucide="mail" size="14"></i>
+                                <span class="text-[0.7rem] font-medium truncate"><%= user.email %></span>
+                            </div>
+                            <div class="flex items-center gap-3 text-stone-400">
+                                <i data-lucide="phone" size="14"></i>
+                                <span class="text-[0.7rem] font-medium"><%= user.phone || 'Not provided' %></span>
+                            </div>
+                        </div>
+                        <a href="/edit-profile" class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-brand-mist/40 text-[0.65rem] font-black uppercase tracking-widest hover:bg-brand-warm transition-all group">
+                            <i data-lucide="edit-3" size="14" class="group-hover:rotate-12 transition-transform"></i>
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
 
-<!-- ══ PAGE BODY ══ -->
-<div style="padding-top:65px;min-height:100vh;">
-  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:flex-start;">
-
-    <!-- SIDEBAR (desktop) -->
-    <aside class="hidden md:block" style="width:220px;min-height:calc(100vh - 65px);border-right:1px solid var(--bdr);padding:3.5rem 0;flex-shrink:0;position:sticky;top:65px;">
-      <nav style="display:flex;flex-direction:column;gap:.1rem;">
-        <a href="/profile" class="sidebar-link active">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
-        </a>
-        <a href="/address" class="sidebar-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Address
-        </a>
-        <a href="/orders" class="sidebar-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          My Orders
-        </a>
-        <a href="/wishlist" class="sidebar-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          Wishlist
-        </a>
-        <a href="/wallet" class="sidebar-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-          Wallet
-        </a>
-        <div style="height:1px;background:var(--bdr);margin:1.75rem 1rem"></div>
-      </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-pad page-in" style="flex:1;padding:3.5rem 3rem;min-width:0;">
-
-      <%- include('../partials/breadcrumbs', { 
-          breadcrumbs: [
-              { name: "My Profile" }
-          ] 
-      }) %>
-
-      <!-- Page Header -->
-      <div class="header-row page-in d1" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1.25rem;margin-bottom:3rem;">
-        <div>
-          <p style="font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem">Account Overview</p>
-          <h1 style="font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2rem,4vw,3rem);line-height:1.1;color:var(--dark)">My Profile</h1>
-        </div>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
-          <a href="/edit-profile" class="btn-dark">
-            Edit Profile
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <button type="button" id="logoutBtnHeader" class="btn-ghost">Logout</button>
-        </div>
-      </div>
-
-      <!-- Profile card + side panels -->
-      <div class="top-grid page-in d2" style="display:grid;grid-template-columns:1fr 280px;gap:1.5rem;margin-bottom:2.5rem;align-items:start;">
-
-        <!-- Identity card -->
-        <div style="background:#fff;border:1px solid var(--bdr);padding:2.2rem 2.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
-          <img
-            src="<%= user.profileImage || '/images/default-user.png' %>"
-            alt="Profile Photo"
-            style="width:96px;height:96px;object-fit:cover;display:block;filter:grayscale(12%);flex-shrink:0;"
-          />
-          <div style="flex:1;min-width:160px;">
-            <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:500;color:var(--dark);line-height:1.15;margin-bottom:.35rem"><%=user.name%></h2>
-            <p style="font-size:.72rem;font-weight:300;color:var(--stone);margin-bottom:1rem">
-              Member since: <strong style="color:var(--dark);font-weight:500">Joined in <%= new Date(user.createdAt).getFullYear() %></strong>
-            </p>
-          </div>
-        </div>
-
-        <!-- Side panels -->
-        <div style="display:flex;flex-direction:column;gap:1rem;">
-
-          <!-- Security Status -->
-          <div style="background:#fff;border:1px solid var(--bdr);padding:1.5rem 1.75rem;">
-            <p style="font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:.9rem">Security Status</p>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;">
-              <span style="font-size:.9rem;color:var(--dark)">Password</span>
-              <% if(!user.googleId) {%>
-              <a href="/change-password" style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--dark);padding-bottom:1px;transition:opacity .2s" onmouseover="this.style.opacity='.5'" onmouseout="this.style.opacity='1'">Change</a>
-              <%} %>
+                <!-- Navigation Sidebar -->
+                <div class="dashboard-card p-4">
+                    <nav class="space-y-1">
+                        <a href="/profile" class="sidebar-item active">
+                            <i data-lucide="layout-grid" size="18"></i>
+                            Overview
+                        </a>
+                        <a href="/orders" class="sidebar-item">
+                            <i data-lucide="package" size="18"></i>
+                            Orders
+                        </a>
+                        <a href="/wishlist" class="sidebar-item">
+                            <i data-lucide="heart" size="18"></i>
+                            Wishlist
+                        </a>
+                        <a href="/address" class="sidebar-item">
+                            <i data-lucide="map-pin" size="18"></i>
+                            Addresses
+                        </a>
+                        <a href="/change-password" class="sidebar-item">
+                            <i data-lucide="lock" size="18"></i>
+                            Password
+                        </a>
+                        <div class="pt-4 mt-4 border-t border-brand-mist/20">
+                            <button onclick="handleLogout()" class="sidebar-item w-full hover:text-red-500 hover:bg-red-50">
+                                <i data-lucide="log-out" size="18"></i>
+                                Sign Out
+                            </button>
+                        </div>
+                    </nav>
+                </div>
             </div>
-            <p style="font-size:.7rem;font-weight:300;color:var(--stone)">Last updated <%= new Date(user.createdAt) %> ago</p>
-          </div>
 
-          <!-- Shopping Region -->
-          <div style="background:var(--dark);padding:1.75rem;">
-            <p style="font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:.75rem">Shopping Region</p>
-            <p style="font-size:1.15rem;font-family:'Playfair Display',serif;font-weight:400;color:#fff"><%=user.nationality%></p>
-          </div>
+            <!-- Main Content Area -->
+            <div class="lg:col-span-9 space-y-10">
+                
+                <!-- Hero Section -->
+                <section class="hero-banner p-10 md:p-16 text-white">
+                    <div class="relative z-10 space-y-8">
+                        <div class="space-y-2">
+                            <p class="text-[0.6rem] font-black tracking-[0.4em] uppercase text-white/50">Welcome Back</p>
+                            <h1 class="editorial-title text-4xl md:text-6xl font-medium flex items-center gap-4">
+                                <%= user.name.split(' ')[0] %> 
+                                <span class="text-3xl md:text-5xl">✨</span>
+                            </h1>
+                        </div>
+                        <p class="text-[0.85rem] md:text-base text-white/60 font-light max-w-md leading-relaxed">
+                            Your radiance journey continues. Discover new arrivals curated just for your skin.
+                        </p>
+                        <a href="/menProductList" class="inline-flex items-center gap-4 bg-white text-brand-dark px-10 py-4 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                            Explore Arrivals
+                            <i data-lucide="arrow-right" size="16"></i>
+                        </a>
+                    </div>
+                </section>
 
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="dashboard-card p-8 flex items-center gap-6 group">
+                        <div class="w-14 h-14 rounded-2xl bg-[#E8F3F1] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="shopping-bag" class="text-[#2D8A7E]" size="24"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.55rem] font-black text-stone-300 uppercase tracking-widest mb-1">Orders</p>
+                            <p class="text-2xl font-bold"><%= orderCount || 0 %></p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card p-8 flex items-center gap-6 group">
+                        <div class="w-14 h-14 rounded-2xl bg-[#FFF0F0] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="heart" class="text-red-400" size="24"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.55rem] font-black text-stone-300 uppercase tracking-widest mb-1">Wishlist</p>
+                            <p class="text-2xl font-bold"><%= wishlistCount || 0 %></p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card p-8 flex items-center gap-6 bg-[#004236] text-white border-none group">
+                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="wallet" class="text-white" size="24"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.55rem] font-black text-white/40 uppercase tracking-widest mb-1">Wallet</p>
+                            <p class="text-2xl font-bold font-serif italic tracking-tight">₹<%= wallet ? wallet.balance.toFixed(2) : '0.00' %></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <section class="space-y-8">
+                    <h3 class="editorial-title text-2xl font-medium tracking-tight">Quick Actions</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Action 1 -->
+                        <div class="dashboard-card p-10 flex gap-8 items-start group">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-warm flex items-center justify-center flex-shrink-0 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                                <i data-lucide="user" size="20"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-base font-bold mb-1">Profile Details</h4>
+                                    <p class="text-[0.7rem] text-stone-400 leading-relaxed font-medium">Update your personal information, email, and preferences.</p>
+                                </div>
+                                <a href="/edit-profile" class="inline-flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-widest border-b-2 border-brand-dark pb-1 hover:gap-4 transition-all">
+                                    Edit
+                                    <i data-lucide="chevron-right" size="14"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Action 2 -->
+                        <div class="dashboard-card p-10 flex gap-8 items-start group">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-warm flex items-center justify-center flex-shrink-0 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                                <i data-lucide="credit-card" size="20"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-base font-bold mb-1">Wallet & Payments</h4>
+                                    <p class="text-[0.7rem] text-stone-400 leading-relaxed font-medium">Manage your balance, add funds, and view transaction history.</p>
+                                </div>
+                                <a href="/wallet" class="inline-flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-widest border-b-2 border-[#2D8A7E] text-[#2D8A7E] pb-1 hover:gap-4 transition-all">
+                                    ₹<%= wallet ? wallet.balance.toFixed(2) : '0.00' %> available
+                                    <i data-lucide="chevron-right" size="14"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Action 3 -->
+                        <div class="dashboard-card p-10 flex gap-8 items-start group">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-warm flex items-center justify-center flex-shrink-0 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                                <i data-lucide="users" size="20"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-base font-bold mb-1">Refer & Earn</h4>
+                                    <p class="text-[0.7rem] text-stone-400 leading-relaxed font-medium">Invite your friends to AJAX and earn exclusive rewards.</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-widest border-b-2 border-brand-dark pb-1 hover:gap-4 transition-all">
+                                    Share Link
+                                    <i data-lucide="chevron-right" size="14"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Action 4 -->
+                        <div class="dashboard-card p-10 flex gap-8 items-start group">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-warm flex items-center justify-center flex-shrink-0 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                                <i data-lucide="map-pin" size="20"></i>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-base font-bold mb-1">My Addresses</h4>
+                                    <p class="text-[0.7rem] text-stone-400 leading-relaxed font-medium">Manage your shipping and billing addresses for faster checkout.</p>
+                                </div>
+                                <a href="/address" class="inline-flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-widest border-b-2 border-brand-dark pb-1 hover:gap-4 transition-all">
+                                    Manage
+                                    <i data-lucide="chevron-right" size="14"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
         </div>
-      </div>
-
-      <!-- Personal Details -->
-      <div class="page-in d3">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:1rem;border-bottom:1px solid var(--bdr);margin-bottom:0;">
-          <h2 style="font-family:'Playfair Display',serif;font-weight:400;font-size:1.4rem;color:var(--dark)">Personal Details</h2>
-        </div>
-
-        <div class="details-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;">
-
-          <div class="detail-field" style="padding-right:2rem;">
-            <p class="field-label">Full Name</p>
-            <p class="field-value"><%=user.name%></p>
-          </div>
-
-          <div class="detail-field" style="padding-right:2rem;">
-            <p class="field-label">Email Address</p>
-            <p class="field-value"><%=user.email%></p>
-          </div>
-
-          <div class="detail-field">
-            <p class="field-label">Phone Number</p>
-            <p class="field-value"><%= user.phone || 'Not added' %></p>
-          </div>
-
-          <div class="detail-field" style="padding-right:2rem;">
-            <p class="field-label">Date of Birth</p>
-            <p class="field-value"><%= user.dob ? new Date(user.dob).toDateString() : 'Not added' %></p>
-          </div>
-
-          <div class="detail-field" style="padding-right:2rem;">
-            <p class="field-label">Gender</p>
-            <p class="field-value"><%= user.gender || 'Not added' %></p>
-          </div>
-
-          <div class="detail-field">
-            <p class="field-label">Nationality</p>
-            <p class="field-value"><%= user.nationality|| 'Not added' %></p>
-          </div>
-
-        </div>
-      </div>
-
     </main>
-  </div>
-</div>
 
-<%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        lucide.createIcons();
 
-<script>
-document.getElementById("logoutBtnHeader").addEventListener("click", function () {
-
-  Swal.fire({
-    title: "Are you sure?",
-    text: "You will be logged out",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#1C1C1C",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, logout"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = "/logout";
-    }
-  });
-
-});
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/js/utils/swal-helper.js"></script>
-  
-<!-- <script src="/js/user/logout.js"></script> -->
+        function handleLogout() {
+            Swal.fire({
+                title: "Sign Out?",
+                text: "Are you sure you want to log out of your session?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#1C1C1C",
+                cancelButtonColor: "#f44336",
+                confirmButtonText: "Yes, sign out",
+                cancelButtonText: "Cancel",
+                background: '#fff',
+                color: '#1C1C1C',
+                borderRadius: '2rem'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/logout";
+                }
+            });
+        }
+    </script>
 </body>
 </html>

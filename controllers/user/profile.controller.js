@@ -1,28 +1,40 @@
 import User from "../../models/user/userModel.js";
+import Order from "../../models/user/orderModel.js";
+import Wishlist from "../../models/user/wishlistModel.js";
+import Wallet from "../../models/user/walletModel.js";
 import Otp from "../../models/user/otpModel.js";
-import { generateOTP } from "../../utils/generateOtp.js"; // adjust path
+import { generateOTP } from "../../utils/generateOtp.js"; 
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { changePasswordService } from "../../services/user/profile.service.js";
 import { verifyEmailOtpService, resendEmailOtpService } from "../../services/user/email.service.js";
+
 export const loadProfile = async (req, res) => {
   try {
-    console.log("🔥 PROFILE HIT");
-    console.log("SESSION:", req.session);
-
     if (!req.session.userId) {
-      console.log("❌ NO SESSION");
       return res.redirect("/login");
     }
 
-    const user = await User.findById(req.session.userId);
+    const userId = req.session.userId;
+    const user = await User.findById(userId);
 
-    console.log("USER:", user);
+    // Fetch stats for the dashboard
+    const orderCount = await Order.countDocuments({ userId });
+    
+    const wishlist = await Wishlist.findOne({ user: userId });
+    const wishlistCount = wishlist ? wishlist.items.length : 0;
+    
+    const wallet = await Wallet.findOne({ userId });
 
-    res.render("user/profile", { user });
+    res.render("user/profile", { 
+      user, 
+      orderCount, 
+      wishlistCount, 
+      wallet 
+    });
 
   } catch (error) {
-    console.log("❌ ERROR:", error);
-    res.send("Server Error"); 
+    console.log("❌ PROFILE ERROR:", error);
+    res.redirect("/login");
   }
 };
 
