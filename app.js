@@ -1,7 +1,8 @@
+
 import express from "express";
-import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
+import path from "path";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js"
 import connectDB from "./config/db.js";

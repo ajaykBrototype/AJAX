@@ -1,4 +1,5 @@
 import User from "../../models/user/userModel.js";
+import Wallet from "../../models/user/walletModel.js";
 import Otp from "../../models/user/otpModel.js";
 import bcrypt from "bcryptjs";
 import { generateOTP } from "../../utils/generateOtp.js";
@@ -77,7 +78,18 @@ export const verifyOtpService = async (req) => {
   if (record.type === "signup") {
     const { name, password } = record.tempData;
 
-    await User.create({ name, email, password });
+    const newUser = await User.create({
+
+    name,
+
+    email,
+
+    password
+});
+
+await Wallet.create({
+    userId: newUser._id
+});
   }
 
   if (record.type === "reset") {
@@ -115,7 +127,7 @@ export const resendOtpService = async (req) => {
   return { success: true };
 };
 
-// RESET
+
 export const resetPasswordService = async (data, req) => {
   const { password, confirmPassword } = data;
 

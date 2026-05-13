@@ -3,16 +3,13 @@ import bcrypt from "bcrypt";
 
 export const loginAdminService = async (email, password) => {
 
-  // ✅ normalize email
   email = email.toLowerCase().trim();
 
   console.log("LOGIN EMAIL:", email);
 
-  // 🔥 DEBUG: check all admins
   const allAdmins = await Admin.find();
   console.log("ALL ADMINS:", allAdmins);
 
-  // 🔥 actual query
   const admin = await Admin.findOne({ email });
 
   console.log("FOUND ADMIN:", admin);

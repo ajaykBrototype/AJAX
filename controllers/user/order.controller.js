@@ -1,5 +1,6 @@
 import Order from "../../models/user/orderModel.js";
 import Cart from "../../models/user/cartModel.js";
+import Wallet from "../../models/user/walletModel.js";
 import Address from "../../models/user/addressModel.js";
 import mongoose from "mongoose";
 import User from "../../models/user/userModel.js";
@@ -318,6 +319,14 @@ if (!item) {
 
 }
 
+   if (item.refunded) {
+
+    return res.status(400).json({
+        success: false,
+        message: "Refund already processed"
+    });
+}
+
     if(item.status==="Cancelled"){
         return res.status(400).json({
             success:false,
@@ -380,11 +389,54 @@ if (!item) {
             note
         });
      }
+
+if (order.paymentMethod !== "COD") {
+
+    const refundAmount =item.price * item.quantity;
+
+
+
+    let wallet =await Wallet.findOne({
+        userId
+    });
+
+
+
+    if (!wallet) {
+
+        wallet =await Wallet.create({
+            userId,
+            balance: 0,
+            transactions: []
+        });
+    }
+
+
+
+    wallet.balance += refundAmount;
+
+
+
+    wallet.transactions.push({
+
+        transactionId:"REF" + Date.now(),
+
+        orderId: order._id,
+        type: "credit",
+        amount: refundAmount,
+        description:"Refund for cancelled order",
+
+        date: new Date()
+    });
+
+    item.refunded = true;
+
+    await wallet.save();
+}
      
      await order.save();
          res.json({
          success: true
-
          })
 }catch (error) {
 

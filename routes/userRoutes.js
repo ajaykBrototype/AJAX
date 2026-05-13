@@ -14,6 +14,7 @@ import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controll
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress } from "../controllers/user/checkout.controller.js";
 import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem, loadReturnRequest,submitReturnRequest } from "../controllers/user/order.controller.js";
+import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment} from "../controllers/user/wallet.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -99,6 +100,12 @@ router.get("/orders", isLoggedIn, loadOrdersList);
 router.get("/orders/:id",isLoggedIn,loadOrderDetails);
 router.get("/orders/:id/return", isLoggedIn, loadReturnRequest);
 router.patch("/orders/:orderId/items/:itemId/cancel",isLoggedIn,cancelOrderItem);
-router.post("/return-request",upload.array("images",5),submitReturnRequest)
+router.post("/return-request",upload.array("images",5),submitReturnRequest);
+
+
+router.get("/wallet",isLoggedIn,loadWalletPage);
+router.post("/wallet/add-money",isLoggedIn,addMoneyToWallet);
+router.post( "/wallet/create-order",isLoggedIn,createWalletOrder);
+router.post("/wallet/verify-payment",isLoggedIn,verifyWalletPayment);
 
 export default router;
