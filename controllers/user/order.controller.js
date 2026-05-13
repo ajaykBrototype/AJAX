@@ -261,10 +261,10 @@ export const placeOrder = async (req, res) => {
             },
             paymentMethod: normalizedPayment,
             totalAmount: total,
-            status: "Placed",
+            status: normalizedPayment === "RAZORPAY" ? "Pending" : "Placed",
             statusHistory: [
                 {
-                    status: "Placed",
+                    status: normalizedPayment === "RAZORPAY" ? "Pending" : "Placed",
                     updatedAt: new Date()
                 }
             ]

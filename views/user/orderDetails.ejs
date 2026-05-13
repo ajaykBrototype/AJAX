@@ -233,14 +233,42 @@ body {
         </p>
       </div>
       
-      <button 
-        id="download-invoice-btn"
-        onclick="downloadInvoice('<%= order._id %>')"
-        class="group flex items-center gap-3 px-8 py-4 bg-white border border-brand-dark/10 rounded-full text-[0.7rem] font-black text-brand-dark uppercase tracking-widest hover:bg-brand-dark hover:text-white transition-all shadow-sm">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:translate-y-0.5 transition-transform">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download Invoice
-      </button>
+      <div class="flex items-center gap-4">
+        <% if (order.status === 'Pending' && order.paymentMethod === 'RAZORPAY') { %>
+          <% 
+            const createdAt = new Date(order.createdAt);
+            const now = new Date();
+            const diff = Math.floor((now - createdAt) / 1000);
+            const initialTimeLeft = Math.max(0, 300 - diff);
+          %>
+          <div id="retryTimer" class="flex items-center gap-3 px-6 py-4 bg-red-50 text-red-500 rounded-2xl border border-red-100 shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span class="text-[0.7rem] font-black uppercase tracking-widest" id="countdownDisplay">05:00</span>
+          </div>
+          
+          <button 
+            id="retryPaymentBtn"
+            onclick="initiateRetryPayment('<%= order._id %>', '<%= order.totalAmount %>')"
+            <%= initialTimeLeft <= 0 ? 'disabled' : '' %>
+            class="group flex items-center gap-3 px-8 py-4 bg-brand-dark text-white rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg disabled:bg-stone-200 disabled:cursor-not-allowed">
+            Retry Payment
+          </button>
+        <% } %>
+
+        <% if (order.status !== 'Pending') { %>
+        <button 
+          id="download-invoice-btn"
+          onclick="downloadInvoice('<%= order._id %>')"
+          class="group flex items-center gap-3 px-8 py-4 bg-white border border-brand-dark/10 rounded-full text-[0.7rem] font-black text-brand-dark uppercase tracking-widest hover:bg-brand-dark hover:text-white transition-all shadow-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:translate-y-0.5 transition-transform">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Invoice
+        </button>
+        <% } %>
+      </div>
     </div>
     
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
@@ -255,10 +283,11 @@ body {
           <div class="timeline-container space-y-6">
             <div class="timeline-line"></div>
                         <% 
-              const baseStatuses = ['Placed', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
+              const baseStatuses = ['Pending', 'Placed', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
               let statuses = [...baseStatuses];
               
               const statusTitles = {
+                'Pending': 'Awaiting Payment',
                 'Placed': 'Order Received',
                 'Confirmed': 'Confirmed',
                 'Processing': 'Processing',
@@ -275,6 +304,7 @@ body {
               };
               
               const statusDescriptions = {
+                'Pending': 'Payment is currently being processed or awaiting re-attempt.',
                 'Placed': 'Ajax has received your order details and is currently processing them.',
                 'Confirmed': 'Your luxury items are being carefully prepared and packaged.',
                 'Processing': 'Our artisans are meticulously finalizing the details of your selection.',
@@ -321,7 +351,12 @@ body {
                 }
               }
               
-              const displayStatus = returnStatus || order.status || 'Placed';
+              const createdAt = new Date(order.createdAt);
+              const now = new Date();
+              const diff = Math.floor((now - createdAt) / 1000);
+              const isPendingExpired = (order.status === 'Pending' && diff >= 300);
+
+              const displayStatus = isPendingExpired ? 'Cancelled' : (returnStatus || order.status || 'Placed');
               const currentIndex = statuses.indexOf(displayStatus);
 
               const getStatusDate = (status, order, returns) => {
@@ -463,7 +498,7 @@ body {
               i.status !== 'Returned'
             );
           %>
-          <% if (order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
+          <% if (order.status !== 'Pending' && order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
             <div class="mb-10">
               <button 
                 onclick='cancelAllItems("<%= order._id %>", <%= JSON.stringify(order.items.filter(i => i.status !== "Cancelled").map(i => i._id)) %>, this)'
@@ -502,7 +537,11 @@ body {
                   <div class="flex justify-between items-center">
                     <p class="text-[0.65rem] font-black text-[#B2B2B2] uppercase tracking-widest">QTY: <%= item.quantity %></p>
                     <div class="flex items-center gap-2">
-                      <% if(item.status !== "Cancelled" && item.status !== "Return Requested" && item.status !== "Returned") { %>
+                      <% if(item.status === "Cancelled" || item.status === "Returned" || item.status === "Return Requested") { %>
+                        <button disabled class="px-4 py-2 bg-red-50 rounded-full text-[0.55rem] font-black text-red-500 uppercase tracking-widest opacity-60 cursor-not-allowed">
+                          <%= item.status %>
+                        </button>
+                      <% } else if (order.status !== 'Pending') { %>
                         <% if(order.status === 'Delivered') { %>
                           <% if (isReturnExpired) { %>
                             <span class="text-[0.55rem] font-black text-slate-300 uppercase tracking-widest">Policy Expired</span>
@@ -521,10 +560,6 @@ body {
                             Cancel Item
                           </button>
                         <% } %>
-                      <% } else { %>
-                        <button disabled class="px-4 py-2 bg-red-50 rounded-full text-[0.55rem] font-black text-red-500 uppercase tracking-widest opacity-60 cursor-not-allowed">
-                          <%= item.status === 'Cancelled' ? 'Cancelled' : 'Returned' %>
-                        </button>
                       <% } %>
                     </div>
                   </div>
@@ -654,12 +689,103 @@ body {
 </div>
 
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="/js/utils/invoice.js"></script>
 <script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/order.js"></script>
+
+<script>
+  // Timer Logic for Order Details
+  <% if (order.status === 'Pending' && order.paymentMethod === 'RAZORPAY') { %>
+    (function() {
+      const createdAt = new Date('<%= order.createdAt %>');
+      const countdownDisplay = document.getElementById('countdownDisplay');
+      const retryBtn = document.getElementById('retryPaymentBtn');
+      const retryTimer = document.getElementById('retryTimer');
+
+      function updateCountdown() {
+        const now = new Date();
+        const diff = Math.floor((now - createdAt) / 1000);
+        let timeLeft = Math.max(0, 300 - diff);
+
+        const minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+
+        if (countdownDisplay) countdownDisplay.innerHTML = `${minutes}:${seconds}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          if (retryBtn) retryBtn.disabled = true;
+          if (retryTimer) retryTimer.style.opacity = '0.5';
+          if (countdownDisplay) countdownDisplay.innerHTML = 'EXPIRED';
+        }
+      }
+
+      const timerInterval = setInterval(updateCountdown, 1000);
+      updateCountdown();
+    })();
+
+    async function initiateRetryPayment(orderId, amount) {
+      try {
+        // Create new Razorpay order for retry
+        const res = await axios.post('/wallet/create-order', { amount }); // Reusing existing create-order logic if suitable, or create a specific one
+        // Wait, order already exists in our DB, we just need a new RZP ID or reuse the old one if it's still valid.
+        // Actually, for simplicity and ensuring success, let's create a new Razorpay session.
+        
+        const options = {
+          key: "rzp_test_SoheRfzN69tfvZ",
+          amount: amount * 100,
+          currency: "INR",
+          name: "AJAX Luxury",
+          description: "Order Payment Retry",
+          order_id: res.data.orderId, // This is the Razorpay order ID
+          handler: async function (response) {
+            try {
+              const verifyRes = await axios.post('/order/verify-payment', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: orderId // Our internal order ID
+              });
+
+              if (verifyRes.data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Payment Successful',
+                  text: 'Your order has been confirmed.',
+                  showConfirmButton: false,
+                  timer: 2000
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                window.location.href = `/payment-failure?orderId=${orderId}&message=${verifyRes.data.message || 'Verification failed'}`;
+              }
+            } catch (err) {
+              console.error(err);
+              window.location.href = `/payment-failure?orderId=${orderId}&message=Verification Error`;
+            }
+          },
+          prefill: {
+            name: "<%= order.address.name %>",
+            contact: "<%= order.address.phone %>"
+          },
+          theme: { color: "#1C1C1C" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'Could not initiate payment. Please try again.', 'error');
+      }
+    }
+  <% } %>
+</script>
 
 <!-- INVOICE TEMPLATE (HIDDEN) -->
 <div style="position: absolute; left: -9999px; top: -9999px;">

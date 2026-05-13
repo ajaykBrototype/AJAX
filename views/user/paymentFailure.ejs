@@ -198,7 +198,7 @@
             <button id="retryBtn" onclick="retryPayment('<%= order ? order._id : '' %>')" class="btn-action btn-dark">
                 Retry Payment
             </button>
-            <a href="/orders" class="btn-action btn-outline inline-block text-center">
+            <a href="/orders/<%= order ? order._id : '' %>" class="btn-action btn-outline inline-block text-center">
                 View Order
             </a>
         </div>
@@ -208,40 +208,89 @@
         </p>
     </div>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        let timeLeft = 300; // 5 minutes in seconds
+        const createdAt = new Date('<%= order ? order.createdAt : new Date() %>');
         const countdownEl = document.getElementById('countdown');
         const retryBtn = document.getElementById('retryBtn');
         const timerBadge = document.getElementById('timerBadge');
 
         function updateTimer() {
+            const now = new Date();
+            const diff = Math.floor((now - createdAt) / 1000);
+            let timeLeft = Math.max(0, 300 - diff);
+
             const minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
             seconds = seconds < 10 ? '0' + seconds : seconds;
 
-            countdownEl.innerHTML = `${minutes}:${seconds}`;
+            if (countdownEl) countdownEl.innerHTML = `${minutes}:${seconds}`;
 
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                retryBtn.disabled = true;
-                timerBadge.style.opacity = '0.5';
-                countdownEl.innerHTML = 'EXPIRED';
+                if (retryBtn) retryBtn.disabled = true;
+                if (timerBadge) timerBadge.style.opacity = '0.5';
+                if (countdownEl) countdownEl.innerHTML = 'EXPIRED';
             }
-            timeLeft--;
         }
 
         const timerInterval = setInterval(updateTimer, 1000);
         updateTimer();
 
-        function retryPayment(orderId) {
+        async function retryPayment(orderId) {
             if (!orderId) {
                 window.location.href = '/checkout';
                 return;
             }
-            window.location.href = '/checkout';
+            
+            try {
+                // Get order amount (we should probably pass it or fetch it)
+                const amount = "<%= order ? order.totalAmount : 0 %>";
+                
+                // Create new Razorpay order
+                const res = await axios.post('/wallet/create-order', { amount });
+                
+                const options = {
+                    key: "rzp_test_SoheRfzN69tfvZ",
+                    amount: amount * 100,
+                    currency: "INR",
+                    name: "AJAX Luxury",
+                    description: "Order Payment Retry",
+                    order_id: res.data.orderId,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await axios.post('/order/verify-payment', {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: orderId
+                            });
+
+                            if (verifyRes.data.success) {
+                                window.location.href = `/order-success/${orderId}`;
+                            } else {
+                                window.location.reload();
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            window.location.reload();
+                        }
+                    },
+                    prefill: {
+                        name: "<%= order ? order.address.name : '' %>",
+                        contact: "<%= order ? order.address.phone : '' %>"
+                    },
+                    theme: { color: "#000000" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (err) {
+                console.error(err);
+                window.location.href = '/checkout';
+            }
         }
     </script>
-</body>
-</html>
 </body>
 </html>
