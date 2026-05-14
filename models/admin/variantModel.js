@@ -16,15 +16,26 @@ const variantSchema = new mongoose.Schema({
   size: {
     type: String
   },
+
   sku: {
     type: String,
     required: true,
     unique: true
   },
 
-  price: {
+  regularPrice: {
     type: Number,
     required: true
+  },
+
+  salePrice: {
+    type: Number,
+    required: true
+  },
+
+  offerPrice: {
+    type: Number,
+    default: 0
   },
 
   stock: {
@@ -37,13 +48,21 @@ const variantSchema = new mongoose.Schema({
     default: []
   },
 
+  appliedOffer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Offer",
+    default: null
+  },
+
   isActive: {
     type: Boolean,
     default: true
   },
+
   isDefault: {
-     type: Boolean, 
-     default: false }
+    type: Boolean,
+    default: false
+  }
 
 }, { timestamps: true });
 

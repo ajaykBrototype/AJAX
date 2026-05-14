@@ -1,9 +1,11 @@
-// models/admin/productModel.js
-
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+
+  name: {
+    type: String,
+    required: true
+  },
 
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,12 +19,28 @@ const productSchema = new mongoose.Schema({
     required: true
   },
 
-  material: { type: String },
+  material: {
+    type: String
+  },
 
-  description: { type: String },
-  careGuide: { type: String },
+  description: {
+    type: String
+  },
 
-  isActive: { type: Boolean, default: true }
+  careGuide: {
+    type: String
+  },
+
+  appliedOffer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Offer",
+    default: null
+  },
+
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 
 }, { timestamps: true });
 
