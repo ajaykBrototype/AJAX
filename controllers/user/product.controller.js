@@ -4,6 +4,43 @@ import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
 import Wishlist from "../../models/user/wishlistModel.js";
 import Offer from "../../models/admin/offerModel.js";
+
+const getBestOffer = (activeOffers, prod, price) => {
+  if (!activeOffers || activeOffers.length === 0) return null;
+
+  const pOffers = activeOffers.filter(o => 
+    o.applicableTo === 'product' && 
+    o.targetProduct && 
+    o.targetProduct.toString() === prod._id.toString()
+  );
+
+  const cOffers = activeOffers.filter(o => 
+    o.applicableTo === 'category' && 
+    o.targetCategory && 
+    prod.category && 
+    o.targetCategory.toString() === prod.category.toString()
+  );
+
+  const applicable = [...pOffers, ...cOffers].filter(o => !o.minOrderValue || price >= o.minOrderValue);
+  
+  let best = null;
+  let maxD = 0;
+  applicable.forEach(o => {
+    let d = 0;
+    if (o.discountMode === 'percentage') {
+      d = (price * o.discountValue) / 100;
+      if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+    } else {
+      d = o.discountValue;
+    }
+
+    if (d > maxD) {
+      maxD = d;
+      best = o;
+    }
+  });
+  return best;
+};
 export const loadMenPage = async (req, res) => {
   try {
     const { sub, page = 1 } = req.query;
@@ -50,6 +87,13 @@ export const loadMenPage = async (req, res) => {
       .limit(limit)
       .lean();
 
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
     const productData = await Promise.all(
       products.map(async (prod) => {
         const variants = await Variant.find({
@@ -57,7 +101,16 @@ export const loadMenPage = async (req, res) => {
           isActive: true
         }).lean();
 
-        return { ...prod, variants };
+        const v = variants[0];
+        const offer = v ? getBestOffer(activeOffers, prod, v.price) : null;
+        let finalPrice = v?.price || null;
+        if (offer && v) {
+          let d = offer.discountMode === 'percentage' ? (v.price * offer.discountValue) / 100 : offer.discountValue;
+          if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
+          finalPrice = v.price - d;
+        }
+
+        return { ...prod, variants, finalPrice, offer };
       })
     );
 
@@ -102,6 +155,29 @@ export const loadProductDetails = async (req, res) => {
       isActive: true
     }).limit(4).lean();
 
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    const pOffers = activeOffers.filter(o => 
+      o.applicableTo === 'product' && 
+      o.targetProduct && 
+      o.targetProduct.toString() === product._id.toString()
+    );
+
+    const cOffers = activeOffers.filter(o => 
+      o.applicableTo === 'category' && 
+      o.targetCategory && 
+      product.category && 
+      o.targetCategory.toString() === product.category.toString()
+    );
+
+    const applicableOffers = [...pOffers, ...cOffers];
+    const bestOffer = getBestOffer(activeOffers, product, defaultVariant.price);
+
     const relatedProducts = await Promise.all(
       relatedRaw.map(async (p) => {
         const v = await Variant.findOne({
@@ -109,10 +185,20 @@ export const loadProductDetails = async (req, res) => {
           isActive: true
         }).lean();
 
+        const offer = v ? getBestOffer(activeOffers, p, v.price) : null;
+        let finalPrice = v?.price || null;
+        if (offer && v) {
+          let d = offer.discountMode === 'percentage' ? (v.price * offer.discountValue) / 100 : offer.discountValue;
+          if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
+          finalPrice = v.price - d;
+        }
+
         return {
           ...p,
           image: v?.images?.[0] || null,
-          price: v?.price || null
+          price: v?.price || null,
+          finalPrice,
+          offer
         };
       })
     );
@@ -123,43 +209,7 @@ export const loadProductDetails = async (req, res) => {
     const wishlist = wishlistDoc?.items.map(i => i.product.toString()) || [];
     const wishlistedVariants = wishlistDoc?.items.map(i => i.variant.toString()) || [];
 
-    const today = new Date();
-    const activeOffers = await Offer.find({
-      isActive: true,
-      startDate: { $lte: today },
-      endDate: { $gte: today }
-    }).lean();
 
-    const productOffers = activeOffers.filter(o => 
-      o.applicableTo === 'product' && o.targetProduct.toString() === product._id.toString()
-    );
-    const categoryOffers = activeOffers.filter(o => 
-      o.applicableTo === 'category' && o.targetCategory.toString() === product.category.toString()
-    );
-
-    const allApplicableOffers = [...productOffers, ...categoryOffers].filter(offer => 
-      !offer.minOrderValue || defaultVariant.price >= offer.minOrderValue
-    );
-    
-    let bestOffer = null;
-    let maxDiscount = 0;
-
-    if (allApplicableOffers.length > 0) {
-      allApplicableOffers.forEach(offer => {
-        let discountAmount = 0;
-        if (offer.discountMode === 'percentage') {
-          discountAmount = (defaultVariant.price * offer.discountValue) / 100;
-          if (offer.maxDiscountCap) discountAmount = Math.min(discountAmount, offer.maxDiscountCap);
-        } else {
-          discountAmount = offer.discountValue;
-        }
-
-        if (discountAmount > maxDiscount) {
-          maxDiscount = discountAmount;
-          bestOffer = offer;
-        }
-      });
-    }
 
     res.render("user/productDetails", {
       product,
@@ -171,7 +221,8 @@ export const loadProductDetails = async (req, res) => {
       stock,
       wishlist,
       wishlistedVariants,
-      bestOffer
+      bestOffer,
+      applicableOffers
     });
 
   } catch (err) {
@@ -250,6 +301,13 @@ export const loadFilteredProducts = async (req, res) => {
 
     let products = await Product.find(filter).lean();
 
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
     let productData = await Promise.all(
       products.map(async (p) => {
         const variants = await Variant.find({
@@ -258,7 +316,18 @@ export const loadFilteredProducts = async (req, res) => {
           price: { $gte: min, $lte: max }
         }).lean();
 
-        return variants.length ? { ...p, variants } : null;
+        if (!variants.length) return null;
+
+        const v = variants[0];
+        const offer = v ? getBestOffer(activeOffers, p, v.price) : null;
+        let finalPrice = v?.price || null;
+        if (offer && v) {
+          let d = offer.discountMode === 'percentage' ? (v.price * offer.discountValue) / 100 : offer.discountValue;
+          if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
+          finalPrice = v.price - d;
+        }
+
+        return { ...p, variants, finalPrice, offer };
       })
     );
 

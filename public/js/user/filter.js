@@ -186,7 +186,12 @@ function renderProducts(products, wishlist = []) {
             </div>
             <div class="product-info space-y-1">
               <h3 class="text-[0.7rem] font-bold tracking-[0.05em] uppercase text-[#1C1C1C]">${p.name}</h3>
-              <p class="text-[0.75rem] font-medium text-stone-500">₹${v.price || ''}</p>
+              <p class="text-[0.75rem] font-medium text-stone-500">
+                ${p.offer ? `
+                  <span class="text-[#1C1C1C] font-bold">₹${Math.round(p.finalPrice)}</span>
+                  <span class="text-[0.65rem] text-stone-400 line-through ml-2">₹${v.price || ''}</span>
+                ` : `₹${v.price || ''}`}
+              </p>
             </div>
           </a>
         </div>

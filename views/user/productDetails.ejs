@@ -192,11 +192,11 @@
         .discount-badge {
             background: #EBF7EE;
             color: #1B7A3D;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 4px 8px;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 2px 6px;
             border-radius: 4px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
         }
 
@@ -247,39 +247,83 @@
             100% { opacity: 1; }
         }
 
-        .offers-container {
-            margin-bottom: 32px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        /* Minimalist Modern Offer Design */
+        .modern-offers-wrapper {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .offer-card {
-            border: 1px dashed var(--border-color);
-            padding: 12px;
-            border-radius: 8px;
+        .modern-offer-card {
+            background: #fff;
+            border: 1px solid #eeeeee;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
             cursor: pointer;
-            transition: all 0.3s;
+            position: relative;
+            width: 100%;
         }
 
-        .offer-card:hover {
-            border-color: var(--accent-color);
-            background: #fafafa;
+        .modern-offer-card:hover {
+            border-color: #000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
 
-        .offer-tag {
-            font-size: 9px;
+        .offer-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .offer-left-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .offer-badge {
+            background: #A91D1D;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 3px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            display: block;
         }
 
-        .offer-title {
+        .offer-applied-text {
+            font-size: 8px;
+            font-weight: 700;
+            color: #A91D1D;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .offer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .offer-name {
             font-size: 11px;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-weight: 700;
+            color: #000;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .offer-save {
+            font-size: 11px;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: -0.01em;
         }
 
         .short-desc {
@@ -896,6 +940,39 @@
                         <div class="discount-badge hidden"></div>
                     <% } %>
                 </div>
+                
+                <div class="modern-offers-wrapper reveal" style="transition-delay: 0.25s;">
+                    <% if (locals.applicableOffers && applicableOffers.length > 0) { %>
+                        <% applicableOffers.forEach(offer => { %>
+                            <div class="modern-offer-card">
+                                <div class="offer-top">
+                                    <div class="offer-left-group">
+                                        <div class="offer-badge">
+                                            <i data-lucide="zap" size="10" fill="currentColor"></i>
+                                            <%= offer.discountMode === 'percentage' ? offer.discountValue + '% OFF' : '₹' + offer.discountValue + ' OFF' %>
+                                        </div>
+                                        <span class="offer-applied-text"><%= (locals.bestOffer && offer._id.toString() === bestOffer._id.toString()) ? 'BEST OFFER APPLIED' : 'AVAILABLE OFFER' %></span>
+                                    </div>
+                                </div>
+                                <div class="offer-bottom">
+                                    <div class="offer-name"><%= offer.offerLabel %></div>
+                                    <div class="offer-save">
+                                        <% 
+                                           let saveAmount = 0;
+                                           if (offer.discountMode === 'percentage') {
+                                               saveAmount = (variant.price * offer.discountValue) / 100;
+                                               if (offer.maxDiscountCap) saveAmount = Math.min(saveAmount, offer.maxDiscountCap);
+                                           } else {
+                                               saveAmount = offer.discountValue;
+                                           }
+                                        %>
+                                        You save ₹<%= Math.round(saveAmount) %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
 
                 <div id="stockInfoContainer" class="stock-info <%= (variant?.stock || 0) < 5 ? 'stock-low' : 'stock-in' %>">
                     <div class="stock-dot"></div>
@@ -960,17 +1037,7 @@
                  <button class="qty-btn" id="increase">+</button>
                 </div>
 
-                <div class="option-label">Available Offers</div>
-                <div class="offers-container">
-                    <div class="offer-card">
-                        <span class="offer-tag">New User</span>
-                        <p class="offer-title">Flat ₹500 OFF on first order</p>
-                    </div>
-                    <div class="offer-card">
-                        <span class="offer-tag">Seasonal</span>
-                        <p class="offer-title">Extra 10% OFF on ₹2,499+</p>
-                    </div>
-                </div>
+
 
                 <div class="action-btns">
                     <button class="btn-primary" id="addToBagBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
@@ -1099,7 +1166,14 @@
         </div>
 
         <h4 class="card-title"><%= r.name %></h4>
-        <p class="card-price">₹<%= r.price || '' %></p>
+        <p class="card-price">
+          <% if (r.offer) { %>
+            <span class="text-black font-bold">₹<%= Math.round(r.finalPrice) %></span>
+            <span class="text-[10px] text-stone-400 line-through ml-2">₹<%= r.price %></span>
+          <% } else { %>
+            ₹<%= r.price || '' %>
+          <% } %>
+        </p>
 
       </a>
 
