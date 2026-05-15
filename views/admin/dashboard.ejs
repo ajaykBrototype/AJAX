@@ -129,168 +129,207 @@
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Revenue -->
-        <div class="glass-card p-8 animate-slide-up">
+        <div class="glass-card p-6 animate-slide-up">
           <div class="flex justify-between items-start mb-6">
             <div class="stat-icon shadow-lg shadow-black/10">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
             </div>
-            <span class="text-[0.65rem] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter">+12.5%</span>
+            <span class="text-[0.65rem] font-black text-brand-dark bg-brand-bg px-3 py-1 rounded-full uppercase tracking-tighter">+12.5%</span>
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-1">Total Revenue</p>
-          <h3 class="text-3xl font-bold tracking-tighter">₹<%= (stats && stats.totalRevenue) ? stats.totalRevenue.toLocaleString() : '1,284,500' %></h3>
+          <h3 class="text-3xl font-bold tracking-tighter">₹<%= (stats && stats.totalRevenue) ? stats.totalRevenue.toLocaleString() : '0' %></h3>
         </div>
 
         <!-- Orders -->
-        <div class="glass-card p-8 animate-slide-up delay-1">
+        <div class="glass-card p-6 animate-slide-up delay-1">
           <div class="flex justify-between items-start mb-6">
             <div class="stat-icon shadow-lg shadow-black/10">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
             </div>
-            <span class="text-[0.65rem] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter">+8.2%</span>
+            <span class="text-[0.65rem] font-black text-brand-dark bg-brand-bg px-3 py-1 rounded-full uppercase tracking-tighter">+8.2%</span>
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-1">Total Orders</p>
-          <h3 class="text-3xl font-bold tracking-tighter"><%= (stats && stats.totalOrders) ? stats.totalOrders : '1,420' %></h3>
+          <h3 class="text-3xl font-bold tracking-tighter"><%= (stats && stats.totalOrders) ? stats.totalOrders : '0' %></h3>
         </div>
 
         <!-- Customers -->
-        <div class="glass-card p-8 animate-slide-up delay-2">
+        <div class="glass-card p-6 animate-slide-up delay-2">
           <div class="flex justify-between items-start mb-6">
             <div class="stat-icon shadow-lg shadow-black/10">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
-            <span class="text-[0.65rem] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter">+4.1%</span>
+            <span class="text-[0.65rem] font-black text-brand-dark bg-brand-bg px-3 py-1 rounded-full uppercase tracking-tighter">+4.1%</span>
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-1">Active Users</p>
-          <h3 class="text-3xl font-bold tracking-tighter"><%= (stats && stats.totalUsers) ? stats.totalUsers : '856' %></h3>
+          <h3 class="text-3xl font-bold tracking-tighter"><%= (stats && stats.totalUsers) ? stats.totalUsers : '0' %></h3>
         </div>
 
         <!-- Conversion -->
-        <div class="glass-card p-8 animate-slide-up delay-3">
+        <div class="glass-card p-6 animate-slide-up delay-3">
           <div class="flex justify-between items-start mb-6">
             <div class="stat-icon shadow-lg shadow-black/10">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
             </div>
-            <span class="text-[0.65rem] font-black text-rose-500 bg-rose-50 px-3 py-1 rounded-full uppercase tracking-tighter">-2.4%</span>
+            <span class="text-[0.65rem] font-black text-brand-dark bg-brand-bg px-3 py-1 rounded-full uppercase tracking-tighter">-2.4%</span>
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-1">Conversion Rate</p>
           <h3 class="text-3xl font-bold tracking-tighter">3.2%</h3>
         </div>
       </div>
 
-      <!-- Main Visuals -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Sales Chart -->
-        <div class="lg:col-span-2 glass-card p-10 animate-slide-up delay-4">
-          <div class="flex items-center justify-between mb-10">
+      <!-- Row 1: Sales Activity & Order Status -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <!-- Sales Activity Chart -->
+        <div class="lg:col-span-2 glass-card p-6 animate-slide-up delay-4 flex flex-col h-full">
+          <div class="flex items-center justify-between mb-8">
             <div>
-              <h4 class="text-xl font-bold tracking-tight">Sales Analytics</h4>
-              <p class="text-[0.7rem] text-brand-muted uppercase tracking-widest font-medium mt-1">Revenue Performance Overview</p>
+              <div class="flex items-center gap-3 mb-1">
+                <div class="w-3 h-3 rounded-full bg-brand-dark shadow-[0_0_12px_rgba(28,28,28,0.3)]"></div>
+                <h4 class="text-lg font-bold tracking-tight">Sales Activity</h4>
+              </div>
+              <p class="text-[0.65rem] text-brand-muted font-medium">Last 7 days performance</p>
             </div>
-            <div class="flex gap-2">
-              <button class="px-4 py-2 bg-brand-dark text-white text-[0.6rem] font-black uppercase tracking-widest rounded-lg">Weekly</button>
-              <button class="px-4 py-2 bg-brand-bg text-brand-dark text-[0.6rem] font-black uppercase tracking-widest rounded-lg border border-brand-border">Monthly</button>
-            </div>
+            <div class="px-3 py-1.5 bg-brand-bg text-brand-dark text-[0.55rem] font-black uppercase tracking-widest rounded-lg border border-brand-border">7 Days</div>
           </div>
-          <div class="chart-container">
+          <div class="flex-1 min-h-[300px]">
             <canvas id="salesChart"></canvas>
           </div>
         </div>
 
-        <!-- Top Categories -->
-        <div class="glass-card p-10 animate-slide-up delay-4">
-          <h4 class="text-xl font-bold tracking-tight mb-2">Category Performance</h4>
-          <p class="text-[0.7rem] text-brand-muted uppercase tracking-widest font-medium mb-10">Distribution of Sales</p>
+        <!-- Order Status Distribution -->
+        <div class="lg:col-span-1 glass-card p-6 bg-[#1A202C] border-none shadow-2xl animate-slide-up delay-4 text-white overflow-hidden flex flex-col h-full">
+          <h4 class="text-lg font-bold tracking-tight mb-1">Order Status</h4>
+          <p class="text-[0.65rem] text-slate-400 font-medium mb-8">Distribution breakdown</p>
           
-          <div class="space-y-8">
-            <div class="relative pt-1">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase tracking-wider">Men's Apparel</span>
-                <span class="text-xs font-bold">45%</span>
-              </div>
-              <div class="overflow-hidden h-1.5 text-xs flex rounded-full bg-brand-bg">
-                <div style="width:45%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-brand-dark"></div>
+          <div class="relative flex-1 flex flex-col items-center justify-center">
+            <div class="w-40 h-40 mb-8 relative">
+              <canvas id="statusDonut"></canvas>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-2xl font-bold tracking-tighter"><%= stats.totalOrders %></span>
+                <span class="text-[0.45rem] font-black uppercase tracking-widest text-slate-400">Orders</span>
               </div>
             </div>
-            <div class="relative pt-1">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase tracking-wider">Women's Collection</span>
-                <span class="text-xs font-bold">32%</span>
-              </div>
-              <div class="overflow-hidden h-1.5 text-xs flex rounded-full bg-brand-bg">
-                <div style="width:32%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-brand-dark opacity-80"></div>
-              </div>
-            </div>
-            <div class="relative pt-1">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase tracking-wider">Accessories</span>
-                <span class="text-xs font-bold">15%</span>
-              </div>
-              <div class="overflow-hidden h-1.5 text-xs flex rounded-full bg-brand-bg">
-                <div style="width:15%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-brand-dark opacity-60"></div>
-              </div>
-            </div>
-            <div class="relative pt-1">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase tracking-wider">Limited Editions</span>
-                <span class="text-xs font-bold">8%</span>
-              </div>
-              <div class="overflow-hidden h-1.5 text-xs flex rounded-full bg-brand-bg">
-                <div style="width:8%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-brand-dark opacity-40"></div>
-              </div>
+
+            <div class="w-full space-y-3">
+              <% const statuses = ['Delivered', 'Pending', 'Cancelled', 'Returned']; 
+                 const statusColors = ['bg-white', 'bg-slate-300', 'bg-slate-500', 'bg-slate-700'];
+              %>
+              <% statuses.forEach((status, i) => { %>
+                <div class="flex items-center gap-4">
+                  <span class="text-[0.6rem] font-bold text-slate-300 w-16"><%= status %></span>
+                  <div class="flex-1 h-1 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div class="h-full <%= statusColors[i] %>" style="width: <%= (orderStatusCounts[status] / stats.totalOrders * 100) || 0 %>%"></div>
+                  </div>
+                  <span class="text-[0.6rem] font-bold text-slate-300"><%= orderStatusCounts[status] || 0 %></span>
+                </div>
+              <% }) %>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="mt-12 pt-8 border-t border-brand-border">
-            <h5 class="text-[0.65rem] font-black uppercase tracking-widest text-brand-muted mb-4">Top Product</h5>
-            <div class="flex items-center gap-4 p-4 bg-brand-bg rounded-2xl">
-              <div class="w-12 h-12 rounded-xl bg-white border border-brand-border overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=100&auto=format&fit=crop" class="w-full h-full object-cover">
-              </div>
-              <div>
-                <p class="text-xs font-bold">Linen Heritage Blazer</p>
-                <p class="text-[0.6rem] text-brand-muted font-bold">124 Units Sold</p>
-              </div>
+      <!-- Row 2: Best Categories & Inventory Alerts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <!-- Best Categories -->
+        <div class="glass-card p-6 animate-slide-up delay-4 flex flex-col h-full">
+          <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-brand-dark shadow-[0_0_12px_rgba(28,28,28,0.3)]"></div>
+              <h4 class="text-xl font-bold tracking-tight">Best Categories</h4>
+            </div>
+            <a href="/admin/subcategories" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-bg text-brand-dark hover:bg-brand-dark hover:text-white transition-all text-[0.6rem] font-black uppercase tracking-widest">
+              View All
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+          
+          <div class="space-y-6 flex-1">
+            <% if(typeof subcategorySales !== 'undefined' && subcategorySales.length > 0) { %>
+              <% subcategorySales.forEach((sub, index) => { %>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-end">
+                    <span class="text-[0.7rem] font-bold uppercase tracking-widest text-brand-dark"><%= sub.name %></span>
+                    <span class="text-[0.6rem] font-black text-brand-muted"><%= sub.totalSold %> sold</span>
+                  </div>
+                  <div class="h-2 bg-brand-bg rounded-full overflow-hidden">
+                    <div class="h-full bg-brand-dark rounded-full" style="width: <%= (sub.totalSold / subcategorySales[0].totalSold * 100) %>%"></div>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p class="text-[0.7rem] text-brand-muted italic">No category data yet.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Inventory Alerts -->
+        <div class="glass-card p-6 animate-slide-up delay-4 flex flex-col h-full">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.5)]"></div>
+            <h4 class="text-xl font-bold tracking-tight">Inventory Alerts</h4>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 flex-1">
+            <!-- Out of Stock -->
+            <div class="p-4 rounded-[24px] bg-rose-50/50 border border-rose-100 flex flex-col items-center text-center justify-center">
+              <p class="text-[0.45rem] font-black uppercase tracking-[0.2em] text-rose-400 mb-2">Out of Stock</p>
+              <h2 class="text-3xl font-bold tracking-tighter text-rose-600 mb-1">
+                <%= inventoryStats.outOfStock %>
+              </h2>
+              <p class="text-[0.5rem] font-bold text-rose-400/80 mb-4 uppercase tracking-tighter">need restock</p>
+              <a href="/admin/products" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-rose-600 shadow-sm transition-all text-[0.5rem] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                View
+              </a>
+            </div>
+
+            <!-- Low Stock -->
+            <div class="p-4 rounded-[24px] bg-amber-50/50 border border-amber-100 flex flex-col items-center text-center justify-center">
+              <p class="text-[0.45rem] font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Low Stock</p>
+              <h2 class="text-3xl font-bold tracking-tighter text-amber-600 mb-1">
+                <%= inventoryStats.lowStock %>
+              </h2>
+              <p class="text-[0.5rem] font-bold text-amber-500/80 mb-4 uppercase tracking-tighter">running low</p>
+              <a href="/admin/products" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-amber-600 shadow-sm transition-all text-[0.5rem] font-black uppercase tracking-widest hover:bg-amber-600 hover:text-white">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                View
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Recent Orders & Activity -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
-        <div class="lg:col-span-2 glass-card overflow-hidden">
-          <div class="p-10 border-b border-brand-border flex items-center justify-between">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-10 items-stretch">
+        <!-- Recent Acquisitions -->
+        <div class="glass-card p-6 overflow-hidden flex flex-col h-full">
+          <div class="pb-6 border-b border-brand-border flex items-center justify-between mb-4">
             <h4 class="text-xl font-bold tracking-tight">Recent Acquisitions</h4>
             <a href="/admin/orders" class="text-[0.6rem] font-black uppercase tracking-widest text-brand-muted hover:text-brand-dark transition-colors underline underline-offset-4">View All Registry</a>
           </div>
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto flex-1">
             <table class="w-full text-left">
               <thead>
                 <tr class="bg-brand-bg/50">
-                  <th class="px-10 py-5 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Order ID</th>
-                  <th class="px-10 py-5 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Client</th>
-                  <th class="px-10 py-5 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Valuation</th>
-                  <th class="px-10 py-5 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Status</th>
-                  <th class="px-10 py-5 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-right">Activity</th>
+                  <th class="px-6 py-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Order ID</th>
+                  <th class="px-6 py-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Client</th>
+                  <th class="px-6 py-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-right">Activity</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-brand-border">
                 <% if(recentOrders && recentOrders.length > 0) { %>
                   <% recentOrders.forEach(order => { %>
                     <tr class="hover:bg-brand-bg/30 transition-colors">
-                      <td class="px-10 py-6 text-[0.7rem] font-bold">#ORD-<%= order._id.toString().slice(-6).toUpperCase() %></td>
-                      <td class="px-10 py-6">
+                      <td class="px-6 py-4 text-[0.7rem] font-bold">#ORD-<%= order._id.toString().slice(-6).toUpperCase() %></td>
+                      <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                           <div class="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center text-[0.6rem] font-bold">
                             <%= order.address.name.charAt(0) %>
                           </div>
-                          <span class="text-[0.7rem] font-bold"><%= order.address.name %></span>
+                          <span class="text-[0.7rem] font-bold text-brand-dark"><%= order.address.name %></span>
                         </div>
                       </td>
-                      <td class="px-10 py-6 text-[0.7rem] font-bold">₹<%= order.totalAmount.toLocaleString() %></td>
-                      <td class="px-10 py-6">
-                        <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-brand-bg border border-brand-border"><%= order.status %></span>
-                      </td>
-                      <td class="px-10 py-6 text-right">
+                      <td class="px-6 py-4 text-right">
                         <a href="/admin/orders/<%= order._id %>" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-brand-border hover:bg-brand-dark hover:text-white transition-all">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </a>
@@ -298,42 +337,8 @@
                     </tr>
                   <% }) %>
                 <% } else { %>
-                  <!-- Static Placeholder Rows for UI Demo -->
-                  <tr class="hover:bg-brand-bg/30 transition-colors">
-                    <td class="px-10 py-6 text-[0.7rem] font-bold">#ORD-942851</td>
-                    <td class="px-10 py-6">
-                      <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center text-[0.6rem] font-bold">JW</div>
-                        <span class="text-[0.7rem] font-bold">Julianne White</span>
-                      </div>
-                    </td>
-                    <td class="px-10 py-6 text-[0.7rem] font-bold">₹12,450</td>
-                    <td class="px-10 py-6">
-                      <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">Delivered</span>
-                    </td>
-                    <td class="px-10 py-6 text-right">
-                      <button class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-brand-border hover:bg-brand-dark hover:text-white transition-all">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-brand-bg/30 transition-colors">
-                    <td class="px-10 py-6 text-[0.7rem] font-bold">#ORD-831924</td>
-                    <td class="px-10 py-6">
-                      <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center text-[0.6rem] font-bold">AM</div>
-                        <span class="text-[0.7rem] font-bold">Arthur Morgan</span>
-                      </div>
-                    </td>
-                    <td class="px-10 py-6 text-[0.7rem] font-bold">₹8,900</td>
-                    <td class="px-10 py-6">
-                      <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100">Shipped</span>
-                    </td>
-                    <td class="px-10 py-6 text-right">
-                      <button class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-brand-border hover:bg-brand-dark hover:text-white transition-all">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                      </button>
-                    </td>
+                  <tr>
+                    <td colspan="3" class="px-6 py-12 text-[0.7rem] text-brand-muted italic text-center">No recent acquisitions found.</td>
                   </tr>
                 <% } %>
               </tbody>
@@ -341,107 +346,45 @@
           </div>
         </div>
 
-        <div class="glass-card p-10 overflow-hidden flex flex-col">
-          <div class="flex items-center gap-3 mb-8">
-            <div class="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)]"></div>
-            <h4 class="text-xl font-bold tracking-tight">Most Popular Products</h4>
+        <!-- Most Popular -->
+        <div class="glass-card p-6 overflow-hidden flex flex-col h-full">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-3 h-3 rounded-full bg-brand-dark shadow-[0_0_12px_rgba(28,28,28,0.3)]"></div>
+            <h4 class="text-xl font-bold tracking-tight">Most Popular</h4>
           </div>
           
           <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             <table class="w-full text-left">
               <thead>
                 <tr class="border-b border-brand-border">
-                  <th class="pb-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Product Name</th>
-                  <th class="pb-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-center">Qty Sold</th>
-                  <th class="pb-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-center">Status</th>
-                  <th class="pb-4 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-right">Action</th>
+                  <th class="pb-3 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Product</th>
+                  <th class="pb-3 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-center">Sold</th>
+                  <th class="pb-3 text-[0.6rem] font-black uppercase tracking-widest text-brand-muted text-right">Link</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-brand-border/50">
                 <% if(typeof popularProducts !== 'undefined' && popularProducts.length > 0) { %>
                   <% popularProducts.forEach(prod => { %>
                     <tr class="group hover:bg-brand-bg/30 transition-colors">
-                      <td class="py-4">
-                        <div class="flex items-center gap-4">
-                          <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border overflow-hidden flex-shrink-0">
-                            <img src="<%= prod.image || 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=100' %>" class="w-full h-full object-cover">
+                      <td class="py-3">
+                        <div class="flex items-center gap-3">
+                          <div class="w-8 h-8 rounded-lg bg-brand-bg border border-brand-border overflow-hidden flex-shrink-0">
+                            <img src="<%= prod.image %>" class="w-full h-full object-cover">
                           </div>
-                          <span class="text-[0.7rem] font-bold truncate max-w-[120px]"><%= prod.name %></span>
+                          <span class="text-[0.7rem] font-bold text-brand-dark truncate max-w-[120px]"><%= prod.name %></span>
                         </div>
                       </td>
-                      <td class="py-4 text-center text-[0.7rem] font-bold"><%= prod.totalSold %></td>
-                      <td class="py-4 text-center">
-                        <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">Popular</span>
-                      </td>
-                      <td class="py-4 text-right">
-                        <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all text-[0.55rem] font-black uppercase tracking-widest">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                          View
-                        </button>
+                      <td class="py-3 text-center text-[0.7rem] font-bold text-brand-dark"><%= prod.totalSold %></td>
+                      <td class="py-3 text-right">
+                        <a href="/admin/products/<%= prod._id %>" class="w-6 h-6 rounded-lg bg-brand-bg border border-brand-border hover:bg-brand-dark hover:text-white transition-all flex items-center justify-center">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </a>
                       </td>
                     </tr>
                   <% }) %>
                 <% } else { %>
-                  <!-- Static Placeholder Rows for UI Demo -->
-                  <tr class="group hover:bg-brand-bg/30 transition-colors">
-                    <td class="py-4">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border overflow-hidden flex-shrink-0">
-                          <img src="https://images.unsplash.com/photo-1583522676223-9a74404a20e1?q=80&w=100" class="w-full h-full object-cover">
-                        </div>
-                        <span class="text-[0.7rem] font-bold truncate max-w-[120px]">Super Glow Vitamin Serum</span>
-                      </div>
-                    </td>
-                    <td class="py-4 text-center text-[0.7rem] font-bold">124</td>
-                    <td class="py-4 text-center">
-                      <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">Popular</span>
-                    </td>
-                    <td class="py-4 text-right">
-                      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all text-[0.55rem] font-black uppercase tracking-widest">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                  <tr class="group hover:bg-brand-bg/30 transition-colors">
-                    <td class="py-4">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border overflow-hidden flex-shrink-0">
-                          <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=100" class="w-full h-full object-cover">
-                        </div>
-                        <span class="text-[0.7rem] font-bold truncate max-w-[120px]">Hydra F5 Moisturizer</span>
-                      </div>
-                    </td>
-                    <td class="py-4 text-center text-[0.7rem] font-bold">98</td>
-                    <td class="py-4 text-center">
-                      <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">Popular</span>
-                    </td>
-                    <td class="py-4 text-right">
-                      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all text-[0.55rem] font-black uppercase tracking-widest">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                  <tr class="group hover:bg-brand-bg/30 transition-colors">
-                    <td class="py-4">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-brand-bg border border-brand-border overflow-hidden flex-shrink-0">
-                          <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=100" class="w-full h-full object-cover">
-                        </div>
-                        <span class="text-[0.7rem] font-bold truncate max-w-[120px]">BIFF SP5 Face Wash</span>
-                      </div>
-                    </td>
-                    <td class="py-4 text-center text-[0.7rem] font-bold">86</td>
-                    <td class="py-4 text-center">
-                      <span class="px-3 py-1 rounded-full text-[0.55rem] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">Popular</span>
-                    </td>
-                    <td class="py-4 text-right">
-                      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all text-[0.55rem] font-black uppercase tracking-widest">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View
-                      </button>
-                    </td>
+                  <tr>
+                    <td colspan="3" class="px-6 py-12 text-[0.7rem] text-brand-muted italic text-center">No popular products found.</td>
                   </tr>
                 <% } %>
               </tbody>
@@ -454,43 +397,51 @@
   </main>
 
   <script>
-    // Chart.js Configuration
-    const ctx = document.getElementById('salesChart').getContext('2d');
-    
-    // Custom gradient for the chart
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(28, 28, 28, 0.08)');
-    gradient.addColorStop(1, 'rgba(28, 28, 28, 0)');
+    // Sales Activity Chart (Line)
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    const salesGradient = salesCtx.createLinearGradient(0, 0, 0, 400);
+    salesGradient.addColorStop(0, 'rgba(28, 28, 28, 0.12)');
+    salesGradient.addColorStop(1, 'rgba(28, 28, 28, 0)');
 
-    new Chart(ctx, {
+    new Chart(salesCtx, {
       type: 'line',
       data: {
-        labels: ['01 May', '05 May', '10 May', '15 May', '20 May', '25 May', '30 May'],
+        labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         datasets: [{
           label: 'Revenue',
-          data: [65000, 82000, 78000, 95000, 110000, 105000, 128000],
+          data: [500, 450, 600, 400, 2200, 500, 2800],
           borderColor: '#1C1C1C',
-          borderWidth: 3,
+          borderWidth: 4,
           pointBackgroundColor: '#FFFFFF',
           pointBorderColor: '#1C1C1C',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointBorderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 8,
           fill: true,
-          backgroundColor: gradient,
-          tension: 0.4
+          backgroundColor: salesGradient,
+          tension: 0.5
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1C1C1C',
+            titleFont: { family: 'Outfit', size: 12 },
+            bodyFont: { family: 'Outfit', size: 14, weight: 'bold' },
+            padding: 12,
+            cornerRadius: 12,
+            displayColors: false,
+            callbacks: {
+              label: function(context) { return '₹' + context.parsed.y.toLocaleString(); }
+            }
+          }
         },
         scales: {
           y: {
-            grid: { display: true, color: 'rgba(0,0,0,0.03)' },
-            border: { display: false },
+            grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
             ticks: {
               color: '#888888',
               font: { family: 'Outfit', size: 10, weight: 600 },
@@ -499,17 +450,41 @@
           },
           x: {
             grid: { display: false },
-            border: { display: false },
             ticks: {
               color: '#888888',
               font: { family: 'Outfit', size: 10, weight: 600 }
             }
           }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
+        }
+      }
+    });
+
+    // Order Status Donut Chart
+    const statusCtx = document.getElementById('statusDonut').getContext('2d');
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Delivered', 'Pending', 'Cancelled', 'Returned'],
+        datasets: [{
+          data: [
+            <%= orderStatusCounts.Delivered %>,
+            <%= orderStatusCounts.Pending %>,
+            <%= orderStatusCounts.Cancelled %>,
+            <%= orderStatusCounts.Returned %>
+          ],
+          backgroundColor: ['#FFFFFF', '#CBD5E0', '#718096', '#2D3748'],
+          borderWidth: 0,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '85%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        }
       }
     });
   </script>
