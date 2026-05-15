@@ -74,6 +74,80 @@ export const loadDashboard = async (req, res) => {
       { $limit: 5 }
     ]);
 
+    // --- MULTI-PERIOD SALES AGGREGATIONS (Delivered Only) ---
+    
+    // 1. TODAY (Hourly)
+    const startOfToday = new Date();
+    startOfToday.setHours(0,0,0,0);
+    const todayRaw = await Order.aggregate([
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfToday } } },
+      { $group: {
+          _id: { $hour: "$createdAt" },
+          revenue: { $sum: "$totalAmount" }
+      }},
+      { $sort: { "_id": 1 } }
+    ]);
+    const todayData = Array.from({length: 6}, (_, i) => {
+      const hour = (i + 1) * 4; // 4am, 8am, 12pm, 4pm, 8pm, 12am
+      const match = todayRaw.find(r => r._id >= hour - 4 && r._id < hour);
+      return { label: `${hour > 12 ? hour-12 : hour}${hour >= 12 ? 'pm' : 'am'}`, value: match ? match.revenue : 0 };
+    });
+
+    // 2. WEEK (Last 7 Days - Already implemented but naming it for clarity)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weekRaw = await Order.aggregate([
+      { $match: { status: 'Delivered', createdAt: { $gte: sevenDaysAgo } } },
+      { $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" }
+      }},
+      { $sort: { "_id": 1 } }
+    ]);
+    const weekData = [];
+    for(let i=6; i>=0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const match = weekRaw.find(s => s._id === dateStr);
+      weekData.push({ label: d.toLocaleDateString('en-US', { weekday: 'short' }), value: match ? match.revenue : 0 });
+    }
+
+    // 3. MONTH (Weeks of current month)
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    const monthRaw = await Order.aggregate([
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfMonth } } },
+      { $group: {
+          _id: { $ceil: { $divide: [{ $dayOfMonth: "$createdAt" }, 7] } },
+          revenue: { $sum: "$totalAmount" }
+      }},
+      { $sort: { "_id": 1 } }
+    ]);
+    const monthData = Array.from({length: 4}, (_, i) => {
+      const match = monthRaw.find(r => r._id === i + 1);
+      return { label: `Week ${i + 1}`, value: match ? match.revenue : 0 };
+    });
+
+    // 4. YEAR (Months of current year)
+    const startOfYear = new Date();
+    startOfYear.setMonth(0, 1);
+    const yearRaw = await Order.aggregate([
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfYear } } },
+      { $group: {
+          _id: { $month: "$createdAt" },
+          revenue: { $sum: "$totalAmount" }
+      }},
+      { $sort: { "_id": 1 } }
+    ]);
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const yearData = monthNames.map((name, i) => {
+      const match = yearRaw.find(r => r._id === i + 1);
+      return { label: name, value: match ? match.revenue : 0 };
+    });
+
+    const chartData = { today: todayData, week: weekData, month: monthData, year: yearData };
+
     // Subcategory sales aggregation
     const subcategorySales = await Order.aggregate([
       { $unwind: "$items" },
@@ -134,6 +208,7 @@ export const loadDashboard = async (req, res) => {
       recentOrders,
       popularProducts,
       subcategorySales,
+      chartData,
       topProduct,
       inventoryStats: {
         outOfStock: outOfStockCount,

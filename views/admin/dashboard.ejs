@@ -105,20 +105,20 @@
         <h1 class="editorial-title text-3xl italic tracking-tight">Executive <span class="not-italic font-bold text-brand-dark">Overview</span></h1>
       </div>
       
-      <div class="flex items-center gap-8">
-        <!-- Date Picker Placeholder -->
-        <div class="hidden md:flex items-center gap-3 px-5 py-2.5 bg-brand-bg border border-brand-border rounded-full text-[0.7rem] font-bold uppercase tracking-widest text-brand-muted">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Last 30 Days
-        </div>
-
-        <div class="flex items-center gap-4">
-          <div class="text-right hidden sm:block">
-            <p class="text-xs font-black uppercase tracking-widest">Administrator</p>
-            <p class="text-[0.65rem] text-brand-muted">Control Center active</p>
+        <!-- Time Period Selector -->
+        <div class="relative hidden md:block">
+          <select id="timePeriod" class="appearance-none pl-12 pr-10 py-3 bg-brand-bg border border-brand-border rounded-full text-[0.7rem] font-black uppercase tracking-widest text-brand-muted hover:text-brand-dark transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-dark/10">
+            <option value="today">Today</option>
+            <option value="week">Week</option>
+            <option value="month" selected>Month</option>
+            <option value="year">Year</option>
+            <option value="custom">Custom</option>
+          </select>
+          <div class="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-brand-dark flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
-            <img src="https://ui-avatars.com/api/?name=Admin&background=1c1c1c&color=fff" alt="Admin" class="w-full h-full object-cover">
+          <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </div>
         </div>
       </div>
@@ -403,13 +403,13 @@
     salesGradient.addColorStop(0, 'rgba(28, 28, 28, 0.12)');
     salesGradient.addColorStop(1, 'rgba(28, 28, 28, 0)');
 
-    new Chart(salesCtx, {
+    const salesChart = new Chart(salesCtx, {
       type: 'line',
       data: {
-        labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        labels: [<% chartData.month.forEach(function(p, index) { %>'<%= p.label %>'<%= index < chartData.month.length - 1 ? ',' : '' %><% }) %>],
         datasets: [{
           label: 'Revenue',
-          data: [500, 450, 600, 400, 2200, 500, 2800],
+          data: [<% chartData.month.forEach(function(p, index) { %><%= p.value %><%= index < chartData.month.length - 1 ? ',' : '' %><% }) %>],
           borderColor: '#1C1C1C',
           borderWidth: 4,
           pointBackgroundColor: '#FFFFFF',
@@ -445,7 +445,10 @@
             ticks: {
               color: '#888888',
               font: { family: 'Outfit', size: 10, weight: 600 },
-              callback: function(value) { return '₹' + value/1000 + 'k'; }
+              callback: function(value) { 
+                if (value >= 1000) return '₹' + value/1000 + 'k';
+                return '₹' + value;
+              }
             }
           },
           x: {
@@ -456,6 +459,39 @@
             }
           }
         }
+      }
+    });
+
+    // Dynamic Period Switching
+    const periodData = {
+      today: { 
+        labels: [<% chartData.today.forEach(function(p, index) { %>'<%= p.label %>'<%= index < chartData.today.length - 1 ? ',' : '' %><% }) %>], 
+        data: [<% chartData.today.forEach(function(p, index) { %><%= p.value %><%= index < chartData.today.length - 1 ? ',' : '' %><% }) %>] 
+      },
+      week: { 
+        labels: [<% chartData.week.forEach(function(p, index) { %>'<%= p.label %>'<%= index < chartData.week.length - 1 ? ',' : '' %><% }) %>], 
+        data: [<% chartData.week.forEach(function(p, index) { %><%= p.value %><%= index < chartData.week.length - 1 ? ',' : '' %><% }) %>] 
+      },
+      month: { 
+        labels: [<% chartData.month.forEach(function(p, index) { %>'<%= p.label %>'<%= index < chartData.month.length - 1 ? ',' : '' %><% }) %>], 
+        data: [<% chartData.month.forEach(function(p, index) { %><%= p.value %><%= index < chartData.month.length - 1 ? ',' : '' %><% }) %>] 
+      },
+      year: { 
+        labels: [<% chartData.year.forEach(function(p, index) { %>'<%= p.label %>'<%= index < chartData.year.length - 1 ? ',' : '' %><% }) %>], 
+        data: [<% chartData.year.forEach(function(p, index) { %><%= p.value %><%= index < chartData.year.length - 1 ? ',' : '' %><% }) %>] 
+      },
+      custom: { labels: ['Nov 1', 'Nov 10', 'Nov 20', 'Nov 30'], data: [3200, 4500, 2800, 5100] }
+    };
+
+    document.getElementById('timePeriod').addEventListener('change', (e) => {
+      const period = e.target.value;
+      if (periodData[period]) {
+        salesChart.data.labels = periodData[period].labels;
+        salesChart.data.datasets[0].data = periodData[period].data;
+        salesChart.update({
+          duration: 800,
+          easing: 'easeOutQuart'
+        });
       }
     });
 
