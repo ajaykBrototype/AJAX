@@ -257,51 +257,51 @@
 
         .modern-offer-card {
             background: #fff;
-            border: 1px solid #eeeeee;
-            border-radius: 12px;
-            padding: 12px 16px;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
             position: relative;
-            width: 100%;
+            max-width: 320px;
         }
 
-        .modern-offer-card:hover {
-            border-color: #000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        .modern-offer-card.best-applied {
+            border-color: rgba(169, 29, 29, 0.15);
         }
 
         .offer-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
         }
 
         .offer-left-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
         }
 
         .offer-badge {
             background: #A91D1D;
             color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 8px;
-            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.4rem;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.02em;
             display: flex;
             align-items: center;
-            gap: 3px;
-            text-transform: uppercase;
+            gap: 0.25rem;
         }
 
         .offer-applied-text {
-            font-size: 8px;
-            font-weight: 700;
+            font-size: 0.45rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
             color: #A91D1D;
-            letter-spacing: 0.02em;
             text-transform: uppercase;
         }
 
@@ -312,18 +312,19 @@
         }
 
         .offer-name {
-            font-size: 11px;
-            font-weight: 700;
-            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.7rem;
             letter-spacing: 0.02em;
             text-transform: uppercase;
+            color: #1a1a1a;
         }
 
         .offer-save {
-            font-size: 11px;
+            font-size: 0.6rem;
             font-weight: 700;
-            color: #000;
-            letter-spacing: -0.01em;
+            color: #1a1a1a;
+            opacity: 0.8;
         }
 
         .short-desc {
@@ -942,35 +943,34 @@
                 </div>
                 
                 <div class="modern-offers-wrapper reveal" style="transition-delay: 0.25s;">
-                    <% if (locals.applicableOffers && applicableOffers.length > 0) { %>
-                        <% applicableOffers.forEach(offer => { %>
-                            <div class="modern-offer-card">
-                                <div class="offer-top">
-                                    <div class="offer-left-group">
-                                        <div class="offer-badge">
-                                            <i data-lucide="zap" size="10" fill="currentColor"></i>
-                                            <%= offer.discountMode === 'percentage' ? offer.discountValue + '% OFF' : '₹' + offer.discountValue + ' OFF' %>
-                                        </div>
-                                        <span class="offer-applied-text"><%= (locals.bestOffer && offer._id.toString() === bestOffer._id.toString()) ? 'BEST OFFER APPLIED' : 'AVAILABLE OFFER' %></span>
+                    <% if (locals.bestOffer) { %>
+                        <% const offer = bestOffer; %>
+                        <div class="modern-offer-card best-applied">
+                            <div class="offer-top">
+                                <div class="offer-left-group">
+                                    <div class="offer-badge">
+                                        <i data-lucide="zap" size="10" fill="currentColor"></i>
+                                        <%= offer.discountMode === 'percentage' ? offer.discountValue + '% OFF' : '₹' + offer.discountValue + ' OFF' %>
                                     </div>
-                                </div>
-                                <div class="offer-bottom">
-                                    <div class="offer-name"><%= offer.offerLabel %></div>
-                                    <div class="offer-save">
-                                        <% 
-                                           let saveAmount = 0;
-                                           if (offer.discountMode === 'percentage') {
-                                               saveAmount = (variant.price * offer.discountValue) / 100;
-                                               if (offer.maxDiscountCap) saveAmount = Math.min(saveAmount, offer.maxDiscountCap);
-                                           } else {
-                                               saveAmount = offer.discountValue;
-                                           }
-                                        %>
-                                        You save ₹<%= Math.round(saveAmount) %>
-                                    </div>
+                                    <span class="offer-applied-text">BEST OFFER APPLIED</span>
                                 </div>
                             </div>
-                        <% }) %>
+                            <div class="offer-bottom">
+                                <div class="offer-name"><%= offer.offerLabel %></div>
+                                <div class="offer-save">
+                                    <% 
+                                       let saveAmount = 0;
+                                       if (offer.discountMode === 'percentage') {
+                                           saveAmount = (variant.price * offer.discountValue) / 100;
+                                           if (offer.maxDiscountCap) saveAmount = Math.min(saveAmount, offer.maxDiscountCap);
+                                       } else {
+                                           saveAmount = offer.discountValue;
+                                       }
+                                    %>
+                                    You save ₹<%= Math.round(saveAmount) %>
+                                </div>
+                            </div>
+                        </div>
                     <% } %>
                 </div>
 
