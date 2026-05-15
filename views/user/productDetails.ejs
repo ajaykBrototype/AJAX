@@ -829,6 +829,9 @@
                         <i data-lucide="heart" size="19" class="<%= (locals.wishlist || []).includes(product._id.toString()) ? 'fill-red-500' : '' %>"></i>
                     </button>
                 </div>
+                <script>
+                    const bestOffer = <%- JSON.stringify(bestOffer) %>;
+                </script>
                 
                 <!-- Accordions strictly below the image -->
                 <div class="accordions reveal" style="transition-delay: 0.6s; margin-top: 40px; border-top: 1px solid var(--border-color);">
@@ -874,9 +877,24 @@
                 </div>
 
                 <div class="price-wrapper">
-                    <p class="product-price" id="productPrice">₹<%= variant?.price %></p>
-                    <p class="original-price" id="originalPrice">₹<%= Math.round(variant?.price * 1.4) %></p>
-                    <div class="discount-badge">40% OFF</div>
+                    <% if (bestOffer && (!bestOffer.minOrderValue || variant.price >= bestOffer.minOrderValue)) { 
+                        let discountAmount = 0;
+                        if (bestOffer.discountMode === 'percentage') {
+                            discountAmount = (variant.price * bestOffer.discountValue) / 100;
+                            if (bestOffer.maxDiscountCap) discountAmount = Math.min(discountAmount, bestOffer.maxDiscountCap);
+                        } else {
+                            discountAmount = bestOffer.discountValue;
+                        }
+                        const finalPrice = Math.max(0, variant.price - discountAmount);
+                    %>
+                        <p class="product-price" id="productPrice">₹<%= Math.round(finalPrice) %></p>
+                        <p class="original-price" id="originalPrice">₹<%= variant.price %></p>
+                        <div class="discount-badge"><%= bestOffer.discountMode === 'percentage' ? bestOffer.discountValue + '% OFF' : '₹' + bestOffer.discountValue + ' OFF' %></div>
+                    <% } else { %>
+                        <p class="product-price" id="productPrice">₹<%= variant?.price %></p>
+                        <p class="original-price hidden" id="originalPrice"></p>
+                        <div class="discount-badge hidden"></div>
+                    <% } %>
                 </div>
 
                 <div id="stockInfoContainer" class="stock-info <%= (variant?.stock || 0) < 5 ? 'stock-low' : 'stock-in' %>">

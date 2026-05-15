@@ -3,6 +3,7 @@ import SubCategory from "../../models/admin/subCategoryModel.js";
 import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
 import Wishlist from "../../models/user/wishlistModel.js";
+import Offer from "../../models/admin/offerModel.js";
 export const loadMenPage = async (req, res) => {
   try {
     const { sub, page = 1 } = req.query;
@@ -122,6 +123,44 @@ export const loadProductDetails = async (req, res) => {
     const wishlist = wishlistDoc?.items.map(i => i.product.toString()) || [];
     const wishlistedVariants = wishlistDoc?.items.map(i => i.variant.toString()) || [];
 
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    const productOffers = activeOffers.filter(o => 
+      o.applicableTo === 'product' && o.targetProduct.toString() === product._id.toString()
+    );
+    const categoryOffers = activeOffers.filter(o => 
+      o.applicableTo === 'category' && o.targetCategory.toString() === product.category.toString()
+    );
+
+    const allApplicableOffers = [...productOffers, ...categoryOffers].filter(offer => 
+      !offer.minOrderValue || defaultVariant.price >= offer.minOrderValue
+    );
+    
+    let bestOffer = null;
+    let maxDiscount = 0;
+
+    if (allApplicableOffers.length > 0) {
+      allApplicableOffers.forEach(offer => {
+        let discountAmount = 0;
+        if (offer.discountMode === 'percentage') {
+          discountAmount = (defaultVariant.price * offer.discountValue) / 100;
+          if (offer.maxDiscountCap) discountAmount = Math.min(discountAmount, offer.maxDiscountCap);
+        } else {
+          discountAmount = offer.discountValue;
+        }
+
+        if (discountAmount > maxDiscount) {
+          maxDiscount = discountAmount;
+          bestOffer = offer;
+        }
+      });
+    }
+
     res.render("user/productDetails", {
       product,
       variants,
@@ -131,7 +170,8 @@ export const loadProductDetails = async (req, res) => {
       subCategory,
       stock,
       wishlist,
-      wishlistedVariants
+      wishlistedVariants,
+      bestOffer
     });
 
   } catch (err) {

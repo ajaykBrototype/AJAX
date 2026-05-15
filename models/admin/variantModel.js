@@ -24,15 +24,6 @@ const variantSchema = new mongoose.Schema({
   },
 
   price: {
-    type: Number
-  },
-
-  regularPrice: {
-    type: Number,
-    required: true
-  },
-
-  salePrice: {
     type: Number,
     required: true
   },

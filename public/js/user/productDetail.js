@@ -243,8 +243,7 @@ document.addEventListener('click', async (e) => {
                 updateGallery(firstVariant.images);
                 
         
-                document.getElementById('productPrice').textContent = `₹${firstVariant.price}`;
-                document.getElementById('originalPrice').textContent = `₹${Math.round(firstVariant.price * 1.4)}`;
+                updatePriceDisplay(firstVariant.price);
 
                  updateStockDisplay(firstVariant.stock);
 
@@ -281,6 +280,7 @@ document.addEventListener('click', async (e) => {
                     
                     state.selectedVariant = v;
                     
+                    updatePriceDisplay(v.price);
                     
                     updateStockDisplay(v.stock);
                     
@@ -306,6 +306,33 @@ document.addEventListener('click', async (e) => {
             } else {
                 stockInfoContainer.className = 'stock-info stock-in';
                 stockStatus.textContent = 'In Stock & Ready to Ship';
+            }
+        }
+
+        function updatePriceDisplay(price) {
+            const priceEl = document.getElementById('productPrice');
+            const originalPriceEl = document.getElementById('originalPrice');
+            const badgeEl = document.querySelector('.discount-badge');
+
+            if (typeof bestOffer !== 'undefined' && bestOffer && (!bestOffer.minOrderValue || price >= bestOffer.minOrderValue)) {
+                let discountAmount = 0;
+                if (bestOffer.discountMode === 'percentage') {
+                    discountAmount = (price * bestOffer.discountValue) / 100;
+                    if (bestOffer.maxDiscountCap) discountAmount = Math.min(discountAmount, bestOffer.maxDiscountCap);
+                } else {
+                    discountAmount = bestOffer.discountValue;
+                }
+                const finalPrice = Math.max(0, price - discountAmount);
+
+                priceEl.textContent = `₹${Math.round(finalPrice)}`;
+                originalPriceEl.textContent = `₹${price}`;
+                originalPriceEl.classList.remove('hidden');
+                badgeEl.textContent = bestOffer.discountMode === 'percentage' ? `${bestOffer.discountValue}% OFF` : `₹${bestOffer.discountValue} OFF`;
+                badgeEl.classList.remove('hidden');
+            } else {
+                priceEl.textContent = `₹${price}`;
+                originalPriceEl.classList.add('hidden');
+                badgeEl.classList.add('hidden');
             }
         }
 
