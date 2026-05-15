@@ -494,13 +494,19 @@
                 Select a product...
               </option>
 
-              <% products.forEach(p => { %>
+             <% products.forEach(p => { %>
 
-                <option value="<%= p._id %>">
+              <option  value="<%= p._id %>" data-type="product">
+                        <%= p.name %>
+               </option>
 
-                  <%= p.name %>
+              <% }) %>
 
-                </option>
+                <% categories.forEach(c => { %>
+
+             <option value="<%= c._id %>" data-type="category" hidden>
+                 <%= c.name %>
+            </option>
 
               <% }) %>
 
@@ -743,18 +749,6 @@
       });
     }
 
-    setupToggle('applicableToToggle', 'applicableTo', (value) => {
-      const label = document.getElementById('targetLabel');
-      const select = document.getElementById('targetSelect');
-      if (value === 'product') {
-        label.textContent = 'Target Product';
-        select.innerHTML = '<option selected disabled>Select a product...</option><option>Super Glow Serum</option><option>Vitamin C Cream</option>';
-      } else {
-        label.textContent = 'Target Category';
-        select.innerHTML = '<option selected disabled>Select a category...</option><option>Serum</option><option>Moisturizer</option>';
-      }
-    });
-
     setupToggle('discountModeToggle', 'discountMode', (value) => {
       const unit = document.getElementById('discountUnit');
       unit.textContent = value === 'percentage' ? '%' : '₹';
@@ -773,6 +767,92 @@
       dateFormat: "Y-m-d",
       minDate: "today"
     });
+
+
+
+
+
+    const applicableToInput =
+    document.getElementById(
+        "applicableTo"
+    );
+
+const applicableToggleItems =
+    document.querySelectorAll(
+        "#applicableToToggle .toggle-item"
+    );
+
+const targetSelect =
+    document.getElementById(
+        "targetSelect"
+    );
+
+const targetLabel =
+    document.getElementById(
+        "targetLabel"
+    );
+
+
+// TOGGLE SWITCHING
+applicableToggleItems.forEach(item => {
+
+    item.addEventListener(
+        "click",
+        () => {
+
+        // ACTIVE UI
+        applicableToggleItems
+        .forEach(i =>
+            i.classList.remove(
+                "active"
+            )
+        );
+
+        item.classList.add(
+            "active"
+        );
+
+        // VALUE
+        const value =
+            item.dataset.value;
+
+        applicableToInput.value =
+            value;
+
+        // LABEL
+        targetLabel.textContent =
+            value === "product"
+            ?
+            "Target Product"
+            :
+            "Target Category";
+
+        // RESET SELECT
+        targetSelect.value = "";
+
+        // SWITCH OPTIONS
+        const options =
+            targetSelect.querySelectorAll(
+                "option"
+            );
+
+        options.forEach(option => {
+
+            if (
+                option.value === ""
+            ) {
+                option.textContent = value === "product" ? "Select a product..." : "Select a category...";
+                return;
+            }
+
+            const type =
+                option.dataset.type;
+
+            option.hidden =
+                type !== value;
+        });
+    });
+});
   </script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
