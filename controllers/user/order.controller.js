@@ -9,6 +9,45 @@ import Return from "../../models/user/returnModel.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
 import Coupon from "../../models/admin/couponModel.js";
+import Offer from "../../models/admin/offerModel.js";
+import Product from "../../models/admin/productModel.js";
+
+const getBestOffer = (activeOffers, prod, price) => {
+  if (!activeOffers || activeOffers.length === 0) return null;
+
+  const pOffers = activeOffers.filter(o => 
+    o.applicableTo === 'product' && 
+    o.targetProduct && 
+    o.targetProduct.toString() === prod._id.toString()
+  );
+
+  const cOffers = activeOffers.filter(o => 
+    o.applicableTo === 'category' && 
+    o.targetCategory && 
+    prod.category && 
+    o.targetCategory.toString() === prod.category.toString()
+  );
+
+  const applicable = [...pOffers, ...cOffers].filter(o => !o.minOrderValue || price >= o.minOrderValue);
+  
+  let best = null;
+  let maxD = 0;
+  applicable.forEach(o => {
+    let d = 0;
+    if (o.discountMode === 'percentage') {
+      d = (price * o.discountValue) / 100;
+      if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+    } else {
+      d = o.discountValue;
+    }
+
+    if (d > maxD) {
+      maxD = d;
+      best = o;
+    }
+  });
+  return best;
+};
 
 export const loadOrderPage = async (req, res) => {
     try {
@@ -209,6 +248,13 @@ export const placeOrder = async (req, res) => {
 
         const orderItems = [];
 
+        const today = new Date();
+        const activeOffers = await Offer.find({
+          isActive: true,
+          startDate: { $lte: today },
+          endDate: { $gte: today }
+        }).lean();
+
         for (const item of cart.items) {
 
             if (!item.variant || !item.variant.productId) {
@@ -222,14 +268,29 @@ export const placeOrder = async (req, res) => {
             }
 
             item.variant.stock -= item.quantity;
-
             await item.variant.save();
+
+            const product = item.variant.productId;
+            const bestOffer = getBestOffer(activeOffers, product, item.variant.price);
+            
+            let finalUnitPrice = item.variant.price;
+            if (bestOffer) {
+              let discount = 0;
+              if (bestOffer.discountMode === 'percentage') {
+                discount = (finalUnitPrice * bestOffer.discountValue) / 100;
+                if (bestOffer.maxDiscountCap) discount = Math.min(discount, bestOffer.maxDiscountCap);
+              } else {
+                discount = bestOffer.discountValue;
+              }
+              finalUnitPrice -= discount;
+            }
 
             orderItems.push({
                 productId: item.variant.productId._id,
                 variantId: item.variant._id,
                 name: item.variant.productId.name,
-                price: item.variant.price,
+                price: finalUnitPrice,
+                originalPrice: item.variant.price,
                 quantity: item.quantity,
                 size: item.variant.size,
                 image: item.variant.images[0],
@@ -240,6 +301,11 @@ export const placeOrder = async (req, res) => {
 
         const subtotal = orderItems.reduce(
             (sum, item) => sum + item.price * item.quantity,
+            0
+        );
+
+        const totalOfferDiscount = orderItems.reduce(
+            (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
             0
         );
 
@@ -304,6 +370,7 @@ export const placeOrder = async (req, res) => {
             paymentMethod: normalizedPayment,
             totalAmount: total,
             discount: discount,
+            totalOfferDiscount: totalOfferDiscount,
             couponCode: appliedCoupon ? appliedCoupon.code : null,
             status: normalizedPayment === "RAZORPAY" ? "Pending" : "Placed",
             statusHistory: [

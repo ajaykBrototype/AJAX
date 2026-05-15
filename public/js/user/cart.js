@@ -1,6 +1,22 @@
 
         lucide.createIcons();
 
+        function updateDisplays(data) {
+            const subtotalDisplays = document.querySelectorAll('.subtotal-display');
+            const savingsDisplays = document.querySelectorAll('.savings-display');
+            const totalDisplays = document.querySelectorAll('.total-display');
+
+            if (data.subtotal !== undefined) {
+                subtotalDisplays.forEach(el => el.innerText = `₹${data.subtotal.toFixed(2)}`);
+            }
+            if (data.totalDiscount !== undefined) {
+                savingsDisplays.forEach(el => el.innerText = `- ₹${data.totalDiscount.toFixed(2)}`);
+            }
+            if (data.totalPrice !== undefined) {
+                totalDisplays.forEach(el => el.innerText = `₹${data.totalPrice.toFixed(2)}`);
+            }
+        }
+
         function recalculate() {
             let subtotal = 0;
             const items = document.querySelectorAll('.bag-card:not(.item-exit)');
@@ -18,18 +34,9 @@
             items.forEach(card => {
                 if (card.classList.contains('grayscale')) {
                     hasOutOfStock = true;
-                    return; 
-                }
-                
-                const price = parseFloat(card.dataset.price) || 0;
-                const qtyVal = card.querySelector('.qty-val');
-                if (qtyVal) {
-                    const qty = parseInt(qtyVal.innerText) || 0;
-                    subtotal += price * qty;
                 }
             });
 
-           
             if (checkoutBtn) {
                 if (hasOutOfStock) {
                     checkoutBtn.classList.add('disabled');
@@ -38,13 +45,6 @@
                 }
             }
 
-            const subtotalDisplays = document.querySelectorAll('.subtotal-display');
-            const totalDisplays = document.querySelectorAll('.total-display');
-
-            subtotalDisplays.forEach(el => el.innerText = `₹${subtotal.toFixed(2)}`);
-            totalDisplays.forEach(el => el.innerText = `₹${subtotal.toFixed(2)}`);
-
-           
             if (items.length === 0) {
                 window.location.reload();
             }
@@ -65,16 +65,15 @@
 
             try {
               
-                qtyEl.innerText = newQty;
-                recalculate();
-
                 const res = await axios.patch('/cart/update', { itemId, delta });
                 
-                if (!res.data.success) {
-                   
-                    qtyEl.innerText = currentQty;
+                if (res.data.success) {
+                    qtyEl.innerText = res.data.qty;
+                    updateDisplays(res.data);
                     recalculate();
+                } else {
                     ajaxToast("error", res.data.message);
+                    recalculate();
                 }
             } catch (err) {
                 console.log("QTY UPDATE ERROR:", err);

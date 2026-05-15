@@ -13,6 +13,7 @@ const orderSchema = new mongoose.Schema({
       variantId: mongoose.Schema.Types.ObjectId,
       name: String,
       price: Number,
+      originalPrice: Number,
       quantity: Number,
       size:String,
       image: String,
@@ -50,6 +51,10 @@ const orderSchema = new mongoose.Schema({
   couponCode: {
     type: String,
     uppercase: true
+  },
+  totalOfferDiscount: {
+    type: Number,
+    default: 0
   },
 
   status: {

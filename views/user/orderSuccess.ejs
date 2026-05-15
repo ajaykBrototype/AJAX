@@ -260,9 +260,14 @@
               <p class="text-stone-400 text-[0.7rem] mb-2">
                  Qty: <%= item.quantity %>
               </p>
-               <p class="text-sm font-black">
-                ₹<%= item.price %>
-             </p>
+               <div class="flex items-center gap-2">
+                 <p class="text-sm font-black">
+                   ₹<%= item.price %>
+                 </p>
+                 <% if (item.originalPrice && item.originalPrice > item.price) { %>
+                   <p class="text-[0.65rem] text-stone-300 line-through">₹<%= item.originalPrice %></p>
+                 <% } %>
+               </div>
               </div>
            </div>
              <% }) %>
@@ -270,13 +275,29 @@
 
                 <!-- Totals -->
                 <div class="space-y-2 pt-4 border-t border-brand-mist/20">
+                    <% 
+                       const originalSubtotal = order.items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0);
+                       const shipping = order.totalAmount > 1000 ? 0 : 100;
+                    %>
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Subtotal</span>
-                        <span class="font-bold">₹<%= order.totalAmount.toFixed(2) %></span>
+                        <span class="font-bold">₹<%= originalSubtotal.toFixed(2) %></span>
                     </div>
+                    <% if (order.totalOfferDiscount > 0) { %>
+                    <div class="flex justify-between items-center text-[0.75rem]">
+                        <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem] text-brand-success">Offer Savings</span>
+                        <span class="font-bold text-brand-success">-₹<%= order.totalOfferDiscount.toFixed(2) %></span>
+                    </div>
+                    <% } %>
+                    <% if (order.discount > 0) { %>
+                    <div class="flex justify-between items-center text-[0.75rem]">
+                        <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem] text-brand-success">Coupon (<%= order.couponCode %>)</span>
+                        <span class="font-bold text-brand-success">-₹<%= order.discount.toFixed(2) %></span>
+                    </div>
+                    <% } %>
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Shipping</span>
-                        <span class="font-bold text-brand-success"><%= order.totalAmount > 1000 ? "FREE" : "₹100" %></span>
+                        <span class="font-bold text-brand-success"><%= shipping === 0 ? "FREE" : "₹" + shipping %></span>
                     </div>
                     <div class="flex justify-between items-end pt-2">
                         <div>

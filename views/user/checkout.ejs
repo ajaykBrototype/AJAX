@@ -212,15 +212,9 @@
         }) %>
 
          <%
-        let subtotal = 0;
-
-         cart.items.forEach(item => {
-         subtotal += (item.variant?.price || 0) * item.quantity;
-          });
-
-          const shipping = subtotal > 1000 ? 0 : 100;
-         const total = subtotal + shipping;
-           %>
+           const shipping = totalPrice > 1000 ? 0 : 100;
+           const total = totalPrice + shipping;
+         %>
    
     
 
@@ -371,14 +365,19 @@
             <p class="text-[0.6rem] text-stone-300 uppercase">
             <%= item.variant?.size || "N/A" %>
             </p>
-           <p class="text-[0.6rem] text-stone-300 uppercase">
-            <%= item?.quantity || "N/A" %>
-          </p>
+            <p class="text-[0.65rem] font-bold mt-1">
+              Qty: <%= item?.quantity || "N/A" %>
+            </p>
           </div>
 
-         <p class="font-bold text-base">
-          ₹<%= (item.variant?.price || 0) * item.quantity %>
-         </p>
+          <div class="text-right">
+            <% if (item.offer) { %>
+              <p class="font-bold text-base">₹<%= Math.round(item.finalPrice) * item.quantity %></p>
+              <p class="text-[0.55rem] text-stone-300 line-through">₹<%= item.variant.price * item.quantity %></p>
+            <% } else { %>
+              <p class="font-bold text-base">₹<%= (item.variant?.price || 0) * item.quantity %></p>
+            <% } %>
+          </div>
 
         </div>
          <% }) %>
@@ -403,8 +402,12 @@
                             <span class="uppercase tracking-[0.2em]">Subtotal</span>
                             <span class="text-dark">₹ <%= subtotal %></span>
                         </div>
+                        <div class="flex justify-between items-center text-[0.7rem] font-bold">
+                            <span class="uppercase tracking-[0.2em] text-green-600">Offer Savings</span>
+                            <span class="text-green-600">-₹ <%= totalOfferDiscount.toFixed(2) %></span>
+                        </div>
                         <div id="discountRow" class="hidden flex justify-between items-center text-[0.7rem] font-bold">
-                            <span class="uppercase tracking-[0.2em] text-green-600">Discount</span>
+                            <span class="uppercase tracking-[0.2em] text-green-600">Coupon Discount</span>
                             <span id="discountValue" class="text-green-600">-₹ 0.00</span>
                         </div>
                         <div class="flex justify-between items-center text-[0.7rem] font-bold text-stone-400">
@@ -418,7 +421,9 @@
                             <p class="text-[0.65rem] font-black uppercase tracking-[0.3em] mb-1.5 text-stone-300">TOTAL</p>
                             <p class="text-[0.55rem] text-stone-200 font-bold uppercase tracking-widest">INR</p>
                         </div>
-                        <p id="totalPrice" class="text-5xl font-serif tracking-tighter">₹ <%= total %></p>
+                        <div class="text-right">
+                            <p id="totalPrice" class="text-5xl font-serif tracking-tighter">₹ <%= total %></p>
+                        </div>
                     </div>
 
                     <!-- Action Button -->

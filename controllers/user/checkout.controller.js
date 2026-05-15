@@ -3,7 +3,46 @@ import Address from "../../models/user/addressModel.js";
 import Wallet from "../../models/user/walletModel.js";
 import Coupon from "../../models/admin/couponModel.js";
 import Order from "../../models/user/orderModel.js";
+import Offer from "../../models/admin/offerModel.js";
+import Product from "../../models/admin/productModel.js";
 import mongoose from "mongoose";
+
+const getBestOffer = (activeOffers, prod, price) => {
+  if (!activeOffers || activeOffers.length === 0) return null;
+
+  const pOffers = activeOffers.filter(o => 
+    o.applicableTo === 'product' && 
+    o.targetProduct && 
+    o.targetProduct.toString() === prod._id.toString()
+  );
+
+  const cOffers = activeOffers.filter(o => 
+    o.applicableTo === 'category' && 
+    o.targetCategory && 
+    prod.category && 
+    o.targetCategory.toString() === prod.category.toString()
+  );
+
+  const applicable = [...pOffers, ...cOffers].filter(o => !o.minOrderValue || price >= o.minOrderValue);
+  
+  let best = null;
+  let maxD = 0;
+  applicable.forEach(o => {
+    let d = 0;
+    if (o.discountMode === 'percentage') {
+      d = (price * o.discountValue) / 100;
+      if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+    } else {
+      d = o.discountValue;
+    }
+
+    if (d > maxD) {
+      maxD = d;
+      best = o;
+    }
+  });
+  return best;
+};
 
 export const loadCheckoutPage = async (req, res) => {
     try {
@@ -35,9 +74,53 @@ export const loadCheckoutPage = async (req, res) => {
             return res.redirect("/cart");
         }
 
+        const today = new Date();
+        const activeOffers = await Offer.find({
+          isActive: true,
+          startDate: { $lte: today },
+          endDate: { $gte: today }
+        }).lean();
+
+        let subtotal = 0;
+        let totalOfferDiscount = 0;
+
+        cart.items.forEach(item => {
+          if (item.variant && item.variant.stock > 0) {
+            const product = item.variant.productId;
+            const bestOffer = getBestOffer(activeOffers, product, item.variant.price);
+            
+            let itemPrice = item.variant.price;
+            let discount = 0;
+
+            if (bestOffer) {
+              if (bestOffer.discountMode === 'percentage') {
+                discount = (itemPrice * bestOffer.discountValue) / 100;
+                if (bestOffer.maxDiscountCap) discount = Math.min(discount, bestOffer.maxDiscountCap);
+              } else {
+                discount = bestOffer.discountValue;
+              }
+            }
+
+            item.finalPrice = itemPrice - discount;
+            item.offer = bestOffer;
+            
+            subtotal += itemPrice * item.quantity;
+            totalOfferDiscount += discount * item.quantity;
+          }
+        });
+
+        const totalPrice = subtotal - totalOfferDiscount;
         const wallet = await Wallet.findOne({ userId });
 
-        res.render("user/checkout", { cart, address, addresses, wallet });
+        res.render("user/checkout", { 
+          cart, 
+          address, 
+          addresses, 
+          wallet,
+          subtotal,
+          totalOfferDiscount,
+          totalPrice
+        });
 
     } catch (err) {
         console.log("CHECKOUT ERROR:", err);

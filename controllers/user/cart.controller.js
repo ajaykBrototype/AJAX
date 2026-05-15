@@ -1,6 +1,44 @@
 import Cart from "../../models/user/cartModel.js";
 import Variant from "../../models/admin/variantModel.js";
-import { success } from "zod";
+import Offer from "../../models/admin/offerModel.js";
+import Product from "../../models/admin/productModel.js";
+
+const getBestOffer = (activeOffers, prod, price) => {
+  if (!activeOffers || activeOffers.length === 0) return null;
+
+  const pOffers = activeOffers.filter(o => 
+    o.applicableTo === 'product' && 
+    o.targetProduct && 
+    o.targetProduct.toString() === prod._id.toString()
+  );
+
+  const cOffers = activeOffers.filter(o => 
+    o.applicableTo === 'category' && 
+    o.targetCategory && 
+    prod.category && 
+    o.targetCategory.toString() === prod.category.toString()
+  );
+
+  const applicable = [...pOffers, ...cOffers].filter(o => !o.minOrderValue || price >= o.minOrderValue);
+  
+  let best = null;
+  let maxD = 0;
+  applicable.forEach(o => {
+    let d = 0;
+    if (o.discountMode === 'percentage') {
+      d = (price * o.discountValue) / 100;
+      if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+    } else {
+      d = o.discountValue;
+    }
+
+    if (d > maxD) {
+      maxD = d;
+      best = o;
+    }
+  });
+  return best;
+};
 
 export const addToCart = async (req, res) => {
   try {
@@ -99,21 +137,54 @@ export const loadCartPage = async (req, res) => {
         await cart.save();
       }
 
-      let totalPrice = 0;
+      const today = new Date();
+      const activeOffers = await Offer.find({
+        isActive: true,
+        startDate: { $lte: today },
+        endDate: { $gte: today }
+      }).lean();
+
+      let subtotal = 0;
+      let totalDiscount = 0;
+
       cart.items.forEach(item => {
-        // Only count items that have stock
-        if (item.variant.stock > 0) {
-          totalPrice += item.variant.price * item.quantity;
+        if (item.variant && item.variant.stock > 0) {
+          const product = item.variant.productId;
+          const bestOffer = getBestOffer(activeOffers, product, item.variant.price);
+          
+          let itemPrice = item.variant.price;
+          let discount = 0;
+
+          if (bestOffer) {
+            if (bestOffer.discountMode === 'percentage') {
+              discount = (itemPrice * bestOffer.discountValue) / 100;
+              if (bestOffer.maxDiscountCap) discount = Math.min(discount, bestOffer.maxDiscountCap);
+            } else {
+              discount = bestOffer.discountValue;
+            }
+          }
+
+          item.finalPrice = itemPrice - discount;
+          item.offer = bestOffer;
+          
+          subtotal += itemPrice * item.quantity;
+          totalDiscount += discount * item.quantity;
         }
       });
 
+      const totalPrice = subtotal - totalDiscount;
+
       res.render("user/cart", {
         cart,
+        subtotal,
+        totalDiscount,
         totalPrice
       });
     } else {
       res.render("user/cart", {
         cart: null,
+        subtotal: 0,
+        totalDiscount: 0,
         totalPrice: 0
       });
     }
@@ -154,18 +225,51 @@ export const updateCartQty = async (req, res) => {
     await cart.save();
 
    
-    let total = 0;
-    const populatedCart = await Cart.findOne({ user: userId }).populate("items.variant");
+    let subtotal = 0;
+    let totalDiscount = 0;
+
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    const populatedCart = await Cart.findOne({ user: userId }).populate({
+      path: "items.variant",
+      populate: { path: "productId" }
+    });
+
     populatedCart.items.forEach(i => {
-      if (i.variant) {
-        total += i.quantity * i.variant.price;
+      if (i.variant && i.variant.stock > 0) {
+        const product = i.variant.productId;
+        const bestOffer = getBestOffer(activeOffers, product, i.variant.price);
+        
+        let itemPrice = i.variant.price;
+        let discount = 0;
+
+        if (bestOffer) {
+          if (bestOffer.discountMode === 'percentage') {
+            discount = (itemPrice * bestOffer.discountValue) / 100;
+            if (bestOffer.maxDiscountCap) discount = Math.min(discount, bestOffer.maxDiscountCap);
+          } else {
+            discount = bestOffer.discountValue;
+          }
+        }
+
+        subtotal += itemPrice * i.quantity;
+        totalDiscount += discount * i.quantity;
       }
     });
+
+    const totalPrice = subtotal - totalDiscount;
 
     res.json({
       success: true,
       qty: newQty,
-      total
+      subtotal,
+      totalDiscount,
+      totalPrice
     });
 
   } catch (err) {
