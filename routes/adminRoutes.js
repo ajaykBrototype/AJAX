@@ -1,7 +1,7 @@
 import express from "express";
 import { upload } from "../middleware/upload.js";
 import {
-  loadLogin, loginAdmin, logoutAdmin
+  loadLogin, loginAdmin, logoutAdmin, loadDashboard
 } from "../controllers/admin/auth.controller.js";
 import {
   loadCategoryPage, createCategory, getCategories,
@@ -39,7 +39,8 @@ router.get("/login", isLoggedOut, noCache, loadLogin);
 router.post("/login", isLoggedOut, loginAdmin);
 router.get("/logout",isAdminAuth, logoutAdmin);
 
-router.get("/", isAdminAuth, (req, res) => res.redirect("/admin/users"));
+router.get("/", isAdminAuth, (req, res) => res.redirect("/admin/dashboard"));
+router.get("/dashboard", isAdminAuth, noCache, loadDashboard);
 
 router.get("/users", noCache, isAdminAuth, getAllUsers);
 router.patch("/toggleblockuser/:id", isAdminAuth, toggleBlockUser);
