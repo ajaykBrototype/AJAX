@@ -29,7 +29,7 @@ import {
 import { loadAdminOrders, loadOrderDetails,updateOrderStatus } from "../controllers/admin/order.controller.js";
 import { loadReturnManagement, loadReturnDetails,approveReturn,rejectReturn,schedulePickup,markPickedUp } from "../controllers/admin/return.controller.js";
 import { loadCouponPage,createCoupon,updateCoupon,toggleCouponStatus,deleteCoupon,getSingleCoupon } from "../controllers/admin/coupon.controller.js";
-import { createOffer, loadCreateOffer, loadOffers } from "../controllers/admin/offer.controller.js";
+import { createOffer, loadCreateOffer, loadOffers,updateOffer,deleteOffer,toggleOfferStatus } from "../controllers/admin/offer.controller.js";
 
 
 const router = express.Router();
@@ -67,8 +67,9 @@ router.get("/coupons/get-coupon/:id",isAdminAuth,getSingleCoupon);
 router.get("/offers",isAdminAuth,loadOffers);
 router.get("/offers/create",isAdminAuth,loadCreateOffer);
 router.post("/offers/create",isAdminAuth,createOffer);
-
-
+router.put("/offers/update",isAdminAuth,updateOffer);
+router.patch("/offers/delete/:id", isAdminAuth, deleteOffer);
+router.patch("/offers/toggle-status/:id",isAdminAuth,toggleOfferStatus);
 
 router.get("/categories", isAdminAuth, loadCategoryPage);
 router.get("/categories/all", isAdminAuth, getCategories);

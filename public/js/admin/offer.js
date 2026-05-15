@@ -351,3 +351,454 @@ document
         clearError(input);
     });
 });
+
+
+
+
+
+// OPEN EDIT MODAL
+function openEditOfferModal(offer) {
+
+    const modal =
+        document.getElementById(
+            "editOfferModal"
+        );
+
+    modal.style.display = "flex";
+
+    setTimeout(() => {
+
+        modal.classList.add(
+            "show"
+        );
+
+    }, 10);
+
+    // OFFER ID
+    document.getElementById(
+        "editOfferId"
+    ).value = offer._id;
+
+    // LABEL
+    document.getElementById(
+        "editOfferLabel"
+    ).value = offer.offerLabel;
+
+    // DISCOUNT MODE
+    document.getElementById(
+        "editDiscountMode"
+    ).value = offer.discountMode;
+
+    // TOGGLE ACTIVE
+    const toggleItems =
+        document.querySelectorAll(
+            "#editDiscountModeToggle .toggle-item"
+        );
+
+    toggleItems.forEach(item => {
+
+        item.classList.remove(
+            "active"
+        );
+
+        if (
+            item.dataset.value ===
+            offer.discountMode
+        ) {
+
+            item.classList.add(
+                "active"
+            );
+        }
+    });
+
+    // UNIT
+    document.getElementById(
+        "editDiscountUnit"
+    ).textContent =
+        offer.discountMode === "percentage"
+        ? "%"
+        : "₹";
+
+    // DISCOUNT VALUE
+    document.querySelector(
+        '#editOfferForm [name="discountValue"]'
+    ).value =
+        offer.discountValue;
+
+    // MAX CAP
+    document.querySelector(
+        '#editOfferForm [name="maxDiscountCap"]'
+    ).value =
+        offer.maxDiscountCap || "";
+
+    // MIN ORDER
+    document.querySelector(
+        '#editOfferForm [name="minOrderValue"]'
+    ).value =
+        offer.minOrderValue || "";
+
+    // DATES
+    document.getElementById(
+        "editStartDate"
+    ).value =
+        offer.startDate.split("T")[0];
+
+    document.getElementById(
+        "editEndDate"
+    ).value =
+        offer.endDate.split("T")[0];
+}
+
+
+
+// CLOSE EDIT MODAL
+function closeEditOfferModal() {
+
+    const modal =
+        document.getElementById(
+            "editOfferModal"
+        );
+
+    modal.classList.remove(
+        "show"
+    );
+
+    setTimeout(() => {
+
+        modal.style.display =
+            "none";
+
+    }, 300);
+}
+
+
+
+// EDIT TOGGLE
+setupToggle(
+    "editDiscountModeToggle",
+    "editDiscountMode",
+    (value) => {
+
+    const unit =
+        document.getElementById(
+            "editDiscountUnit"
+        );
+
+    unit.textContent =
+        value === "percentage"
+        ? "%"
+        : "₹";
+});
+
+
+
+
+document
+.getElementById(
+    "editOfferForm"
+)
+.addEventListener(
+    "submit",
+    async (e) => {
+
+    e.preventDefault();
+
+    const offerLabel =
+        document.getElementById(
+            "editOfferLabel"
+        );
+
+    const discountValue =
+        document.querySelector(
+            '#editOfferForm [name="discountValue"]'
+        );
+
+    const maxDiscountCap =
+        document.querySelector(
+            '#editOfferForm [name="maxDiscountCap"]'
+        );
+
+    const minOrderValue =
+        document.querySelector(
+            '#editOfferForm [name="minOrderValue"]'
+        );
+
+    const startDate =
+        document.getElementById(
+            "editStartDate"
+        );
+
+    const endDate =
+        document.getElementById(
+            "editEndDate"
+        );
+
+    const discountMode =
+        document.getElementById(
+            "editDiscountMode"
+        ).value;
+
+    let isValid = true;
+
+    [
+        offerLabel,
+        discountValue,
+        maxDiscountCap,
+        minOrderValue,
+        startDate,
+        endDate
+    ].forEach(clearError);
+
+    // LABEL
+    if (
+        !offerLabel.value.trim()
+    ) {
+
+        showError(
+            offerLabel,
+            "Offer label required"
+        );
+
+        isValid = false;
+    }
+
+    const discount =
+        Number(
+            discountValue.value
+        );
+
+    if (
+        !discount ||
+        discount <= 0
+    ) {
+
+        showError(
+            discountValue,
+            "Invalid discount amount"
+        );
+
+        isValid = false;
+    }
+
+
+    if (
+        discountMode ===
+        "percentage"
+        &&
+        discount > 90
+    ) {
+
+        showError(
+            discountValue,
+            "Maximum allowed is 90%"
+        );
+
+        isValid = false;
+    }
+
+    if (
+        maxDiscountCap.value &&
+        Number(
+            maxDiscountCap.value
+        ) < 0
+    ) {
+
+        showError(
+            maxDiscountCap,
+            "Invalid max cap"
+        );
+
+        isValid = false;
+    }
+
+    if (
+        minOrderValue.value &&
+        Number(
+            minOrderValue.value
+        ) < 0
+    ) {
+
+        showError(
+            minOrderValue,
+            "Invalid minimum order"
+        );
+
+        isValid = false;
+    }
+
+    // START DATE
+    if (!startDate.value) {
+
+        showError(
+            startDate,
+            "Start date required"
+        );
+
+        isValid = false;
+    }
+
+    // END DATE
+    if (!endDate.value) {
+
+        showError(
+            endDate,
+            "End date required"
+        );
+
+        isValid = false;
+    }
+
+   
+    if (
+        startDate.value &&
+        endDate.value &&
+        new Date(startDate.value)
+        >
+        new Date(endDate.value)
+    ) {
+
+        showError(
+            endDate,
+            "End date must be after start date"
+        );
+
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    const submitBtn =
+        e.target.querySelector(
+            'button[type="submit"]'
+        );
+
+    const originalBtn =
+        submitBtn.innerHTML;
+
+    submitBtn.disabled = true;
+
+    submitBtn.innerHTML =
+        "Updating Offer...";
+
+    try {
+
+        const formData =
+            new FormData(e.target);
+
+        const data =
+            Object.fromEntries(
+                formData.entries()
+            );
+
+        const response =
+            await axios.put(
+                "/admin/offers/update",
+                data
+            );
+
+        if (
+            response.data.success
+        ) {
+
+            ajaxToast(
+                "success",
+                "Offer updated successfully"
+            );
+
+            closeEditOfferModal();
+
+            setTimeout(() => {
+
+                window.location.reload();
+
+            }, 1200);
+        }
+
+    } catch (error) {
+
+        ajaxToast(
+            "error",
+            error?.response?.data?.message
+            ||
+            "Something went wrong"
+        );
+
+    } finally {
+
+        submitBtn.disabled = false;
+
+        submitBtn.innerHTML =
+            originalBtn;
+    }
+});
+
+
+
+
+async function deleteOffer(id) {
+
+    try {
+
+        const response =
+            await axios.patch(
+                `/admin/offers/delete/${id}`
+            );
+
+        if (
+            response.data.success
+        ) {
+
+            ajaxToast(
+                "success",
+                "Offer deleted successfully"
+            );
+
+            setTimeout(() => {
+
+                window.location.reload();
+
+            }, 1200);
+        }
+
+    } catch (error) {
+
+        ajaxToast(
+            "error",
+            "Something went wrong"
+        );
+    }
+}
+
+
+async function toggleOfferStatus(id) {
+
+    try {
+
+        const response =
+            await axios.patch(
+                `/admin/offers/toggle-status/${id}`
+            );
+
+        if (
+            response.data.success
+        ) {
+
+            ajaxToast(
+                "success",
+                response.data.message
+            );
+
+           setTimeout(()=>{
+             window.location.reload();
+           },2000)
+        }
+
+    } catch (error) {
+
+        ajaxToast(
+            "error",
+            "Something went wrong"
+        );
+    }
+}

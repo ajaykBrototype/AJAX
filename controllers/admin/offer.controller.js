@@ -132,3 +132,186 @@ export const createOffer = async (req, res) => {
         });
     }
 };
+
+
+export const updateOffer = async (req, res) => {
+
+    try {
+
+        const {
+
+            offerId,
+
+            offerLabel,
+
+            discountMode,
+
+            discountValue,
+
+            maxDiscountCap,
+
+            minOrderValue,
+
+            startDate,
+
+            endDate
+
+        } = req.body;
+
+        const offer =
+            await Offer.findById(
+                offerId
+            );
+
+        if (!offer) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "Offer not found"
+            });
+        }
+
+        offer.offerLabel =
+            offerLabel;
+
+        offer.discountMode =
+            discountMode;
+
+        offer.discountValue =
+            discountValue;
+
+        offer.maxDiscountCap =
+            maxDiscountCap || null;
+
+        offer.minOrderValue =
+            minOrderValue || 0;
+
+        offer.startDate =
+            startDate;
+
+        offer.endDate =
+            endDate;
+
+        await offer.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+                "Offer updated successfully"
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message:
+                "Server error"
+        });
+    }
+};
+
+
+export const deleteOffer = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const offer =
+            await Offer.findById(id);
+
+        if (!offer) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "Offer not found"
+            });
+        }
+
+        await Offer.findByIdAndDelete(id);
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+                "Offer deleted successfully"
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message:
+                "Server error"
+        });
+    }
+};
+
+
+export const toggleOfferStatus = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const offer =
+            await Offer.findById(id);
+
+        if (!offer) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "Offer not found"
+            });
+        }
+
+        offer.isActive =
+            !offer.isActive;
+
+        await offer.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+                `Offer ${
+                    offer.isActive
+                    ? "activated"
+                    : "deactivated"
+                }`
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message:
+                "Server error"
+        });
+    }
+};

@@ -342,16 +342,15 @@
                   </td>
                   <td class="px-8 py-7">
                     <div class="flex items-center justify-end gap-3">
-                      <button class="p-2.5 rounded-xl hover:bg-stone-100 text-brand-gray hover:text-brand-black transition-all">
+                      <button  onclick='openEditOfferModal(<%- JSON.stringify(offer) %>)'  class="p-2.5 rounded-xl hover:bg-stone-100 text-brand-gray hover:text-brand-black transition-all">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
-                      <button class="p-2.5 rounded-xl hover:bg-rose-50 text-brand-gray hover:text-brand-red transition-all">
+                      <button onclick="deleteOffer('<%= offer._id %>')" class="p-2.5 rounded-xl hover:bg-rose-50 text-brand-gray hover:text-brand-red transition-all">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                       </button>
                       <div class="h-6 w-[1px] bg-stone-100 mx-1"></div>
                       <label class="switch">
-                        <input type="checkbox" <%= offer.isActive ? 'checked' : '' %>>
-                        <span class="slider"></span>
+                          <input type="checkbox" <%= offer.isActive ? 'checked' : '' %> onchange="toggleOfferStatus('<%= offer._id %>')">                        <span class="slider"></span>
                       </label>
                     </div>
                   </td>
@@ -369,15 +368,33 @@
       <!-- Pagination Placeholder -->
       <div class="px-8 py-6 border-t border-[#F9F9F9] flex justify-between items-center">
         <p class="text-xs font-medium text-brand-gray">Showing <span id="visibleResultsCount" class="text-brand-black"><%= offers && offers.length > 0 ? '1-' + offers.length : '0' %></span> of <span id="totalPaginationCount" class="text-brand-black"><%= offers ? offers.length : 0 %></span> results</p>
-        <div class="flex gap-2">
-          <button class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray hover:bg-stone-50 disabled:opacity-30" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button class="w-8 h-8 rounded-lg bg-brand-black text-white text-xs font-bold">1</button>
-          <button class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray hover:bg-stone-50 disabled:opacity-30" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
+           <div class="flex gap-2">
+
+  <button
+    class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray opacity-30 cursor-not-allowed"
+    disabled
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+
+  <button
+    class="w-8 h-8 rounded-lg bg-brand-black text-white text-xs font-bold"
+  >
+    1
+  </button>
+
+  <button
+    class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray opacity-30 cursor-not-allowed"
+    disabled
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
+
+</div>
       </div>
     </div>
   </main>
@@ -704,6 +721,273 @@
         >
 
           Create Offer
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- Edit Offer Modal -->
+<div
+  id="editOfferModal"
+  class="modal-overlay"
+  onclick="closeEditOfferModal(event)"
+>
+
+  <div
+    class="modal-content animate-up"
+    onclick="event.stopPropagation()"
+  >
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-start mb-8">
+
+      <div>
+
+        <h2 class="text-3xl font-serif font-bold text-[#1a2b4b] mb-1">
+          Edit Offer
+        </h2>
+
+        <p class="text-brand-gray text-sm font-medium">
+          Update your discount promotion.
+        </p>
+
+      </div>
+
+      <button
+        onclick="closeEditOfferModal()"
+        class="p-2 hover:bg-stone-50 rounded-full text-brand-gray transition-colors"
+      >
+
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+
+      </button>
+
+    </div>
+
+    <!-- FORM -->
+    <form
+      id="editOfferForm"
+      class="space-y-8"
+    >
+
+      <!-- OFFER ID -->
+      <input
+        type="hidden"
+        id="editOfferId"
+        name="offerId"
+      >
+
+      <!-- OFFER LABEL -->
+      <div>
+
+        <label class="field-label">
+          Offer Label
+        </label>
+
+        <input
+          type="text"
+          id="editOfferLabel"
+          name="offerLabel"
+          placeholder="e.g. Seasonal Sale"
+          class="input-field"
+        >
+
+        <p class="error-text hidden"></p>
+
+      </div>
+
+      <!-- DISCOUNT -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- MODE -->
+        <div>
+
+          <label class="field-label">
+            Discount Mode
+          </label>
+
+          <div
+            class="toggle-group"
+            id="editDiscountModeToggle"
+          >
+
+            <div
+              class="toggle-item active"
+              data-value="percentage"
+            >
+              Percentage
+            </div>
+
+            <div
+              class="toggle-item"
+              data-value="flat"
+            >
+              Flat
+            </div>
+
+            <input
+              type="hidden"
+              id="editDiscountMode"
+              name="discountMode"
+              value="percentage"
+            >
+
+          </div>
+
+        </div>
+
+        <!-- VALUE -->
+        <div>
+
+          <label class="field-label">
+            Discount Amount
+          </label>
+
+          <div class="relative">
+
+            <input
+              type="number"
+              name="discountValue"
+              placeholder="0.00"
+              class="input-field pr-12"
+            >
+
+            <span
+              class="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-300"
+              id="editDiscountUnit"
+            >
+              %
+            </span>
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+      </div>
+
+      <!-- OPTIONAL -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- MAX CAP -->
+        <div>
+
+          <label class="field-label text-slate-400">
+            Max Cap
+            <span class="normal-case">
+              (optional)
+            </span>
+          </label>
+
+          <div class="relative">
+
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+              ₹
+            </span>
+
+            <input
+              type="number"
+              name="maxDiscountCap"
+              placeholder="0.00"
+              class="input-field pl-12"
+            >
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+        <!-- MIN ORDER -->
+        <div>
+
+          <label class="field-label text-slate-400">
+            Min Order
+            <span class="normal-case">
+              (optional)
+            </span>
+          </label>
+
+          <div class="relative">
+
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+              ₹
+            </span>
+
+            <input
+              type="number"
+              name="minOrderValue"
+              placeholder="0.00"
+              class="input-field pl-12"
+            >
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+      </div>
+
+      <!-- DATES -->
+      <div>
+
+        <label class="field-label">
+          Promotion Window
+        </label>
+
+        <div class="flex items-center gap-4">
+
+          <input
+            type="date"
+            id="editStartDate"
+            name="startDate"
+            class="input-field text-center"
+          >
+
+          <span class="text-brand-gray">
+            —
+          </span>
+
+          <input
+            type="date"
+            id="editEndDate"
+            name="endDate"
+            class="input-field text-center"
+          >
+
+        </div>
+
+        <p class="error-text hidden"></p>
+
+      </div>
+
+      <!-- BUTTON -->
+      <div class="pt-4">
+
+        <button
+          type="submit"
+          class="w-full bg-brand-black text-white py-5 rounded-3xl font-bold text-lg hover:bg-stone-800 transition-all shadow-xl active:scale-[0.98]"
+        >
+
+          Update Offer
 
         </button>
 
