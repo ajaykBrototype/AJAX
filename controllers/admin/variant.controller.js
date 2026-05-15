@@ -25,8 +25,13 @@ export const loadVariantPage = async (req, res) => {
     const product = await Product.findById(id)
       .populate("category")
       .populate("subcategory");
-    const variants = await Variant.find(filter).sort({ isDefault: -1, createdAt: -1 });
+    let variants = await Variant.find(filter).sort({ isDefault: -1, createdAt: -1 }).lean();
     
+    variants = variants.map(v => ({
+      ...v,
+      price: v.salePrice || v.regularPrice || v.price || 0
+    }));
+
     res.render("admin/variants", {
       product,
       variants,
@@ -92,6 +97,8 @@ export const addVariant = async (req, res) => {
       color,
       size,
       price,
+      regularPrice: price,
+      salePrice: price,
       stock,
       sku,
       images: imagePaths,
@@ -229,6 +236,8 @@ export const updateVariant = async (req, res) => {
         color,
         size,
         price,
+        regularPrice: price,
+        salePrice: price,
         stock,
         sku,
         images: finalImages
