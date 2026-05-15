@@ -210,6 +210,20 @@
     color: #064E3B;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   }
+
+
+  .input-error {
+  border: 1.5px solid #EF4444 !important;
+  background: #FEF2F2 !important;
+}
+
+.error-text {
+  color: #EF4444;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  padding-left: 4px;
+}
 </style>
 </head>
 <body class="flex min-h-screen">
@@ -257,7 +271,7 @@
       </div>
 
       <div class="text-sm font-medium text-brand-gray pr-4">
-        Total Results: <span class="text-brand-black font-bold">2</span>
+        Total Results: <span class="text-brand-black font-bold"><%= offers ? offers.length : 0 %></span>
       </div>
     </div>
 
@@ -277,100 +291,83 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-[#F9F9F9]">
-            <!-- Row 1: BIGFIX -->
-            <tr class="table-row group">
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-brand-black mb-1">BIGFIX</span>
-                  <span class="text-xs text-brand-gray font-medium italic">Applied to: serum</span>
-                </div>
-              </td>
-              <td class="px-8 py-7">
-                <span class="badge badge-category">Category</span>
-              </td>
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-brand-black">6% Off</span>
-                  <span class="text-[10px] font-bold text-brand-gray uppercase tracking-tighter">Percentage</span>
-                </div>
-              </td>
-              <td class="px-8 py-7 text-brand-gray">—</td>
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-brand-black">24 Apr — 09 May,</span>
-                  <span class="text-xs font-bold text-brand-black">2026</span>
-                </div>
-              </td>
-              <td class="px-8 py-7">
-                <span class="badge badge-status-expired">Expired</span>
-              </td>
-              <td class="px-8 py-7">
-                <div class="flex items-center justify-end gap-3">
-                  <button class="p-2.5 rounded-xl hover:bg-stone-100 text-brand-gray hover:text-brand-black transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button class="p-2.5 rounded-xl hover:bg-rose-50 text-brand-gray hover:text-brand-red transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                  </button>
-                  <div class="h-6 w-[1px] bg-stone-100 mx-1"></div>
-                  <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </td>
-            </tr>
-
-            <!-- Row 2: ONAMSALE -->
-            <tr class="table-row group">
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-brand-black mb-1">ONAMSALE</span>
-                  <span class="text-xs text-brand-gray font-medium italic">Applied to: Super Glow Vitamin c + magnesium serum</span>
-                </div>
-              </td>
-              <td class="px-8 py-7">
-                <span class="badge badge-product">Product</span>
-              </td>
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-brand-black">20% Off</span>
-                  <span class="text-[10px] font-bold text-brand-gray uppercase tracking-tighter">Percentage</span>
-                </div>
-              </td>
-              <td class="px-8 py-7 text-brand-gray">—</td>
-              <td class="px-8 py-7">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-brand-black">22 Apr — 12 Jun,</span>
-                  <span class="text-xs font-bold text-brand-black">2026</span>
-                </div>
-              </td>
-              <td class="px-8 py-7">
-                <span class="badge badge-status-active">Active</span>
-              </td>
-              <td class="px-8 py-7">
-                <div class="flex items-center justify-end gap-3">
-                  <button class="p-2.5 rounded-xl hover:bg-stone-100 text-brand-gray hover:text-brand-black transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button class="p-2.5 rounded-xl hover:bg-rose-50 text-brand-gray hover:text-brand-red transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                  </button>
-                  <div class="h-6 w-[1px] bg-stone-100 mx-1"></div>
-                  <label class="switch">
-                    <input type="checkbox" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </td>
-            </tr>
+            <% if(offers && offers.length > 0) { %>
+              <% offers.forEach(offer => { %>
+                <tr class="table-row group">
+                  <td class="px-8 py-7">
+                    <div class="flex flex-col">
+                      <span class="text-sm font-bold text-brand-black mb-1"><%= offer.offerLabel %></span>
+                      <span class="text-xs text-brand-gray font-medium italic">Applied to: <%= offer.applicableTo === 'product' ? (offer.targetProduct?.name || 'Unknown Product') : (offer.targetCategory?.name || 'Unknown Category') %></span>
+                    </div>
+                  </td>
+                  <td class="px-8 py-7">
+                    <% if (offer.applicableTo === 'category') { %>
+                      <span class="badge badge-category">Category</span>
+                    <% } else { %>
+                      <span class="badge badge-product">Product</span>
+                    <% } %>
+                  </td>
+                  <td class="px-8 py-7">
+                    <div class="flex flex-col">
+                      <span class="text-sm font-bold text-brand-black">
+                        <%= offer.discountMode === 'percentage' ? offer.discountValue + '% Off' : '₹' + offer.discountValue + ' Off' %>
+                      </span>
+                      <span class="text-[10px] font-bold text-brand-gray uppercase tracking-tighter"><%= offer.discountMode %></span>
+                    </div>
+                  </td>
+                  <td class="px-8 py-7 text-brand-gray">
+                    <%= offer.minOrderValue > 0 ? '₹' + offer.minOrderValue : '—' %>
+                  </td>
+                  <td class="px-8 py-7">
+                    <div class="flex flex-col">
+                      <% 
+                        const sDate = new Date(offer.startDate);
+                        const eDate = new Date(offer.endDate);
+                      %>
+                      <span class="text-xs font-bold text-brand-black"><%= sDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %> — <%= eDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %>,</span>
+                      <span class="text-xs font-bold text-brand-black"><%= eDate.getFullYear() %></span>
+                    </div>
+                  </td>
+                  <td class="px-8 py-7">
+                    <% 
+                      const now = new Date();
+                      const isExpired = new Date(offer.endDate) < now;
+                    %>
+                    <% if (isExpired || !offer.isActive) { %>
+                      <span class="badge badge-status-expired"><%= isExpired ? 'Expired' : 'Inactive' %></span>
+                    <% } else { %>
+                      <span class="badge badge-status-active">Active</span>
+                    <% } %>
+                  </td>
+                  <td class="px-8 py-7">
+                    <div class="flex items-center justify-end gap-3">
+                      <button class="p-2.5 rounded-xl hover:bg-stone-100 text-brand-gray hover:text-brand-black transition-all">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button class="p-2.5 rounded-xl hover:bg-rose-50 text-brand-gray hover:text-brand-red transition-all">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      </button>
+                      <div class="h-6 w-[1px] bg-stone-100 mx-1"></div>
+                      <label class="switch">
+                        <input type="checkbox" <%= offer.isActive ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="px-8 py-7 text-center text-brand-gray font-medium">No offers found.</td>
+              </tr>
+            <% } %>
           </tbody>
         </table>
       </div>
 
       <!-- Pagination Placeholder -->
       <div class="px-8 py-6 border-t border-[#F9F9F9] flex justify-between items-center">
-        <p class="text-xs font-medium text-brand-gray">Showing <span class="text-brand-black">1-2</span> of <span class="text-brand-black">2</span> results</p>
+        <p class="text-xs font-medium text-brand-gray">Showing <span class="text-brand-black">1-<%= offers ? offers.length : 0 %></span> of <span class="text-brand-black"><%= offers ? offers.length : 0 %></span> results</p>
         <div class="flex gap-2">
           <button class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray hover:bg-stone-50 disabled:opacity-30" disabled>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -384,103 +381,332 @@
     </div>
   </main>
 
-  <!-- Create Offer Modal -->
-  <div id="createOfferModal" class="modal-overlay" onclick="closeCreateOfferModal(event)">
-    <div class="modal-content animate-up" onclick="event.stopPropagation()">
-      <div class="flex justify-between items-start mb-8">
+
+      <!-- Create Offer Modal -->
+<div id="createOfferModal" class="modal-overlay" onclick="closeCreateOfferModal(event)">
+
+  <div class="modal-content animate-up" onclick="event.stopPropagation()">
+
+    <div class="flex justify-between items-start mb-8">
+
+      <div>
+        <h2 class="text-3xl font-serif font-bold text-[#1a2b4b] mb-1">
+          Create Offer
+        </h2>
+
+        <p class="text-brand-gray text-sm font-medium">
+          Set up a new discount promotion.
+        </p>
+      </div>
+
+      <button
+        onclick="closeCreateOfferModal()"
+        class="p-2 hover:bg-stone-50 rounded-full text-brand-gray transition-colors"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <form id="createOfferForm" class="space-y-8">
+
+      <!-- OFFER LABEL -->
+      <div>
+
+        <label class="field-label">
+          Offer Label
+        </label>
+
+        <input
+          type="text"
+          id="offerLabel"
+          name="offerLabel"
+          placeholder="e.g. Seasonal Sale"
+          class="input-field"
+        >
+
+        <p class="error-text hidden"></p>
+
+      </div>
+
+      <!-- APPLICABLE TO -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
         <div>
-          <h2 class="text-3xl font-serif font-bold text-[#1a2b4b] mb-1">Create Offer</h2>
-          <p class="text-brand-gray text-sm font-medium">Set up a new discount promotion.</p>
+
+          <label class="field-label">
+            Applicable To
+          </label>
+
+          <div class="toggle-group" id="applicableToToggle">
+
+            <div
+              class="toggle-item active"
+              data-value="product"
+            >
+              Product
+            </div>
+
+            <div
+              class="toggle-item"
+              data-value="category"
+            >
+              Category
+            </div>
+
+            <input
+              type="hidden"
+              id="applicableTo"
+              name="applicableTo"
+              value="product"
+            >
+
+          </div>
+
         </div>
-        <button onclick="closeCreateOfferModal()" class="p-2 hover:bg-stone-50 rounded-full text-brand-gray transition-colors">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+        <!-- TARGET -->
+        <div>
+
+          <label
+            class="field-label"
+            id="targetLabel"
+          >
+            Target Product
+          </label>
+
+          <div class="relative">
+
+            <select
+              class="input-field appearance-none pr-12 cursor-pointer"
+              id="targetSelect"
+              name="targetProduct"
+            >
+
+              <option
+                selected
+                disabled
+                value=""
+              >
+                Select a product...
+              </option>
+
+              <% products.forEach(p => { %>
+
+                <option value="<%= p._id %>">
+
+                  <%= p.name %>
+
+                </option>
+
+              <% }) %>
+
+            </select>
+
+            <svg
+              class="absolute right-6 top-1/2 -translate-y-1/2 text-brand-gray pointer-events-none"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+      </div>
+
+      <!-- DISCOUNT -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div>
+
+          <label class="field-label">
+            Discount Mode
+          </label>
+
+          <div class="toggle-group" id="discountModeToggle">
+
+            <div
+              class="toggle-item active"
+              data-value="percentage"
+            >
+              Percentage
+            </div>
+
+            <div
+              class="toggle-item"
+              data-value="flat"
+            >
+              Flat
+            </div>
+
+            <input
+              type="hidden"
+              id="discountMode"
+              name="discountMode"
+              value="percentage"
+            >
+
+          </div>
+
+        </div>
+
+        <div>
+
+          <label class="field-label">
+            Discount Amount
+          </label>
+
+          <div class="relative">
+
+            <input
+              type="number"
+              name="discountValue"
+              placeholder="0.00"
+              class="input-field pr-12"
+            >
+
+            <span
+              class="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-300"
+              id="discountUnit"
+            >
+              %
+            </span>
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+      </div>
+
+      <!-- MAX CAP + MIN ORDER -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div>
+
+          <label class="field-label text-slate-400">
+            Max Cap
+            <span class="normal-case">
+              (optional)
+            </span>
+          </label>
+
+          <div class="relative">
+
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+              ₹
+            </span>
+
+            <input
+              type="number"
+              name="maxDiscountCap"
+              placeholder="0.00"
+              class="input-field pl-12"
+            >
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+        <div>
+
+          <label class="field-label text-slate-400">
+            Min Order
+            <span class="normal-case">
+              (optional)
+            </span>
+          </label>
+
+          <div class="relative">
+
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+              ₹
+            </span>
+
+            <input
+              type="number"
+              name="minOrderValue"
+              placeholder="0.00"
+              class="input-field pl-12"
+            >
+
+          </div>
+
+          <p class="error-text hidden"></p>
+
+        </div>
+
+      </div>
+
+      <!-- DATES -->
+      <div>
+
+        <label class="field-label">
+          Promotion Window
+        </label>
+
+        <div class="flex items-center gap-4">
+
+          <input
+            type="date"
+            id="startDate"
+            name="startDate"
+            placeholder="START DATE"
+            class="input-field text-center"
+          >
+
+          <span class="text-brand-gray">
+            —
+          </span>
+
+          <input
+            type="date"
+            id="endDate"
+            name="endDate"
+            placeholder="END DATE"
+            class="input-field text-center"
+          >
+
+        </div>
+
+        <p class="error-text hidden"></p>
+
+      </div>
+
+      <!-- BUTTON -->
+      <div class="pt-4">
+
+        <button
+          type="submit"
+          class="w-full bg-brand-black text-white py-5 rounded-3xl font-bold text-lg hover:bg-stone-800 transition-all shadow-xl active:scale-[0.98]"
+        >
+
+          Create Offer
+
         </button>
+
       </div>
 
-      <div class="space-y-8">
-        <!-- Offer Label -->
-        <div>
-          <label class="field-label">Offer Label</label>
-          <input type="text" placeholder="e.g. Seasonal Skincare Sale" class="input-field">
-        </div>
+    </form>
 
-        <!-- Applicable To & Target Category -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="field-label">Applicable To</label>
-            <div class="toggle-group" id="applicableToToggle">
-              <div class="toggle-item active" data-value="product">Product</div>
-              <div class="toggle-item" data-value="category">Category</div>
-              <input type="hidden" id="applicableTo" value="product">
-            </div>
-          </div>
-          <div>
-            <label class="field-label" id="targetLabel">Target Product</label>
-            <div class="relative">
-              <select class="input-field appearance-none pr-12 cursor-pointer" id="targetSelect">
-                <option selected disabled>Select a product...</option>
-                <option>Super Glow Serum</option>
-                <option>Vitamin C Cream</option>
-              </select>
-              <svg class="absolute right-6 top-1/2 -translate-y-1/2 text-brand-gray pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </div>
-          </div>
-        </div>
+  </div>
 
-        <!-- Discount Mode & Amount -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="field-label">Discount Mode</label>
-            <div class="toggle-group" id="discountModeToggle">
-              <div class="toggle-item active" data-value="percentage">Percentage</div>
-              <div class="toggle-item" data-value="flat">Flat</div>
-              <input type="hidden" id="discountMode" value="percentage">
-            </div>
-          </div>
-          <div>
-            <label class="field-label">Discount Amount</label>
-            <div class="relative">
-              <input type="text" placeholder="0.00" class="input-field pr-12">
-              <span class="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-300" id="discountUnit">%</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Max Cap & Min Order -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="field-label text-slate-400">Max Cap <span class="normal-case">(optional)</span></label>
-            <div class="relative">
-              <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">₹</span>
-              <input type="text" placeholder="0.00" class="input-field pl-12">
-            </div>
-          </div>
-          <div>
-            <label class="field-label text-slate-400">Min Order <span class="normal-case">(optional)</span></label>
-            <div class="relative">
-              <span class="absolute left-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">₹</span>
-              <input type="text" placeholder="0.00" class="input-field pl-12">
-            </div>
-          </div>
-        </div>
-
-        <!-- Promotion Window -->
-        <div>
-          <label class="field-label">Promotion Window</label>
-          <div class="flex items-center gap-4">
-            <input type="text" id="startDate" placeholder="START DATE" class="input-field text-center">
-            <span class="text-brand-gray">—</span>
-            <input type="text" id="endDate" placeholder="END DATE" class="input-field text-center">
-          </div>
-        </div>
-
-        <!-- Action Button -->
-        <div class="pt-4">
-          <button class="w-full bg-brand-black text-white py-5 rounded-3xl font-bold text-lg hover:bg-stone-800 transition-all shadow-xl active:scale-[0.98]">
-            Create Offer
-          </button>
-        </div>
-      </div>
+</div>
     </div>
   </div>
 
@@ -548,5 +774,9 @@
       minDate: "today"
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+   <script src="/js/admin/offer.js"></script>
 </body>
 </html>

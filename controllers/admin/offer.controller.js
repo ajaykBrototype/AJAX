@@ -5,12 +5,16 @@ import Category from "../../models/admin/categoryModel.js";
 export const loadOffers=async (req,res)=>{
    try{
        const offers=await Offer.find().populate("targetProduct").populate("targetCategory").sort({createdAt:-1});
+       const products = await Product.find({ isActive: true });
+       const categories = await Category.find({ isActive: true });
 
        res.render("admin/offers",{
-        offers
-       })
+        offers,
+        products,
+        categories
+       });
    }catch(err){
-           console.log(error);
+        console.log(err);
         res.redirect("/admin/pageerror");
    }
 }
@@ -71,6 +75,15 @@ export const createOffer = async (req, res) => {
                 message: "Invalid discount"
             });
         }
+        if (!startDate || !endDate) {
+
+    return res.status(400).json({
+
+        success: false,
+
+        message: "Please select dates"
+    });
+}
 
         if (new Date(startDate) > new Date(endDate)) {
 
