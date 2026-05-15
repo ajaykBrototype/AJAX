@@ -364,7 +364,7 @@ body {
                 if (historyItem) return historyItem.updatedAt;
                 
                 if (typeof returns !== 'undefined' && returns && returns.length > 0) {
-                    const r = returns.find(ret => ret.status === status) || returns[0];
+                    const r = returns[0];
                     if (status === 'Requested') return r.requestedAt || r.createdAt;
                     if (status === 'Approved') return r.approvedAt;
                     if (status === 'Rejected') return r.rejectedAt;

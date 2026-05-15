@@ -151,6 +151,22 @@ async function createCoupon() {
         hasError = true;
     }
 
+     if (
+
+    userLimit &&
+    maxUsage &&
+    Number(userLimit) > Number(maxUsage)
+
+) {
+
+    showError(
+        "userLimitError",
+        "User limit cannot exceed max usage"
+    );
+
+    hasError = true;
+}
+
     if (
         maxUsage &&
         Number(maxUsage) <= 0
