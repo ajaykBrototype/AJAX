@@ -252,26 +252,26 @@
         <!-- Search -->
         <div class="relative w-full md:w-80">
           <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-brand-gray" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search by offer name..." class="w-full pl-12 pr-4 py-3 custom-input rounded-2xl text-sm outline-none">
+          <input type="text" id="searchInput" placeholder="Search by offer name..." class="w-full pl-12 pr-4 py-3 custom-input rounded-2xl text-sm outline-none">
         </div>
 
         <!-- Filter Dropdowns -->
         <div class="flex items-center gap-3 w-full md:w-auto">
-          <select class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
-            <option>All Types</option>
-            <option>Percentage</option>
-            <option>Flat Discount</option>
+          <select id="typeFilter" class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
+            <option value="all">All Types</option>
+            <option value="percentage">Percentage</option>
+            <option value="flat">Flat Discount</option>
           </select>
-          <select class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Expired</option>
+          <select id="statusFilter" class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
           </select>
         </div>
       </div>
 
       <div class="text-sm font-medium text-brand-gray pr-4">
-        Total Results: <span class="text-brand-black font-bold"><%= offers ? offers.length : 0 %></span>
+        Total Results: <span id="totalResultsCount" class="text-brand-black font-bold"><%= offers ? offers.length : 0 %></span>
       </div>
     </div>
 
@@ -293,7 +293,12 @@
           <tbody class="divide-y divide-[#F9F9F9]">
             <% if(offers && offers.length > 0) { %>
               <% offers.forEach(offer => { %>
-                <tr class="table-row group">
+                <% 
+                  const now = new Date();
+                  const isExpired = new Date(offer.endDate) < now;
+                  const status = (isExpired || !offer.isActive) ? 'expired' : 'active';
+                %>
+                <tr class="table-row group offer-row" data-name="<%= offer.offerLabel.toLowerCase() %>" data-type="<%= offer.discountMode %>" data-status="<%= status %>">
                   <td class="px-8 py-7">
                     <div class="flex flex-col">
                       <span class="text-sm font-bold text-brand-black mb-1"><%= offer.offerLabel %></span>
@@ -329,11 +334,7 @@
                     </div>
                   </td>
                   <td class="px-8 py-7">
-                    <% 
-                      const now = new Date();
-                      const isExpired = new Date(offer.endDate) < now;
-                    %>
-                    <% if (isExpired || !offer.isActive) { %>
+                    <% if (status === 'expired') { %>
                       <span class="badge badge-status-expired"><%= isExpired ? 'Expired' : 'Inactive' %></span>
                     <% } else { %>
                       <span class="badge badge-status-active">Active</span>
@@ -367,7 +368,7 @@
 
       <!-- Pagination Placeholder -->
       <div class="px-8 py-6 border-t border-[#F9F9F9] flex justify-between items-center">
-        <p class="text-xs font-medium text-brand-gray">Showing <span class="text-brand-black">1-<%= offers ? offers.length : 0 %></span> of <span class="text-brand-black"><%= offers ? offers.length : 0 %></span> results</p>
+        <p class="text-xs font-medium text-brand-gray">Showing <span id="visibleResultsCount" class="text-brand-black"><%= offers && offers.length > 0 ? '1-' + offers.length : '0' %></span> of <span id="totalPaginationCount" class="text-brand-black"><%= offers ? offers.length : 0 %></span> results</p>
         <div class="flex gap-2">
           <button class="p-2 rounded-lg border border-[#F1F1F1] text-brand-gray hover:bg-stone-50 disabled:opacity-30" disabled>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -767,6 +768,53 @@
       dateFormat: "Y-m-d",
       minDate: "today"
     });
+
+    // Filter Logic
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const offerRows = document.querySelectorAll('.offer-row');
+    const totalResultsCount = document.getElementById('totalResultsCount');
+    const visibleResultsCount = document.getElementById('visibleResultsCount');
+    const totalPaginationCount = document.getElementById('totalPaginationCount');
+
+    function filterOffers() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const typeValue = typeFilter.value;
+      const statusValue = statusFilter.value;
+
+      let visibleCount = 0;
+
+      offerRows.forEach(row => {
+        const name = row.dataset.name || '';
+        const type = row.dataset.type || '';
+        const status = row.dataset.status || '';
+
+        const matchSearch = name.includes(searchTerm);
+        const matchType = typeValue === 'all' || type === typeValue;
+        const matchStatus = statusValue === 'all' || status === statusValue;
+
+        if (matchSearch && matchType && matchStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      totalResultsCount.textContent = visibleCount;
+      visibleResultsCount.textContent = visibleCount > 0 ? `1-${visibleCount}` : '0';
+      totalPaginationCount.textContent = visibleCount;
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(filterOffers, 300);
+    });
+
+    typeFilter.addEventListener('change', filterOffers);
+    statusFilter.addEventListener('change', filterOffers);
 
 
 
