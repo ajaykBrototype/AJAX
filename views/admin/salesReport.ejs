@@ -112,7 +112,7 @@
         <div>
           <h1 class="editorial-title text-4xl italic tracking-tight mb-2">Sales <span class="not-italic font-black text-brand-dark">Report</span></h1>
           <p class="text-[0.7rem] font-bold text-brand-muted uppercase tracking-[0.2em]">
-            Performance overview <span class="mx-2 text-stone-300">•</span> May 01, 2026 — May 16, 2026
+            Performance overview <span class="mx-2 text-stone-300">•</span> <%= startDate %> — <%= endDate %>
           </p>
         </div>
         
@@ -120,16 +120,15 @@
           <!-- Time Period Selector (Custom Modern Dropdown) -->
           <div class="relative group" id="periodDropdown">
             <button id="dropdownBtn" class="flex items-center gap-4 pl-6 pr-5 py-3 bg-white border border-brand-border text-brand-dark rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:border-brand-dark transition-all active:scale-95">
-              <span id="selectedPeriodText">Month</span>
+              <span id="selectedPeriodText"><%= period.charAt(0).toUpperCase() + period.slice(1) %></span>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="ml-2 transition-transform duration-300" id="dropdownArrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div id="dropdownMenu" class="absolute right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
               <div class="px-5 py-2 text-[0.55rem] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border/50 mb-2">Analysis Period</div>
-              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" data-value="day">Day</div>
-              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" data-value="week">Week</div>
-              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" data-value="month">Month</div>
-              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" data-value="year">Year</div>
-              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-muted hover:text-brand-dark hover:bg-brand-bg cursor-pointer transition-all border-t border-brand-border/50 mt-2" data-value="custom">Custom Range</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=day'">Day</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=week'">Week</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=month'">Month</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=year'">Year</div>
             </div>
           </div>
 
@@ -149,18 +148,26 @@
       <!-- Top Metrics -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Revenue -->
+        <% 
+           let revGrowth = 0;
+           if (previousStats.revenue > 0) {
+             revGrowth = ((stats.revenue - previousStats.revenue) / previousStats.revenue) * 100;
+           }
+        %>
         <div class="glass-card p-8 animate-slide-up">
           <div class="flex justify-between items-start mb-8">
             <div class="stat-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
             </div>
             <div class="flex flex-col items-end">
-              <span class="text-[0.6rem] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg uppercase tracking-tighter mb-1">-64.37%</span>
+              <span class="text-[0.6rem] font-black <%= revGrowth >= 0 ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50' %> px-2 py-1 rounded-lg uppercase tracking-tighter mb-1">
+                <%= revGrowth >= 0 ? '+' : '' %><%= revGrowth.toFixed(2) %>%
+              </span>
               <span class="text-[0.5rem] font-bold text-brand-muted uppercase tracking-widest">vs prev. period</span>
             </div>
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-2">Total Revenue</p>
-          <h3 class="text-4xl font-black tracking-tighter">₹<%= reportData.totalRevenue.toLocaleString() %></h3>
+          <h3 class="text-4xl font-black tracking-tighter">₹<%= stats.revenue.toLocaleString() %></h3>
         </div>
 
         <!-- Orders -->
@@ -172,8 +179,8 @@
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-2">Total Orders</p>
           <div class="flex items-baseline gap-3">
-            <h3 class="text-4xl font-black tracking-tighter"><%= reportData.deliveredOrders %></h3>
-            <span class="text-[0.6rem] font-bold text-brand-muted uppercase tracking-widest">Delivered orders</span>
+            <h3 class="text-4xl font-black tracking-tighter text-brand-dark"><%= stats.orderCount %></h3>
+            <span class="text-[0.6rem] font-bold text-brand-muted uppercase tracking-widest">Active transactions</span>
           </div>
         </div>
 
@@ -186,7 +193,7 @@
           </div>
           <p class="text-[0.65rem] font-bold text-brand-muted uppercase tracking-[0.2em] mb-2">Products Sold</p>
           <div class="flex items-baseline gap-3">
-            <h3 class="text-4xl font-black tracking-tighter"><%= reportData.productsSold %></h3>
+            <h3 class="text-4xl font-black tracking-tighter text-brand-dark"><%= stats.productCount %></h3>
             <span class="text-[0.6rem] font-bold text-brand-muted uppercase tracking-widest">Total units dispatched</span>
           </div>
         </div>
@@ -199,11 +206,13 @@
           <div class="flex items-center justify-between mb-10">
             <div>
               <h4 class="text-xl font-black tracking-tight mb-1">Revenue Overview</h4>
-              <p class="text-[0.6rem] text-brand-muted font-bold uppercase tracking-widest">Daily sales peak • May 01 — May 16</p>
+              <p class="text-[0.6rem] text-brand-muted font-bold uppercase tracking-widest">Daily sales peaks • <%= startDate %> — <%= endDate %></p>
             </div>
             <div class="text-right">
-              <h3 class="text-2xl font-black tracking-tighter">₹4,083.40</h3>
-              <span class="text-[0.6rem] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md uppercase">-64.37%</span>
+              <h3 class="text-2xl font-black tracking-tighter text-brand-dark">₹<%= stats.revenue.toLocaleString() %></h3>
+              <span class="text-[0.6rem] font-black <%= revGrowth >= 0 ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50' %> px-2 py-0.5 rounded-md uppercase">
+                <%= revGrowth >= 0 ? '+' : '' %><%= revGrowth.toFixed(2) %>%
+              </span>
             </div>
           </div>
           <div class="flex-1 min-h-[350px]">
@@ -222,7 +231,9 @@
             </div>
             <div class="text-center pt-6 border-t border-white/10">
               <p class="text-[0.55rem] font-black uppercase tracking-[0.3em] text-stone-500 mb-2">Analysis Result</p>
-              <p class="text-sm font-bold text-rose-400 italic">"Moderate decline in realized revenue compared to last cycle."</p>
+              <p class="text-sm font-bold <%= revGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' %> italic">
+                <%= revGrowth >= 0 ? '"Significant growth in realized revenue compared to last cycle."' : '"Moderate decline in realized revenue compared to last cycle."' %>
+              </p>
             </div>
           </div>
         </div>
@@ -240,35 +251,26 @@
               <thead>
                 <tr class="bg-brand-bg/50">
                   <th>Coupon Code</th>
-                  <th>Type</th>
-                  <th>Discount</th>
-                  <th class="text-center">Usage</th>
-                  <th>Status</th>
+                  <th class="text-center">Usage Count</th>
+                  <th class="text-right">Total Discount</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>
-                    <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[0.6rem] font-black uppercase tracking-widest">SUMMER30</span>
-                  </td>
-                  <td>Flat</td>
-                  <td>₹400.00</td>
-                  <td class="text-center">3 / 100</td>
-                  <td>
-                    <span class="text-[0.6rem] font-black text-emerald-500 uppercase tracking-widest">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[0.6rem] font-black uppercase tracking-widest">FEST33</span>
-                  </td>
-                  <td>Percentage</td>
-                  <td>15%</td>
-                  <td class="text-center">1 / 50</td>
-                  <td>
-                    <span class="text-[0.6rem] font-black text-emerald-500 uppercase tracking-widest">Active</span>
-                  </td>
-                </tr>
+                <% if (couponUsage.length > 0) { %>
+                  <% couponUsage.forEach(coupon => { %>
+                    <tr>
+                      <td>
+                        <span class="bg-brand-bg text-brand-dark px-3 py-1 rounded-full text-[0.6rem] font-black uppercase tracking-widest border border-brand-border"><%= coupon._id %></span>
+                      </td>
+                      <td class="text-center text-brand-dark font-black"><%= coupon.count %>x</td>
+                      <td class="text-right text-brand-dark font-black">₹<%= coupon.discount.toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="3" class="text-center text-brand-muted py-10 font-bold uppercase tracking-widest">No coupon data for this period</td>
+                  </tr>
+                <% } %>
               </tbody>
             </table>
           </div>
@@ -277,9 +279,9 @@
         <!-- Order Discount Breakdown -->
         <div class="glass-card overflow-hidden animate-slide-up delay-4">
           <div class="p-8 border-b border-brand-border flex justify-between items-center">
-            <h4 class="text-xl font-black tracking-tight">Order Discount Breakdown</h4>
-            <div class="bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-[0.6rem] font-black uppercase tracking-widest">
-              Total Saved: ₹490.00
+            <h4 class="text-xl font-black tracking-tight">Recent Orders</h4>
+            <div class="bg-brand-dark text-white px-4 py-1.5 rounded-full text-[0.6rem] font-black uppercase tracking-widest">
+              Visible: <%= orderBreakdown.length %>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -294,35 +296,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td class="font-bold text-[0.7rem]">#ORD-7UH9MHQ</td>
-                  <td class="text-brand-muted">May 07, 2026</td>
-                  <td>₹1,598.40</td>
-                  <td class="text-rose-500">- ₹400.00</td>
-                  <td class="text-right font-black">₹1,198.40</td>
-                </tr>
-                <tr>
-                  <td class="font-bold text-[0.7rem]">#ORD-GYLU91O</td>
-                  <td class="text-brand-muted">May 05, 2026</td>
-                  <td>₹890.00</td>
-                  <td class="text-stone-300">—</td>
-                  <td class="text-right font-black">₹890.00</td>
-                </tr>
-                <tr>
-                  <td class="font-bold text-[0.7rem]">#ORD-36UAM2A</td>
-                  <td class="text-brand-muted">May 04, 2026</td>
-                  <td>₹399.00</td>
-                  <td class="text-stone-300">—</td>
-                  <td class="text-right font-black">₹399.00</td>
-                </tr>
+                <% if (orderBreakdown.length > 0) { %>
+                  <% orderBreakdown.forEach(order => { %>
+                    <tr>
+                      <td class="font-bold text-[0.7rem] text-brand-dark tracking-tighter">#<%= order._id.toString().slice(-8).toUpperCase() %></td>
+                      <td class="text-brand-muted text-[0.65rem]"><%= order.createdAt.toLocaleDateString() %></td>
+                      <td class="text-brand-dark">₹<%= (order.totalAmount + order.discount).toLocaleString() %></td>
+                      <td class="text-rose-500 font-bold"><%= order.discount > 0 ? '- ₹'+order.discount : '—' %></td>
+                      <td class="text-right font-black text-brand-dark">₹<%= order.totalAmount.toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                   <tr>
+                    <td colspan="5" class="text-center text-brand-muted py-10 font-bold uppercase tracking-widest">No order data for this period</td>
+                  </tr>
+                <% } %>
               </tbody>
-              <tfoot>
-                <tr class="bg-brand-bg/30">
-                  <td colspan="3" class="text-[0.6rem] font-black uppercase tracking-widest text-brand-muted">Totals (3)</td>
-                  <td class="text-[0.7rem] font-black text-rose-500">- ₹400.00</td>
-                  <td class="text-right text-[0.9rem] font-black">₹2,487.40</td>
-                </tr>
-              </tfoot>
             </table>
           </div>
         </div>
@@ -336,10 +325,9 @@
     const dropdownBtn = document.getElementById('dropdownBtn');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const dropdownArrow = document.getElementById('dropdownArrow');
-    const selectedText = document.getElementById('selectedPeriodText');
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
 
-    const toggleDropdown = () => {
+    dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const isOpen = !dropdownMenu.classList.contains('invisible');
       if (isOpen) {
         dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
@@ -348,11 +336,6 @@
         dropdownMenu.classList.remove('opacity-0', 'invisible', 'translate-y-4');
         dropdownArrow.classList.add('rotate-180');
       }
-    };
-
-    dropdownBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleDropdown();
     });
 
     document.addEventListener('click', () => {
@@ -360,27 +343,23 @@
       dropdownArrow.classList.remove('rotate-180');
     });
 
-    dropdownItems.forEach(item => {
-      item.addEventListener('click', () => {
-        selectedText.innerText = item.innerText;
-      });
-    });
-
     // Revenue Chart (Line)
     const revCtx = document.getElementById('revenueChart').getContext('2d');
+    const overviewData = <%- JSON.stringify(revenueOverview) %>;
+    
     new Chart(revCtx, {
       type: 'line',
       data: {
-        labels: ['1', '3', '5', '7', '9', '11', '13', '15'],
+        labels: overviewData.map(d => d._id),
         datasets: [{
-          label: 'Daily Sales',
-          data: [0, 1000, 200, 1000, 100, 1600, 100, 100],
+          label: 'Net Revenue',
+          data: overviewData.map(d => d.revenue),
           borderColor: '#1C1C1C',
           borderWidth: 4,
           pointBackgroundColor: '#FFFFFF',
           pointBorderColor: '#1C1C1C',
           pointBorderWidth: 3,
-          pointRadius: 0,
+          pointRadius: 4,
           pointHoverRadius: 8,
           fill: true,
           backgroundColor: 'rgba(28, 28, 28, 0.03)',
@@ -394,7 +373,7 @@
         scales: {
           y: {
             grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
-            ticks: { color: '#888888', font: { size: 10, weight: 600 }, callback: v => '₹' + v + 'k' }
+            ticks: { color: '#888888', font: { size: 10, weight: 600 }, callback: v => '₹' + v.toLocaleString() }
           },
           x: { grid: { display: false }, ticks: { color: '#888888', font: { size: 10, weight: 600 } } }
         }
@@ -408,7 +387,7 @@
       data: {
         labels: ['Previous Period', 'Current Period'],
         datasets: [{
-          data: [12000, 4083],
+          data: [<%= previousStats.revenue %>, <%= stats.revenue %>],
           backgroundColor: ['rgba(255,255,255,0.1)', '#FFFFFF'],
           borderRadius: 12,
           barThickness: 60

@@ -3,18 +3,22 @@ import Order from "../../models/user/orderModel.js";
 import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
 
-
 export const loadDashboard = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const totalOrders = await Order.countDocuments();
     const totalProducts = await Product.countDocuments();
     
-    const revenueData = await Order.aggregate([
-      { $match: { status: 'Delivered' } },
-      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+    // Total Earnings & Total Product Count (All items regardless of order status)
+    const earningsData = await Order.aggregate([
+      { $unwind: "$items" },
+      { $group: { 
+          _id: null, 
+          totalEarnings: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+          totalProductCount: { $sum: "$items.quantity" }
+      }}
     ]);
-    const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
+    const totalEarnings = earningsData.length > 0 ? earningsData[0].totalEarnings : 0;
+    const totalProductCount = earningsData.length > 0 ? earningsData[0].totalProductCount : 0;
 
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
@@ -32,33 +36,35 @@ export const loadDashboard = async (req, res) => {
       { $limit: 5 }
     ]);
 
-    
+    // --- MULTI-PERIOD SALES AGGREGATIONS (All Statuses, Sum of Item Values) ---
     
     // 1. TODAY (Hourly)
     const startOfToday = new Date();
     startOfToday.setHours(0,0,0,0);
     const todayRaw = await Order.aggregate([
-      { $match: { status: 'Delivered', createdAt: { $gte: startOfToday } } },
+      { $match: { createdAt: { $gte: startOfToday } } },
+      { $unwind: "$items" },
       { $group: {
           _id: { $hour: "$createdAt" },
-          revenue: { $sum: "$totalAmount" }
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }
     ]);
     const todayData = Array.from({length: 6}, (_, i) => {
-      const hour = (i + 1) * 4; // 4am, 8am, 12pm, 4pm, 8pm, 12am
+      const hour = (i + 1) * 4;
       const match = todayRaw.find(r => r._id >= hour - 4 && r._id < hour);
       return { label: `${hour > 12 ? hour-12 : hour}${hour >= 12 ? 'pm' : 'am'}`, value: match ? match.revenue : 0 };
     });
 
-    // 2. WEEK (Last 7 Days - Already implemented but naming it for clarity)
+    // 2. WEEK (Last 7 Days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const weekRaw = await Order.aggregate([
-      { $match: { status: 'Delivered', createdAt: { $gte: sevenDaysAgo } } },
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      { $unwind: "$items" },
       { $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          revenue: { $sum: "$totalAmount" }
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -75,10 +81,11 @@ export const loadDashboard = async (req, res) => {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     const monthRaw = await Order.aggregate([
-      { $match: { status: 'Delivered', createdAt: { $gte: startOfMonth } } },
+      { $match: { createdAt: { $gte: startOfMonth } } },
+      { $unwind: "$items" },
       { $group: {
           _id: { $ceil: { $divide: [{ $dayOfMonth: "$createdAt" }, 7] } },
-          revenue: { $sum: "$totalAmount" }
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -91,10 +98,11 @@ export const loadDashboard = async (req, res) => {
     const startOfYear = new Date();
     startOfYear.setMonth(0, 1);
     const yearRaw = await Order.aggregate([
-      { $match: { status: 'Delivered', createdAt: { $gte: startOfYear } } },
+      { $match: { createdAt: { $gte: startOfYear } } },
+      { $unwind: "$items" },
       { $group: {
           _id: { $month: "$createdAt" },
-          revenue: { $sum: "$totalAmount" }
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -106,7 +114,6 @@ export const loadDashboard = async (req, res) => {
 
     const chartData = { today: todayData, week: weekData, month: monthData, year: yearData };
 
-    // Subcategory sales aggregation
     const subcategorySales = await Order.aggregate([
       { $unwind: "$items" },
       { $lookup: {
@@ -133,45 +140,18 @@ export const loadDashboard = async (req, res) => {
     ]);
 
     const topProduct = popularProducts.length > 0 ? popularProducts[0] : null;
-
-    // Inventory Alerts
     const outOfStockCount = await Variant.countDocuments({ stock: 0 });
     const lowStockCount = await Variant.countDocuments({ stock: { $gt: 0, $lte: 10 } });
-
-    // Order Status Distribution
     const statusCounts = await Order.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ]);
-
-    const orderStatusCounts = {
-      Delivered: 0,
-      Pending: 0,
-      Cancelled: 0,
-      Returned: 0
-    };
-
-    statusCounts.forEach(s => {
-      if (orderStatusCounts.hasOwnProperty(s._id)) {
-        orderStatusCounts[s._id] = s.count;
-      }
-    });
+    const orderStatusCounts = { Delivered: 0, Pending: 0, Cancelled: 0, Returned: 0, Placed: 0, Confirmed: 0, Processing: 0, Shipped: 0 };
+    statusCounts.forEach(s => { orderStatusCounts[s._id] = s.count; });
 
     res.render("admin/dashboard", {
-      stats: {
-        totalUsers,
-        totalOrders,
-        totalProducts,
-        totalRevenue
-      },
-      recentOrders,
-      popularProducts,
-      subcategorySales,
-      chartData,
-      topProduct,
-      inventoryStats: {
-        outOfStock: outOfStockCount,
-        lowStock: lowStockCount
-      },
+      stats: { totalUsers, totalOrders: totalProductCount, totalProducts, totalRevenue: totalEarnings },
+      recentOrders, popularProducts, subcategorySales, chartData, topProduct,
+      inventoryStats: { outOfStock: outOfStockCount, lowStock: lowStockCount },
       orderStatusCounts
     });
   } catch (err) {
@@ -181,114 +161,97 @@ export const loadDashboard = async (req, res) => {
 };
 
 export const loadSalesReport = async (req, res) => {
-
   try {
+    const period = req.query.period || 'month';
+    let startDate = new Date();
+    let prevStartDate = new Date();
+    const endDate = new Date();
 
-    const revenueResult = await Order.aggregate([
+    if (period === 'day') {
+      startDate.setHours(0, 0, 0, 0);
+      prevStartDate = new Date(startDate);
+      prevStartDate.setDate(startDate.getDate() - 1);
+    } else if (period === 'week') {
+      startDate.setDate(startDate.getDate() - 7);
+      prevStartDate = new Date(startDate);
+      prevStartDate.setDate(startDate.getDate() - 7);
+    } else if (period === 'month') {
+      startDate.setMonth(startDate.getMonth() - 1);
+      prevStartDate = new Date(startDate);
+      prevStartDate.setMonth(startDate.getMonth() - 1);
+    } else if (period === 'year') {
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      prevStartDate = new Date(startDate);
+      prevStartDate.setFullYear(startDate.getFullYear() - 1);
+    }
 
+    const getStats = async (start, end) => {
+      const stats = await Order.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end }, status: { $nin: ['Cancelled'] } }},
+        { $unwind: "$items" },
+        { $match: { "items.status": { $nin: ['Cancelled', 'Returned'] } } },
+        { $group: {
+            _id: null,
+            revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+            orders: { $addToSet: "$_id" },
+            products: { $sum: "$items.quantity" }
+        }},
+        { $project: {
+            revenue: 1,
+            orderCount: { $size: "$orders" },
+            productCount: "$products"
+        }}
+      ]);
+      return stats[0] || { revenue: 0, orderCount: 0, productCount: 0 };
+    };
+
+    const currentStats = await getStats(startDate, endDate);
+    const previousStats = await getStats(prevStartDate, startDate);
+
+    const revenueOverviewRaw = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $nin: ['Cancelled'] } }},
       { $unwind: "$items" },
-
-      {
-        $group: {
-          _id: null,
-
-          deliveredRevenue: {
-            $sum: {
-              $cond: [
-                { $eq: ["$items.status", "Delivered"] },
-                {
-                  $multiply: [
-                    "$items.price",
-                    "$items.quantity"
-                  ]
-                },
-                0
-              ]
-            }
-          },
-
-          cancelledAmount: {
-            $sum: {
-              $cond: [
-                { $eq: ["$items.status", "Cancelled"] },
-                {
-                  $multiply: [
-                    "$items.price",
-                    "$items.quantity"
-                  ]
-                },
-                0
-              ]
-            }
-          },
-
-          returnedAmount: {
-            $sum: {
-              $cond: [
-                {
-                  $and: [
-                    { $eq: ["$items.status", "Returned"] },
-                    { $eq: ["$items.returnApproved", true] }
-                  ]
-                },
-                {
-                  $multiply: [
-                    "$items.price",
-                    "$items.quantity"
-                  ]
-                },
-                0
-              ]
-            }
-          },
-
-          productsSold: {
-            $sum: {
-              $cond: [
-                { $eq: ["$items.status", "Delivered"] },
-                "$items.quantity",
-                0
-              ]
-            }
-          }
-
-        }
-      }
-
+      { $match: { "items.status": { $nin: ['Cancelled', 'Returned'] } } },
+      { $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+      }},
+      { $sort: { _id: 1 } }
     ]);
 
-    const sales = revenueResult[0] || {};
+    // Fill in missing dates for "up and downs"
+    const revenueOverview = [];
+    let current = new Date(startDate);
+    while (current <= endDate) {
+      const dateStr = current.toISOString().split('T')[0];
+      const match = revenueOverviewRaw.find(d => d._id === dateStr);
+      revenueOverview.push({ _id: dateStr, revenue: match ? match.revenue : 0 });
+      current.setDate(current.getDate() + 1);
+    }
 
-    const totalRevenue =
-      (sales.deliveredRevenue || 0)
-      - (sales.cancelledAmount || 0)
-      - (sales.returnedAmount || 0);
+    const couponUsage = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, couponCode: { $ne: null } }},
+      { $group: { _id: "$couponCode", count: { $sum: 1 }, discount: { $sum: "$discount" } }},
+      { $limit: 5 }
+    ]);
 
-    const deliveredOrders = await Order.countDocuments({
-      status: "Delivered"
-    });
+    const orderBreakdown = await Order.find({
+      createdAt: { $gte: startDate, $lte: endDate }
+    }).sort({ createdAt: -1 }).limit(5);
 
     res.render("admin/salesReport", {
-
       currentPath: "/admin/sales-report",
-
-      reportData: {
-        totalRevenue,
-        deliveredRevenue: sales.deliveredRevenue || 0,
-        cancelledAmount: sales.cancelledAmount || 0,
-        returnedAmount: sales.returnedAmount || 0,
-        productsSold: sales.productsSold || 0,
-        deliveredOrders
-      }
-
+      period,
+      stats: currentStats,
+      previousStats,
+      revenueOverview,
+      couponUsage,
+      orderBreakdown,
+      startDate: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      endDate: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     });
-
   } catch (err) {
-
-    console.log("SALES REPORT ERROR:", err);
-
+    console.log("LOAD SALES REPORT ERROR:", err);
     res.redirect("/admin/dashboard");
-
   }
-
 };
