@@ -53,7 +53,7 @@ export const loadDashboard = async (req, res) => {
     const totalProducts = await Product.countDocuments();
     
     const revenueData = await Order.aggregate([
-      { $match: { status: { $ne: 'Cancelled' } } },
+      { $match: { status: 'Delivered' } },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } }
     ]);
     const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
@@ -74,7 +74,7 @@ export const loadDashboard = async (req, res) => {
       { $limit: 5 }
     ]);
 
-    // --- MULTI-PERIOD SALES AGGREGATIONS (Delivered Only) ---
+    
     
     // 1. TODAY (Hourly)
     const startOfToday = new Date();
@@ -220,6 +220,10 @@ export const loadDashboard = async (req, res) => {
     console.log("LOAD DASHBOARD ERROR:", err);
     res.redirect("/admin/dashboard");
   }
+};
+
+export const loadSalesReport = (req, res) => {
+  res.render("admin/salesReport", { currentPath: "/admin/sales-report" });
 };
 
 export const logoutAdmin = (req, res) => {
