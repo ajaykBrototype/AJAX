@@ -26,7 +26,7 @@ export const loginAdmin = async (req, res) => {
 
     req.session.save((err) => {
       if(err) console.log("Session Save Error:", err);
-      res.json({ success: true, redirect: "/admin/users" });
+      res.json({ success: true, redirect: "/admin/dashboard" });
     });
 
   } catch (err) {
@@ -218,7 +218,7 @@ export const loadDashboard = async (req, res) => {
     });
   } catch (err) {
     console.log("LOAD DASHBOARD ERROR:", err);
-    res.redirect("/admin/users");
+    res.redirect("/admin/dashboard");
   }
 };
 
