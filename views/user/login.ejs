@@ -46,16 +46,16 @@
 <body class="min-h-screen flex overflow-hidden">
 
   <!-- LEFT IMAGE -->
-  <div class="hidden md:block w-7/12 h-screen overflow-hidden">
+  <div class="hero-container hidden md:block w-7/12 h-screen overflow-hidden bg-white">
     <img 
       id="hero-img"
       src="/images/login3.png"
-      class="w-full h-full object-cover scale-110"
+      class="w-full h-full object-contain"
     />
   </div>
 
   <!-- RIGHT FORM -->
-  <div class="w-full md:w-5/12 flex items-center justify-center bg-white p-8 md:p-12 lg:p-20 relative">
+  <div class="right-panel w-full md:w-5/12 flex items-center justify-center bg-white p-8 md:p-12 lg:p-20 relative">
     
     <!-- Back to Home Button -->
     <a href="/home" class="absolute top-8 right-8 text-[0.65rem] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-colors duration-300 flex items-center gap-2">
@@ -149,19 +149,44 @@
     window.addEventListener('DOMContentLoaded', () => {
       const tl = gsap.timeline();
 
-      tl.to('#hero-img', {
-        scale: 1,
-        duration: 2.5,
-        ease: 'power2.out'
-      });
+      // Initial States for refined entrance
+      gsap.set('#hero-img', { x: -30, opacity: 0 });
+      gsap.set('.right-panel', { x: 30, opacity: 0 });
 
-      tl.to('.stagger-item', {
+      tl.to('#hero-img', {
+        x: 0,
+        opacity: 1,
+        duration: 1.5,
+        ease: 'power4.out'
+      })
+      .to('.right-panel', {
+        x: 0,
+        opacity: 1,
+        duration: 1.2,
+        ease: 'power3.out'
+      }, "-=1")
+      .to('.stagger-item', {
         opacity: 1,
         y: 0,
-        stagger: 0.1,
-        duration: 1,
-        ease: 'power3.out'
-      }, "-=2");
+        stagger: 0.08,
+        duration: 0.8,
+        ease: 'power2.out'
+      }, "-=0.8");
+
+      // Subtle Dynamic Parallax on Mouse Move
+      const heroImg = document.querySelector('#hero-img');
+      document.addEventListener('mousemove', (e) => {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth - 0.5) * 15;
+        const yPos = (clientY / window.innerHeight - 0.5) * 15;
+
+        gsap.to(heroImg, {
+          x: xPos,
+          y: yPos,
+          duration: 1.5,
+          ease: 'power2.out'
+        });
+      });
     });
   </script>
   <script src="/js/user/login.js"></script>
