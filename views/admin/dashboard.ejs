@@ -105,20 +105,36 @@
         <h1 class="editorial-title text-3xl italic tracking-tight">Executive <span class="not-italic font-bold text-brand-dark">Overview</span></h1>
       </div>
       
-        <!-- Time Period Selector -->
-        <div class="relative hidden md:block">
-          <select id="timePeriod" class="appearance-none pl-12 pr-10 py-3 bg-brand-bg border border-brand-border rounded-full text-[0.7rem] font-black uppercase tracking-widest text-brand-muted hover:text-brand-dark transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-dark/10">
-            <option value="today">Today</option>
-            <option value="week">Week</option>
-            <option value="month" selected>Month</option>
-            <option value="year">Year</option>
-            <option value="custom">Custom</option>
-          </select>
-          <div class="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <!-- Time Period Selector (Custom Modern Dropdown) -->
+        <div class="relative hidden md:block group" id="periodDropdown">
+          <button id="dropdownBtn" class="flex items-center gap-4 pl-6 pr-5 py-3 bg-brand-dark text-white rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          </div>
-          <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <span id="selectedPeriodText">Month</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="ml-2 transition-transform duration-300" id="dropdownArrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          
+          <div id="dropdownMenu" class="absolute right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
+            <div class="px-5 py-2 text-[0.55rem] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border/50 mb-2">Analysis Period</div>
+            <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all flex items-center justify-between group/item" data-value="today">
+              Today
+              <div class="w-1.5 h-1.5 rounded-full bg-brand-dark opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+            </div>
+            <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all flex items-center justify-between group/item" data-value="week">
+              Week
+              <div class="w-1.5 h-1.5 rounded-full bg-brand-dark opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+            </div>
+            <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all flex items-center justify-between group/item" data-value="month">
+              Month
+              <div class="w-1.5 h-1.5 rounded-full bg-brand-dark opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+            </div>
+            <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all flex items-center justify-between group/item" data-value="year">
+              Year
+              <div class="w-1.5 h-1.5 rounded-full bg-brand-dark opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+            </div>
+            <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-muted hover:text-brand-dark hover:bg-brand-bg cursor-pointer transition-all border-t border-brand-border/50 mt-2 flex items-center justify-between group/item" data-value="custom">
+              Custom Range
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -491,8 +507,45 @@
       custom: { subtext: "Custom range performance", badge: "Custom" }
     };
 
-    document.getElementById('timePeriod').addEventListener('change', (e) => {
-      const period = e.target.value;
+    // Custom Dropdown Logic
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const dropdownArrow = document.getElementById('dropdownArrow');
+    const selectedText = document.getElementById('selectedPeriodText');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+    const toggleDropdown = () => {
+      const isOpen = !dropdownMenu.classList.contains('invisible');
+      if (isOpen) {
+        dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+        dropdownArrow.classList.remove('rotate-180');
+      } else {
+        dropdownMenu.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+        dropdownArrow.classList.add('rotate-180');
+      }
+    };
+
+    dropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+
+    document.addEventListener('click', () => {
+      dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+      dropdownArrow.classList.remove('rotate-180');
+    });
+
+    dropdownItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const value = item.getAttribute('data-value');
+        const label = item.innerText.trim().split('\n')[0];
+        
+        selectedText.innerText = label;
+        updateDashboardPeriod(value);
+      });
+    });
+
+    function updateDashboardPeriod(period) {
       if (periodData[period]) {
         salesChart.data.labels = periodData[period].labels;
         salesChart.data.datasets[0].data = periodData[period].data;
@@ -505,7 +558,7 @@
         document.getElementById('chartSubtext').innerText = periodLabels[period].subtext;
         document.getElementById('chartPeriodBadge').innerText = periodLabels[period].badge;
       }
-    });
+    }
 
     // Order Status Donut Chart
     const statusCtx = document.getElementById('statusDonut').getContext('2d');
