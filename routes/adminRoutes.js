@@ -1,8 +1,13 @@
 import express from "express";
 import { upload } from "../middleware/upload.js";
 import {
-  loadLogin, loginAdmin, logoutAdmin, loadDashboard, loadSalesReport
+  loadLogin, loginAdmin, logoutAdmin
 } from "../controllers/admin/auth.controller.js";
+
+import {
+  loadDashboard, loadSalesReport
+} from "../controllers/admin/dashboard.controller.js";
+
 import {
   loadCategoryPage, createCategory, getCategories,
   toggleCategory, deleteCategory, updateCategory

@@ -1,69 +1,20 @@
-import * as adminService from "../../services/admin/auth.service.js";
-import { adminLoginSchema } from "../../validators/adminValidator.js";
 import User from "../../models/user/userModel.js";
 import Order from "../../models/user/orderModel.js";
 import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
 
-export const loadLogin = (req, res) => {
-  res.render("admin/login");
-};
-
-export const loginAdmin = async (req, res) => {
-  try {
-    const result=adminLoginSchema.safeParse(req.body);
-    if(!result.success){
-      return res.status(400).json({
-        success:false,
-        errors:result.error.flatten().fieldErrors
-      });
-    }
-    const { email, password } = result.data;
-    const admin = await adminService.loginAdminService(email, password);
-
-    req.session.adminId = admin._id;
-    console.log("SESSION SAVED:", req.session.adminId);
-
-    req.session.save((err) => {
-      if(err) console.log("Session Save Error:", err);
-      res.json({ success: true, redirect: "/admin/dashboard" });
-    });
-
-  } catch (err) {
-    let errors = {};
-
-    if (err.message.includes("email")) {
-      errors.email = [err.message];
-    } else if (err.message.includes("password")) {
-      errors.password = [err.message];
-    } else {
-      errors.general = [err.message];
-    }
-
-    return res.status(401).json({
-      success: false,
-      errors
-    });
-  }
-};
 
 export const loadDashboard = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
+    const totalOrders = await Order.countDocuments();
     const totalProducts = await Product.countDocuments();
     
-    // Total Earnings & Total Product Count (All items regardless of order status)
-    // We remove all status filters to include Placed, Pending, Confirmed, etc. immediately.
-    const earningsData = await Order.aggregate([
-      { $unwind: "$items" },
-      { $group: { 
-          _id: null, 
-          totalEarnings: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
-          totalProductCount: { $sum: "$items.quantity" }
-      }}
+    const revenueData = await Order.aggregate([
+      { $match: { status: 'Delivered' } },
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
     ]);
-    const totalEarnings = earningsData.length > 0 ? earningsData[0].totalEarnings : 0;
-    const totalProductCount = earningsData.length > 0 ? earningsData[0].totalProductCount : 0;
+    const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
 
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
@@ -81,17 +32,16 @@ export const loadDashboard = async (req, res) => {
       { $limit: 5 }
     ]);
 
-    // --- MULTI-PERIOD SALES AGGREGATIONS (Strictly No Filters) ---
+    
     
     // 1. TODAY (Hourly)
     const startOfToday = new Date();
     startOfToday.setHours(0,0,0,0);
     const todayRaw = await Order.aggregate([
-      { $match: { createdAt: { $gte: startOfToday } } },
-      { $unwind: "$items" },
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfToday } } },
       { $group: {
           _id: { $hour: "$createdAt" },
-          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+          revenue: { $sum: "$totalAmount" }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -101,15 +51,14 @@ export const loadDashboard = async (req, res) => {
       return { label: `${hour > 12 ? hour-12 : hour}${hour >= 12 ? 'pm' : 'am'}`, value: match ? match.revenue : 0 };
     });
 
-    // 2. WEEK (Last 7 Days)
+    // 2. WEEK (Last 7 Days - Already implemented but naming it for clarity)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const weekRaw = await Order.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo } } },
-      { $unwind: "$items" },
+      { $match: { status: 'Delivered', createdAt: { $gte: sevenDaysAgo } } },
       { $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+          revenue: { $sum: "$totalAmount" }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -126,11 +75,10 @@ export const loadDashboard = async (req, res) => {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     const monthRaw = await Order.aggregate([
-      { $match: { createdAt: { $gte: startOfMonth } } },
-      { $unwind: "$items" },
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfMonth } } },
       { $group: {
           _id: { $ceil: { $divide: [{ $dayOfMonth: "$createdAt" }, 7] } },
-          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+          revenue: { $sum: "$totalAmount" }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -143,11 +91,10 @@ export const loadDashboard = async (req, res) => {
     const startOfYear = new Date();
     startOfYear.setMonth(0, 1);
     const yearRaw = await Order.aggregate([
-      { $match: { createdAt: { $gte: startOfYear } } },
-      { $unwind: "$items" },
+      { $match: { status: 'Delivered', createdAt: { $gte: startOfYear } } },
       { $group: {
           _id: { $month: "$createdAt" },
-          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+          revenue: { $sum: "$totalAmount" }
       }},
       { $sort: { "_id": 1 } }
     ]);
@@ -200,17 +147,11 @@ export const loadDashboard = async (req, res) => {
       Delivered: 0,
       Pending: 0,
       Cancelled: 0,
-      Returned: 0,
-      Placed: 0,
-      Confirmed: 0,
-      Processing: 0,
-      Shipped: 0
+      Returned: 0
     };
 
     statusCounts.forEach(s => {
       if (orderStatusCounts.hasOwnProperty(s._id)) {
-        orderStatusCounts[s._id] = s.count;
-      } else {
         orderStatusCounts[s._id] = s.count;
       }
     });
@@ -218,9 +159,9 @@ export const loadDashboard = async (req, res) => {
     res.render("admin/dashboard", {
       stats: {
         totalUsers,
-        totalOrders: totalProductCount,
+        totalOrders,
         totalProducts,
-        totalRevenue: totalEarnings
+        totalRevenue
       },
       recentOrders,
       popularProducts,
@@ -241,18 +182,4 @@ export const loadDashboard = async (req, res) => {
 
 export const loadSalesReport = (req, res) => {
   res.render("admin/salesReport", { currentPath: "/admin/sales-report" });
-};
-
-export const logoutAdmin = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Logout failed"
-      });
-    }
-
-    res.clearCookie("connect.sid");
-    res.redirect("/admin/login");
-  });
 };
