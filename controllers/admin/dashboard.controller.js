@@ -180,6 +180,115 @@ export const loadDashboard = async (req, res) => {
   }
 };
 
-export const loadSalesReport = (req, res) => {
-  res.render("admin/salesReport", { currentPath: "/admin/sales-report" });
+export const loadSalesReport = async (req, res) => {
+
+  try {
+
+    const revenueResult = await Order.aggregate([
+
+      { $unwind: "$items" },
+
+      {
+        $group: {
+          _id: null,
+
+          deliveredRevenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$items.status", "Delivered"] },
+                {
+                  $multiply: [
+                    "$items.price",
+                    "$items.quantity"
+                  ]
+                },
+                0
+              ]
+            }
+          },
+
+          cancelledAmount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$items.status", "Cancelled"] },
+                {
+                  $multiply: [
+                    "$items.price",
+                    "$items.quantity"
+                  ]
+                },
+                0
+              ]
+            }
+          },
+
+          returnedAmount: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$items.status", "Returned"] },
+                    { $eq: ["$items.returnApproved", true] }
+                  ]
+                },
+                {
+                  $multiply: [
+                    "$items.price",
+                    "$items.quantity"
+                  ]
+                },
+                0
+              ]
+            }
+          },
+
+          productsSold: {
+            $sum: {
+              $cond: [
+                { $eq: ["$items.status", "Delivered"] },
+                "$items.quantity",
+                0
+              ]
+            }
+          }
+
+        }
+      }
+
+    ]);
+
+    const sales = revenueResult[0] || {};
+
+    const totalRevenue =
+      (sales.deliveredRevenue || 0)
+      - (sales.cancelledAmount || 0)
+      - (sales.returnedAmount || 0);
+
+    const deliveredOrders = await Order.countDocuments({
+      status: "Delivered"
+    });
+
+    res.render("admin/salesReport", {
+
+      currentPath: "/admin/sales-report",
+
+      reportData: {
+        totalRevenue,
+        deliveredRevenue: sales.deliveredRevenue || 0,
+        cancelledAmount: sales.cancelledAmount || 0,
+        returnedAmount: sales.returnedAmount || 0,
+        productsSold: sales.productsSold || 0,
+        deliveredOrders
+      }
+
+    });
+
+  } catch (err) {
+
+    console.log("SALES REPORT ERROR:", err);
+
+    res.redirect("/admin/dashboard");
+
+  }
+
 };
