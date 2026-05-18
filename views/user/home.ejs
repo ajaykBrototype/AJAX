@@ -3,393 +3,682 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AJAX — Autumn/Winter 2026</title>
+<title>AJAX — Timeless Luxury</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 tailwind.config = {
-  theme: { extend: { fontFamily: { serif: ['Playfair Display','Georgia','serif'], sans: ['DM Sans','system-ui','sans-serif'] } } }
+  theme: { 
+      extend: { 
+          fontFamily: { 
+              serif: ['Playfair Display', 'serif'], 
+              sans: ['Inter', 'sans-serif'] 
+          },
+          colors: {
+              luxury: {
+                  bg: '#F5F1EB',
+                  dark: '#1A1A1A',
+                  accent: '#B89D7A',
+                  secondary: '#EAE4DC',
+              }
+          }
+      } 
+  }
 }
 </script>
 <%- include("../partials/navbar-hero-styles.ejs") %>
 <style>
-
-/* HERO */
-.hero{position:relative;height:100svh;min-height:640px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1920&q=90&auto=format&fit=crop') center 25%/cover;animation:bgz 14s ease-out both}
-@keyframes bgz{from{transform:scale(1.1)}to{transform:scale(1)}}
-.hero-ov{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,.38) 0%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.52) 100%)}
-.hero-c{position:relative;z-index:2;text-align:center;color:#fff;padding:0 1.5rem}
-.h-eye{font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:1.5rem;animation:fu 1.2s cubic-bezier(.16,1,.3,1) .15s both}
-.h-title{font-family:'Playfair Display',serif;font-weight:400;font-style:italic;font-size:clamp(3rem,9vw,8.5rem);line-height:1;letter-spacing:-.01em;margin-bottom:2.5rem;animation:fu 1.2s cubic-bezier(.16,1,.3,1) .4s both}
-.h-title span{font-style:normal;display:block}
-.h-cta{animation:fu 1.2s cubic-bezier(.16,1,.3,1) .65s both}
-@keyframes fu{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-.btn-w{display:inline-block;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.65);padding:.95rem 2.8rem;transition:background .35s,color .35s,border-color .35s}
-.btn-w:hover{background:#fff;color:var(--dark);border-color:#fff}
-.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;color:rgba(255,255,255,.45);z-index:2;animation:fu 1s 1.3s both}
-.scroll-hint span{font-size:.5rem;letter-spacing:.3em;text-transform:uppercase}
-.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,rgba(255,255,255,.45),transparent);animation:sl 2s ease-in-out infinite}
-@keyframes sl{0%,100%{opacity:.4}50%{opacity:.85}}
-
-/* TICKER */
-.ticker{overflow:hidden;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:var(--cream);padding:.75rem 0}
-.ticker-t{display:flex;gap:3.5rem;animation:tk 28s linear infinite;width:max-content}
-@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.t-item{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--stone);white-space:nowrap;flex-shrink:0}
-
-/* SECTION UTILS */
-.sec-eye{font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:.5rem}
-.sec-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(1.9rem,3.5vw,2.8rem);line-height:1.15;color:var(--dark)}
-.btn-dark{display:inline-block;text-decoration:none;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dark);border:1px solid var(--dark);padding:.85rem 2.3rem;transition:background .35s,color .35s;cursor:pointer;background:none}
-.btn-dark:hover{background:var(--dark);color:#fff}
-
-/* CATEGORY GRID */
-.cat-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:340px 340px;gap:10px}
-.cat-left{grid-row:1/3}
-.cat-rt,.cat-rb{grid-column:2}
-@media(max-width:767px){
-  .cat-grid{grid-template-columns:1fr;grid-template-rows:auto}
-  .cat-left{grid-row:auto;height:360px}
-  .cat-rt,.cat-rb{grid-column:1;height:260px}
+/* CORE STYLES */
+body {
+    background-color: #F5F1EB;
+    color: #1A1A1A;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 }
-.cat-tile{position:relative;overflow:hidden;cursor:pointer;display:block;height:100%}
-.cat-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s cubic-bezier(.25,.1,.25,1)}
-.cat-tile:hover img{transform:scale(1.06)}
-.cat-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62) 0%,rgba(0,0,0,.04) 55%);transition:background .45s}
-.cat-tile:hover .cat-ov{background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 55%)}
-.cat-txt{position:absolute;bottom:0;left:0;right:0;padding:1.75rem 1.6rem;color:#fff}
-.cat-lbl{font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.5rem;display:block}
-.cat-name{font-family:'Playfair Display',serif;font-weight:400;font-size:2rem;line-height:1}
-.cat-rb .cat-name,.cat-rt .cat-name{font-size:1.55rem}
-.cat-arr{display:inline-flex;align-items:center;gap:6px;font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:.65rem;transition:gap .3s,color .3s}
-.cat-tile:hover .cat-arr{gap:12px;color:#fff}
 
-/* PRODUCT GRID */
-.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem}
-@media(max-width:1024px){.prod-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.prod-grid{gap:.7rem}}
-.p-card{cursor:pointer}
-.p-thumb{position:relative;overflow:hidden;background:var(--cream);aspect-ratio:3/4}
-.p-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.25,.1,.25,1)}
-.p-card:hover .p-thumb img{transform:scale(1.07)}
-.p-ov{position:absolute;inset:0;background:rgba(28,28,28,0);transition:background .4s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.3rem}
-.p-card:hover .p-ov{background:rgba(28,28,28,.07)}
-.p-qa{font-size:.53rem;letter-spacing:.18em;text-transform:uppercase;background:#fff;color:var(--dark);padding:.65rem 1.4rem;border:none;cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;white-space:nowrap;font-family:'DM Sans',sans-serif}
-.p-card:hover .p-qa{opacity:1;transform:translateY(0)}
-.p-tag{position:absolute;top:.75rem;left:.75rem;font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;background:var(--dark);color:#fff;padding:.28rem .62rem}
-.p-info{padding:.8rem 0 0}
-.p-name{font-size:.76rem;font-weight:300;color:var(--dark);margin-bottom:.28rem;letter-spacing:.02em}
-.p-price{font-size:.76rem;color:var(--stone)}
+/* HERO SECTION */
+.hero {
+    position: relative;
+    height: 100vh;
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&q=90&auto=format&fit=crop') center 30%/cover;
+    animation: slowZoom 20s ease-out both;
+}
+@keyframes slowZoom {
+    from { transform: scale(1.1); }
+    to { transform: scale(1); }
+}
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(26,26,26,0.85) 0%, rgba(26,26,26,0.3) 50%, rgba(26,26,26,0.6) 100%);
+}
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    color: white;
+    padding: 0 1.5rem;
+}
+.hero-eye {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: #B89D7A;
+    margin-bottom: 2rem;
+    display: block;
+}
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 1.05;
+    margin-bottom: 3rem;
+}
+.btn-outline {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.6);
+    padding: 1.1rem 3rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(5px);
+}
+.btn-outline:hover {
+    background: white;
+    color: #1A1A1A;
+    border-color: white;
+    transform: translateY(-2px);
+}
+.btn-filled {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    background: white;
+    color: #1A1A1A;
+    border: 1px solid white;
+    padding: 1.1rem 3rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-filled:hover {
+    background: transparent;
+    color: white;
+}
+.scroll-indicator {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+}
+.scroll-text {
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+}
+.scroll-line {
+    width: 1px;
+    height: 45px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    50.1% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+}
 
-/* EDITORIAL */
-.ed-split{display:grid;grid-template-columns:1fr 1fr}
-@media(max-width:767px){.ed-split{grid-template-columns:1fr}}
-.ed-img{overflow:hidden}
-.ed-img img{width:100%;height:100%;min-height:480px;object-fit:cover;display:block;filter:grayscale(100%);transition:transform 1s cubic-bezier(.25,.1,.25,1),filter .6s}
-.ed-img:hover img{transform:scale(1.04);filter:grayscale(15%)}
-.ed-txt{background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
-@media(max-width:1024px){.ed-txt{padding:3.5rem 2.5rem}}
-@media(max-width:767px){.ed-txt{padding:3rem 1.75rem}}
-.ed-q{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--stone);margin-bottom:1.5rem}
-.ed-rule{width:36px;height:1px;background:var(--stone);opacity:.45;margin-bottom:1.75rem}
-.ed-h{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(2.2rem,3.5vw,3.4rem);line-height:1.1;margin-bottom:1.4rem}
-.ed-body{font-size:.8rem;font-weight:300;line-height:1.95;color:var(--stone);max-width:330px;margin-bottom:2.5rem}
+/* SECTION UTILITIES */
+.section-padding { padding: 7rem 4rem; max-width: 1536px; margin: 0 auto; }
+@media(max-width: 768px) { .section-padding { padding: 4rem 1.5rem; } }
 
-/* FEATURES STRIP */
-.feat-strip{background:var(--cream);padding:3.5rem 3rem}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;max-width:1320px;margin:0 auto;text-align:center}
-@media(max-width:640px){.feat-grid{grid-template-columns:1fr;gap:2rem}}
-.feat-icon{width:42px;height:42px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
-.feat-title{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dark);font-weight:500;margin-bottom:.5rem}
-.feat-desc{font-size:.72rem;font-weight:300;color:var(--stone);line-height:1.75}
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #B89D7A;
+    margin-bottom: 1rem;
+    display: block;
+}
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    color: #1A1A1A;
+    font-weight: 400;
+}
 
-/* JOURNAL */
-.journal-grid{columns:4;column-gap:8px}
-@media(max-width:1024px){.journal-grid{columns:3}}
-@media(max-width:640px){.journal-grid{columns:2}}
-.j-item{break-inside:avoid;margin-bottom:8px;overflow:hidden;display:block;cursor:pointer}
-.j-item img{width:100%;display:block;transition:transform .7s cubic-bezier(.25,.1,.25,1),filter .4s;filter:brightness(.96)}
-.j-item:hover img{transform:scale(1.06);filter:brightness(1)}
+/* BENTO CATEGORY GRID */
+.editorial-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+@media(min-width: 768px) {
+    .editorial-grid {
+        grid-template-columns: 7fr 5fr;
+    }
+}
+.ed-card {
+    position: relative;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 15px 35px -15px rgba(0,0,0,0.1);
+    transform: translateZ(0); /* Hardware acceleration */
+}
+.ed-card img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ed-card:hover img { transform: scale(1.08); }
+.ed-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15,15,15,0.9) 0%, rgba(15,15,15,0.2) 50%, transparent 100%);
+    opacity: 0.5;
+    transition: opacity 0.6s ease;
+}
+.ed-card:hover .ed-overlay { opacity: 0.85; }
+.ed-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2.5rem;
+    color: white;
+    transform: translateY(15px);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ed-card:hover .ed-content { transform: translateY(0); }
+.ed-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: block;
+    opacity: 0.8;
+}
+.ed-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+}
+.ed-card.small .ed-title { font-size: 1.75rem; margin-bottom: 0.5rem; }
+.ed-link {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.4);
+    padding-bottom: 0.25rem;
+    transition: border-color 0.3s;
+}
+.ed-card:hover .ed-link { border-color: white; }
+
+/* PRODUCT SLIDER & CARDS */
+.product-slider {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2rem 0 4rem; 
+    margin: 0 -1.5rem;
+    padding-inline: 1.5rem;
+    scrollbar-width: none;
+    cursor: grab;
+}
+.product-slider:active { cursor: grabbing; }
+.product-slider::-webkit-scrollbar { display: none; }
+.product-card {
+    min-width: 320px;
+    scroll-snap-align: center;
+    position: relative;
+}
+@media(max-width: 640px) { .product-card { min-width: 280px; } }
+.prod-img-wrapper {
+    position: relative;
+    background: #EAE4DC;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    aspect-ratio: 4/5;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 15px 35px -15px rgba(0,0,0,0.05);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-card:hover .prod-img-wrapper {
+    box-shadow: 0 25px 50px -20px rgba(0,0,0,0.15);
+    transform: translateY(-8px);
+}
+.prod-img-primary, .prod-img-secondary {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: opacity 0.8s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.prod-img-secondary { opacity: 0; transform: scale(1.05); }
+.product-card:hover .prod-img-primary { opacity: 0; }
+.product-card:hover .prod-img-secondary { opacity: 1; transform: scale(1); }
+
+.quick-add {
+    position: absolute;
+    bottom: 1.25rem; left: 1.25rem; right: 1.25rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    color: #1A1A1A;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-radius: 0.75rem;
+    transform: translateY(150%);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 500;
+}
+.product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
+.wishlist-btn {
+    position: absolute;
+    top: 1.25rem; right: 1.25rem;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1A1A1A;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-card:hover .wishlist-btn { opacity: 1; transform: scale(1); }
+.wishlist-btn:hover { background: #1A1A1A; color: white; }
+
+.new-badge {
+    position: absolute;
+    top: 1.25rem; left: 1.25rem;
+    background: #1A1A1A;
+    color: white;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    z-index: 10;
+}
+
+.prod-info { text-align: center; }
+.prod-name { font-size: 0.9rem; color: #1A1A1A; margin-bottom: 0.4rem; font-weight: 500; letter-spacing: 0.02em; }
+.prod-price { font-size: 0.85rem; color: #666; font-family: 'Playfair Display', serif; font-style: italic; }
+
+/* BRAND STORY */
+.story-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #EAE4DC;
+    border-radius: 2rem;
+    overflow: hidden;
+    margin: 4rem auto;
+    max-width: 1440px;
+}
+@media(max-width: 768px) { .story-section { grid-template-columns: 1fr; } }
+.story-img { height: 100%; min-height: 600px; object-fit: cover; }
+.story-content {
+    padding: 6rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+@media(max-width: 1024px) { .story-content { padding: 4rem 3rem; } }
+.story-title { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 1.5rem; line-height: 1.1; }
+.story-text { font-size: 0.9rem; line-height: 1.8; color: #4A4A4A; margin-bottom: 3rem; max-width: 400px; }
+
+/* FEATURES */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+@media(max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width: 480px) { .features-grid { grid-template-columns: 1fr; } }
+.feature-card {
+    text-align: center;
+    background: #EAE4DC;
+    padding: 3rem 2rem;
+    border-radius: 1rem;
+    transition: transform 0.4s ease;
+}
+.feature-card:hover { transform: translateY(-10px); }
+.feat-icon { margin: 0 auto 1.5rem; color: #B89D7A; }
+.feat-title { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; margin-bottom: 0.75rem; }
+.feat-desc { font-size: 0.8rem; color: #666; line-height: 1.6; }
 
 /* NEWSLETTER */
-.nl{background:var(--dark);padding:7rem 2rem}
-.nl-in{max-width:520px;margin:0 auto;text-align:center}
-.nl-eye{font-size:.54rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:1rem}
-.nl-h{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);font-weight:400;color:#fff;line-height:1.15;margin-bottom:.9rem}
-.nl-sub{font-size:.78rem;font-weight:300;color:rgba(255,255,255,.42);line-height:1.8;margin-bottom:2.5rem}
-.nl-form{display:flex;max-width:400px;margin:0 auto}
-.nl-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-right:none;color:#fff;padding:.88rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.68rem;letter-spacing:.04em;outline:none;transition:border-color .3s}
-.nl-inp::placeholder{color:rgba(255,255,255,.28)}
-.nl-inp:focus{border-color:rgba(255,255,255,.5)}
-.nl-btn{background:#fff;color:var(--dark);border:1px solid #fff;font-family:'DM Sans',sans-serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;padding:.88rem 1.4rem;cursor:pointer;transition:background .3s;white-space:nowrap}
-.nl-btn:hover{background:var(--cream);border-color:var(--cream)}
-.nl-note{font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:1.2rem}
+.newsletter-section {
+    background: #1A1A1A;
+    color: white;
+    text-align: center;
+    padding: 8rem 2rem;
+    margin: 4rem 2rem 0;
+    border-radius: 2rem 2rem 0 0;
+}
+@media(max-width: 640px) { .newsletter-section { margin: 2rem 0 0; border-radius: 1.5rem 1.5rem 0 0; padding: 5rem 1.5rem; } }
+.nl-form {
+    display: flex;
+    max-width: 500px;
+    margin: 3rem auto 0;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.nl-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 1rem 0;
+    font-size: 0.85rem;
+    outline: none;
+}
+.nl-input::placeholder { color: rgba(255,255,255,0.4); }
+.nl-submit {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.nl-submit:hover { color: #B89D7A; }
 
-/* FOOTER */
-footer{background:var(--warm);border-top:1px solid var(--bdr);padding:5rem 3rem 2.5rem}
-@media(max-width:640px){footer{padding:3.5rem 1.5rem 2rem}}
-.ft-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3.5rem}
-@media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem 2.5rem}}
-@media(max-width:480px){.ft-grid{grid-template-columns:1fr 1fr;gap:1.75rem 1.25rem}}
-.ft-logo{font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:.35em;color:var(--dark);margin-bottom:.9rem;display:block;text-decoration:none}
-.ft-desc{font-size:.7rem;font-weight:300;line-height:1.9;color:var(--stone);max-width:195px;margin-bottom:1.4rem}
-.ft-socials{display:flex;gap:.75rem}
+/* ANIMATIONS */
+.gsap-up { opacity: 0; transform: translateY(40px); }
 </style>
 <%- include("../partials/footer-styles.ejs") %>
-<style>
-
-/* SCROLL REVEAL */
-.sr{opacity:0;transform:translateY(34px);transition:opacity .85s cubic-bezier(.16,1,.3,1),transform .85s cubic-bezier(.16,1,.3,1)}
-.sr.in{opacity:1;transform:translateY(0)}
-.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
-
-/* SECTION PADDING */
-.sec{padding:5.5rem 3rem;max-width:1320px;margin:0 auto}
-@media(max-width:767px){.sec{padding:3.5rem 1.25rem}}
-.sec-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem}
-</style>
 </head>
 <body>
 
 <%- include("../partials/navbar-hero.ejs") %>
 
-
-<!-- HERO -->
+<!-- 1. HERO SECTION -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-ov"></div>
-  <div class="hero-c">
-    <p class="h-eye">New Collection — AW 2026</p>
-    <h1 class="h-title"><span>Autumn /</span>Winter 2026</h1>
-    <div class="h-cta"><a href="#" class="btn-w">Shop the Collection</a></div>
-  </div>
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <span class="hero-eye gsap-hero">Autumn Winter 2026</span>
+        <h1 class="hero-title gsap-hero">
+            Timeless <i class="text-[#B89D7A]">Luxury</i>
+        </h1>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center gsap-hero">
+            <a href="/menProductList" class="btn-filled">Shop Men</a>
+            <a href="#" class="btn-outline">Shop Women</a>
+        </div>
+    </div>
+    
+    <div class="scroll-indicator gsap-hero">
+        <span class="scroll-text">Discover</span>
+        <div class="scroll-line"></div>
+    </div>
 </section>
 
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-t">
-    <span class="t-item">Free Shipping on Orders Over ₹5,000</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">New Collection — Autumn / Winter 2026</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">Sustainably Crafted · Endlessly Refined</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">Complimentary Returns Within 30 Days</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">Free Shipping on Orders Over ₹5,000</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">New Collection — Autumn / Winter 2026</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">Sustainably Crafted · Endlessly Refined</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-    <span class="t-item">Complimentary Returns Within 30 Days</span>
-    <span class="t-item" style="opacity:.4">✦</span>
-  </div>
-</div>
-
-<!-- CATEGORY GRID -->
-<div class="sec">
-  <div class="sec-hdr sr">
-    <div>
-      <p class="sec-eye">Shop by Category</p>
-      <h2 class="sec-title">Explore the Range</h2>
+<!-- 3. FEATURED COLLECTIONS (EDITORIAL EDIT) -->
+<section class="section-padding">
+    <div class="section-header gsap-up">
+        <span class="section-eyebrow">Curations</span>
+        <h2 class="section-title">The Editorial Edit</h2>
     </div>
-    <a href="#" class="btn-dark">View All</a>
-  </div>
-
-  <div class="cat-grid sr d1">
-    <!-- MEN large -->
-    <a href="/menProductList" class="cat-tile cat-left">
-      <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=800&q=85&auto=format&fit=crop" alt="Men" loading="lazy"/>
-      <div class="cat-ov"></div>
-      <div class="cat-txt">
-        <span class="cat-lbl">Explore Collection</span>
-        <div class="cat-name">Men</div>
-        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
-      </div>
-    </a>
-    <!-- WOMEN -->
-    <a href="#" class="cat-tile cat-rt">
-      <img src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?w=700&q=80&auto=format&fit=crop" alt="Women" loading="lazy"/>
-      <div class="cat-ov"></div>
-      <div class="cat-txt">
-        <span class="cat-lbl">Explore Collection</span>
-        <div class="cat-name">Women</div>
-        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
-      </div>
-    </a>
-    <!-- NEW ARRIVALS -->
-    <a href="#" class="cat-tile cat-rb">
-      <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&q=80&auto=format&fit=crop" alt="New Arrivals" loading="lazy"/>
-      <div class="cat-ov"></div>
-      <div class="cat-txt">
-        <span class="cat-lbl">Just Dropped</span>
-        <div class="cat-name">New Arrivals</div>
-        <div class="cat-arr">Shop Now <svg width="16" height="8" viewBox="0 0 16 8" fill="none"><path d="M0 4h14M10 1l4 3-4 3" stroke="currentColor" stroke-width="1"/></svg></div>
-      </div>
-    </a>
-  </div>
-</div>
-
-<!-- BEST SELLERS -->
-<div class="sec" style="padding-top:2rem">
-  <div class="sec-hdr sr">
-    <div>
-      <p class="sec-eye">Curated for You</p>
-      <h2 class="sec-title">Best Sellers</h2>
+    
+    <div class="editorial-grid">
+        <!-- Main Large Card -->
+        <a href="/menProductList" class="ed-card md:h-[640px] h-[500px] gsap-up">
+            <img src="https://images.unsplash.com/photo-1550614000-4b95d4ebf0e9?w=1200&q=90&auto=format&fit=crop" alt="Menswear Collection" loading="lazy">
+            <div class="ed-overlay"></div>
+            <div class="ed-content">
+                <span class="ed-label">Autumn Collection</span>
+                <h3 class="ed-title">Menswear <br>Tailoring</h3>
+                <span class="ed-link">Discover Collection <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </div>
+        </a>
+        
+        <!-- Stacked Right Column -->
+        <div class="flex flex-col gap-6">
+            <!-- Top Right: Womenswear -->
+            <a href="#" class="ed-card h-[308px] small gsap-up" style="transition-delay: 0.1s">
+                <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=90&auto=format&fit=crop" alt="Womenswear" loading="lazy">
+                <div class="ed-overlay"></div>
+                <div class="ed-content">
+                    <span class="ed-label">New Season</span>
+                    <h3 class="ed-title">Womenswear</h3>
+                    <span class="ed-link" style="border-bottom-width: 0;">Explore</span>
+                </div>
+            </a>
+            
+            <!-- Bottom Split -->
+            <div class="grid grid-cols-2 gap-6 h-[308px]">
+                <a href="#" class="ed-card h-full small gsap-up" style="transition-delay: 0.2s">
+                    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=90&auto=format&fit=crop" alt="Essentials" loading="lazy">
+                    <div class="ed-overlay" style="background: linear-gradient(to top, rgba(15,15,15,0.7) 0%, transparent 100%);"></div>
+                    <div class="ed-content" style="padding: 1.5rem;">
+                        <h3 class="ed-title" style="font-size: 1.4rem;">Essentials</h3>
+                    </div>
+                </a>
+                <a href="#" class="ed-card h-full small gsap-up" style="transition-delay: 0.3s">
+                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=90&auto=format&fit=crop" alt="Streetwear" loading="lazy">
+                    <div class="ed-overlay" style="background: linear-gradient(to top, rgba(15,15,15,0.7) 0%, transparent 100%);"></div>
+                    <div class="ed-content" style="padding: 1.5rem;">
+                        <h3 class="ed-title" style="font-size: 1.4rem;">Streetwear</h3>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
-    <a href="#" class="btn-dark hidden md:inline-block">View All</a>
-  </div>
-
-  <div class="prod-grid">
-    <div class="p-card sr d1">
-      <div class="p-thumb">
-        <span class="p-tag">New</span>
-        <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80&auto=format&fit=crop" alt="Tailored Wool Coat" loading="lazy"/>
-        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
-      </div>
-      <div class="p-info"><p class="p-name">Tailored Wool Overcoat</p><p class="p-price">₹12,500</p></div>
-    </div>
-    <div class="p-card sr d2">
-      <div class="p-thumb">
-        <span class="p-tag">Bestseller</span>
-        <img src="https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=600&q=80&auto=format&fit=crop" alt="Cashmere Turtleneck" loading="lazy"/>
-        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
-      </div>
-      <div class="p-info"><p class="p-name">Cashmere Turtleneck</p><p class="p-price">₹8,200</p></div>
-    </div>
-    <div class="p-card sr d3">
-      <div class="p-thumb">
-        <img src="https://images.unsplash.com/photo-1594938298603-c8148c4b8c5e?w=600&q=80&auto=format&fit=crop" alt="Slim Trousers" loading="lazy"/>
-        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
-      </div>
-      <div class="p-info"><p class="p-name">Slim Tailored Trousers</p><p class="p-price">₹6,400</p></div>
-    </div>
-    <div class="p-card sr d4">
-      <div class="p-thumb">
-        <span class="p-tag">Essential</span>
-        <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80&auto=format&fit=crop" alt="Linen Shirt" loading="lazy"/>
-        <div class="p-ov"><button class="p-qa">Quick Add</button></div>
-      </div>
-      <div class="p-info"><p class="p-name">Oversized Linen Shirt</p><p class="p-price">₹4,900</p></div>
-    </div>
-  </div>
-
-  <div class="sr" style="text-align:center;margin-top:3rem">
-    <a href="#" class="btn-dark">View All Best Sellers</a>
-  </div>
-</div>
-
-<!-- EDITORIAL SPLIT -->
-<section style="margin:1rem 0">
-  <div class="ed-split">
-    <div class="ed-img sr">
-      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=85&auto=format&fit=crop" alt="Modern Essentials" loading="lazy"/>
-    </div>
-    <div class="ed-txt sr d2">
-      <p class="ed-q">"Wear less. Choose better."</p>
-      <div class="ed-rule"></div>
-      <h2 class="ed-h">Modern<br><em>Essentials</em></h2>
-      <p class="ed-body">Refined silhouettes built for the contemporary wardrobe. Each piece is designed with one intention — lasting elegance. No trend, no noise. Just considered clothing made to endure.</p>
-      <a href="#" class="btn-dark" style="align-self:flex-start">Explore Collection</a>
-    </div>
-  </div>
 </section>
 
-<!-- FEATURES STRIP -->
-<div class="feat-strip">
-  <div class="feat-grid sr">
-    <div>
-      <div class="feat-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
-          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-        </svg>
-      </div>
-      <p class="feat-title">Free Shipping</p>
-      <p class="feat-desc">Complimentary delivery on all orders above ₹5,000 across India.</p>
+<!-- 4. NEW ARRIVALS SLIDER -->
+<section class="section-padding py-0">
+    <div class="flex justify-between items-end mb-10 gsap-up">
+        <div>
+            <span class="section-eyebrow">Just Landed</span>
+            <h2 class="section-title">New Arrivals</h2>
+        </div>
+        <a href="#" class="hidden md:inline-block text-[0.65rem] tracking-[0.2em] uppercase border-b border-[#1A1A1A] pb-1 hover:text-[#B89D7A] hover:border-[#B89D7A] transition-colors">View All Collection</a>
     </div>
-    <div>
-      <div class="feat-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
-          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-        </svg>
-      </div>
-      <p class="feat-title">Easy Returns</p>
-      <p class="feat-desc">Hassle-free returns within 30 days of receiving your order.</p>
+    
+    <div class="product-slider gsap-up">
+        <!-- Card 1 -->
+        <div class="product-card">
+            <div class="prod-img-wrapper">
+                <span class="new-badge">New Season</span>
+                <button class="wishlist-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+                <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" class="prod-img-primary" alt="Coat">
+                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80" class="prod-img-secondary" alt="Coat alt">
+                <button class="quick-add">Quick Add to Bag</button>
+            </div>
+            <div class="prod-info">
+                <h4 class="prod-name">Tailored Wool Overcoat</h4>
+                <p class="prod-price">₹12,500</p>
+            </div>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="product-card">
+            <div class="prod-img-wrapper">
+                <button class="wishlist-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+                <img src="https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=600&q=80" class="prod-img-primary" alt="Knit">
+                <img src="https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=600&q=80" class="prod-img-secondary" alt="Knit alt">
+                <button class="quick-add">Quick Add to Bag</button>
+            </div>
+            <div class="prod-info">
+                <h4 class="prod-name">Heavyweight Cashmere Knit</h4>
+                <p class="prod-price">₹8,200</p>
+            </div>
+        </div>
+        
+        <!-- Card 3 -->
+        <div class="product-card">
+            <div class="prod-img-wrapper">
+                <span class="new-badge" style="background: white; color: #1A1A1A;">Bestseller</span>
+                <button class="wishlist-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80" class="prod-img-primary" alt="Jacket">
+                <img src="https://images.unsplash.com/photo-1520975954732-57dd22299614?w=600&q=80" class="prod-img-secondary" alt="Jacket alt">
+                <button class="quick-add">Quick Add to Bag</button>
+            </div>
+            <div class="prod-info">
+                <h4 class="prod-name">Leather Aviator Jacket</h4>
+                <p class="prod-price">₹24,000</p>
+            </div>
+        </div>
+        
+        <!-- Card 4 -->
+        <div class="product-card">
+            <div class="prod-img-wrapper">
+                <button class="wishlist-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+                <img src="https://images.unsplash.com/photo-1603252109303-2751441dd157?w=600&q=80" class="prod-img-primary" alt="Shirt">
+                <img src="https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=600&q=80" class="prod-img-secondary" alt="Shirt alt">
+                <button class="quick-add">Quick Add to Bag</button>
+            </div>
+            <div class="prod-info">
+                <h4 class="prod-name">Oversized Poplin Shirt</h4>
+                <p class="prod-price">₹4,500</p>
+            </div>
+        </div>
     </div>
-    <div>
-      <div class="feat-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="1.4">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      <p class="feat-title">Quality Promise</p>
-      <p class="feat-desc">Every garment crafted from sustainably sourced, premium materials.</p>
-    </div>
-  </div>
-</div>
+</section>
 
-<!-- VISUAL JOURNAL -->
-<div class="sec">
-  <div class="sec-hdr sr">
-    <div>
-      <p class="sec-eye">Inspiration</p>
-      <h2 class="sec-title">Visual Journal</h2>
+<!-- 6. BRAND STORY -->
+<section class="section-padding">
+    <div class="story-section gsap-up">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1000&q=90" alt="Brand Story" class="story-img">
+        <div class="story-content">
+            <span class="section-eyebrow">The Philosophy</span>
+            <h2 class="story-title">Crafted for modern elegance.</h2>
+            <p class="story-text">We believe in clothes that endure. Free from the noise of transient trends, our garments are meticulously constructed using the world's finest materials to create a wardrobe of uncompromising quality and timeless silhouettes.</p>
+            <div>
+                <a href="#" class="inline-block border-b border-[#1A1A1A] text-[0.65rem] tracking-[0.2em] uppercase pb-1 hover:text-[#B89D7A] hover:border-[#B89D7A] transition-colors">Discover Our Story</a>
+            </div>
+        </div>
     </div>
-    <a href="#" style="font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);text-decoration:none;border-bottom:1px solid var(--bdr);padding-bottom:2px;transition:color .25s,border-color .25s" onmouseover="this.style.color='var(--dark)';this.style.borderColor='var(--dark)'" onmouseout="this.style.color='var(--stone)';this.style.borderColor='var(--bdr)'">Follow on Instagram</a>
-  </div>
+</section>
 
-  <div class="journal-grid sr d1">
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:2/3"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1605289982774-9a6fef564df8?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:4/3"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:3/4"/></div>
-    <div class="j-item"><img src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=480&q=75&auto=format&fit=crop" alt="" loading="lazy" style="aspect-ratio:1/1"/></div>
-  </div>
-</div>
-
-<!-- NEWSLETTER -->
-<div class="nl">
-  <div class="nl-in sr">
-    <p class="nl-eye">Stay Connected</p>
-    <h2 class="nl-h">Join the <em>Circle</em></h2>
-    <p class="nl-sub">Early access to new drops, exclusive offers,<br>and editorial stories. No noise — only what matters.</p>
-    <div class="nl-form">
-      <input type="email" class="nl-inp" placeholder="Your email address"/>
-      <button class="nl-btn">Subscribe</button>
+<!-- 7. LUXURY FEATURES -->
+<section class="section-padding py-0 mb-16">
+    <div class="features-grid">
+        <div class="feature-card gsap-up">
+            <svg class="feat-icon w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+            <h4 class="feat-title">Complimentary Shipping</h4>
+            <p class="feat-desc">On all domestic orders over ₹5,000.</p>
+        </div>
+        <div class="feature-card gsap-up" style="transition-delay: 0.1s">
+            <svg class="feat-icon w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <h4 class="feat-title">Secure Payments</h4>
+            <p class="feat-desc">Encrypted processing for your peace of mind.</p>
+        </div>
+        <div class="feature-card gsap-up" style="transition-delay: 0.2s">
+            <svg class="feat-icon w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+            <h4 class="feat-title">Uncompromising Quality</h4>
+            <p class="feat-desc">Sustainably sourced, premium materials.</p>
+        </div>
+        <div class="feature-card gsap-up" style="transition-delay: 0.3s">
+            <svg class="feat-icon w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <h4 class="feat-title">Complimentary Returns</h4>
+            <p class="feat-desc">Hassle-free exchanges within 30 days.</p>
+        </div>
     </div>
-    <p class="nl-note">No spam. Unsubscribe anytime.</p>
-  </div>
-</div>
+</section>
 
-<!-- FOOTER -->
+<!-- 8. NEWSLETTER -->
+<section class="newsletter-section">
+    <div class="max-w-2xl mx-auto gsap-up">
+        <span class="hero-eye" style="margin-bottom: 1rem;">The Inner Circle</span>
+        <h2 class="section-title text-white mb-4">Stay Inspired.</h2>
+        <p class="text-white/60 font-light text-sm max-w-md mx-auto">Join the AJAX society for early access to new collections, exclusive editorial content, and private sales.</p>
+        
+        <form class="nl-form">
+            <input type="email" class="nl-input" placeholder="Enter your email address" required>
+            <button type="submit" class="nl-submit">Subscribe</button>
+        </form>
+    </div>
+</section>
+
+<!-- 9. FOOTER -->
 <%- include("../partials/footer.ejs") %>
 
+<!-- SCRIPTS -->
 <script>
-/* Scroll reveal */
-const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:0.07,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+// GSAP Animations
+document.addEventListener("DOMContentLoaded", () => {
+    // Register ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero entrance
+    gsap.fromTo(".gsap-hero", 
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2, stagger: 0.2, ease: "power3.out", delay: 0.2 }
+    );
+
+    // Scroll reveal for elements
+    gsap.utils.toArray(".gsap-up").forEach(elem => {
+        gsap.fromTo(elem,
+            { y: 50, opacity: 0 },
+            { 
+                y: 0, 
+                opacity: 1, 
+                duration: 1, 
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top 85%", // Trigger when top of element hits 85% of viewport
+                    toggleActions: "play none none none"
+                }
+            }
+        );
+    });
+});
 </script>
 
 <script>
-document.getElementById("logoutBtn").addEventListener("click", function () {
+document.getElementById("logoutBtn")?.addEventListener("click", function () {
   Swal.fire({
     title: "Are you sure?",
     text: "You will be logged out",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#1C1C1C",
+    confirmButtonColor: "#1A1A1A",
     cancelButtonColor: "#d33",
     confirmButtonText: "Yes, logout"
   }).then((result) => {
@@ -400,10 +689,8 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
 });
 </script>
 
-
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/js/utils/swal-helper.js"></script>
+<script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/home.js"></script>
 </body>
 </html>
