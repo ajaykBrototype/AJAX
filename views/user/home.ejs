@@ -458,7 +458,7 @@ body {
     <div class="editorial-grid">
         <!-- Main Large Card -->
         <a href="/menProductList" class="ed-card md:h-[640px] h-[500px] gsap-up">
-            <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1200&q=90&auto=format&fit=crop" alt="Menswear Collection" loading="lazy">
+            <img src="/images/menproduct.png" alt="Menswear Collection" loading="lazy">
             <div class="ed-overlay"></div>
             <div class="ed-content">
                 <span class="ed-label">Autumn Collection</span>
@@ -471,7 +471,7 @@ body {
         <div class="flex flex-col gap-6">
             <!-- Top Right: Womenswear -->
             <a href="#" class="ed-card h-[308px] small gsap-up" style="transition-delay: 0.1s">
-                <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&q=90&auto=format&fit=crop" alt="Womenswear" loading="lazy">
+                <img src="/images/womenproduct.jpg" alt="Womenswear" loading="lazy">
                 <div class="ed-overlay"></div>
                 <div class="ed-content">
                     <span class="ed-label">New Season</span>
@@ -480,16 +480,21 @@ body {
                 </div>
             </a>
             
-            <!-- Bottom Right: Footwear (Replacing Essentials and Streetwear) -->
-            <a href="#" class="ed-card h-[308px] small gsap-up" style="transition-delay: 0.2s">
-                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=90&auto=format&fit=crop" alt="Footwear" loading="lazy">
-                <div class="ed-overlay"></div>
-                <div class="ed-content">
-                    <span class="ed-label">The Shoe Edit</span>
-                    <h3 class="ed-title">Footwear</h3>
-                    <span class="ed-link" style="border-bottom-width: 0;">Explore</span>
+            <!-- Bottom Right: Kids (Coming Soon) -->
+            <div class="ed-card h-[308px] small gsap-up relative group cursor-not-allowed" style="transition-delay: 0.2s">
+                <img src="https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=800&q=90&auto=format&fit=crop" alt="Kids Collection" loading="lazy" class="blur-[4px] scale-105 group-hover:scale-[1.08] transition-transform duration-1000">
+                <div class="ed-overlay" style="background: rgba(15,15,15,0.4);"></div>
+                
+                <!-- Center "Coming Soon" Badge -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center z-20">
+                    <span class="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white text-[0.7rem] font-bold tracking-[0.2em] uppercase shadow-2xl">Coming Soon</span>
                 </div>
-            </a>
+                
+                <div class="ed-content z-10 opacity-50">
+                    <span class="ed-label">Little Icons</span>
+                    <h3 class="ed-title">Kidswear</h3>
+                </div>
+            </div>
         </div>
     </div>
 </section>
