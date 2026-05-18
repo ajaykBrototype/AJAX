@@ -458,7 +458,7 @@ body {
     <div class="editorial-grid">
         <!-- Main Large Card -->
         <a href="/menProductList" class="ed-card md:h-[640px] h-[500px] gsap-up">
-            <img src="https://images.unsplash.com/photo-1550614000-4b95d4ebf0e9?w=1200&q=90&auto=format&fit=crop" alt="Menswear Collection" loading="lazy">
+            <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1200&q=90&auto=format&fit=crop" alt="Menswear Collection" loading="lazy">
             <div class="ed-overlay"></div>
             <div class="ed-content">
                 <span class="ed-label">Autumn Collection</span>
@@ -480,23 +480,16 @@ body {
                 </div>
             </a>
             
-            <!-- Bottom Split -->
-            <div class="grid grid-cols-2 gap-6 h-[308px]">
-                <a href="#" class="ed-card h-full small gsap-up" style="transition-delay: 0.2s">
-                    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=90&auto=format&fit=crop" alt="Essentials" loading="lazy">
-                    <div class="ed-overlay" style="background: linear-gradient(to top, rgba(15,15,15,0.7) 0%, transparent 100%);"></div>
-                    <div class="ed-content" style="padding: 1.5rem;">
-                        <h3 class="ed-title" style="font-size: 1.4rem;">Essentials</h3>
-                    </div>
-                </a>
-                <a href="#" class="ed-card h-full small gsap-up" style="transition-delay: 0.3s">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=90&auto=format&fit=crop" alt="Streetwear" loading="lazy">
-                    <div class="ed-overlay" style="background: linear-gradient(to top, rgba(15,15,15,0.7) 0%, transparent 100%);"></div>
-                    <div class="ed-content" style="padding: 1.5rem;">
-                        <h3 class="ed-title" style="font-size: 1.4rem;">Streetwear</h3>
-                    </div>
-                </a>
-            </div>
+            <!-- Bottom Right: Footwear (Replacing Essentials and Streetwear) -->
+            <a href="#" class="ed-card h-[308px] small gsap-up" style="transition-delay: 0.2s">
+                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=90&auto=format&fit=crop" alt="Footwear" loading="lazy">
+                <div class="ed-overlay"></div>
+                <div class="ed-content">
+                    <span class="ed-label">The Shoe Edit</span>
+                    <h3 class="ed-title">Footwear</h3>
+                    <span class="ed-link" style="border-bottom-width: 0;">Explore</span>
+                </div>
+            </a>
         </div>
     </div>
 </section>
@@ -508,75 +501,54 @@ body {
             <span class="section-eyebrow">Just Landed</span>
             <h2 class="section-title">New Arrivals</h2>
         </div>
-        <a href="#" class="hidden md:inline-block text-[0.65rem] tracking-[0.2em] uppercase border-b border-[#1A1A1A] pb-1 hover:text-[#B89D7A] hover:border-[#B89D7A] transition-colors">View All Collection</a>
+        <a href="/menProductList" class="hidden md:inline-block text-[0.65rem] tracking-[0.2em] uppercase border-b border-[#1A1A1A] pb-1 hover:text-[#B89D7A] hover:border-[#B89D7A] transition-colors">View All Collection</a>
     </div>
     
     <div class="product-slider gsap-up">
-        <!-- Card 1 -->
-        <div class="product-card">
-            <div class="prod-img-wrapper">
-                <span class="new-badge">New Season</span>
-                <button class="wishlist-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" class="prod-img-primary" alt="Coat">
-                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&q=80" class="prod-img-secondary" alt="Coat alt">
-                <button class="quick-add">Quick Add to Bag</button>
+        <% if (typeof products !== 'undefined' && products.length > 0) { %>
+            <% products.forEach((product, index) => { %>
+                <% const variant = product.variants && product.variants[0]; %>
+                <!-- Card <%= index + 1 %> -->
+                <div class="product-card">
+                    <a href="/product/<%= product._id %>" class="block">
+                        <div class="prod-img-wrapper">
+                            <% if (index === 0) { %>
+                                <span class="new-badge">New Season</span>
+                            <% } else if (index === 2) { %>
+                                <span class="new-badge" style="background: white; color: #1A1A1A;">Bestseller</span>
+                            <% } %>
+                            <button class="wishlist-btn" onclick="event.preventDefault(); if(typeof toggleWishlist === 'function') toggleWishlist('<%= product._id %>', this, '<%= variant?._id %>')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </button>
+                            <% if (variant && variant.images && variant.images.length > 0) { %>
+                                <img src="<%= variant.images[0] %>" class="prod-img-primary" alt="<%= product.name %>">
+                                <% if (variant.images[1]) { %>
+                                    <img src="<%= variant.images[1] %>" class="prod-img-secondary" alt="<%= product.name %> alt">
+                                <% } %>
+                            <% } else { %>
+                                <div class="w-full h-full bg-gray-200"></div>
+                            <% } %>
+                            <button class="quick-add" onclick="event.preventDefault(); window.location.href='/product/<%= product._id %>'">Quick Add to Bag</button>
+                        </div>
+                        <div class="prod-info">
+                            <h4 class="prod-name"><%= product.name %></h4>
+                            <p class="prod-price">
+                                <% if(product.offer) { %>
+                                    <span style="color: #1A1A1A;">₹<%= Math.round(product.finalPrice) %></span>
+                                    <span style="text-decoration: line-through; opacity: 0.4; margin-left: 8px;">₹<%= variant?.price || 0 %></span>
+                                <% } else { %>
+                                    ₹<%= variant?.price || 0 %>
+                                <% } %>
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="w-full text-center py-10">
+                <p class="text-[0.65rem] tracking-[0.2em] uppercase text-gray-500">New arrivals dropping soon.</p>
             </div>
-            <div class="prod-info">
-                <h4 class="prod-name">Tailored Wool Overcoat</h4>
-                <p class="prod-price">₹12,500</p>
-            </div>
-        </div>
-        
-        <!-- Card 2 -->
-        <div class="product-card">
-            <div class="prod-img-wrapper">
-                <button class="wishlist-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <img src="https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=600&q=80" class="prod-img-primary" alt="Knit">
-                <img src="https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=600&q=80" class="prod-img-secondary" alt="Knit alt">
-                <button class="quick-add">Quick Add to Bag</button>
-            </div>
-            <div class="prod-info">
-                <h4 class="prod-name">Heavyweight Cashmere Knit</h4>
-                <p class="prod-price">₹8,200</p>
-            </div>
-        </div>
-        
-        <!-- Card 3 -->
-        <div class="product-card">
-            <div class="prod-img-wrapper">
-                <span class="new-badge" style="background: white; color: #1A1A1A;">Bestseller</span>
-                <button class="wishlist-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80" class="prod-img-primary" alt="Jacket">
-                <img src="https://images.unsplash.com/photo-1520975954732-57dd22299614?w=600&q=80" class="prod-img-secondary" alt="Jacket alt">
-                <button class="quick-add">Quick Add to Bag</button>
-            </div>
-            <div class="prod-info">
-                <h4 class="prod-name">Leather Aviator Jacket</h4>
-                <p class="prod-price">₹24,000</p>
-            </div>
-        </div>
-        
-        <!-- Card 4 -->
-        <div class="product-card">
-            <div class="prod-img-wrapper">
-                <button class="wishlist-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </button>
-                <img src="https://images.unsplash.com/photo-1603252109303-2751441dd157?w=600&q=80" class="prod-img-primary" alt="Shirt">
-                <img src="https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=600&q=80" class="prod-img-secondary" alt="Shirt alt">
-                <button class="quick-add">Quick Add to Bag</button>
-            </div>
-            <div class="prod-info">
-                <h4 class="prod-name">Oversized Poplin Shirt</h4>
-                <p class="prod-price">₹4,500</p>
-            </div>
-        </div>
+        <% } %>
     </div>
 </section>
 

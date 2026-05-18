@@ -1,5 +1,7 @@
 import User from "../../models/user/userModel.js";
 import Otp from "../../models/user/otpModel.js";
+import Product from "../../models/admin/productModel.js";
+import Variant from "../../models/admin/variantModel.js";
 import { generateOTP } from "../../utils/generateOtp.js";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import {
@@ -170,6 +172,27 @@ export const loadResetPassword = (req, res) => {
   res.render("user/resetPassword");
 };
 
-export const loadHome = (req, res) => {
-  res.render("user/home", { user: req.session.userId });
+export const loadHome = async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(4);
+
+    // Reattach variants logic similar to product listing
+    const productsWithVariants = await Promise.all(
+      products.map(async (product) => {
+        const productObj = product.toObject();
+        productObj.variants = await Variant.find({ productId: product._id, isActive: true });
+        return productObj;
+      })
+    );
+
+    res.render("user/home", { 
+      user: req.session.userId,
+      products: productsWithVariants
+    });
+  } catch (error) {
+    console.error("Error loading home page:", error);
+    res.render("user/home", { user: req.session.userId, products: [] });
+  }
 };
