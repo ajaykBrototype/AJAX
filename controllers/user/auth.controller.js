@@ -11,7 +11,12 @@ import {
 } from "../../services/user/auth.service.js";
 
 export const loadSignup = (req, res) => {
-  res.render("user/signup");
+  res.render("user/signup",{
+     errors: {},
+
+      oldData: {}
+
+  });
 };
 
 export const registerUser = async (req, res) => {

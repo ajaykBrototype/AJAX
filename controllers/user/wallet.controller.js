@@ -221,7 +221,8 @@ export const verifyWalletPayment = async (req, res) => {
             wallet =
                 await Wallet.create({
 
-                userId
+                userId,
+                 balance: 0
             });
         }
 
@@ -271,6 +272,64 @@ export const verifyWalletPayment = async (req, res) => {
 
 
 
-export const loadreferral=async (req,res)=>{
-    res.render("user/referral");
-}
+export const loadreferral = async (req, res) => {
+
+  try {
+
+    const userId = req.session.userId;
+
+    let user = await User.findById(userId);
+
+    if (!user.referralCode) {
+
+      user.referralCode =
+        "AJX" +
+        Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
+
+      await user.save();
+
+    }
+
+   
+    let wallet = await Wallet.findOne({
+      userId
+    });
+
+    if (!wallet) {
+
+      wallet = await Wallet.create({
+        userId,
+        balance: 0
+      });
+
+    }
+
+    const referralUsers = await User.find({
+      referredBy: userId
+    });
+
+    const referralCount = referralUsers.length;
+
+    const referralEarnings = referralCount * 200;
+
+    res.render("user/referral", {
+
+      user,
+      wallet,
+      referralCount,
+      referralEarnings
+
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.redirect("/profile");
+
+  }
+
+};

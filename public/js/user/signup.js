@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ✅ FIELD ERRORS (priority)
   if (error?.errors) {
     for (let key in error.errors) {
-      ajaxError(key + "Error", error.errors[key][0]);
+      showError(key + "Error", error.errors[key][0]);
     }
     return; // 🚨 stop here (no Swal)
   }

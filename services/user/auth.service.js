@@ -20,6 +20,43 @@ export const registerService = async (data, req) => {
 
   const { name, email, password, referralCode } = result.data;
 
+
+   if (referralCode && referralCode.trim() !== "") {
+
+      const referrer = await User.findOne({
+        referralCode: referralCode.toUpperCase()
+      });
+
+  
+      if (!referrer) {
+
+        return {
+          success: false,
+          errors: {
+            referralCode: ["Invalid referral code"]
+          }
+        };
+
+      }
+
+  
+      if (referrer.email === email) {
+
+        return {
+          success: false,
+          errors: {
+            referralCode: [
+              "You cannot use your own referral code"
+            ]
+          }
+        };
+
+      }
+    }
+
+   
+  
+
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return {
@@ -71,21 +108,28 @@ export const verifyOtpService = async (req) => {
   if (!record) {
     return {
       success: false,
-      errors: { otp: ["OTP not found"] }
+      errors: {
+        otp: ["OTP not found"]
+      }
     };
   }
+
 
   if (Date.now() > record.expiresAt) {
     return {
       success: false,
-      errors: { otp: ["OTP expired"] }
+      errors: {
+        otp: ["OTP expired"]
+      }
     };
   }
 
   if (String(otp) !== String(record.otp)) {
     return {
       success: false,
-      errors: { otp: ["Invalid OTP"] }
+      errors: {
+        otp: ["Invalid OTP"]
+      }
     };
   }
 
@@ -97,20 +141,23 @@ export const verifyOtpService = async (req) => {
       referralCode
     } = record.tempData;
 
-  
     const generatedReferralCode =
-      name.slice(0,3).toUpperCase() +
-      Math.floor(1000 + Math.random() * 9000);
+      "AJX" +
+      Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
 
     let referredBy = null;
 
-  
-    if (referralCode) {
+  console.log("REFERRAL CODE:", referralCode);
+    if (referralCode && referralCode.trim() !== "") {
 
       const referrer = await User.findOne({
         referralCode: referralCode.toUpperCase()
       });
 
+  
       if (!referrer) {
 
         return {
@@ -122,6 +169,7 @@ export const verifyOtpService = async (req) => {
 
       }
 
+  
       if (referrer.email === email) {
 
         return {
@@ -141,12 +189,17 @@ export const verifyOtpService = async (req) => {
         { userId: referrer._id },
         {
           $inc: { balance: 200 }
-        }
+        },
+         {
+    upsert: true,
+    new: true
+  }
+        
       );
 
     }
 
-
+    
     const newUser = await User.create({
 
       name,
@@ -159,6 +212,7 @@ export const verifyOtpService = async (req) => {
 
     });
 
+  
     await Wallet.create({
 
       userId: newUser._id,
@@ -178,7 +232,9 @@ export const verifyOtpService = async (req) => {
 
   }
 
-  await Otp.deleteOne({ _id: record._id });
+  await Otp.deleteOne({
+    _id: record._id
+  });
 
   return {
     success: true,
