@@ -348,7 +348,8 @@ body {
     max-width: 1440px;
 }
 @media(max-width: 768px) { .story-section { grid-template-columns: 1fr; } }
-.story-img { height: 100%; min-height: 600px; object-fit: cover; }
+.story-img { height: 100%; min-height: 600px; object-fit: cover; transition: filter 0.8s ease-in-out; }
+.story-img:hover { filter: grayscale(100%); }
 .story-content {
     padding: 6rem 5rem;
     display: flex;
@@ -494,6 +495,72 @@ body {
                     <span class="ed-label">Little Icons</span>
                     <h3 class="ed-title">Kidswear</h3>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3.5 BRAND PHILOSOPHY MANIFESTO -->
+<section class="section-padding bg-[#F5F1EB] overflow-hidden relative py-24">
+    <!-- Subtle luxury architectural background grid -->
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#1A1A1A_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    
+    <div class="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center px-6 relative z-10">
+        <!-- Left Column: Typography & Story -->
+        <div class="lg:col-span-5 flex flex-col justify-center space-y-8 gsap-up">
+            <span class="text-[0.6rem] font-bold tracking-[0.3em] uppercase text-[#B89D7A]">The Ajax Ethos</span>
+            <h2 class="font-serif text-5xl md:text-6xl text-[#1A1A1A] leading-[1.05] tracking-tight">
+                Our<br>
+                <span class="italic font-serif font-normal">Philosophy</span>
+            </h2>
+            <div class="space-y-6 text-[#1A1A1A]/80 text-[0.8rem] md:text-[0.85rem] font-light leading-relaxed tracking-wide max-w-md">
+                <p>
+                    We believe in the eloquence of restraint. At the heart of AJAX lies a dedication to creating a modern wardrobe that speaks softly but carries profound presence. Every piece is an exploration of form, texture, and geometry.
+                </p>
+                <p class="font-serif italic text-[0.95rem] text-[#B89D7A] leading-relaxed">
+                    "Luxury is not about being noticed, it is about being remembered."
+                </p>
+                <p>
+                    By merging master craftsmanship with fluid, clean-lined tailoring, we construct garments that exist beyond transient trends. We define timelessness not as a lack of change, but as an enduring relevance.
+                </p>
+            </div>
+            
+            <div class="pt-4">
+                <a href="#" class="inline-flex items-center gap-3 text-[0.65rem] font-bold tracking-[0.2em] uppercase text-[#1A1A1A] border-b border-[#1A1A1A] pb-1.5 hover:text-[#B89D7A] hover:border-[#B89D7A] transition-all duration-300 group">
+                    <span>Discover Our Heritage</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transform group-hover:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Right Column: Premium Level/Type Staggered Triptych Image Arrangement -->
+        <div class="lg:col-span-7 relative h-[500px] md:h-[600px] w-full flex items-center justify-center gsap-up" style="transition-delay: 0.15s;">
+            <!-- Background Decorative Cream Circle -->
+            <div class="absolute w-[350px] md:w-[480px] aspect-square rounded-full bg-[#EAE4DC] -z-10 opacity-60 filter blur-2xl"></div>
+            
+            <!-- Staggered Layout Elements -->
+            
+            <!-- Card 1: Tall Back Left (Architectural/Mood) -->
+            <div class="absolute left-[5%] top-[10%] w-[42%] aspect-[3/4.5] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50 -rotate-[3deg] transition-all duration-700 hover:rotate-0 hover:scale-[1.03] z-10 group">
+                <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80" alt="Ethos Mood" class="w-full h-full object-cover transition-all duration-[1.2s] filter grayscale-0 group-hover:grayscale group-hover:scale-110">
+                <div class="absolute inset-0 bg-[#1A1A1A]/10 group-hover:bg-transparent transition-colors"></div>
+            </div>
+            
+            <!-- Card 2: Center Foreground Main (High Fashion) -->
+            <div class="absolute left-[30%] top-[20%] w-[46%] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] border-4 border-white z-30 transition-all duration-700 hover:scale-[1.05] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.35)] group">
+                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&q=80" alt="Main Philosophy Model" class="w-full h-full object-cover transition-all duration-[1.2s] filter grayscale-0 group-hover:grayscale group-hover:scale-105">
+                <div class="absolute inset-0 bg-[#1A1A1A]/5 group-hover:bg-transparent transition-colors"></div>
+            </div>
+            
+            <!-- Card 3: Top Right Overlapping (Detail Crop) -->
+            <div class="absolute right-[5%] top-[5%] w-[38%] aspect-[1/1] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white/80 rotate-[4deg] transition-all duration-700 hover:rotate-0 hover:scale-[1.03] z-20 group">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80" alt="Detail Craft" class="w-full h-full object-cover transition-all duration-[1.2s] filter grayscale-0 group-hover:grayscale group-hover:scale-115">
+                <div class="absolute inset-0 bg-[#1A1A1A]/10 group-hover:bg-transparent transition-colors"></div>
+            </div>
+            
+            <!-- Floating Label Detail (Magazine aesthetic) -->
+            <div class="absolute bottom-[5%] right-[10%] bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg border border-white/50 z-40 rotate-[-2deg] hidden sm:block">
+                <span class="text-[0.5rem] font-black tracking-[0.25em] text-[#1A1A1A] uppercase">EST. 2026 — PREMIUM LINE</span>
             </div>
         </div>
     </div>
