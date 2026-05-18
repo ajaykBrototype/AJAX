@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { generateOTP } from "../../utils/generateOtp.js";
 import { sendOtpEmail } from "../../utils/sendEmail.js";
 import { signupSchema } from "../../validators/authValidator.js";
+import { success } from "zod";
 
 
 export const registerService = async (data, req) => {
@@ -17,7 +18,7 @@ export const registerService = async (data, req) => {
     };
   }
 
-  const { name, email, password } = result.data;
+  const { name, email, password, referralCode } = result.data;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -38,7 +39,7 @@ export const registerService = async (data, req) => {
         otp,
         expiresAt: Date.now() + 2 * 60 * 1000,
         type: "signup",
-        tempData: { name, password: hashedPassword }
+        tempData: { name, password: hashedPassword,referralCode  }
       }
     },
     { upsert: true }
@@ -54,6 +55,7 @@ export const registerService = async (data, req) => {
 
 
 export const verifyOtpService = async (req) => {
+
   const { otp } = req.body;
 
   const email =
@@ -61,44 +63,128 @@ export const verifyOtpService = async (req) => {
       ? req.session.resetEmail
       : req.session.tempEmail;
 
-  const record = await Otp.findOne({ email, type: req.session.type });
+  const record = await Otp.findOne({
+    email,
+    type: req.session.type
+  });
 
   if (!record) {
-    return { success: false, errors: { otp: ["OTP not found"] } };
+    return {
+      success: false,
+      errors: { otp: ["OTP not found"] }
+    };
   }
 
   if (Date.now() > record.expiresAt) {
-    return { success: false, errors: { otp: ["OTP expired"] } };
+    return {
+      success: false,
+      errors: { otp: ["OTP expired"] }
+    };
   }
 
   if (String(otp) !== String(record.otp)) {
-    return { success: false, errors: { otp: ["Invalid OTP"] } };
+    return {
+      success: false,
+      errors: { otp: ["Invalid OTP"] }
+    };
   }
 
   if (record.type === "signup") {
-    const { name, password } = record.tempData;
+
+    const {
+      name,
+      password,
+      referralCode
+    } = record.tempData;
+
+  
+    const generatedReferralCode =
+      name.slice(0,3).toUpperCase() +
+      Math.floor(1000 + Math.random() * 9000);
+
+    let referredBy = null;
+
+  
+    if (referralCode) {
+
+      const referrer = await User.findOne({
+        referralCode: referralCode.toUpperCase()
+      });
+
+      if (!referrer) {
+
+        return {
+          success: false,
+          errors: {
+            referralCode: ["Invalid referral code"]
+          }
+        };
+
+      }
+
+      if (referrer.email === email) {
+
+        return {
+          success: false,
+          errors: {
+            referralCode: [
+              "You cannot use your own referral code"
+            ]
+          }
+        };
+
+      }
+
+      referredBy = referrer._id;
+
+      await Wallet.findOneAndUpdate(
+        { userId: referrer._id },
+        {
+          $inc: { balance: 200 }
+        }
+      );
+
+    }
+
 
     const newUser = await User.create({
 
-    name,
+      name,
+      email,
+      password,
 
-    email,
+      referralCode: generatedReferralCode,
 
-    password
-});
+      referredBy
 
-await Wallet.create({
-    userId: newUser._id
-});
+    });
+
+    await Wallet.create({
+
+      userId: newUser._id,
+
+      balance: referredBy ? 50 : 0
+
+    });
+
   }
 
   if (record.type === "reset") {
-    return { success: true, redirect: "/reset-password" };
+
+    return {
+      success: true,
+      redirect: "/reset-password"
+    };
+
   }
 
   await Otp.deleteOne({ _id: record._id });
 
-  return { success: true, redirect: "/login" };
+  return {
+    success: true,
+    redirect: "/login"
+  };
+
 };
 
 // 🔹 RESEND OTP

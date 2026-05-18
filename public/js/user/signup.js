@@ -89,3 +89,44 @@ function togglePassword(fieldId, icon) {
     icon.textContent = "👁️";
   }
 }
+
+
+const referralToggle = document.getElementById("referralToggle");
+const referralWrapper = document.getElementById("referralWrapper");
+const toggleCircle = document.getElementById("toggleCircle");
+
+let referralEnabled = false;
+
+referralToggle.addEventListener("click", () => {
+
+  referralEnabled = !referralEnabled;
+
+  if (referralEnabled) {
+
+    referralToggle.classList.remove("bg-[#2B1A10]");
+    referralToggle.classList.add("bg-[#4A3425]");
+
+    toggleCircle.classList.add("translate-x-6");
+
+    referralWrapper.classList.remove("hidden");
+
+    setTimeout(() => {
+      referralWrapper.classList.remove("opacity-0", "translate-y-2");
+    }, 10);
+
+  } else {
+
+    referralToggle.classList.remove("bg-[#4A3425]");
+    referralToggle.classList.add("bg-[#2B1A10]");
+
+    toggleCircle.classList.remove("translate-x-6");
+
+    referralWrapper.classList.add("opacity-0", "translate-y-2");
+
+    setTimeout(() => {
+      referralWrapper.classList.add("hidden");
+    }, 300);
+
+  }
+
+});

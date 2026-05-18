@@ -265,3 +265,12 @@ export const verifyWalletPayment = async (req, res) => {
         });
     }
 };
+
+
+
+
+
+
+export const loadreferral=async (req,res)=>{
+    res.render("user/referral");
+}

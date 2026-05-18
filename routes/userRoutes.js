@@ -14,7 +14,7 @@ import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controll
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../controllers/user/checkout.controller.js";
 import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem, loadReturnRequest,submitReturnRequest, verifyOrderPayment, loadPaymentFailure } from "../controllers/user/order.controller.js";
-import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment} from "../controllers/user/wallet.controller.js";
+import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment,  loadreferral} from "../controllers/user/wallet.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -112,5 +112,7 @@ router.get("/wallet",isLoggedIn,loadWalletPage);
 router.post("/wallet/add-money",isLoggedIn,addMoneyToWallet);
 router.post( "/wallet/create-order",isLoggedIn,createWalletOrder);
 router.post("/wallet/verify-payment",isLoggedIn,verifyWalletPayment);
+
+router.get("/refer",isLoggedIn,loadreferral);
 
 export default router;

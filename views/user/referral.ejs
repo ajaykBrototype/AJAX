@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn — AJAX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Inter', 'sans-serif'], 
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        luxury: {
+                            black: '#0A0A0A',
+                            charcoal: '#121212',
+                            gold: '#D4AF37',
+                            emerald: '#09261D',
+                            emeraldLight: '#114636',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <%- include('../partials/navbar-styles') %>
+    <%- include('../partials/footer-styles') %>
+    <style>
+        body {
+            background-color: #FFFFFF; 
+            color: #1C1C1C;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .editorial-title {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Sidebar Navigation */
+        .side-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1.25rem;
+            color: #888888;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 0.75rem;
+            margin-bottom: 0.2rem;
+            font-family: 'Outfit', sans-serif;
+        }
+        .side-nav-item:hover {
+            background: #FAFAFA;
+            color: #1C1C1C;
+            transform: translateX(4px);
+        }
+        .side-nav-item.active {
+            background: #F4F4F4;
+            color: #1C1C1C;
+            border-left: 2px solid #1C1C1C;
+            border-radius: 0 0.75rem 0.75rem 0;
+            font-weight: 600;
+        }
+        
+        /* Premium Stat Card */
+        .stat-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 1.75rem;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.03);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 1.75rem;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+            pointer-events: none;
+        }
+        .stat-card:hover {
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+            border-color: rgba(0,0,0,0.08);
+        }
+
+        /* Hero Dashboard Section */
+        .luxury-hero {
+            background: linear-gradient(145deg, #0A0A0A, #121212);
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.2);
+        }
+        
+        /* Glass Code Box */
+        .glass-code-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 1.25rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-code-box:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(212, 175, 55, 0.3); /* Subtle gold hover */
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.15), 0 12px 32px rgba(0,0,0,0.3);
+        }
+        
+        .copy-btn {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Abstract Glow Patterns */
+        .glow-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        /* GSAP Initial States */
+        .gsap-reveal { opacity: 0; transform: translateY(20px); }
+    </style>
+</head>
+<body class="bg-white">
+    <%- include('../partials/navbar') %>
+
+    <main class="max-w-[1440px] mx-auto px-6 lg:px-12 pt-28 pb-24">
+        
+        <!-- Breadcrumbs -->
+         
+    <div class="max-w-3xl mx-auto">
+            <%- include('../partials/breadcrumbs', { 
+                breadcrumbs: [
+                    { name: "Overview", url: "/profile" },
+                    { name: "Referral" }
+                ] 
+            }) %>
+
+        <div class="flex flex-col lg:flex-row gap-12">
+
+            <!-- RIGHT COLUMN: MAIN CONTENT -->
+            <div class="flex-grow space-y-10">
+                
+                <!-- Hero Referral Card (Split Layout) -->
+                <section class="luxury-hero gsap-reveal flex flex-col md:flex-row min-h-[400px]">
+                    
+                    <!-- Left: Content -->
+                    <div class="relative z-20 w-full md:w-3/5 p-10 md:p-14 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-8">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-luxury-gold/10">
+                                <i data-lucide="award" size="12" class="text-luxury-gold"></i>
+                            </span>
+                            <p class="text-[0.6rem] font-bold tracking-[0.3em] uppercase text-luxury-gold">AJAX Rewards</p>
+                        </div>
+                        
+                        <h1 class="editorial-title text-4xl md:text-5xl text-white leading-[1.15] mb-6 font-medium">
+                            Invite Friends.<br/>
+                            <span class="italic text-gray-400">Earn ₹500 Each.</span>
+                        </h1>
+                        
+                        <p class="text-sm text-gray-400 leading-relaxed font-light mb-10 max-w-md">
+                            Share the gift of elegance. When friends sign up with your unique code and make their first purchase, we'll instantly credit ₹500 to your wallet.
+                        </p>
+                        
+                        <!-- Premium Code Box -->
+                        <div class="glass-code-box flex items-center justify-between p-2 pl-6 mb-8 w-full max-w-sm">
+                            <div class="py-2">
+                                <p class="text-[0.55rem] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Your Unique Code</p>
+                                <p class="text-xl font-medium tracking-[0.2em] text-white font-outfit" id="referralCodeText">54UZDPFJ</p>
+                            </div>
+                            <button onclick="copyReferralCode()" class="copy-btn bg-white text-black px-6 py-4 rounded-xl text-[0.65rem] font-bold uppercase tracking-widest flex items-center gap-2 h-full">
+                                <i data-lucide="copy" size="14"></i>
+                                Copy
+                            </button>
+                        </div>
+
+                        <!-- Share Actions -->
+                        <div class="flex items-center gap-6">
+                            <a href="#" class="inline-flex items-center gap-3 text-[0.65rem] font-bold uppercase tracking-widest text-gray-300 hover:text-white transition-colors group">
+                                <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#25D366] group-hover:bg-[#25D366]/10 transition-all duration-300">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#25D366] transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                </div>
+                                WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Abstract Art / Glow Pattern -->
+                    <div class="relative w-full md:w-2/5 min-h-[200px] flex items-center justify-center border-t md:border-t-0 md:border-l border-white/5 bg-[#050505] overflow-hidden z-10">
+                        <!-- Glows -->
+                        <div class="absolute bg-[#D4AF37] w-64 h-64 top-0 right-0 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse"></div>
+                        <div class="absolute bg-[#FFFFFF] w-64 h-64 -bottom-10 -left-10 rounded-full mix-blend-overlay filter blur-[60px] opacity-20"></div>
+                        
+                        <!-- Minimal Geometric Element -->
+                        <div class="relative w-48 h-48 border border-white/10 rounded-full flex items-center justify-center animate-[spin_40s_linear_infinite]">
+                            <div class="w-36 h-36 border border-[#D4AF37]/30 rounded-full flex items-center justify-center animate-[spin_30s_reverse_linear_infinite]">
+                                <div class="w-24 h-24 border border-white/10 rounded-full backdrop-blur-md bg-white/5 shadow-[0_0_30px_rgba(212,175,55,0.1)]"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiIvPjwvc3ZnPg==')] opacity-30"></div>
+                    </div>
+                </section>
+
+                <!-- Stats Grid (Equal Height Cards) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Total Referrals -->
+                    <div class="stat-card p-8 flex flex-col justify-between h-[220px] gsap-reveal">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mb-auto">
+                            <i data-lucide="users" class="text-gray-800" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 font-outfit">Total Referrals</p>
+                            <p class="text-4xl font-semibold editorial-title text-black tracking-tight">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Total Earned -->
+                    <div class="stat-card p-8 flex flex-col justify-between h-[220px] gsap-reveal" style="transition-delay: 50ms;">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mb-auto">
+                            <i data-lucide="star" class="text-gray-800" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 font-outfit">Total Earned</p>
+                            <p class="text-4xl font-semibold editorial-title text-black tracking-tight">₹0</p>
+                        </div>
+                    </div>
+
+                    <!-- Wallet Balance -->
+                    <div class="stat-card p-8 flex flex-col justify-between h-[220px] gsap-reveal" style="transition-delay: 100ms;">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mb-auto">
+                            <i data-lucide="wallet" class="text-gray-800" size="20"></i>
+                        </div>
+                        <div>
+                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 font-outfit">Wallet Balance</p>
+                            <p class="text-4xl font-semibold editorial-title text-black tracking-tight">₹500.00</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/utils/swal-helper.js"></script> <!-- Optional toast integration -->
+    
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // GSAP Entrance Animations
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.to(".gsap-reveal", {
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                stagger: 0.1,
+                ease: "power3.out"
+            });
+        });
+
+        // Copy Functionality with feedback
+        function copyReferralCode() {
+            const code = document.getElementById('referralCodeText').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                // Try using the project's toast system if available
+                if(typeof ajaxToast === 'function') {
+                    ajaxToast('success', 'Referral code copied to clipboard!');
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top',
+                        icon: 'success',
+                        title: 'Copied!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
