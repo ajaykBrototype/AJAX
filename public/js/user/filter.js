@@ -16,7 +16,8 @@ window.filters = {
   sort: "",
   category: "",
   minPrice: 0,
-  maxPrice: 10000
+  maxPrice: 10000,
+  mainCategory: window.location.pathname.includes('women') ? 'women' : 'men'
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -152,7 +153,7 @@ window.applyFilters = async function () {
 };
 
 window.clearAllFilters = function () {
-  window.location.href = '/menProductList';
+  window.location.href = window.location.pathname;
 };
 
 function renderProducts(products, wishlist = []) {

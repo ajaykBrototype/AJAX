@@ -397,7 +397,7 @@
     const file = e.target.files[0];
     if (file) {
      
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg','image/avif'];
       if (!allowedTypes.includes(file.type)) {
         ajaxToast("error","Invalid file type");
         imageInput.value = '';
