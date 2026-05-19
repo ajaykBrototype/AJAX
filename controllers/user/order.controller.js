@@ -592,7 +592,14 @@ if (!item) {
 
 if (order.paymentMethod !== "COD") {
 
-    const refundAmount =item.price * item.quantity;
+    let refundAmount = item.price * item.quantity;
+    if (order.discount && order.discount > 0) {
+        const originalSubtotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        if (originalSubtotal > 0) {
+            const itemDiscountPortion = (item.price * item.quantity / originalSubtotal) * order.discount;
+            refundAmount = Math.max(0, refundAmount - itemDiscountPortion);
+        }
+    }
 
 
 
@@ -803,6 +810,15 @@ export const submitReturnRequest = async (req, res) => {
 
 
 
+            let refundAmt = item.price * item.quantity;
+            if (order.discount && order.discount > 0) {
+                const originalSubtotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                if (originalSubtotal > 0) {
+                    const itemDiscountPortion = (item.price * item.quantity / originalSubtotal) * order.discount;
+                    refundAmt = Math.max(0, refundAmt - itemDiscountPortion);
+                }
+            }
+
             await Return.create({
 
                 orderId,
@@ -819,8 +835,7 @@ export const submitReturnRequest = async (req, res) => {
 
                 images,
 
-                refundAmount:
-                    item.price * item.quantity
+                refundAmount: refundAmt
 
             });
 

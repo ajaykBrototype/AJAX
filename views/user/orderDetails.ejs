@@ -498,7 +498,7 @@ body {
               i.status !== 'Returned'
             );
           %>
-          <% if (order.status !== 'Pending' && order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
+          <% if (order.status !== 'Pending' && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.items.length > 1) { %>
             <div class="mb-10">
               <button 
                 onclick='cancelAllItems("<%= order._id %>", <%= JSON.stringify(order.items.filter(i => i.status !== "Cancelled").map(i => i._id)) %>, this)'
@@ -506,7 +506,7 @@ body {
                 Cancel Entire Order
               </button>
             </div>
-          <% } else if (order.status === 'Delivered' && returnableItems.length > 0) { %>
+          <% } else if (order.status === 'Delivered' && returnableItems.length > 0 && order.items.length > 1) { %>
             <div class="mb-10">
               <% if (isReturnExpired) { %>
                 <button disabled class="w-full py-4 bg-slate-50 border border-slate-100 text-slate-300 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl cursor-not-allowed">
