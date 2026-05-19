@@ -2,6 +2,8 @@ import User from "../../models/user/userModel.js";
 import Order from "../../models/user/orderModel.js";
 import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import XLSX from "xlsx-js-style";
+import PDFDocument from "pdfkit";
 
 export const loadDashboard = async (req, res) => {
   try {
@@ -183,6 +185,312 @@ export const loadSalesReport = async (req, res) => {
       startDate.setFullYear(startDate.getFullYear() - 1);
       prevStartDate = new Date(startDate);
       prevStartDate.setFullYear(startDate.getFullYear() - 1);
+    }
+
+    if (req.query.download) {
+      const formatDate = (date) => {
+        return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+      };
+      
+      const formatDateTime = (date) => {
+        return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      };
+
+      const periodStr = `${formatDate(startDate)} -> ${formatDate(endDate)}`;
+      const generatedStr = formatDateTime(new Date());
+
+      const orders = await Order.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+        status: { $nin: ['Cancelled'] }
+      }).sort({ createdAt: -1 });
+
+      let totalOrders = orders.length;
+      let totalDiscount = 0;
+      let unitsSold = 0;
+      let totalRevenue = 0;
+
+      const orderRows = orders.map((ord, index) => {
+        const activeItems = ord.items.filter(item => item.status !== 'Cancelled' && item.status !== 'Returned');
+        const qty = activeItems.reduce((sum, item) => sum + item.quantity, 0);
+        const subtotal = activeItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const discount = ord.discount || 0;
+        const payment = ord.paymentMethod === 'COD' ? 'Cash' : (ord.paymentMethod === 'RAZORPAY' ? 'Razorpay' : 'Wallet');
+        const total = ord.totalAmount;
+
+        totalDiscount += discount;
+        unitsSold += qty;
+        totalRevenue += total;
+
+        return {
+          index: index + 1,
+          orderNumber: `ORD-${ord._id.toString().slice(-8).toUpperCase()}`,
+          date: ord.createdAt.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
+          qty,
+          subtotal: subtotal.toFixed(2),
+          discount: discount.toFixed(2),
+          payment,
+          total: total.toFixed(2)
+        };
+      });
+
+      const reportTitle = `${period.toUpperCase()} REPORT`;
+
+      if (req.query.download === 'excel') {
+        const wb = XLSX.utils.book_new();
+        const ws = {};
+
+        // Helper for cell creation
+        const setCell = (r, c, val, type, format = null, style = {}) => {
+          const cellRef = XLSX.utils.encode_cell({ r, c });
+          const cell = { v: val, t: type };
+          if (format) {
+            cell.z = format;
+          }
+          if (style) {
+            cell.s = style;
+          }
+          ws[cellRef] = cell;
+        };
+
+        // 1. Headers
+        const headers = ["Order Number", "Date", "Subtotal", "Discount", "Total Amount", "Payment Method"];
+        const headerStyle = {
+          fill: {
+            fgColor: { rgb: "1E5E2F" } // forest green matching dashboard
+          },
+          font: {
+            color: { rgb: "FFFFFF" },
+            bold: true,
+            name: "Calibri",
+            sz: 11
+          },
+          alignment: {
+            horizontal: "center",
+            vertical: "center"
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "D1D5DB" } },
+            bottom: { style: "thin", color: { rgb: "D1D5DB" } },
+            left: { style: "thin", color: { rgb: "D1D5DB" } },
+            right: { style: "thin", color: { rgb: "D1D5DB" } }
+          }
+        };
+
+        headers.forEach((h, c) => {
+          setCell(0, c, h, 's', null, headerStyle);
+        });
+
+        // 2. Data Rows
+        const dataStyle = (align) => ({
+          font: {
+            name: "Calibri",
+            sz: 11
+          },
+          alignment: {
+            horizontal: align,
+            vertical: "center"
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "D1D5DB" } },
+            bottom: { style: "thin", color: { rgb: "D1D5DB" } },
+            left: { style: "thin", color: { rgb: "D1D5DB" } },
+            right: { style: "thin", color: { rgb: "D1D5DB" } }
+          }
+        });
+
+        orderRows.forEach((row, i) => {
+          const ord = orders[i];
+          const r = i + 1;
+          
+          // Format date as YYYY-MM-DD
+          const yyyy = ord.createdAt.getFullYear();
+          const mm = String(ord.createdAt.getMonth() + 1).padStart(2, '0');
+          const dd = String(ord.createdAt.getDate()).padStart(2, '0');
+          const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+          const subtotalVal = parseFloat(row.subtotal);
+          const discountVal = parseFloat(row.discount);
+          const totalVal = parseFloat(row.total);
+
+          setCell(r, 0, row.orderNumber, 's', null, dataStyle("center"));
+          setCell(r, 1, formattedDate, 's', null, dataStyle("center"));
+          setCell(r, 2, subtotalVal, 'n', '"₹"#,##0.00', dataStyle("right"));
+          setCell(r, 3, discountVal, 'n', '"₹"#,##0.00', dataStyle("right"));
+          setCell(r, 4, totalVal, 'n', '"₹"#,##0.00', dataStyle("right"));
+          setCell(r, 5, ord.paymentMethod.toUpperCase(), 's', null, dataStyle("center"));
+        });
+
+        // 3. Grand Total Row (Separating blank row before)
+        const grandLabelStyle = {
+          font: {
+            bold: true,
+            name: "Calibri",
+            sz: 11
+          },
+          alignment: {
+            horizontal: "right",
+            vertical: "center"
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+          }
+        };
+
+        const grandValueStyle = {
+          font: {
+            bold: true,
+            name: "Calibri",
+            sz: 11
+          },
+          alignment: {
+            horizontal: "right",
+            vertical: "center"
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+          }
+        };
+
+        const rGrand = orderRows.length + 2;
+        setCell(rGrand, 3, "GRAND TOTAL", 's', null, grandLabelStyle);
+        setCell(rGrand, 4, parseFloat(totalRevenue.toFixed(2)), 'n', '"₹"#,##0.00', grandValueStyle);
+
+        // Set range ref
+        const maxRow = rGrand + 1;
+        ws['!ref'] = XLSX.utils.encode_range({
+          s: { r: 0, c: 0 },
+          e: { r: maxRow - 1, c: 5 }
+        });
+
+        // Set column widths
+        ws['!cols'] = [
+          { wch: 20 }, // Order Number
+          { wch: 15 }, // Date
+          { wch: 15 }, // Subtotal
+          { wch: 15 }, // Discount
+          { wch: 15 }, // Total Amount
+          { wch: 18 }  // Payment Method
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+        const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename=Sales_Report_${period}_${startDate.toISOString().split('T')[0]}.xlsx`);
+        return res.send(buffer);
+      }
+
+      if (req.query.download === 'pdf') {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename=Sales_Report_${period}_${startDate.toISOString().split('T')[0]}.pdf`);
+
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        doc.pipe(res);
+
+        // 1. Green top accent bar
+        doc.rect(40, 30, 515, 6).fill('#1E5E2F');
+
+        // 2. Header
+        doc.fillColor('#1C1C1C').font('Times-Bold').fontSize(30).text('AJAX', 40, 55);
+        doc.fillColor('#475569').font('Helvetica-Bold').fontSize(12).text(reportTitle, 300, 55, { width: 255, align: 'right' });
+        doc.fillColor('#6B7280').font('Helvetica').fontSize(8.5).text(`Period: ${periodStr}`, 300, 72, { width: 255, align: 'right' });
+        doc.fillColor('#9CA3AF').font('Helvetica').fontSize(8.5).text(`Generated: ${generatedStr}`, 300, 85, { width: 255, align: 'right' });
+
+        // 3. Metrics Cards (four columns)
+        const boxY = 115;
+        const boxW = 121.25;
+        const boxH = 50;
+        const boxGap = 10;
+
+        const metrics = [
+          { label: 'TOTAL ORDERS', val: totalOrders.toString() },
+          { label: 'TOTAL REVENUE', val: `Rs.${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+          { label: 'TOTAL DISCOUNT', val: `Rs.${totalDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` },
+          { label: 'UNITS SOLD', val: unitsSold.toString() }
+        ];
+
+        metrics.forEach((m, idx) => {
+          const boxX = 40 + idx * (boxW + boxGap);
+          doc.fillColor('#FAFAF8').strokeColor('#E2E8F0').lineWidth(0.75).roundedRect(boxX, boxY, boxW, boxH, 6).fillAndStroke();
+          doc.fillColor('#888888').font('Helvetica-Bold').fontSize(7).text(m.label, boxX, boxY + 12, { width: boxW, align: 'center' });
+          doc.fillColor('#1C1C1C').font('Helvetica-Bold').fontSize(12).text(m.val, boxX, boxY + 26, { width: boxW, align: 'center' });
+        });
+
+        // 4. Order Details Table
+        doc.fillColor('#1C1C1C').font('Helvetica-Bold').fontSize(11).text('Order Details', 40, 185);
+
+        const tableY = 202;
+        doc.fillColor('#1E352F').rect(40, tableY, 515, 22).fill();
+
+        const cols = [
+          { name: '#', x: 40, w: 25, align: 'left' },
+          { name: 'Order Number', x: 65, w: 110, align: 'left' },
+          { name: 'Date', x: 175, w: 80, align: 'left' },
+          { name: 'Qty', x: 255, w: 30, align: 'center' },
+          { name: 'Subtotal', x: 285, w: 65, align: 'right' },
+          { name: 'Discount', x: 350, w: 60, align: 'right' },
+          { name: 'Payment', x: 410, w: 55, align: 'left' },
+          { name: 'Total', x: 465, w: 90, align: 'right' }
+        ];
+
+        doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.5);
+        cols.forEach(c => {
+          doc.text(c.name, c.x, tableY + 7, { width: c.w, align: c.align });
+        });
+
+        let currentY = tableY + 22;
+        const rowHeight = 20;
+
+        orderRows.forEach(row => {
+          if (currentY > 780) {
+            doc.addPage();
+            currentY = 40;
+            doc.fillColor('#1E352F').rect(40, currentY, 515, 22).fill();
+            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.5);
+            cols.forEach(c => {
+              doc.text(c.name, c.x, currentY + 7, { width: c.w, align: c.align });
+            });
+            currentY += 22;
+          }
+
+          doc.fillColor('#1C1C1C');
+          doc.font('Helvetica').fontSize(7.5).text(row.index.toString(), cols[0].x, currentY + 6, { width: cols[0].w, align: cols[0].align });
+          doc.font('Helvetica-Bold').text(row.orderNumber, cols[1].x, currentY + 6, { width: cols[1].w, align: cols[1].align });
+          doc.font('Helvetica').text(row.date, cols[2].x, currentY + 6, { width: cols[2].w, align: cols[2].align });
+          doc.text(row.qty.toString(), cols[3].x, currentY + 6, { width: cols[3].w, align: cols[3].align });
+          doc.text(`Rs.${parseFloat(row.subtotal).toLocaleString(undefined, {minimumFractionDigits:2})}`, cols[4].x, currentY + 6, { width: cols[4].w, align: cols[4].align });
+          doc.fillColor('#EF4444').text(`Rs.${parseFloat(row.discount).toLocaleString(undefined, {minimumFractionDigits:2})}`, cols[5].x, currentY + 6, { width: cols[5].w, align: cols[5].align });
+          doc.fillColor('#1C1C1C').text(row.payment, cols[6].x, currentY + 6, { width: cols[6].w, align: cols[6].align });
+          doc.font('Helvetica-Bold').text(`Rs.${parseFloat(row.total).toLocaleString(undefined, {minimumFractionDigits:2})}`, cols[7].x, currentY + 6, { width: cols[7].w, align: cols[7].align });
+
+          doc.strokeColor('#F1F5F9').lineWidth(0.5).moveTo(40, currentY + rowHeight).lineTo(555, currentY + rowHeight).stroke();
+          currentY += rowHeight;
+        });
+
+        if (currentY > 780) {
+          doc.addPage();
+          currentY = 40;
+        }
+
+        doc.fillColor('#F4FBF7').rect(40, currentY, 515, 22).fill();
+        doc.strokeColor('#1E5E2F').lineWidth(1).moveTo(40, currentY).lineTo(555, currentY).stroke();
+        doc.strokeColor('#1E5E2F').lineWidth(1).moveTo(40, currentY + 22).lineTo(555, currentY + 22).stroke();
+
+        doc.fillColor('#1E5E2F').font('Helvetica-Bold').fontSize(7.5);
+        doc.text('GRAND TOTAL', cols[0].x, currentY + 7, { width: cols[0].w + cols[1].w + cols[2].w, align: 'left' });
+        doc.text(unitsSold.toString(), cols[3].x, currentY + 7, { width: cols[3].w, align: cols[3].align });
+        doc.text(`Rs.${totalDiscount.toLocaleString(undefined, {minimumFractionDigits:2})}`, cols[5].x, currentY + 7, { width: cols[5].w, align: cols[5].align });
+        doc.text(`Rs.${totalRevenue.toLocaleString(undefined, {minimumFractionDigits:2})}`, cols[7].x, currentY + 7, { width: cols[7].w, align: cols[7].align });
+
+        doc.end();
+        return;
+      }
     }
 
     const getStats = async (start, end) => {

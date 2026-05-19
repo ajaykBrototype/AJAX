@@ -135,21 +135,21 @@ async function createCoupon() {
 
         hasError = true;
     }
-    if (
+    // if (
 
-        maxDiscount &&
+    //     maxDiscount &&
 
-        Number(maxDiscount) >= Number(minOrder)
+    //     Number(maxDiscount) >= Number(minOrder)
 
-    ) {
+    // ) {
 
-        showError(
-            "maxDiscountError",
-            "Max cap must be less than minimum order"
-        );
+    //     showError(
+    //         "maxDiscountError",
+    //         "Max cap must be less than minimum order"
+    //     );
 
-        hasError = true;
-    }
+    //     hasError = true;
+    // }
 
      if (
 

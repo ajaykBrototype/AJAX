@@ -132,12 +132,17 @@
             </div>
           </div>
 
-          <!-- Export Button -->
-          <div class="relative group">
-            <button class="flex items-center gap-3 pl-6 pr-5 py-3 bg-brand-dark text-white rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95">
+          <!-- Export Button Dropdown -->
+          <div class="relative group" id="exportDropdown">
+            <button id="exportDropdownBtn" class="flex items-center gap-3 pl-6 pr-5 py-3 bg-brand-dark text-white rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95">
               Export
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-300" id="exportDropdownArrow"><path d="m6 9 6 6 6-6"/></svg>
             </button>
+            <div id="exportDropdownMenu" class="absolute right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
+              <div class="px-5 py-2 text-[0.55rem] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border/50 mb-2">Export Format</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=<%= period %>&download=excel'">Excel (.xlsx)</div>
+              <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=<%= period %>&download=pdf'">PDF Document</div>
+            </div>
           </div>
         </div>
       </div>
@@ -326,21 +331,55 @@
     const dropdownMenu = document.getElementById('dropdownMenu');
     const dropdownArrow = document.getElementById('dropdownArrow');
 
-    dropdownBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = !dropdownMenu.classList.contains('invisible');
-      if (isOpen) {
-        dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
-        dropdownArrow.classList.remove('rotate-180');
-      } else {
-        dropdownMenu.classList.remove('opacity-0', 'invisible', 'translate-y-4');
-        dropdownArrow.classList.add('rotate-180');
-      }
-    });
+    const exportDropdownBtn = document.getElementById('exportDropdownBtn');
+    const exportDropdownMenu = document.getElementById('exportDropdownMenu');
+    const exportDropdownArrow = document.getElementById('exportDropdownArrow');
+
+    if (dropdownBtn) {
+      dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (exportDropdownMenu) {
+          exportDropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+          exportDropdownArrow.classList.remove('rotate-180');
+        }
+        const isOpen = !dropdownMenu.classList.contains('invisible');
+        if (isOpen) {
+          dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+          dropdownArrow.classList.remove('rotate-180');
+        } else {
+          dropdownMenu.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+          dropdownArrow.classList.add('rotate-180');
+        }
+      });
+    }
+
+    if (exportDropdownBtn) {
+      exportDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (dropdownMenu) {
+          dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+          dropdownArrow.classList.remove('rotate-180');
+        }
+        const isOpen = !exportDropdownMenu.classList.contains('invisible');
+        if (isOpen) {
+          exportDropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+          exportDropdownArrow.classList.remove('rotate-180');
+        } else {
+          exportDropdownMenu.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+          exportDropdownArrow.classList.add('rotate-180');
+        }
+      });
+    }
 
     document.addEventListener('click', () => {
-      dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
-      dropdownArrow.classList.remove('rotate-180');
+      if (dropdownMenu) {
+        dropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+        dropdownArrow.classList.remove('rotate-180');
+      }
+      if (exportDropdownMenu) {
+        exportDropdownMenu.classList.add('opacity-0', 'invisible', 'translate-y-4');
+        exportDropdownArrow.classList.remove('rotate-180');
+      }
     });
 
     // Revenue Chart (Line)
