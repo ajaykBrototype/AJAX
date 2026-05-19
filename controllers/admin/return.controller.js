@@ -1,6 +1,7 @@
-
 import Return from "../../models/user/returnModel.js";
 import Wallet from "../../models/user/walletModel.js";
+import Order from "../../models/user/orderModel.js";
+import Variant from "../../models/admin/variantModel.js";
 
 export const loadReturnManagement = async (req, res) => {
     try {
@@ -135,7 +136,35 @@ try {
 
     }
 
+    // Find all return requests for this order that are currently in "Requested" state
+    const pendingReturns = await Return.find({
+        orderId: currentReturn.orderId,
+        status: "Requested"
+    });
 
+    const order = await Order.findById(currentReturn.orderId);
+
+    if (order) {
+        for (const ret of pendingReturns) {
+            const orderItem = order.items.find(item => 
+                item._id.toString() === ret.itemId.toString() ||
+                (item.productId && item.productId.toString() === ret.itemId.toString())
+            );
+
+            if (orderItem) {
+                if (orderItem.variantId) {
+                    const variant = await Variant.findById(orderItem.variantId);
+                    if (variant) {
+                        variant.stock += orderItem.quantity;
+                        await variant.save();
+                    }
+                }
+                orderItem.status = "Returned";
+            }
+        }
+        order.markModified("items");
+        await order.save();
+    }
 
     await Return.updateMany(
         {

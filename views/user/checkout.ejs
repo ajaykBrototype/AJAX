@@ -428,7 +428,7 @@
 
                     <!-- Action Button -->
                     <div class="space-y-4">
-                        <input type="hidden" id="checkoutSubtotal" value="<%= subtotal %>">
+                        <input type="hidden" id="checkoutSubtotal" value="<%= totalPrice %>">
                         <input type="hidden" id="checkoutTotalRaw" value="<%= total %>">
                         <button id="completeOrderBtn" onclick="placeOrder()" class="w-full bg-white text-brand-dark border border-brand-dark/10 py-6 rounded-[2rem] text-[0.75rem] font-black tracking-[0.3em] uppercase hover:bg-brand-dark hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-4 shadow-xl shadow-brand-dark/5 relative overflow-hidden group">
                             <span id="orderBtnText" class="relative z-10 btn-text">Complete Order — ₹<%= total %></span>
