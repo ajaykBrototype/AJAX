@@ -35,6 +35,7 @@ import { loadAdminOrders, loadOrderDetails,updateOrderStatus } from "../controll
 import { loadReturnManagement, loadReturnDetails,approveReturn,rejectReturn,schedulePickup,markPickedUp } from "../controllers/admin/return.controller.js";
 import { loadCouponPage,createCoupon,updateCoupon,toggleCouponStatus,deleteCoupon,getSingleCoupon } from "../controllers/admin/coupon.controller.js";
 import { createOffer, loadCreateOffer, loadOffers,updateOffer,deleteOffer,toggleOfferStatus } from "../controllers/admin/offer.controller.js";
+import { getPendingReviews, approveReview, rejectReview } from "../controllers/admin/review.controller.js";
 
 
 const router = express.Router();
@@ -119,5 +120,10 @@ router.post("/products/:id/variants/add", isAdminAuth, upload.array("images", 5)
 router.patch("/variants/toggle/:id", isAdminAuth, toggleVariantStatus);
 router.patch("/variants/default/:id", isAdminAuth, setDefaultVariant);
 router.delete("/variants/delete/:id", isAdminAuth, deleteVariant);
+
+// Review management
+router.get("/reviews", isAdminAuth, getPendingReviews);
+router.patch("/reviews/:reviewId/approve", isAdminAuth, approveReview);
+router.patch("/reviews/:reviewId/reject", isAdminAuth, rejectReview);
 
 export default router;

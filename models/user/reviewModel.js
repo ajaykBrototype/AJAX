@@ -29,14 +29,20 @@ const reviewSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        maxlength: 100
     },
 
     comment: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        maxlength: 1000
     },
+
+    images: [{
+        type: String
+    }],
 
     verifiedPurchase: {
         type: Boolean,
@@ -48,10 +54,30 @@ const reviewSchema = new mongoose.Schema({
         default: 0
     },
 
+    helpfulUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+
+    adminReply: {
+        message: String,
+        repliedAt: Date
+    },
+
+    isEdited: {
+        type: Boolean,
+        default: false
+    },
+
+    reportedCount: {
+        type: Number,
+        default: 0
+    },
+
     status: {
         type: String,
-        enum: ["active", "hidden"],
-        default: "active"
+        enum: ["pending", "active", "hidden", "rejected"],
+        default: "pending"
     }
 
 }, { timestamps: true });

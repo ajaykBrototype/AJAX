@@ -14,7 +14,8 @@ import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controll
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../controllers/user/checkout.controller.js";
 import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem, loadReturnRequest,submitReturnRequest, verifyOrderPayment, loadPaymentFailure } from "../controllers/user/order.controller.js";
-import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment,  loadreferral} from "../controllers/user/wallet.controller.js";
+import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment, loadreferral} from "../controllers/user/wallet.controller.js";
+import { addReview, getProductReviews, markHelpful, editReview, deleteReview } from "../controllers/user/review.controller.js";
 
 const router = express.Router();
 router.use(checkBlocked);
@@ -29,7 +30,7 @@ router.get("/auth/google",
 
 router.get("/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  authController.googleCallback 
+  authController.googleCallback
 );
 
 router.get("/otp", authController.loadOtpPage);
@@ -56,7 +57,7 @@ router.get("/", authController.loadHome);
 router.get("/profile", noCache, isLoggedIn, profileController.loadProfile);
 router.get("/edit-profile", noCache, isLoggedIn, profileController.loadEditProfile);
 
-router.patch( "/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
+router.patch("/profile/update", isLoggedIn, upload.single("profileImage"), profileController.updateProfile);
 
 router.get("/profile/email/verify", isLoggedIn, emailController.loadVerifyEmailPage);
 router.post("/profile/email/verify", isLoggedIn, emailController.verifyEmailOtp);
@@ -74,9 +75,9 @@ router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
 router.put("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
-router.get("/menProductList",loadMenPage);
-router.get("/womenProductList",loadWomenPage);
-router.get("/api/products",loadFilteredProducts);
+router.get("/menProductList", loadMenPage);
+router.get("/womenProductList", loadWomenPage);
+router.get("/api/products", loadFilteredProducts);
 
 router.get("/product/:id", loadProductDetails);
 router.post("/check-quantity", checkQuantity);
@@ -92,28 +93,35 @@ router.post("/cart/add-from-wishlist", isLoggedIn, addToBagFromWishlist);
 router.delete("/wishlist/clear", isLoggedIn, clearAllWishlist);
 
 
-router.get("/checkout",isLoggedIn,loadCheckoutPage);
-router.post("/address/save",isLoggedIn, saveAddress);
+router.get("/checkout", isLoggedIn, loadCheckoutPage);
+router.post("/address/save", isLoggedIn, saveAddress);
 
-router.get("/order-success/:id",isLoggedIn, loadOrderPage);
+router.get("/order-success/:id", isLoggedIn, loadOrderPage);
 router.post("/order/place", isLoggedIn, placeOrder);
 router.post("/order/verify-payment", isLoggedIn, verifyOrderPayment);
 router.get("/payment-failure", isLoggedIn, loadPaymentFailure);
 router.get("/orders", isLoggedIn, loadOrdersList);
-router.get("/orders/:id",isLoggedIn,loadOrderDetails);
+router.get("/orders/:id", isLoggedIn, loadOrderDetails);
 router.get("/orders/:id/return", isLoggedIn, loadReturnRequest);
-router.patch("/orders/:orderId/items/:itemId/cancel",isLoggedIn,cancelOrderItem);
-router.post("/return-request",upload.array("images",5),submitReturnRequest);
+router.patch("/orders/:orderId/items/:itemId/cancel", isLoggedIn, cancelOrderItem);
+router.post("/return-request", upload.array("images", 5), submitReturnRequest);
 
-router.get("/coupons/available",isLoggedIn,getAvailableCoupons);
+router.get("/coupons/available", isLoggedIn, getAvailableCoupons);
 router.post("/checkout/apply-coupon", isLoggedIn, applyCoupon);
 
 
-router.get("/wallet",isLoggedIn,loadWalletPage);
-router.post("/wallet/add-money",isLoggedIn,addMoneyToWallet);
-router.post( "/wallet/create-order",isLoggedIn,createWalletOrder);
-router.post("/wallet/verify-payment",isLoggedIn,verifyWalletPayment);
+router.get("/wallet", isLoggedIn, loadWalletPage);
+router.post("/wallet/add-money", isLoggedIn, addMoneyToWallet);
+router.post("/wallet/create-order", isLoggedIn, createWalletOrder);
+router.post("/wallet/verify-payment", isLoggedIn, verifyWalletPayment);
 
-router.get("/refer",isLoggedIn,loadreferral);
+router.get("/refer", isLoggedIn, loadreferral);
+
+// Review routes
+router.post("/reviews/:productId", isLoggedIn, upload.array("images", 3), addReview);
+router.get("/reviews/:productId", getProductReviews);
+router.patch("/reviews/:reviewId/helpful", isLoggedIn, markHelpful);
+router.put("/reviews/:reviewId", isLoggedIn, upload.array("images", 3), editReview);
+router.delete("/reviews/:reviewId", isLoggedIn, deleteReview);
 
 export default router;

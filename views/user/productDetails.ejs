@@ -621,12 +621,29 @@
 
         /* --- Customer Reviews Section --- */
         .reviews-section {
-            padding: 48px 48px 96px;
+            max-width: 1300px;
+            margin: 64px auto;
+            padding: 64px;
             background: #ffffff;
-            border-top: 1px solid #F4F4F5;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
             display: grid;
             grid-template-columns: 341px 1fr;
             gap: 80px;
+        }
+
+        @media (max-width: 1024px) {
+            .reviews-section {
+                grid-template-columns: 1fr;
+                gap: 48px;
+                padding: 40px 24px;
+                margin: 32px 16px;
+                border-radius: 16px;
+            }
+            .review-list {
+                padding-top: 0 !important;
+            }
         }
 
         .reviews-summary h2 {
@@ -710,11 +727,11 @@
             display: flex;
             flex-direction: column;
             gap: 64px;
+            padding-top: 84px;
         }
 
         .review-card {
-            border-bottom: 1px solid #F4F4F5;
-            padding-bottom: 48px;
+            transition: all 0.3s ease;
         }
 
         .review-header {
@@ -838,6 +855,279 @@
         /* --- Animations --- */
         .reveal {
             /* Removed initial hidden state for reliability */
+        }
+
+        /* --- Review Modal Styles --- */
+        .review-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .review-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .review-modal-card {
+            background: #ffffff;
+            width: 520px;
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            padding: 32px;
+            overflow-y: auto;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .review-modal-overlay.active .review-modal-card {
+            transform: translateY(0) scale(1);
+        }
+        .review-modal-card::-webkit-scrollbar {
+            display: none;
+        }
+        .review-modal-card {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .modal-title {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--text-muted);
+            transition: color 0.2s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+        .modal-rating-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .modal-rating-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .modal-stars {
+            display: flex;
+            gap: 6px;
+        }
+        .modal-star {
+            cursor: pointer;
+            transition: transform 0.2s ease, fill 0.2s ease;
+        }
+        .modal-star:hover {
+            transform: scale(1.15);
+        }
+        .modal-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .modal-input-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .modal-text-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: var(--font-main);
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #fafafa;
+        }
+        .modal-text-input:focus {
+            border-color: #111111;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.03);
+        }
+        .modal-textarea {
+            resize: none;
+            height: 110px;
+        }
+        .char-counter {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .upload-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .upload-zone {
+            border: 1.5px dashed rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 32px 16px;
+            text-align: center;
+            cursor: pointer;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .upload-zone:hover {
+            border-color: #111111;
+            background: #fafafa;
+        }
+        .camera-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: transform 0.2s ease;
+        }
+        .upload-zone:hover .camera-icon-wrapper {
+            transform: scale(1.05);
+        }
+        .upload-main-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111111;
+            margin: 0;
+        }
+        .upload-sub-text {
+            font-size: 12px;
+            color: #9ca3af;
+            margin: 0;
+        }
+        .media-previews-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .media-preview-item {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .media-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-preview-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: background 0.2s ease;
+        }
+        .media-preview-remove:hover {
+            background: rgba(220,38,38,0.9);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 32px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 20px;
+        }
+        .btn-submit-review {
+            height: 48px;
+            padding: 0 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-submit-review:disabled {
+            background: #E5E7EB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+        .btn-submit-review:not(:disabled) {
+            background: #000000;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .btn-submit-review:not(:disabled):hover {
+            background: #222222;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-submit-review:not(:disabled):active {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -1064,19 +1354,19 @@
             <h2>Feedback</h2>
             <h3>Customer Reviews</h3>
             <div class="rating-hero">
-                <div class="rating-val">4.8</div>
+                <div class="rating-val" id="avgRatingValue">4.8</div>
                 <div>
-                    <div class="stars-row">
+                    <div class="stars-row" id="avgStarsRow">
                         <i data-lucide="star" size="16" fill="#000"></i>
                         <i data-lucide="star" size="16" fill="#000"></i>
                         <i data-lucide="star" size="16" fill="#000"></i>
                         <i data-lucide="star" size="16" fill="#000"></i>
                         <i data-lucide="star" size="16" fill="#000" stroke-opacity="0.2"></i>
                     </div>
-                    <div class="rating-count">Based on 128 Reviews</div>
+                    <div class="rating-count" id="totalReviewsCount">Based on 128 Reviews</div>
                 </div>
             </div>
-            <div class="filters">
+            <div class="filters" id="starBreakdownContainer">
                 <div class="filter-row">
                     <span class="filter-label">5 Stars</span>
                     <div class="filter-bar-bg"><div class="filter-bar-fill" style="width: 80%;"></div></div>
@@ -1094,55 +1384,11 @@
                 </div>
             </div>
             <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn-primary" style="height: 47px; font-size: 10px;">Write a Review</button>
-                <button class="btn-secondary" style="height: 49px; font-size: 10px;">Ask a Question</button>
+                <button class="btn-primary" id="writeReviewBtn" style="height: 47px; font-size: 10px;">Write a Review</button>
             </div>
         </div>
-        <div class="review-list">
-            <div class="review-card reveal">
-                <div class="review-header">
-                    <div>
-                        <div class="review-stars">
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                        </div>
-                        <h4 class="review-title">Exceptional Quality</h4>
-                        <p class="review-author">Marcus R. — April 12, 2024</p>
-                    </div>
-                    <div class="verified-badge">
-                        <i data-lucide="check" size="10"></i>
-                        Verified Purchase
-                    </div>
-                </div>
-                <p class="review-text">
-                    The linen is remarkably soft right out of the box. The fit is exactly what I was looking for — relaxed but still structured enough for dinner.
-                </p>
-            </div>
-            <div class="review-card reveal">
-                <div class="review-header">
-                    <div>
-                        <div class="review-stars">
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                            <i data-lucide="star" size="12" fill="#000"></i>
-                        </div>
-                        <h4 class="review-title">Perfect Summer Essential</h4>
-                        <p class="review-author">Elena G. — March 28, 2024</p>
-                    </div>
-                    <div class="verified-badge">
-                        <i data-lucide="check" size="10"></i>
-                        Verified Purchase
-                    </div>
-                </div>
-                <p class="review-text">
-                    Bought this for my husband and he hasn't stopped wearing it. It breathes so well in the heat. We'll be ordering more colors soon.
-                </p>
-            </div>
+        <div class="review-list" id="reviewList">
+            <div class="text-center py-20 text-stone-400 uppercase tracking-[0.2em] text-xs">Loading reviews...</div>
         </div>
     </section>
 
@@ -1196,5 +1442,85 @@
 </script>
 <script src="/js/user/productDetail.js"></script>
 <script src="/js/user/wishlist.js"></script>
+
+<!-- REVIEW MODAL -->
+<div class="review-modal-overlay" id="reviewModal">
+    <div class="review-modal-card">
+        <div class="modal-header">
+            <h3 class="modal-title">Write a Review</h3>
+            <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close Modal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <form id="reviewForm">
+            <!-- Overall Rating -->
+            <div class="modal-rating-container">
+                <label class="modal-rating-label">Overall Rating</label>
+                <div class="modal-stars" id="modalStars">
+                    <% for(let i = 1; i <= 5; i++) { %>
+                        <svg class="modal-star" data-index="<%= i %>" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Review Title -->
+            <div class="modal-input-group">
+                <label class="modal-input-label" for="reviewTitle">Review Title</label>
+                <input type="text" id="reviewTitle" class="modal-text-input" placeholder="Summarize your experience (e.g. Exceptional Quality)" maxlength="100">
+            </div>
+
+            <!-- Review Body -->
+            <div class="modal-input-group">
+                <label class="modal-input-label" for="reviewBody">Review Body</label>
+                <textarea id="reviewBody" class="modal-text-input modal-textarea" placeholder="What did you like or dislike? How was the fit and quality?" maxlength="1000"></textarea>
+                <div class="char-counter">
+                    <span id="charHint" style="font-size: 11px; margin-right: auto; color: #B04040; transition: color 0.3s ease;">Min. 10 characters</span>
+                    <span id="charCounterValue" style="font-size: 11px;">0 / 1000</span>
+                </div>
+            </div>
+
+            <!-- Media Upload Zone -->
+            <div class="modal-input-group">
+                <label class="upload-label">Add Media (Optional)</label>
+                <div class="upload-zone" id="uploadZone">
+                    <div class="camera-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+                            <circle cx="12" cy="13" r="3"></circle>
+                        </svg>
+                    </div>
+                    <p class="upload-main-text"><span style="text-decoration: underline;">Click to upload</span> or drag and drop</p>
+                    <p class="upload-sub-text">SVG, PNG, JPG (max. 3 images)</p>
+                    <input type="file" id="mediaInput" style="display: none;" accept="image/*" multiple>
+                </div>
+                <div class="media-previews-container" id="mediaPreviews"></div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="submit" id="submitReviewBtn" class="btn-submit-review" disabled>Submit Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- REVIEW MODAL SCRIPTS -->
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+<script>
+    const currentProductId = '<%= product._id %>';
+    let wishlistedVariants = <%- JSON.stringify(wishlistedVariants || []) %>;
+</script>
+<script src="/js/user/productDetail.js"></script>
+<script src="/js/user/wishlist.js"></script>
+<script src="/js/user/review.js"></script>
+
 </body>
 </html>

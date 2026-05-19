@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Review Management — AJAX Admin</title>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/utils/swal-helper.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Playfair Display', 'serif'],
+          sans: ['Plus Jakarta Sans', 'sans-serif']
+        },
+        colors: {
+          'luxury-bg': '#FFFFFF',
+          'luxury-accent': '#1C1C1C',
+          'luxury-text': '#1C1C1C',
+          'luxury-muted': '#8E8E8E'
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { background-color: #FFFFFF; color: theme('colors.luxury-text'); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+
+  /* Table styles */
+  .table-card { background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+  .status-pill { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 600; text-transform: capitalize; display: inline-flex; align-items: center; justify-content: center; }
+  .status-pending { background: #FFF9C4; color: #F57F17; }
+  .status-approved { background: #E8F5E9; color: #2E7D32; }
+  .status-rejected { background: #FFEBEE; color: #C62828; }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D1D1D1; border-radius: 10px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+  /* Tab Pill Style */
+  .tab-pill {
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab-pill.active {
+    background-color: #0F172A;
+    color: #FFFFFF;
+  }
+  .tab-pill:not(.active) {
+    background-color: transparent;
+    color: #64748B;
+    border-color: rgba(0,0,0,0.05);
+  }
+  .tab-pill:not(.active):hover {
+    background-color: rgba(0,0,0,0.02);
+    color: #0F172A;
+  }
+
+  /* Modal styling */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-container {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+  }
+  .modal-overlay.active .modal-container {
+    transform: scale(1);
+  }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- SIDEBAR (PARTIAL) -->
+  <%- include('partials/sidebar', { currentPath: '/admin/reviews' }) %>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 min-w-0 flex flex-col p-4 lg:p-8">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-4">
+        <button id="sidebarToggle" class="lg:hidden p-2 hover:bg-stone-50 rounded-lg transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h2 class="text-3xl font-serif font-bold">Review Management</h2>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="text-right hidden sm:block">
+          <p class="text-xs font-bold">Administrator</p>
+          <p class="text-[0.65rem] text-stone-400">admin@ajax.com</p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center border border-stone-200 overflow-hidden">
+          <img src="https://ui-avatars.com/api/?name=Admin&background=1c1c1c&color=fff" alt="Admin">
+        </div>
+      </div>
+    </header>
+
+    <!-- TABS & SEARCH BAR -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 animate-fade-in">
+      <!-- Tabs Pills exactly like reference image -->
+      <div class="flex flex-wrap gap-2" id="tabsContainer">
+        <button class="tab-pill active" data-tab="all">
+          All Reviews <span class="text-[10px] opacity-80" id="count-all">(0)</span>
+        </button>
+        <button class="tab-pill" data-tab="pending">
+          Pending <span class="text-[10px] opacity-80" id="count-pending">(0)</span>
+        </button>
+        <button class="tab-pill" data-tab="approved">
+          Approved <span class="text-[10px] opacity-80" id="count-approved">(0)</span>
+        </button>
+        <button class="tab-pill" data-tab="rejected">
+          Rejected <span class="text-[10px] opacity-80" id="count-rejected">(0)</span>
+        </button>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="flex items-center gap-3 w-full lg:w-auto">
+        <div class="relative w-full lg:w-72">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="reviewSearchInput" placeholder="Search by user, product, or content..." class="w-full pl-11 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition-all">
+        </div>
+       
+      </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="table-card animate-fade-in">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left" id="reviewsTable">
+          <thead>
+            <tr class="text-left text-[11px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-100 bg-stone-50/50">
+              <th class="py-4 px-6">SL NO</th>
+              <th class="py-4 px-6">USER</th>
+              <th class="py-4 px-6">PRODUCT</th>
+              <th class="py-4 px-6">RATING</th>
+              <th class="py-4 px-6">REVIEW COMMENT</th>
+              <th class="py-4 px-6">DATE</th>
+              <th class="py-4 px-6 text-center">STATUS</th>
+              <th class="py-4 px-6 text-right">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-50">
+            <% if (reviews && reviews.length > 0) { %>
+              <% reviews.forEach((review, index) => { %>
+                <tr class="group hover:bg-stone-50/30 transition-colors review-row" 
+                    data-status="<%= review.status === 'active' ? 'approved' : (review.status === 'rejected' ? 'rejected' : 'pending') %>"
+                    data-user="<%= review.userId?.name || 'Customer' %>"
+                    data-product="<%= review.productId?.name || 'Product' %>"
+                    data-comment="<%= review.title %> <%= review.comment %>"
+                >
+                  <!-- SL NO -->
+                  <td class="py-5 px-6 text-sm text-stone-400 font-semibold">
+                    <%= (index + 1).toString().padStart(2, '0') %>
+                  </td>
+
+                  <!-- USER -->
+                  <td class="py-5 px-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-stone-100 border border-stone-200 overflow-hidden flex-shrink-0">
+                        <img src="<%= review.userId?.profileImage || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(review.userId?.name || 'Customer') + '&background=F3F2EE&color=1C1C1C' %>" alt="" class="w-full h-full object-cover">
+                      </div>
+                      <div>
+                        <p class="text-sm font-bold text-slate-800 leading-tight"><%= review.userId?.name || 'Customer' %></p>
+                        <% if (review.verifiedPurchase) { %>
+                          <p class="text-[10px] text-emerald-600 font-bold tracking-tight mt-0.5 uppercase">Verified Buyer</p>
+                        <% } else { %>
+                          <p class="text-[10px] text-stone-400 font-medium mt-0.5">Buyer</p>
+                        <% } %>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- PRODUCT -->
+                  <td class="py-5 px-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-stone-100 border border-stone-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                      </div>
+                      <div class="max-w-[160px]">
+                        <p class="text-xs font-bold text-slate-800 truncate leading-tight" title="<%= review.productId?.name || 'Deleted Product' %>">
+                          <%= review.productId?.name || 'Deleted Product' %>
+                        </p>
+                        <p class="text-[9px] text-stone-400 font-bold uppercase tracking-wider mt-0.5">SKU: N/A</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- RATING -->
+                  <td class="py-5 px-6">
+                    <div class="flex gap-0.5 text-amber-400">
+                      <% for(let i = 1; i <= 5; i++) { %>
+                        <svg class="w-3.5 h-3.5 fill-current <%= i <= review.rating ? '' : 'text-stone-200' %>" viewBox="0 0 24 24">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                      <% } %>
+                    </div>
+                  </td>
+
+                  <!-- REVIEW COMMENT -->
+                  <td class="py-5 px-6 max-w-[280px]">
+                    <div class="text-xs text-slate-700 leading-relaxed truncate">
+                      <span class="font-bold text-slate-800"><%= review.title %></span> - <%= review.comment %>
+                    </div>
+                    <% if (review.images && review.images.length > 0) { %>
+                      <div class="flex items-center gap-1 mt-1 text-[10px] text-blue-600 font-bold uppercase tracking-wider">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <%= review.images.length %> <%= review.images.length === 1 ? 'Image' : 'Images' %>
+                      </div>
+                    <% } %>
+                  </td>
+
+                  <!-- DATE -->
+                  <td class="py-5 px-6">
+                    <p class="text-xs text-slate-700 font-semibold">
+                      <%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %>
+                    </p>
+                  </td>
+
+                  <!-- STATUS -->
+                  <td class="py-5 px-6 text-center">
+                    <span class="status-pill <%= review.status === 'active' ? 'status-approved' : (review.status === 'rejected' ? 'status-rejected' : 'status-pending') %>">
+                      <%= review.status === 'active' ? 'Approved' : (review.status === 'rejected' ? 'Rejected' : 'Pending') %>
+                    </span>
+                  </td>
+
+                  <!-- ACTIONS -->
+                  <td class="py-5 px-6 text-right">
+                    <div class="flex items-center justify-end gap-2.5">
+                      <!-- VIEW DETAILS -->
+                      <button onclick="openReviewModal('<%= encodeURIComponent(JSON.stringify(review)) %>')" title="View Review" class="p-2 text-stone-400 hover:text-black hover:bg-stone-50 rounded-lg border border-stone-100 hover:border-stone-200 transition-all shadow-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+
+                      <% if (review.status === 'pending') { %>
+                        <!-- APPROVE INLINE -->
+                        <button onclick="approveReviewInline('<%= review._id %>')" title="Approve Review" class="p-2 text-emerald-500 hover:text-white hover:bg-emerald-500 rounded-lg border border-emerald-100 hover:border-emerald-500 transition-all shadow-sm">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <!-- REJECT INLINE -->
+                        <button onclick="rejectReviewInline('<%= review._id %>')" title="Reject Review" class="p-2 text-rose-500 hover:text-white hover:bg-rose-500 rounded-lg border border-rose-100 hover:border-rose-500 transition-all shadow-sm">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      <% } %>
+
+                      <!-- DELETE -->
+                      <button onclick="deleteReview('<%= review._id %>')" title="Delete Review" class="p-2 text-stone-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-stone-100 hover:border-rose-100 transition-all shadow-none">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8" class="text-center py-20 text-stone-400 uppercase tracking-widest text-xs">
+                  No customer reviews found.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- DETAIL MODAL OVERLAY -->
+  <div class="modal-overlay" id="reviewDetailModal">
+    <div class="modal-container">
+      <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 leading-tight">Review Details</h3>
+          <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-0.5" id="modal-review-id">ID: 000</p>
+        </div>
+        <button onclick="closeReviewModal()" class="text-stone-400 hover:text-stone-600 p-2 hover:bg-stone-100 rounded-full transition-all">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6 max-h-[480px] overflow-y-auto">
+        <!-- User & Product details -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 bg-stone-50 border border-stone-100 rounded-xl">
+            <p class="text-[9px] text-stone-400 font-bold uppercase tracking-widest mb-1.5">Submitted By</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-stone-200 overflow-hidden flex-shrink-0" id="modal-user-avatar">
+                <img src="" alt="" class="w-full h-full object-cover">
+              </div>
+              <div class="overflow-hidden">
+                <p class="text-xs font-bold text-slate-800 truncate" id="modal-user-name">Tony Stark</p>
+                <p class="text-[9px] text-stone-400 truncate" id="modal-user-email">tony@stark.com</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 bg-stone-50 border border-stone-100 rounded-xl">
+            <p class="text-[9px] text-stone-400 font-bold uppercase tracking-widest mb-1.5">Product Reviewed</p>
+            <div class="overflow-hidden">
+              <p class="text-xs font-bold text-slate-800 truncate" id="modal-product-name">Anua Heartleaf Deep Cleansing Oil</p>
+              <span class="inline-block text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 mt-1 uppercase" id="modal-verified-badge">Verified Buyer</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating & Title -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[9px] text-stone-400 font-bold uppercase tracking-widest">Rating & Title</span>
+            <div class="flex gap-0.5 text-amber-400" id="modal-rating-stars">
+              <!-- JS Generated -->
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-slate-800" id="modal-review-title">nice product</h4>
+        </div>
+
+        <!-- Comment -->
+        <div class="space-y-1.5">
+          <span class="text-[9px] text-stone-400 font-bold uppercase tracking-widest">Review Content</span>
+          <p class="text-xs text-stone-600 leading-relaxed bg-stone-50/50 p-4 border border-stone-100 rounded-xl" id="modal-review-comment">
+            it is very useful
+          </p>
+        </div>
+
+        <!-- Images -->
+        <div class="space-y-2 hidden" id="modal-images-container">
+          <span class="text-[9px] text-stone-400 font-bold uppercase tracking-widest">Uploaded Media</span>
+          <div class="flex flex-wrap gap-2" id="modal-images-list">
+            <!-- Images generated in JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 border-t border-stone-100 bg-stone-50/50 flex justify-end gap-3" id="modal-actions-container">
+        <!-- Buttons will be loaded dynamically based on review status -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variable to hold reviews
+    let activeReview = null;
+
+    // Open/Close Modal
+    function openReviewModal(encodedReview) {
+      try {
+        const review = JSON.parse(decodeURIComponent(encodedReview));
+        activeReview = review;
+
+        document.getElementById('modal-review-id').textContent = `ID: ${review._id}`;
+        document.getElementById('modal-user-name').textContent = review.userId?.name || 'Customer';
+        document.getElementById('modal-user-email').textContent = review.userId?.email || '—';
+        document.getElementById('modal-user-avatar').querySelector('img').src = review.userId?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.userId?.name || 'Customer')}&background=F3F2EE&color=1C1C1C`;
+        document.getElementById('modal-product-name').textContent = review.productId?.name || 'Product';
+        document.getElementById('modal-review-title').textContent = review.title || '';
+        document.getElementById('modal-review-comment').textContent = review.comment || '';
+
+        // Verified Buyer Badge
+        const badge = document.getElementById('modal-verified-badge');
+        if (review.verifiedPurchase) {
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+
+        // Stars
+        const starsContainer = document.getElementById('modal-rating-stars');
+        starsContainer.innerHTML = [1,2,3,4,5].map(i => `
+          <svg class="w-3.5 h-3.5 fill-current ${i <= review.rating ? '' : 'text-stone-200'}" viewBox="0 0 24 24">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        `).join('');
+
+        // Media images
+        const imgContainer = document.getElementById('modal-images-container');
+        const imgList = document.getElementById('modal-images-list');
+        if (review.images && review.images.length > 0) {
+          const formatImagePath = (img) => {
+            if (!img) return '';
+            let p = img.replace(/^public[\\\/]/i, '');
+            p = p.replace(/\\/g, '/');
+            if (!p.startsWith('/')) p = '/' + p;
+            return p;
+          };
+          imgContainer.classList.remove('hidden');
+          imgList.innerHTML = review.images.map(img => {
+            const formatted = formatImagePath(img);
+            return `
+              <img src="${formatted}" class="w-16 h-16 object-cover rounded-lg border border-stone-200 cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${formatted}', '_blank')" />
+            `;
+          }).join('');
+        } else {
+          imgContainer.classList.add('hidden');
+          imgList.innerHTML = '';
+        }
+
+        // Action Buttons
+        const actionsContainer = document.getElementById('modal-actions-container');
+        if (review.status === 'pending') {
+          actionsContainer.innerHTML = `
+            <button onclick="rejectReview('${review._id}')" class="px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold text-xs uppercase tracking-widest rounded-xl transition-all">Reject Review</button>
+            <button onclick="approveReview('${review._id}')" class="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 font-bold text-xs uppercase tracking-widest rounded-xl transition-all">Approve Review</button>
+          `;
+        } else {
+          actionsContainer.innerHTML = `
+            <span class="text-xs font-bold text-stone-400 uppercase tracking-widest py-2">Status: ${review.status === 'active' ? 'Approved' : 'Rejected'}</span>
+            <button onclick="closeReviewModal()" class="px-5 py-2.5 bg-stone-100 text-stone-700 hover:bg-stone-200 font-bold text-xs uppercase tracking-widest rounded-xl transition-all ml-4">Close</button>
+          `;
+        }
+
+        document.getElementById('reviewDetailModal').classList.add('active');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewDetailModal').classList.remove('active');
+      activeReview = null;
+    }
+
+    // inline / modal handlers
+    async function approveReview(reviewId) {
+      closeReviewModal();
+      try {
+        const res = await axios.patch(`/admin/reviews/${reviewId}/approve`);
+        if (res.data.success) {
+          ajaxToast.success(res.data.message || "Review approved successfully");
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          ajaxToast.error(res.data.message || "Failed to approve review");
+        }
+      } catch (error) {
+        console.error(error);
+        ajaxToast.error("Server error approving review");
+      }
+    }
+
+    async function rejectReview(reviewId) {
+      closeReviewModal();
+      try {
+        const res = await axios.patch(`/admin/reviews/${reviewId}/reject`);
+        if (res.data.success) {
+          ajaxToast.success(res.data.message || "Review rejected successfully");
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          ajaxToast.error(res.data.message || "Failed to reject review");
+        }
+      } catch (error) {
+        console.error(error);
+        ajaxToast.error("Server error rejecting review");
+      }
+    }
+
+    // Inline shortcuts
+    function approveReviewInline(id) {
+      ajaxConfirm({
+        title: "Approve Review?",
+        text: "This review will immediately be published and count towards the product's overall ratings.",
+        confirmText: "APPROVE",
+        cancelText: "CANCEL",
+        icon: "question"
+      }).then(res => {
+        if (res.isConfirmed) approveReview(id);
+      });
+    }
+
+    function rejectReviewInline(id) {
+      ajaxConfirm({
+        title: "Reject Review?",
+        text: "Are you sure you want to reject this customer review?",
+        confirmText: "REJECT",
+        cancelText: "CANCEL",
+        icon: "warning"
+      }).then(res => {
+        if (res.isConfirmed) rejectReview(id);
+      });
+    }
+
+    async function deleteReview(id) {
+      ajaxConfirm({
+        title: "Delete Review?",
+        text: "This is a permanent action and cannot be undone.",
+        confirmText: "DELETE",
+        cancelText: "CANCEL",
+        icon: "warning"
+      }).then(async res => {
+        if (res.isConfirmed) {
+          try {
+            // Delete reviews API (we can use standard user DELETE route or fallback to soft-reject)
+            const response = await axios.delete(`/reviews/${id}`);
+            if (response.data.success) {
+              ajaxToast.success("Review deleted successfully");
+              setTimeout(() => location.reload(), 1200);
+            } else {
+              // fallback: reject it if delete fails
+              const responseReject = await axios.patch(`/admin/reviews/${id}/reject`);
+              if (responseReject.data.success) {
+                ajaxToast.success("Review rejected & hidden successfully");
+                setTimeout(() => location.reload(), 1200);
+              } else {
+                ajaxToast.error("Failed to delete review");
+              }
+            }
+          } catch (e) {
+            // fallback rejection if no DELETE route is set
+            try {
+              await axios.patch(`/admin/reviews/${id}/reject`);
+              ajaxToast.success("Review rejected successfully");
+              setTimeout(() => location.reload(), 1200);
+            } catch(err) {
+              ajaxToast.error("Failed to delete review");
+            }
+          }
+        }
+      });
+    }
+
+    // Mobile sidebar
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+    }
+
+    // TAB FILTERING & COUNTS (PURE CLIENT SIDE FOR SPEED & WOW EFFECT)
+    document.addEventListener("DOMContentLoaded", () => {
+      const rows = document.querySelectorAll(".review-row");
+      const tabs = document.querySelectorAll(".tab-pill");
+      const searchInput = document.getElementById("reviewSearchInput");
+
+      // Calculate tab counts
+      let total = 0, pending = 0, approved = 0, rejected = 0;
+      rows.forEach(row => {
+        total++;
+        const s = row.getAttribute("data-status");
+        if (s === "pending") pending++;
+        else if (s === "approved") approved++;
+        else if (s === "rejected") rejected++;
+      });
+
+      document.getElementById("count-all").textContent = `(${total})`;
+      document.getElementById("count-pending").textContent = `(${pending})`;
+      document.getElementById("count-approved").textContent = `(${approved})`;
+      document.getElementById("count-rejected").textContent = `(${rejected})`;
+
+      // Filtering logic
+      function applyFilters() {
+        const activeTab = document.querySelector(".tab-pill.active").getAttribute("data-tab");
+        const query = searchInput.value.toLowerCase().trim();
+
+        rows.forEach(row => {
+          const rowStatus = row.getAttribute("data-status");
+          const user = row.getAttribute("data-user").toLowerCase();
+          const product = row.getAttribute("data-product").toLowerCase();
+          const comment = row.getAttribute("data-comment").toLowerCase();
+
+          const matchesTab = activeTab === "all" || rowStatus === activeTab;
+          const matchesSearch = !query || user.includes(query) || product.includes(query) || comment.includes(query);
+
+          if (matchesTab && matchesSearch) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      // Tab click events
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          applyFilters();
+        });
+      });
+
+      // Search input events
+      searchInput.addEventListener("input", applyFilters);
+    });
+  </script>
+</body>
+</html>

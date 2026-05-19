@@ -183,3 +183,16 @@ window.ajaxToast = function(type, message, title = '') {
         }
     });
 };
+
+window.ajaxToast.success = function(message, title = '') {
+    window.ajaxToast('success', message, title);
+};
+window.ajaxToast.error = function(message, title = '') {
+    window.ajaxToast('error', message, title);
+};
+window.ajaxToast.warning = function(message, title = '') {
+    window.ajaxToast('warning', message, title);
+};
+window.ajaxToast.info = function(message, title = '') {
+    window.ajaxToast('info', message, title);
+};

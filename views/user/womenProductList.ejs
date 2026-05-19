@@ -84,7 +84,7 @@ body {
 
 /* CUSTOM SORT DROPDOWN */
 .custom-sort-dropdown { position: relative; }
-.dropdown-menu {
+.sort-dropdown-menu {
     position: absolute;
     top: 100%; right: 0;
     margin-top: 12px;
@@ -101,12 +101,12 @@ body {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 200px;
 }
-.dropdown-menu.show {
+.sort-dropdown-menu.show {
     visibility: visible;
     opacity: 1;
     transform: translateY(0);
 }
-.dropdown-item {
+.sort-dropdown-item {
     padding: 12px 20px;
     font-size: 0.65rem;
     font-weight: 600;
@@ -117,8 +117,8 @@ body {
     border-radius: 1rem;
     transition: all 0.2s ease;
 }
-.dropdown-item:hover { background: #F5F1EB; }
-.dropdown-item.active { background: #1A1A1A; color: white; }
+.sort-dropdown-item:hover { background: #F5F1EB; }
+.sort-dropdown-item.active { background: #1A1A1A; color: white; }
 
 /* SIDEBAR FILTER (Unchanged Logic, Upgraded UI) */
 .filter-overlay {
@@ -235,12 +235,12 @@ body {
                         <span id="currentSortLabel">Sort By</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform duration-300" id="sortArrow"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="dropdown-menu" id="sortMenu">
-                        <div class="dropdown-item active" data-value="newest">Newest Arrivals</div>
-                        <div class="dropdown-item" data-value="price-low">Price: Low - High</div>
-                        <div class="dropdown-item" data-value="price-high">Price: High - Low</div>
-                        <div class="dropdown-item" data-value="name-az">A - Z</div>
-                        <div class="dropdown-item" data-value="name-za">Z - A</div>
+                    <div class="sort-dropdown-menu" id="sortMenu">
+                        <div class="sort-dropdown-item active" data-value="newest">Newest Arrivals</div>
+                        <div class="sort-dropdown-item" data-value="price-low">Price: Low - High</div>
+                        <div class="sort-dropdown-item" data-value="price-high">Price: High - Low</div>
+                        <div class="sort-dropdown-item" data-value="name-az">A - Z</div>
+                        <div class="sort-dropdown-item" data-value="name-za">Z - A</div>
                     </div>
                     <input type="hidden" id="sortSelect" value="newest">
                 </div>
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortMenu = document.getElementById('sortMenu');
   const sortArrow = document.getElementById('sortArrow');
   const currentSortLabel = document.getElementById('currentSortLabel');
-  const sortItems = document.querySelectorAll('.dropdown-item');
+  const sortItems = document.querySelectorAll('.sort-dropdown-item');
   const sortInput = document.getElementById('sortSelect');
 
   sortTrigger.addEventListener('click', (e) => {
