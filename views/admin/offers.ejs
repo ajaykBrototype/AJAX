@@ -1037,6 +1037,28 @@
     setupToggle('discountModeToggle', 'discountMode', (value) => {
       const unit = document.getElementById('discountUnit');
       unit.textContent = value === 'percentage' ? '%' : '₹';
+
+       const maxCapField = document
+        .querySelector('input[name="maxDiscountCap"]')
+        .closest('.grid > div');
+
+    const maxCapInput = document
+        .querySelector('input[name="maxDiscountCap"]');
+
+    if (value === 'flat') {
+
+        maxCapField.classList.add('hidden');
+
+        maxCapInput.disabled = true;
+
+        maxCapInput.value = '';
+
+    } else {
+
+        maxCapField.classList.remove('hidden');
+
+        maxCapInput.disabled = false;
+    }
     });
 
     // Calendar Initialization

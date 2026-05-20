@@ -314,17 +314,35 @@
                         </label>
 
                         <!-- COD Option -->
-                        <label class="payment-option checkout-card p-6 flex items-center gap-6 cursor-pointer hover:bg-brand-warm/20 transition-all border border-transparent group active">
-                            <input type="radio" name="payment" value="cod" checked>
-                            <div class="radio-custom flex-shrink-0"></div>
-                            <div class="w-12 h-12 rounded-2xl bg-[#F5F1EB] flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i data-lucide="banknote" class="text-[#8B7355]" size="20"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <h4 class="text-sm font-bold">Cash on Delivery</h4>
-                                <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">Pay with cash at your doorstep</p>
-                            </div>
-                        </label>
+                      <label class="payment-option checkout-card p-6 flex items-center gap-6 cursor-pointer hover:bg-brand-warm/20 transition-all border border-transparent group active <%= totalPrice > 3000 ? 'opacity-50 cursor-not-allowed' : '' %>">
+
+    <input 
+        type="radio" 
+        name="payment" 
+        value="cod"
+        <%= totalPrice > 3000 ? 'disabled' : 'checked' %>
+    >
+
+    <div class="radio-custom flex-shrink-0"></div>
+
+    <div class="w-12 h-12 rounded-2xl bg-[#F5F1EB] flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i data-lucide="banknote" class="text-[#8B7355]" size="20"></i>
+    </div>
+
+    <div class="flex-grow">
+        <h4 class="text-sm font-bold">
+            Cash on Delivery
+        </h4>
+
+        <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">
+            <% if (totalPrice > 3000) { %>
+                COD is unavailable for orders above ₹3000
+            <% } else { %>
+                Pay with cash at your doorstep
+            <% } %>
+        </p>
+    </div>
+</label>
                     </div>
                 </section>
 
