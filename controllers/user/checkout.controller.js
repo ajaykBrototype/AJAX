@@ -83,6 +83,7 @@ export const loadCheckoutPage = async (req, res) => {
 
         let subtotal = 0;
         let totalOfferDiscount = 0;
+        let couponEligibleSubtotal = 0;
 
         cart.items.forEach(item => {
           if (item.variant && item.variant.stock > 0) {
@@ -106,6 +107,10 @@ export const loadCheckoutPage = async (req, res) => {
             
             subtotal += itemPrice * item.quantity;
             totalOfferDiscount += discount * item.quantity;
+
+            if (!bestOffer) {
+              couponEligibleSubtotal += item.finalPrice * item.quantity;
+            }
           }
         });
 
@@ -119,7 +124,8 @@ export const loadCheckoutPage = async (req, res) => {
           wallet,
           subtotal,
           totalOfferDiscount,
-          totalPrice
+          totalPrice,
+          couponEligibleSubtotal
         });
 
     } catch (err) {

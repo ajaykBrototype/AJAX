@@ -109,7 +109,6 @@
         <!-- Tabs Section -->
         <div class="flex items-center gap-8 mb-8 border-b border-stone-100">
             <button class="tab-btn active">Live Coupons <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-green-500 mb-0.5"></span></button>
-            <button class="tab-btn">Archived</button>
         </div>
 
         <!-- Filter Bar -->
@@ -170,7 +169,7 @@
                                     <div class="flex items-center justify-between w-[100px]">
                                         <span class="text-[9px] font-black text-stone-400 uppercase">Usage</span>
                                         <span class="text-[10px] font-black text-stone-900 uppercase">
-                                            <%= coupon.usageCount === 'UNLIMITED' ? 'UNLIMITED' : coupon.usageCount + ' / ' + coupon.maxUsage %>
+                                            <%= coupon.usageCount === 'UNLIMITED' ? 'UNLIMITED' : coupon.usageCount + ' / ' + (coupon.maxUsage === null ? 'UNLIMITED' : coupon.maxUsage) %>
                                         </span>
                                     </div>
                                     <div class="progress-bar-bg">
@@ -178,11 +177,13 @@
                                             let width = 0;
                                             if (coupon.usageCount === 'UNLIMITED') {
                                                 width = 100;
+                                            } else if (coupon.maxUsage === null) {
+                                                width = 0;
                                             } else {
                                                 width = (coupon.usageCount / coupon.maxUsage) * 100;
                                             }
                                         %>
-                                        <div class="progress-bar-fill <%= coupon.usageCount === 'UNLIMITED' ? 'blue' : '' %>" style="width: <%= width %>%"></div>
+                                        <div class="progress-bar-fill <%= coupon.usageCount === 'UNLIMITED' || coupon.maxUsage === null ? 'blue' : '' %>" style="width: <%= width %>%"></div>
                                     </div>
                                 </div>
                             </td>

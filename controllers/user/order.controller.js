@@ -247,6 +247,7 @@ export const placeOrder = async (req, res) => {
         }
 
         const orderItems = [];
+        let couponEligibleSubtotal = 0;
 
         const today = new Date();
         const activeOffers = await Offer.find({
@@ -282,7 +283,7 @@ export const placeOrder = async (req, res) => {
               } else {
                 discount = bestOffer.discountValue;
               }
-              finalUnitPrice -= discount;
+              finalUnitPrice = Math.round((finalUnitPrice - discount) * 100) / 100;
             }
 
             orderItems.push({
@@ -297,17 +298,20 @@ export const placeOrder = async (req, res) => {
                 status: "Placed"
             });
 
+            if (!bestOffer) {
+                couponEligibleSubtotal += finalUnitPrice * item.quantity;
+            }
         }
 
-        const subtotal = orderItems.reduce(
+        const subtotal = Math.round(orderItems.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0
-        );
+        ) * 100) / 100;
 
-        const totalOfferDiscount = orderItems.reduce(
+        const totalOfferDiscount = Math.round(orderItems.reduce(
             (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
             0
-        );
+        ) * 100) / 100;
 
         let discount = 0;
         let appliedCoupon = null;
@@ -321,15 +325,16 @@ export const placeOrder = async (req, res) => {
                 endDate: { $gte: today }
             });
 
-            if (appliedCoupon && subtotal >= appliedCoupon.minOrder) {
+            if (appliedCoupon && couponEligibleSubtotal >= appliedCoupon.minOrder) {
                 if (appliedCoupon.discountType === "flat") {
                     discount = appliedCoupon.discountAmount;
                 } else {
-                    discount = (subtotal * appliedCoupon.discountAmount) / 100;
+                    discount = (couponEligibleSubtotal * appliedCoupon.discountAmount) / 100;
                     if (appliedCoupon.maxDiscount > 0 && discount > appliedCoupon.maxDiscount) {
                         discount = appliedCoupon.maxDiscount;
                     }
                 }
+                discount = Math.round(Math.min(discount, couponEligibleSubtotal) * 100) / 100;
                 
                 // Check usage limits (treat 0 or null as unlimited)
                 const globalLimitMet = !appliedCoupon.maxUsage || appliedCoupon.usageCount < appliedCoupon.maxUsage;
@@ -554,24 +559,52 @@ if (!item) {
         await variant.save();
      }
 
+     const oldTotal = order.totalAmount;
+
      item.status="Cancelled";
      item.cancellationReason = reason;
      item.cancellationNote = note;
      order.markModified('items');
 
-     const activeItems=order.items.filter(
-        item=>item.status!=="Cancelled"
-     )
+     const activeItems = order.items.filter(
+        item => item.status !== "Cancelled"
+     );
 
-     let newTotal=activeItems.reduce((sum,item)=>
-      sum+(item.price*item.quantity),0
-    );
+     const newSubtotal = Math.round(activeItems.reduce((sum, item) =>
+        sum + (item.price * item.quantity), 0
+     ) * 100) / 100;
 
-    const shipping=newTotal>1000 || newTotal===0?0:100;
+     let remainingDiscount = 0;
+     if (order.couponCode) {
+         const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
+         if (coupon) {
+             const remainingEligibleSubtotal = activeItems.reduce((sum, item) => {
+                 const hasOffer = item.originalPrice && item.originalPrice !== item.price;
+                 if (!hasOffer) {
+                     return sum + item.price * item.quantity;
+                 }
+                 return sum;
+             }, 0);
 
-    order.totalAmount = newTotal + shipping;
+             if (remainingEligibleSubtotal >= coupon.minOrder) {
+                 if (coupon.discountType === "flat") {
+                     remainingDiscount = coupon.discountAmount;
+                 } else {
+                     remainingDiscount = (remainingEligibleSubtotal * coupon.discountAmount) / 100;
+                     if (coupon.maxDiscount > 0 && remainingDiscount > coupon.maxDiscount) {
+                         remainingDiscount = coupon.maxDiscount;
+                     }
+                 }
+                 remainingDiscount = Math.round(Math.min(remainingDiscount, remainingEligibleSubtotal) * 100) / 100;
+             }
+         }
+     }
 
-     
+     const shipping = (newSubtotal > 1000 || newSubtotal === 0) ? 0 : 100;
+     const newTotal = Math.round((newSubtotal + shipping - remainingDiscount) * 100) / 100;
+
+     order.discount = remainingDiscount;
+     order.totalAmount = newTotal;
 
      const allCancelled=order.items.every(
         item=>item.status==="Cancelled"
@@ -591,23 +624,11 @@ if (!item) {
      }
 
 if (order.paymentMethod !== "COD") {
-
-    let refundAmount = item.price * item.quantity;
-    if (order.discount && order.discount > 0) {
-        const originalSubtotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-        if (originalSubtotal > 0) {
-            const itemDiscountPortion = (item.price * item.quantity / originalSubtotal) * order.discount;
-            refundAmount = Math.max(0, refundAmount - itemDiscountPortion);
-        }
-    }
-
-
+    const refundAmount = Math.round(Math.max(0, oldTotal - newTotal) * 100) / 100;
 
     let wallet =await Wallet.findOne({
         userId
     });
-
-
 
     if (!wallet) {
 
@@ -618,11 +639,7 @@ if (order.paymentMethod !== "COD") {
         });
     }
 
-
-
     wallet.balance += refundAmount;
-
-
 
     wallet.transactions.push({
 
@@ -631,7 +648,7 @@ if (order.paymentMethod !== "COD") {
         orderId: order._id,
         type: "credit",
         amount: refundAmount,
-        description:"Refund for cancelled order",
+        description:"Refund for cancelled order item",
 
         date: new Date()
     });
