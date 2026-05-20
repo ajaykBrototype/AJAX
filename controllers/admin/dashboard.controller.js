@@ -10,7 +10,7 @@ export const loadDashboard = async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
     
-    // Total Earnings & Total Product Count (All items regardless of order status)
+   
     const earningsData = await Order.aggregate([
       { $unwind: "$items" },
       { $group: { 
@@ -38,7 +38,6 @@ export const loadDashboard = async (req, res) => {
       { $limit: 5 }
     ]);
 
-    // --- MULTI-PERIOD SALES AGGREGATIONS (All Statuses, Sum of Item Values) ---
     
     // 1. TODAY (Hourly)
     const startOfToday = new Date();
