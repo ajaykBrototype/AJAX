@@ -268,8 +268,10 @@ export const placeOrder = async (req, res) => {
                 );
             }
 
-            item.variant.stock -= item.quantity;
-            await item.variant.save();
+            if (normalizedPayment !== "RAZORPAY") {
+                item.variant.stock -= item.quantity;
+                await item.variant.save();
+            }
 
             const product = item.variant.productId;
             const bestOffer = getBestOffer(activeOffers, product, item.variant.price);
@@ -463,6 +465,17 @@ export const verifyOrderPayment = async (req, res) => {
                 success: false,
                 message: "Order not found"
             });
+        }
+
+        if (order.status === "Pending") {
+            for (const item of order.items) {
+                const variant = await Variant.findById(item.variantId);
+                if (variant) {
+                    // Update stock
+                    variant.stock -= item.quantity;
+                    await variant.save();
+                }
+            }
         }
 
         order.status = "Placed";
