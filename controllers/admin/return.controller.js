@@ -104,7 +104,10 @@ export const loadReturnDetails = async (req, res) => {
             return res.redirect("/admin/returns");
         }
 
-        const allReturnsInOrder = await Return.find({ orderId: returnItem.orderId?._id })
+        const allReturnsInOrder = await Return.find({ 
+            orderId: returnItem.orderId?._id,
+            status: returnItem.status 
+        })
             .populate("userId")
             .populate("orderId");
 
