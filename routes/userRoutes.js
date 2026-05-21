@@ -77,8 +77,8 @@ router.delete("/address/:id", isLoggedIn, addressController.deleteAddress);
 router.get("/edit-address/:id", noCache, isLoggedIn, addressController.loadEditAddressPage);
 router.put("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
-router.get("/menProductList", loadMenPage);
-router.get("/womenProductList", loadWomenPage);
+router.get("/men-product-list", loadMenPage);
+router.get("/women-product-list", loadWomenPage);
 router.get("/category/:name", loadCategoryPage);
 router.get("/api/products", loadFilteredProducts);
 

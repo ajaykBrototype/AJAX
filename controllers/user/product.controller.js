@@ -51,7 +51,7 @@ export const loadMenPage = async (req, res) => {
     const menCategory = await Category.findOne({ name: { $regex: "^men$", $options: "i" } });
 
     if (!menCategory) {
-      return res.render("user/menProductList", {
+      return res.render("user/men-product-list", {
         products: [],
         subCategories: [],
         selectedSub: null,
@@ -114,7 +114,7 @@ export const loadMenPage = async (req, res) => {
       })
     );
 
-    res.render("user/menProductList", {
+    res.render("user/men-product-list", {
       products: productData,
       subCategories,
       selectedSub: sub || null,
@@ -223,7 +223,7 @@ export const loadWomenPage = async (req, res) => {
     const womenCategory = await Category.findOne({ name: { $regex: "^women$", $options: "i" } });
 
     if (!womenCategory) {
-      return res.render("user/womenProductList", {
+      return res.render("user/women-product-list", {
         products: [],
         subCategories: [],
         selectedSub: null,
@@ -286,7 +286,7 @@ export const loadWomenPage = async (req, res) => {
       })
     );
 
-    res.render("user/womenProductList", {
+    res.render("user/women-product-list", {
       products: productData,
       subCategories,
       selectedSub: sub || null,
@@ -310,7 +310,7 @@ export const loadProductDetails = async (req, res) => {
     const subCategory = await SubCategory.findById(product.subcategory).lean();
 
     if (!product || !product.isActive) {
-      return res.redirect("/menProductList");
+      return res.redirect("/men-product-list");
     }
 
     const variants = await Variant.find({

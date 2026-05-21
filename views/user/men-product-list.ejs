@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AJAX — The Women's Collection</title>
+<title>AJAX — The Men's Collection</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Add GSAP for animations -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -177,11 +177,11 @@ body {
     
     <div class="relative z-10 text-center flex flex-col items-center px-4 w-full">
         <div class="fade-in-up mb-3">
-            <%- include('../partials/breadcrumbs', { breadcrumbs: [{ name: "Womenswear" }] }) %>
+            <%- include('../partials/breadcrumbs', { breadcrumbs: [{ name: "Menswear" }] }) %>
         </div>
         <div class="fade-in-up delay-1 overflow-hidden px-4">
             <h1 class="font-serif italic text-4xl md:text-5xl lg:text-6xl text-[#1A1A1A] tracking-tight leading-[1.1]">
-                The Women's <span class="not-italic font-normal">Collection</span>
+                The Men's <span class="not-italic font-normal">Collection</span>
             </h1>
         </div>
         <p class="fade-in-up delay-2 text-[0.55rem] uppercase tracking-[0.3em] text-[#B89D7A] font-bold mt-3">
@@ -193,14 +193,14 @@ body {
 <main class="max-w-[1536px] mx-auto">
     <!-- 2. CATEGORY CAPSULE TABS -->
     <div class="flex flex-wrap gap-3 justify-center mb-10 fade-in-up delay-2 px-6">
-        <a href="/womenProductList" class="relative px-5 py-2.5 text-[0.55rem] font-bold tracking-[0.15em] uppercase transition-colors duration-300 rounded-full group <%= !selectedSub ? 'text-white' : 'text-[#1A1A1A] hover:bg-black/5' %>">
+        <a href="/men-product-list" class="relative px-5 py-2.5 text-[0.55rem] font-bold tracking-[0.15em] uppercase transition-colors duration-300 rounded-full group <%= !selectedSub ? 'text-white' : 'text-[#1A1A1A] hover:bg-black/5' %>">
             <span class="relative z-10">All Essentials</span>
             <% if (!selectedSub) { %>
                 <div class="absolute inset-0 bg-[#1A1A1A] rounded-full -z-10 shadow-md"></div>
             <% } %>
         </a>
         <% subCategories.forEach(sub => { %>
-            <a href="/womenProductList?sub=<%= sub._id %>" class="relative px-5 py-2.5 text-[0.55rem] font-bold tracking-[0.15em] uppercase transition-colors duration-300 rounded-full group <%= selectedSub == sub._id.toString() ? 'text-white' : 'text-[#1A1A1A] hover:bg-black/5' %>">
+            <a href="/men-product-list?sub=<%= sub._id %>" class="relative px-5 py-2.5 text-[0.55rem] font-bold tracking-[0.15em] uppercase transition-colors duration-300 rounded-full group <%= selectedSub == sub._id.toString() ? 'text-white' : 'text-[#1A1A1A] hover:bg-black/5' %>">
                 <span class="relative z-10"><%= sub.name %></span>
                 <% if (selectedSub == sub._id.toString()) { %>
                     <div class="absolute inset-0 bg-[#1A1A1A] rounded-full -z-10 shadow-md"></div>

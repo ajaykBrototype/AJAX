@@ -157,7 +157,7 @@ if (sort === "2025") {
 
         console.log("LOAD ORDERS ERROR:", err);
 
-        res.redirect("/menProductList");
+        res.redirect("/men-product-list");
 
     }
 };
