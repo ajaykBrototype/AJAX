@@ -321,93 +321,75 @@ try {
 }
 };
 
-export const markPickedUp =async (req, res) => {
+export const markPickedUp = async (req, res) => {
+    try {
+        const returnId = req.params.id;
 
-try {
+        const currentReturn = await Return.findById(returnId).populate("orderId").populate("userId");
 
-    const returnId =
-        req.params.id;
-
-
-
-    const currentReturn =await Return.findById(returnId) .populate("orderId").populate("userId");;
-
-    if(!currentReturn){
-
-        return res.status(404).json({
-            success:false
-        });
-    }
-     if (currentReturn.isRefunded) {
-
-        return res.status(400).json({
-            success: false,
-            message:"Refund already processed"
-        });
-    }
-
-
-
-    await Return.updateMany(
-        {
-            orderId:
-            currentReturn.orderId
-        },
-        {
-            $set:{
-                pickupStatus:"Picked Up",
-                status:"Refunded",
-                pickedUpAt:new Date(),
-                isRefunded: true
-            }
+        if(!currentReturn){
+            return res.status(404).json({ success:false });
         }
-    );
+        
+        if (currentReturn.isRefunded) {
+            return res.status(400).json({
+                success: false,
+                message:"Refund already processed"
+            });
+        }
 
-    const userId=currentReturn.userId._id;
+        const pendingReturns = await Return.find({ 
+            orderId: currentReturn.orderId,
+            isRefunded: { $ne: true }
+        });
+        
+        let totalRefundAmount = 0;
+        for (const ret of pendingReturns) {
+            totalRefundAmount += (ret.refundAmount || 0);
+        }
 
-    const wallet=await Wallet.findOne({userId});
+        await Return.updateMany(
+            { orderId: currentReturn.orderId },
+            {
+                $set:{
+                    pickupStatus:"Picked Up",
+                    status:"Refunded",
+                    pickedUpAt:new Date(),
+                    isRefunded: true
+                }
+            }
+        );
 
-    if(!wallet){
-        await Wallet.create({
-            userId,
-            balance:0,
-            transactions:[]
-     });
+        const userId = currentReturn.userId._id;
+        let wallet = await Wallet.findOne({ userId });
+
+        if(!wallet){
+            wallet = await Wallet.create({
+                userId,
+                balance:0,
+                transactions:[]
+            });
+        }
+
+        if (totalRefundAmount > 0) {
+            wallet.balance += totalRefundAmount;
+
+            wallet.transactions.push({
+                transactionId: "REFUND_" + Date.now(),
+                orderId: currentReturn.orderId._id,
+                type: "credit",
+                amount: totalRefundAmount,
+                description: "Refund for returned product(s)",
+                date: new Date()
+            });
+
+            await wallet.save();
+        }
+
+        return res.json({ success: true });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
     }
-
-     const refundAmount=currentReturn.refundAmount||0;
-
-     wallet.balance+=refundAmount;
-
- wallet.transactions.push({
-
-        transactionId:"REFUND_" + Date.now(),
-
-        orderId:currentReturn.orderId._id,
-
-        type:"credit",
-
-        amount:refundAmount,
-
-        description:"Refund for returned product",
-
-        date:new Date()
-    });
-
-    await wallet.save();
-
-    return res.json({
-
-        success: true
-    });
-
-} catch (err) {
-
-    console.log(err);
-
-    res.status(500).json({
-
-        success: false
-    });
-}
 };

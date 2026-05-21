@@ -840,14 +840,54 @@ export const submitReturnRequest = async (req, res) => {
 
 
 
-            let refundAmt = item.price * item.quantity;
-            if (order.discount && order.discount > 0) {
-                const originalSubtotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-                if (originalSubtotal > 0) {
-                    const itemDiscountPortion = (item.price * item.quantity / originalSubtotal) * order.discount;
-                    refundAmt = Math.max(0, refundAmt - itemDiscountPortion);
+            const activeBefore = order.items.filter(i => i.status !== "Cancelled" && i.status !== "Returned" && i.status !== "Return Requested");
+            let subtotalBefore = Math.round(activeBefore.reduce((sum, i) => sum + (i.price * i.quantity), 0) * 100) / 100;
+            let discountBefore = 0;
+            if (order.couponCode) {
+                const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
+                if (coupon) {
+                    const eligibleBefore = activeBefore.reduce((sum, i) => {
+                        const hasOffer = (i.originalPrice && i.originalPrice !== i.price);
+                        return sum + (hasOffer ? 0 : (i.price * i.quantity));
+                    }, 0);
+                    if (eligibleBefore >= coupon.minOrder) {
+                        if (coupon.discountType === "flat") discountBefore = coupon.discountAmount;
+                        else {
+                            discountBefore = (eligibleBefore * coupon.discountAmount) / 100;
+                            if (coupon.maxDiscount > 0 && discountBefore > coupon.maxDiscount) discountBefore = coupon.maxDiscount;
+                        }
+                        discountBefore = Math.round(Math.min(discountBefore, eligibleBefore) * 100) / 100;
+                    }
                 }
             }
+            const shippingBefore = (subtotalBefore > 1000 || subtotalBefore === 0) ? 0 : 100;
+            const totalBefore = Math.round((subtotalBefore + shippingBefore - discountBefore) * 100) / 100;
+
+            const activeAfter = activeBefore.filter(i => i._id.toString() !== item._id.toString());
+            let subtotalAfter = Math.round(activeAfter.reduce((sum, i) => sum + (i.price * i.quantity), 0) * 100) / 100;
+            let discountAfter = 0;
+            if (order.couponCode) {
+                const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
+                if (coupon) {
+                    const eligibleAfter = activeAfter.reduce((sum, i) => {
+                        const hasOffer = (i.originalPrice && i.originalPrice !== i.price);
+                        return sum + (hasOffer ? 0 : (i.price * i.quantity));
+                    }, 0);
+                    if (eligibleAfter >= coupon.minOrder) {
+                        if (coupon.discountType === "flat") discountAfter = coupon.discountAmount;
+                        else {
+                            discountAfter = (eligibleAfter * coupon.discountAmount) / 100;
+                            if (coupon.maxDiscount > 0 && discountAfter > coupon.maxDiscount) discountAfter = coupon.maxDiscount;
+                        }
+                        discountAfter = Math.round(Math.min(discountAfter, eligibleAfter) * 100) / 100;
+                    }
+                }
+            }
+            const shippingAfter = (subtotalAfter > 1000 || subtotalAfter === 0) ? 0 : 100;
+            const totalAfter = Math.round((subtotalAfter + shippingAfter - discountAfter) * 100) / 100;
+
+            let refundAmt = Math.round(Math.max(0, totalBefore - totalAfter) * 100) / 100;
+
 
             await Return.create({
 
