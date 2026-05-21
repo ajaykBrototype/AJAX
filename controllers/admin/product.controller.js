@@ -2,6 +2,7 @@ import Product from "../../models/admin/productModel.js";
 import Variant from "../../models/admin/variantModel.js";
 import Category from "../../models/admin/categoryModel.js";
 import SubCategory from "../../models/admin/subCategoryModel.js";
+import Offer from "../../models/admin/offerModel.js";
 
 import {
   createProductService,
@@ -61,17 +62,47 @@ export const loadProductPage = async (req, res) => {
     const productsRaw = await getAllProductsService(filter, skip, limit);
     const totalMatchingProducts = await Product.countDocuments(filter);
 
-    // Attach default variant to each product for image promotion
+    // Attach default variant and offer data to each product
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
     const products = await Promise.all(productsRaw.map(async (prod) => {
       const allVariants = await Variant.find({ productId: prod._id }).lean();
       const totalStock = allVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
       const defaultVariant = allVariants.find(v => v.isDefault) || allVariants[0];
-      
+
+      // Compute best offer for this product
+      let finalPrice = defaultVariant?.price || null;
+      let bestOffer = null;
+      if (defaultVariant) {
+        const price = defaultVariant.price;
+        const productId = prod._id.toString();
+        const categoryId = prod.category?._id?.toString() || prod.category?.toString();
+        const applicable = activeOffers.filter(o => {
+          if (o.applicableTo === 'product' && o.targetProduct?.toString() === productId) return true;
+          if (o.applicableTo === 'category' && o.targetCategory?.toString() === categoryId) return true;
+          return false;
+        }).filter(o => !o.minOrderValue || price >= o.minOrderValue);
+        let maxD = 0;
+        applicable.forEach(o => {
+          let d = o.discountMode === 'percentage' ? (price * o.discountValue) / 100 : o.discountValue;
+          if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+          if (d > maxD) { maxD = d; bestOffer = o; }
+        });
+        if (bestOffer) finalPrice = Math.round(price - maxD);
+      }
+
       return {
         ...prod.toObject(),
-        totalStock: totalStock,
+        totalStock,
+        finalPrice,
+        bestOffer,
         variant: defaultVariant ? {
-          price: defaultVariant.salePrice || defaultVariant.regularPrice || defaultVariant.price || 0,
+          price: defaultVariant.price,
           stock: defaultVariant.stock,
           images: defaultVariant.images
         } : null
@@ -165,7 +196,6 @@ export const loadProductDetails = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
-
     const variants = await Variant.find({ productId: product._id });
 
     // Support variant selection via query param (?variant=ID)
@@ -180,10 +210,46 @@ export const loadProductDetails = async (req, res) => {
       defaultVariant = variants.find(v => v.isDefault) || variants[0];
     }
 
+    // Compute best active offer for this product/category
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    let bestOffer = null;
+    let finalPrice = defaultVariant ? defaultVariant.price : null;
+
+    if (defaultVariant) {
+      const price = defaultVariant.price;
+      const productId = product._id.toString();
+      const categoryId = product.category?._id?.toString() || product.category?.toString();
+
+      const applicable = activeOffers.filter(o => {
+        if (o.applicableTo === 'product' && o.targetProduct?.toString() === productId) return true;
+        if (o.applicableTo === 'category' && o.targetCategory?.toString() === categoryId) return true;
+        return false;
+      }).filter(o => !o.minOrderValue || price >= o.minOrderValue);
+
+      let maxD = 0;
+      applicable.forEach(o => {
+        let d = o.discountMode === 'percentage'
+          ? (price * o.discountValue) / 100
+          : o.discountValue;
+        if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
+        if (d > maxD) { maxD = d; bestOffer = o; }
+      });
+
+      if (bestOffer) finalPrice = Math.round(price - maxD);
+    }
+
     res.render("admin/productDetails", {
       product,
       variants,
-      defaultVariant
+      defaultVariant,
+      bestOffer,
+      finalPrice
     });
 
   } catch (err) {
