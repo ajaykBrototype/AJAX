@@ -1,6 +1,7 @@
 import Order from "../../models/user/orderModel.js";
 import User from "../../models/user/userModel.js";
 import Variant from "../../models/admin/variantModel.js";
+import Wallet from "../../models/user/walletModel.js";
 
 
 
@@ -160,15 +161,43 @@ export const updateOrderStatus = async (req, res) => {
 
         if(status==="Cancelled"){
             for(const item of order.items){
-                const variant=await Variant.findById(
-                    item.variantId
-                );
+                if (item.status !== "Cancelled" && item.status !== "Returned") {
+                    const variant=await Variant.findById(
+                        item.variantId
+                    );
 
-                if(variant){
-                    variant.stock+=item.quantity;
+                    if(variant){
+                        variant.stock+=item.quantity;
 
-                    await variant.save();
+                        await variant.save();
+                    }
+                    item.status = "Cancelled";
                 }
+            }
+
+            if (order.paymentMethod !== "COD" && order.status !== "Pending" && order.totalAmount > 0) {
+                let wallet = await Wallet.findOne({ userId: order.userId });
+
+                if (!wallet) {
+                    wallet = await Wallet.create({
+                        userId: order.userId,
+                        balance: 0,
+                        transactions: []
+                    });
+                }
+
+                wallet.balance += order.totalAmount;
+
+                wallet.transactions.push({
+                    transactionId: "REF" + Date.now(),
+                    orderId: order._id,
+                    type: "credit",
+                    amount: order.totalAmount,
+                    description: "Refund for order cancelled by admin",
+                    date: new Date()
+                });
+
+                await wallet.save();
             }
         }
 

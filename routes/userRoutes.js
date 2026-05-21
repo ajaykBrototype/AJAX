@@ -16,10 +16,12 @@ import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../
 import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderItem, loadReturnRequest,submitReturnRequest, verifyOrderPayment, loadPaymentFailure } from "../controllers/user/order.controller.js";
 import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment, loadreferral} from "../controllers/user/wallet.controller.js";
 import { addReview, getProductReviews, markHelpful, editReview, deleteReview } from "../controllers/user/review.controller.js";
+import { loadUserCounts } from "../middleware/userCounts.js";
+
 
 const router = express.Router();
 router.use(checkBlocked);
-
+router.use(loadUserCounts);
 
 router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
 router.post("/signup", authController.registerUser);
@@ -126,3 +128,4 @@ router.put("/reviews/:reviewId", isLoggedIn, upload.array("images", 3), editRevi
 router.delete("/reviews/:reviewId", isLoggedIn, deleteReview);
 
 export default router;
+
