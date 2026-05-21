@@ -9,7 +9,7 @@ import * as addressController from "../controllers/user/address.controller.js";
 import { isLoggedIn, isLoggedOut, checkBlocked } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
-import { loadMenPage,loadWomenPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
+import { loadMenPage,loadWomenPage,loadCategoryPage,loadProductDetails,checkQuantity,loadFilteredProducts } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../controllers/user/checkout.controller.js";
@@ -77,6 +77,7 @@ router.put("/edit-address/:id", isLoggedIn, addressController.updateAddress);
 
 router.get("/menProductList", loadMenPage);
 router.get("/womenProductList", loadWomenPage);
+router.get("/category/:name", loadCategoryPage);
 router.get("/api/products", loadFilteredProducts);
 
 router.get("/product/:id", loadProductDetails);

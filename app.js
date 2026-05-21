@@ -11,6 +11,7 @@ import morgan from "morgan";
 import passport from "passport";
 import Cart from "./models/user/cartModel.js";
 import Wishlist from "./models/user/wishlistModel.js";
+import Category from "./models/admin/categoryModel.js";
 
 
 
@@ -59,7 +60,15 @@ app.use(async (req, res, next) => {
   res.locals.user = req.session.userId || null;
   res.locals.cartCount = 0;
   res.locals.wishlistCount = 0;
+  res.locals.categories = [];
   
+  try {
+    const allCategories = await Category.find({ isActive: true });
+    res.locals.categories = allCategories;
+  } catch (err) {
+    console.error("Locals Category Fetch Error:", err);
+  }
+
   if (req.session.userId) {
     try {
       const [cart, wishlist] = await Promise.all([

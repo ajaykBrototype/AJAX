@@ -63,9 +63,13 @@ export const loadProductPage = async (req, res) => {
 
     // Attach default variant to each product for image promotion
     const products = await Promise.all(productsRaw.map(async (prod) => {
-      const defaultVariant = await Variant.findOne({ productId: prod._id, isDefault: true }).lean() || await Variant.findOne({ productId: prod._id }).lean();
+      const allVariants = await Variant.find({ productId: prod._id }).lean();
+      const totalStock = allVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+      const defaultVariant = allVariants.find(v => v.isDefault) || allVariants[0];
+      
       return {
         ...prod.toObject(),
+        totalStock: totalStock,
         variant: defaultVariant ? {
           price: defaultVariant.salePrice || defaultVariant.regularPrice || defaultVariant.price || 0,
           stock: defaultVariant.stock,

@@ -1181,8 +1181,9 @@ applicableToggleItems.forEach(item => {
             :
             "Target Category";
 
-        // RESET SELECT
+        // RESET SELECT & RENAME FIELD so the right key is sent to the server
         targetSelect.value = "";
+        targetSelect.name = value === "product" ? "targetProduct" : "targetCategory";
 
         // SWITCH OPTIONS
         const options =

@@ -11,13 +11,22 @@ function debounce(func, timeout = 500) {
   };
 }
 
+function extractMainCategory(path) {
+  if (path.toLowerCase().includes('women')) return 'women';
+  if (path.toLowerCase().includes('men')) return 'men';
+  if (path.toLowerCase().includes('/category/')) {
+    return path.split('/category/')[1].split(/[/?#]/)[0];
+  }
+  return 'men';
+}
+
 window.filters = {
   search: "",
   sort: "",
   category: "",
   minPrice: 0,
   maxPrice: 10000,
-  mainCategory: window.location.pathname.includes('women') ? 'women' : 'men'
+  mainCategory: extractMainCategory(window.location.pathname)
 };
 
 document.addEventListener("DOMContentLoaded", () => {

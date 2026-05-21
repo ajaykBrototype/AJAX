@@ -129,6 +129,90 @@ export const loadMenPage = async (req, res) => {
   }
 };
 
+export const loadCategoryPage = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { sub, page = 1 } = req.query;
+
+    const limit = 8;
+    const skip = (page - 1) * limit;
+
+    const targetCategory = await Category.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
+
+    if (!targetCategory) {
+      return res.redirect("/home");
+    }
+    
+    const subCategories = await SubCategory.find({
+      category: targetCategory._id,
+      isActive: true
+    });
+
+    let filter = {
+      isActive: true,
+      category: targetCategory._id
+    };
+
+    if (sub) {
+      filter.subcategory = sub;
+    } else {
+      const subIds = subCategories.map(s => s._id);
+      filter.subcategory = { $in: subIds };
+    }
+
+    const wishlist = await Wishlist.findOne({ user: req.session.userId });
+
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    const products = await Product.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    const productData = await Promise.all(
+      products.map(async (prod) => {
+        const variants = await Variant.find({
+          productId: prod._id,
+          isActive: true
+        }).lean();
+
+        const v = variants[0];
+        const offer = v ? getBestOffer(activeOffers, prod, v.price) : null;
+        let finalPrice = v?.price || null;
+        if (offer && v) {
+          let d = offer.discountMode === 'percentage' ? (v.price * offer.discountValue) / 100 : offer.discountValue;
+          if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
+          finalPrice = v.price - d;
+        }
+
+        return { ...prod, variants, finalPrice, offer };
+      })
+    );
+
+    res.render("user/categoryProductList", {
+      products: productData,
+      subCategories,
+      selectedSub: sub || null,
+      currentPage: Number(page),
+      totalPages,
+      totalProducts,
+      targetCategory,
+      wishlist: wishlist?.items.map(i => i.product.toString()) || []
+    });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/home");
+  }
+};
+
 export const loadWomenPage = async (req, res) => {
   try {
     const { sub, page = 1 } = req.query;
@@ -359,7 +443,7 @@ export const loadFilteredProducts = async (req, res) => {
     const min = Number(minPrice) || 0;
     const max = Number(maxPrice) || 1000000; // Large default for max if not provided
 
-    const targetCategoryName = mainCategory === 'women' ? 'women' : 'men';
+    const targetCategoryName = mainCategory || 'men';
     const targetCategory = await Category.findOne({ name: { $regex: new RegExp(`^${targetCategoryName}$`, "i") } });
 
     if (!targetCategory) {

@@ -4,8 +4,11 @@
 <div id="mob-menu">
   <button id="mob-close">✕</button>
   <a href="/" class="mob-link">Home</a>
-  <a href="/menProductList" class="mob-link">Men</a>
-  <a href="/womenProductList" class="mob-link">Women</a>
+  <% if (locals.categories && locals.categories.length > 0) { %>
+    <% locals.categories.forEach(function(cat) { %>
+      <a href="/category/<%= cat.name %>" class="mob-link" style="text-transform: capitalize;"><%= cat.name %></a>
+    <% }); %>
+  <% } %>
   <a href="#" class="mob-link">New Arrivals</a>
   <a href="#" class="mob-link">Journal</a>
 </div>
@@ -17,8 +20,11 @@
 
     <div class="hidden md:flex items-center gap-10" id="nav-links">
       <a href="/" class="nav-link" data-nav style="color:#fff">HOME</a>
-      <a href="/menProductList" class="nav-link" data-nav style="color:#fff">MEN</a>
-      <a href="/womenProductList" class="nav-link" data-nav style="color:#fff">WOMEN</a>
+      <% if (locals.categories && locals.categories.length > 0) { %>
+        <% locals.categories.forEach(function(cat) { %>
+          <a href="/category/<%= cat.name %>" class="nav-link" data-nav style="color:#fff; text-transform: uppercase;"><%= cat.name %></a>
+        <% }); %>
+      <% } %>
     </div>
 
     <div class="flex items-center gap-1">
