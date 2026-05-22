@@ -60,29 +60,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-// GLOBAL LOCALS
-app.use(async (req, res, next) => {
-
-  res.locals.user = req.session.userId || null;
-
-  res.locals.categories = [];
-
-  try {
-
-    const allCategories = await Category.find({
-      isActive: true
-    });
-
-    res.locals.categories = allCategories;
-
-  } catch (err) {
-
-    console.error("Locals Category Fetch Error:", err);
-  }
-
-  next();
-});
-
 app.use("/", userRoutes);
 
 app.use("/admin", adminRoutes);

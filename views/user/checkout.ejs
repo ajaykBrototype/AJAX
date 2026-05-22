@@ -316,12 +316,8 @@
                         <!-- COD Option -->
                       <label class="payment-option checkout-card p-6 flex items-center gap-6 cursor-pointer hover:bg-brand-warm/20 transition-all border border-transparent group active <%= totalPrice > 3000 ? 'opacity-50 cursor-not-allowed' : '' %>">
 
-    <input 
-        type="radio" 
-        name="payment" 
-        value="cod"
-        <%= totalPrice > 3000 ? 'disabled' : 'checked' %>
-    >
+                       <input  type="radio"  name="payment"  value="cod"
+                <%= totalPrice > 3000 ? 'disabled' : 'checked' %> >
 
     <div class="radio-custom flex-shrink-0"></div>
 

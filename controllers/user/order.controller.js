@@ -471,7 +471,6 @@ export const verifyOrderPayment = async (req, res) => {
             for (const item of order.items) {
                 const variant = await Variant.findById(item.variantId);
                 if (variant) {
-                    // Update stock
                     variant.stock -= item.quantity;
                     await variant.save();
                 }
@@ -479,7 +478,7 @@ export const verifyOrderPayment = async (req, res) => {
         }
 
         order.status = "Placed";
-        order.paymentStatus = "Paid"; // Adding a payment status if helpful
+        order.paymentStatus = "Paid"; 
         await order.save();
 
         const userId = req.session.userId;

@@ -245,10 +245,9 @@
             }
             
             try {
-                // Get order amount (we should probably pass it or fetch it)
                 const amount = "<%= order ? order.totalAmount : 0 %>";
                 
-                // Create new Razorpay order
+            
                 const res = await axios.post('/wallet/create-order', { amount });
                 
                 const options = {

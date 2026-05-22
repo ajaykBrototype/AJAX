@@ -17,11 +17,12 @@ import {loadOrderPage,placeOrder,loadOrdersList,loadOrderDetails, cancelOrderIte
 import { loadWalletPage, addMoneyToWallet,createWalletOrder,verifyWalletPayment, loadreferral} from "../controllers/user/wallet.controller.js";
 import { addReview, getProductReviews, markHelpful, editReview, deleteReview } from "../controllers/user/review.controller.js";
 import { loadUserCounts } from "../middleware/userCounts.js";
-
+import { loadCategories } from "../middleware/loadCategories.js";
 
 const router = express.Router();
 router.use(checkBlocked);
 router.use(loadUserCounts);
+router.use(loadCategories);
 
 router.get("/signup", noCache, isLoggedOut, authController.loadSignup);
 router.post("/signup", authController.registerUser);
