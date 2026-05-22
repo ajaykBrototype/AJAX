@@ -172,7 +172,7 @@ body {
         
         <div class="flex items-center gap-4 w-full md:w-auto">
           <div class="relative flex-grow md:w-64">
-            <input id="searchInput" type="text" placeholder="Search orders..." class="w-full bg-white border border-brand-mist/30 rounded-2xl px-6 py-3.5 text-[0.7rem] font-medium focus:ring-1 focus:ring-brand-dark focus:border-brand-dark transition-all outline-none pl-12">
+            <input id="orderSearchInput" type="text" placeholder="Search orders..." class="w-full bg-white border border-brand-mist/30 rounded-2xl px-6 py-3.5 text-[0.7rem] font-medium focus:ring-1 focus:ring-brand-dark focus:border-brand-dark transition-all outline-none pl-12">
             <svg class="absolute left-5 top-1/2 -translate-y-1/2 text-stone-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </div>
           <div class="relative w-full md:w-56" id="customSort">
@@ -292,7 +292,7 @@ body {
 
 <script>
 
-const searchInput = document.getElementById("searchInput");
+const searchInput = document.getElementById("orderSearchInput");
 
 const sortSelect = document.getElementById("sortSelect");
 
@@ -342,7 +342,12 @@ searchInput.addEventListener("input", () => {
 
     debounceTimer = setTimeout(() => {
 
-        fetchOrders();
+        const query = searchInput.value.trim().toLowerCase();
+        const cards = ordersContainer.querySelectorAll(".order-card");
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = text.includes(query) ? "" : "none";
+        });
 
     }, 500);
 

@@ -539,3 +539,62 @@ export const loadFilteredProducts = async (req, res) => {
     res.json({ success: false });
   }
 };
+
+export const searchProducts = async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q || q.length < 1) return res.json({ success: true, results: [] });
+
+    // Find matching subcategories first
+    const subCategoryMatches = await SubCategory.find({
+      name: { $regex: q, $options: 'i' },
+      isActive: true
+    }).lean();
+    const subIds = subCategoryMatches.map(s => s._id);
+
+    // Search products by name OR matching subcategory
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { subcategory: { $in: subIds } }
+      ]
+    }).populate('subcategory', 'name').limit(8).lean();
+
+    const today = new Date();
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    }).lean();
+
+    const results = await Promise.all(products.map(async (p) => {
+      const v = await Variant.findOne({ productId: p._id, isActive: true }).lean();
+      if (!v) return null;
+
+      const offer = getBestOffer(activeOffers, p, v.price);
+      let finalPrice = v.price;
+      if (offer) {
+        let d = offer.discountMode === 'percentage'
+          ? (v.price * offer.discountValue) / 100
+          : offer.discountValue;
+        if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
+        finalPrice = v.price - d;
+      }
+
+      return {
+        _id: p._id,
+        name: p.name,
+        image: v.images?.[0] || null,
+        price: v.price,
+        finalPrice: offer ? Math.round(finalPrice) : null,
+        subcategory: p.subcategory?.name || null
+      };
+    }));
+
+    res.json({ success: true, results: results.filter(Boolean) });
+  } catch (err) {
+    console.error('SEARCH ERROR:', err);
+    res.json({ success: false, results: [] });
+  }
+};
