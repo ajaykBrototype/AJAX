@@ -287,7 +287,14 @@
               
               <div class="fav-info-row">
                 <h3 class="fav-name"><%= product.name %></h3>
-                <p class="fav-price">₹<%= variant ? variant.price : '0.00' %></p>
+                <p class="fav-price">
+                  <% if(item.offer) { %>
+                    <span style="font-weight: 600;">₹<%= Math.round(item.finalPrice) %></span>
+                    <span style="text-decoration: line-through; opacity: 0.4; margin-left: 4px; font-size: 0.85em;">₹<%= variant ? variant.price : '0' %></span>
+                  <% } else { %>
+                    ₹<%= variant ? variant.price : '0.00' %>
+                  <% } %>
+                </p>
               </div>
               
               <p class="fav-desc"><%= product.subcategory ? product.subcategory.name : 'ESSENTIAL' %></p>
