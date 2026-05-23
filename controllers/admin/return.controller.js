@@ -1,7 +1,4 @@
-import Return from "../../models/user/returnModel.js";
-import Wallet from "../../models/user/walletModel.js";
-import Order from "../../models/user/orderModel.js";
-import Variant from "../../models/admin/variantModel.js";
+import * as returnService from "../../services/admin/return.service.js";
 
 export const loadReturnManagement = async (req, res) => {
     try {
@@ -9,81 +6,10 @@ export const loadReturnManagement = async (req, res) => {
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
-        const skip = (page - 1) * limit;
         
-        let filter = {};
-        if (currentStatus && currentStatus !== "all") {
-            const statusMap = {
-                'pending': 'Requested',
-                'approved': 'Approved',
-                'rejected': 'Rejected',
-                'pickup-scheduled': 'Pickup Scheduled',
-                'picked-up': 'Picked Up',
-                'refunded': 'Refunded'
-            };
-            filter.status = statusMap[currentStatus] || currentStatus;
-        }
+        const data = await returnService.getReturnManagementDataService(currentStatus, search, page, limit);
 
-        let allReturns = await Return.find(filter).populate("userId").populate("orderId").sort({ createdAt: -1 });
-        
-        if(search.trim()){
-
-    const q =search.toLowerCase();
-
-    allReturns =allReturns.filter(r => {
-
-        const customerName = r.userId?.name ?.toLowerCase() ?.includes(q);
-
-        const customerEmail = r.userId?.email ?.toLowerCase() ?.includes(q);
-
-        const returnId = r._id.toString() .toLowerCase() .includes(q);
-
-        const orderId = r.orderId?._id?.toString()?.toLowerCase()?.includes(q);
-
-        return (
-            customerName ||
-            customerEmail ||
-            returnId ||
-            orderId
-        );
-
-    });
-
-}
-       
-        const seenOrders = new Map();
-        allReturns.forEach(r => {
-            const oid = r.orderId?._id?.toString();
-            if (!oid) return;
-            if (!seenOrders.has(oid)) {
-                seenOrders.set(oid, { ...r.toObject(), itemCount: 1 });
-            } else {
-                seenOrders.get(oid).itemCount += 1;
-            }
-        });
-        const returnsArray = Array.from(seenOrders.values());
-        const totalFilteredReturns = returnsArray.length;
-        const totalPages = Math.ceil(totalFilteredReturns / limit);
-        const returns = returnsArray.slice(skip, skip + limit);
-
-        const totalReturns = await Return.countDocuments();
-        const pendingReturns = await Return.countDocuments({ status: "Requested" });
-        const approvedReturns = await Return.countDocuments({ status: "Approved" });
-        const rejectedReturns = await Return.countDocuments({ status: "Rejected" });
-
-        res.render("admin/returnManagement", { 
-            returns,
-            totalReturns,
-            pendingReturns,
-            approvedReturns,
-            rejectedReturns,
-            currentStatus,
-            searchQuery: search,
-            currentPage: page,
-            totalPages,
-            totalFilteredReturns,
-            search
-        });
+        res.render("admin/returnManagement", data);
     } catch (err) {
         console.log("ADMIN RETURN MANAGEMENT ERROR:", err);
         res.redirect("/admin/orders");
@@ -92,305 +18,58 @@ export const loadReturnManagement = async (req, res) => {
 
 export const loadReturnDetails = async (req, res) => {
     try {
-        const { id } = req.params;
-        const returnItem = await Return.findById(id)
-            .populate("userId")
-            .populate({
-                path: "orderId",
-                populate: { path: "userId" }
-            });
+        const data = await returnService.getReturnDetailsService(req.params.id);
 
-        if (!returnItem) {
+        if (!data) {
             return res.redirect("/admin/returns");
         }
 
-        const allReturnsInOrder = await Return.find({ 
-            orderId: returnItem.orderId?._id,
-            status: returnItem.status 
-        })
-            .populate("userId")
-            .populate("orderId");
-
-        res.render("admin/returnDetails", {
-            returnItem,
-            allReturnsInOrder
-        });
+        res.render("admin/returnDetails", data);
     } catch (err) {
         console.log("ADMIN RETURN DETAILS ERROR:", err);
         res.redirect("/admin/returns");
     }
 };
 
-
-export const approveReturn =async (req, res) => {
-
-try {
-
-    const returnId =req.params.id;
-
-    const currentReturn =await Return.findById(returnId);
-
-    if(!currentReturn){
-
-        return res.status(404).json({
-            success:false,
-            message:"No return request"
-        });
-
+export const approveReturn = async (req, res) => {
+    try {
+        const result = await returnService.approveReturnService(req.params.id);
+        if (!result.success && result.statusCode === 404) return res.status(404).json(result);
+        res.json(result);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
     }
-
-    // Find all return requests for this order that are currently in "Requested" state
-    const pendingReturns = await Return.find({
-        orderId: currentReturn.orderId,
-        status: "Requested"
-    });
-
-    const order = await Order.findById(currentReturn.orderId);
-
-    if (order) {
-        for (const ret of pendingReturns) {
-            const orderItem = order.items.find(item => 
-                item._id.toString() === ret.itemId.toString() ||
-                (item.productId && item.productId.toString() === ret.itemId.toString())
-            );
-
-            if (orderItem) {
-                if (orderItem.variantId) {
-                    const variant = await Variant.findById(orderItem.variantId);
-                    if (variant) {
-                        variant.stock += orderItem.quantity;
-                        await variant.save();
-                    }
-                }
-                orderItem.status = "Returned";
-            }
-        }
-        order.markModified("items");
-        await order.save();
-    }
-
-    await Return.updateMany(
-        {
-            orderId: currentReturn.orderId
-        },
-        {
-            $set:{
-                status:"Approved",
-                approvedAt:new Date()
-            }
-        }
-    );
-
-
-
-    return res.json({
-        success:true
-    });
-
-} catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-        success:false
-    });
-
-}
 };
 
-
-export const rejectReturn =async (req, res) => {
-
-try {
-
-    const returnId =req.params.id;
-
-    const { reason } =req.body;
-
-    const currentReturn = await Return.findById(returnId);
-
-    if(!currentReturn){
-
-        return res.status(404).json({
-            success:false
-        });
-
+export const rejectReturn = async (req, res) => {
+    try {
+        const result = await returnService.rejectReturnService(req.params.id, req.body.reason);
+        if (!result.success && result.statusCode === 404) return res.status(404).json(result);
+        res.json(result);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
     }
-
-    await Return.updateMany(
-        {
-            orderId:currentReturn.orderId
-        },
-        {
-            $set:{
-                status:"Rejected",
-                rejectionReason:reason,
-                rejectedAt:new Date()
-            }
-        }
-    );
-
-
-
-    return res.json({
-        success:true
-    });
-
-} catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-        success:false
-    });
-
-}
 };
 
-export const schedulePickup =async (req, res) => {
-
-try {
-
-    const returnId =
-        req.params.id;
-
-    const {
-        pickupDate,
-        pickupTime
-    } = req.body;
-
-
-
-    if(!pickupDate || !pickupTime){
-
-        return res.status(400).json({
-            success:false,
-            message:
-            "Pickup date and time required"
-        });
-
+export const schedulePickup = async (req, res) => {
+    try {
+        const { pickupDate, pickupTime } = req.body;
+        const result = await returnService.schedulePickupService(req.params.id, pickupDate, pickupTime);
+        if (!result.success) return res.status(result.statusCode).json(result);
+        res.json(result);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
     }
-
-
-
-    const currentReturn =
-    await Return.findById(returnId);
-
-    if(!currentReturn){
-
-        return res.status(404).json({
-            success:false
-        });
-
-    }
-
-
-
-    await Return.updateMany(
-        {
-            orderId:
-            currentReturn.orderId
-        },
-        {
-            $set:{
-                pickupDate:
-                    new Date(pickupDate),
-
-                pickupTime,
-
-                pickupStatus:
-                    "Scheduled",
-
-                status:
-                    "Pickup Scheduled"
-            }
-        }
-    );
-
-
-
-    return res.json({
-        success:true
-    });
-
-} catch(err){
-
-    console.log(err);
-
-    res.status(500).json({
-        success:false
-    });
-
-}
 };
 
 export const markPickedUp = async (req, res) => {
     try {
-        const returnId = req.params.id;
-
-        const currentReturn = await Return.findById(returnId).populate("orderId").populate("userId");
-
-        if(!currentReturn){
-            return res.status(404).json({ success:false });
-        }
-        
-        if (currentReturn.isRefunded) {
-            return res.status(400).json({
-                success: false,
-                message:"Refund already processed"
-            });
-        }
-
-        const pendingReturns = await Return.find({ 
-            orderId: currentReturn.orderId,
-            isRefunded: { $ne: true }
-        });
-        
-        let totalRefundAmount = 0;
-        for (const ret of pendingReturns) {
-            totalRefundAmount += (ret.refundAmount || 0);
-        }
-
-        await Return.updateMany(
-            { orderId: currentReturn.orderId },
-            {
-                $set:{
-                    pickupStatus:"Picked Up",
-                    status:"Refunded",
-                    pickedUpAt:new Date(),
-                    isRefunded: true
-                }
-            }
-        );
-
-        const userId = currentReturn.userId._id;
-        let wallet = await Wallet.findOne({ userId });
-
-        if(!wallet){
-            wallet = await Wallet.create({
-                userId,
-                balance:0,
-                transactions:[]
-            });
-        }
-
-        if (totalRefundAmount > 0) {
-            wallet.balance += totalRefundAmount;
-
-            wallet.transactions.push({
-                transactionId: "REFUND_" + Date.now(),
-                orderId: currentReturn.orderId._id,
-                type: "credit",
-                amount: totalRefundAmount,
-                description: "Refund for returned product(s)",
-                date: new Date()
-            });
-
-            await wallet.save();
-        }
-
-        return res.json({ success: true });
-
+        const result = await returnService.markPickedUpService(req.params.id);
+        if (!result.success) return res.status(result.statusCode || 400).json(result);
+        res.json(result);
     } catch (err) {
         console.log(err);
         res.status(500).json({ success: false });

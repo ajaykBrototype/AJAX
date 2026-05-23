@@ -1,37 +1,11 @@
-import User from "../../models/user/userModel.js";
-import Order from "../../models/user/orderModel.js";
-import Wishlist from "../../models/user/wishlistModel.js";
-import Wallet from "../../models/user/walletModel.js";
-import Otp from "../../models/user/otpModel.js";
-import { generateOTP } from "../../utils/generateOtp.js"; 
-import { sendOtpEmail } from "../../utils/sendEmail.js";
-import { changePasswordService } from "../../services/user/profile.service.js";
+import * as profileService from "../../services/user/profile.service.js";
 import { verifyEmailOtpService, resendEmailOtpService } from "../../services/user/email.service.js";
 
 export const loadProfile = async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.redirect("/login");
-    }
-
-    const userId = req.session.userId;
-    const user = await User.findById(userId);
-
-    // Fetch stats for the dashboard
-    const orderCount = await Order.countDocuments({ userId });
-    
-    const wishlist = await Wishlist.findOne({ user: userId });
-    const wishlistCount = wishlist ? wishlist.items.length : 0;
-    
-    const wallet = await Wallet.findOne({ userId });
-
-    res.render("user/profile", { 
-      user, 
-      orderCount, 
-      wishlistCount, 
-      wallet 
-    });
-
+    if (!req.session.userId) return res.redirect("/login");
+    const data = await profileService.getProfileDataService(req.session.userId);
+    res.render("user/profile", data);
   } catch (error) {
     console.log("❌ PROFILE ERROR:", error);
     res.redirect("/login");
@@ -40,22 +14,10 @@ export const loadProfile = async (req, res) => {
 
 export const loadEditProfile = async (req, res) => {
   try {
-    const userId = req.session.userId;
-
-    console.log("USER ID:", userId); // DEBUG
-
-    if (!userId) {
-      return res.redirect("/login");
-    }
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.redirect("/login");
-    }
-
-    res.render("user/editProfile", { user });
-
+    if (!req.session.userId) return res.redirect("/login");
+    const data = await profileService.getEditProfileDataService(req.session.userId);
+    if (!data.user) return res.redirect("/login");
+    res.render("user/editProfile", data);
   } catch (err) {
     console.log(err);
     res.redirect("/login");
@@ -64,82 +26,8 @@ export const loadEditProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const user = await User.findById(userId);
-
-    const { name, email, phone, dob, gender, nationality } = req.body;
-
-    // VALIDATION
-    const phoneRegex = /^[0-9]{10}$/;
-    if (phone && !phoneRegex.test(phone)) {
-      return res.json({
-        success: false,
-        message: "Phone number must be exactly 10 digits"
-      });
-    }
-
-    let updateData = { name, phone, dob, gender, nationality };
-
-    if (req.file) {
-      updateData.profileImage = "/uploads/" + req.file.filename;
-    }
-
-    // GOOGLE USER
-    if (user.googleId) {
-      await User.findByIdAndUpdate(userId, updateData);
-      return res.json({ success: true, message: "Profile updated" });
-    }
-
-    // EMAIL CHANGE
-    if (email !== user.email) {
-
-      const existingUser = await User.findOne({
-        email,
-        _id: { $ne: userId }
-      });
-
-      if (existingUser) {
-        return res.json({
-          success: false,
-          message: "Email already exists"
-        });
-      }
-
-      const otp = generateOTP();
-
-      await Otp.findOneAndUpdate(
-        { email, type: "email" },
-        {
-          otp,
-          expiresAt: Date.now() + 2 * 60 * 1000,
-          type: "email"
-        },
-        { upsert: true }
-      );
-
-      // Store both for the verify page and the final update
-      req.session.newEmail = email;
-      req.session.pendingProfileData = {
-        ...updateData,
-        email
-      };
-
-      await sendOtpEmail(email, otp, "verify_email");
-
-      return res.json({
-        success: false,
-        requireOtp: true,
-        message: "OTP sent to new email"
-      });
-    }
-
-    await User.findByIdAndUpdate(userId, {
-      ...updateData,
-      email
-    });
-
-    res.json({ success: true, message: "Profile updated successfully" });
-
+    const result = await profileService.updateProfileService(req.session.userId, req.body, req.file, req);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false });
@@ -149,18 +37,10 @@ export const updateProfile = async (req, res) => {
 export const verifyEmailOtp = async (req, res) => {
   try {
     const result = await verifyEmailOtpService(req);
-
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
+    if (!result.success) return res.status(400).json(result);
     res.json(result);
-
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -168,26 +48,12 @@ export const loadChangePassword = (req, res) => {
   res.render("user/changePassword"); 
 };
 
-
 export const changePassword = async (req, res) => {
   try {
-    console.log("API HIT 🔥");
-
-    const result = await changePasswordService(req.body, req);
-
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    res.json({
-      success: true,
-      message: "Password updated successfully"
-    });
-
+    const result = await profileService.changePasswordService(req.body, req);
+    if (!result.success) return res.status(400).json(result);
+    res.json({ success: true, message: "Password updated successfully" });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error"
-    });
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };

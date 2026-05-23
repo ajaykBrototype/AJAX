@@ -1,5 +1,5 @@
-import { success } from "zod";
 import Category from "../../models/admin/categoryModel.js";
+import SubCategory from "../../models/admin/subCategoryModel.js";
 
 export const createCategoryService = async (data) => {
   let { name, isActive } = data;
@@ -73,4 +73,59 @@ export const toggleCategoryService = async (id) => {
 export const deleteCategoryService = async (id) => {
   await Category.findByIdAndDelete(id);
   return { success: true };
+};
+
+export const getCategoryPageDataService = async (search, page, limit) => {
+  const skip = (page - 1) * limit;
+  let matchStage = {};
+
+  if (search) {
+    matchStage.name = { $regex: search, $options: "i" };
+  }
+
+  const categories = await Category.aggregate([
+    {
+      $match: matchStage
+    },
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "_id",
+        foreignField: "category",
+        as: "subCategories"
+      }
+    },
+    {
+      $addFields: {
+        subCount: { $size: "$subCategories" }
+      }
+    },
+    {
+      $sort: { createdAt: -1 }
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: limit
+    }
+  ]);
+
+  const total = await Category.countDocuments(matchStage);
+  const totalSubCategories = await SubCategory.countDocuments();
+  const activeCount = await Category.countDocuments({ isActive: true });
+  const inactiveCount = await Category.countDocuments({ isActive: false });
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    categories,
+    totalSubCategories,
+    search,
+    currentPage: page,
+    totalCategories: total,
+    activeCount,
+    inactiveCount,
+    totalPages,
+    total
+  };
 };

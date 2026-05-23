@@ -1,0 +1,187 @@
+import Return from "../../models/user/returnModel.js";
+import Wallet from "../../models/user/walletModel.js";
+import Order from "../../models/user/orderModel.js";
+import Variant from "../../models/admin/variantModel.js";
+
+export const getReturnManagementDataService = async (currentStatus, search, page, limit) => {
+    const skip = (page - 1) * limit;
+    
+    let filter = {};
+    if (currentStatus && currentStatus !== "all") {
+        const statusMap = {
+            'pending': 'Requested',
+            'approved': 'Approved',
+            'rejected': 'Rejected',
+            'pickup-scheduled': 'Pickup Scheduled',
+            'picked-up': 'Picked Up',
+            'refunded': 'Refunded'
+        };
+        filter.status = statusMap[currentStatus] || currentStatus;
+    }
+
+    let allReturns = await Return.find(filter).populate("userId").populate("orderId").sort({ createdAt: -1 });
+    
+    if (search.trim()) {
+        const q = search.toLowerCase();
+        allReturns = allReturns.filter(r => {
+            const customerName = r.userId?.name?.toLowerCase()?.includes(q);
+            const customerEmail = r.userId?.email?.toLowerCase()?.includes(q);
+            const returnId = r._id.toString().toLowerCase().includes(q);
+            const orderId = r.orderId?._id?.toString()?.toLowerCase()?.includes(q);
+            return customerName || customerEmail || returnId || orderId;
+        });
+    }
+   
+    const seenOrders = new Map();
+    allReturns.forEach(r => {
+        const oid = r.orderId?._id?.toString();
+        if (!oid) return;
+        if (!seenOrders.has(oid)) {
+            seenOrders.set(oid, { ...r.toObject(), itemCount: 1 });
+        } else {
+            seenOrders.get(oid).itemCount += 1;
+        }
+    });
+
+    const returnsArray = Array.from(seenOrders.values());
+    const totalFilteredReturns = returnsArray.length;
+    const totalPages = Math.ceil(totalFilteredReturns / limit);
+    const returns = returnsArray.slice(skip, skip + limit);
+
+    const totalReturns = await Return.countDocuments();
+    const pendingReturns = await Return.countDocuments({ status: "Requested" });
+    const approvedReturns = await Return.countDocuments({ status: "Approved" });
+    const rejectedReturns = await Return.countDocuments({ status: "Rejected" });
+
+    return {
+        returns,
+        totalReturns,
+        pendingReturns,
+        approvedReturns,
+        rejectedReturns,
+        currentStatus,
+        searchQuery: search,
+        currentPage: page,
+        totalPages,
+        totalFilteredReturns,
+        search
+    };
+};
+
+export const getReturnDetailsService = async (id) => {
+    const returnItem = await Return.findById(id).populate("userId").populate({
+        path: "orderId",
+        populate: { path: "userId" }
+    });
+
+    if (!returnItem) return null;
+
+    const allReturnsInOrder = await Return.find({ 
+        orderId: returnItem.orderId?._id,
+        status: returnItem.status 
+    }).populate("userId").populate("orderId");
+
+    return { returnItem, allReturnsInOrder };
+};
+
+export const approveReturnService = async (returnId) => {
+    const currentReturn = await Return.findById(returnId);
+    if (!currentReturn) return { success: false, statusCode: 404, message: "No return request" };
+
+    const pendingReturns = await Return.find({ orderId: currentReturn.orderId, status: "Requested" });
+    const order = await Order.findById(currentReturn.orderId);
+
+    if (order) {
+        for (const ret of pendingReturns) {
+            const orderItem = order.items.find(item => 
+                item._id.toString() === ret.itemId.toString() ||
+                (item.productId && item.productId.toString() === ret.itemId.toString())
+            );
+
+            if (orderItem) {
+                if (orderItem.variantId) {
+                    const variant = await Variant.findById(orderItem.variantId);
+                    if (variant) {
+                        variant.stock += orderItem.quantity;
+                        await variant.save();
+                    }
+                }
+                orderItem.status = "Returned";
+            }
+        }
+        order.markModified("items");
+        await order.save();
+    }
+
+    await Return.updateMany(
+        { orderId: currentReturn.orderId },
+        { $set: { status: "Approved", approvedAt: new Date() } }
+    );
+
+    return { success: true };
+};
+
+export const rejectReturnService = async (returnId, reason) => {
+    const currentReturn = await Return.findById(returnId);
+    if (!currentReturn) return { success: false, statusCode: 404 };
+
+    await Return.updateMany(
+        { orderId: currentReturn.orderId },
+        { $set: { status: "Rejected", rejectionReason: reason, rejectedAt: new Date() } }
+    );
+
+    return { success: true };
+};
+
+export const schedulePickupService = async (returnId, pickupDate, pickupTime) => {
+    if (!pickupDate || !pickupTime) return { success: false, statusCode: 400, message: "Pickup date and time required" };
+
+    const currentReturn = await Return.findById(returnId);
+    if (!currentReturn) return { success: false, statusCode: 404 };
+
+    await Return.updateMany(
+        { orderId: currentReturn.orderId },
+        { $set: { pickupDate: new Date(pickupDate), pickupTime, pickupStatus: "Scheduled", status: "Pickup Scheduled" } }
+    );
+
+    return { success: true };
+};
+
+export const markPickedUpService = async (returnId) => {
+    const currentReturn = await Return.findById(returnId).populate("orderId").populate("userId");
+    if (!currentReturn) return { success: false, statusCode: 404 };
+    
+    if (currentReturn.isRefunded) return { success: false, statusCode: 400, message: "Refund already processed" };
+
+    const pendingReturns = await Return.find({ orderId: currentReturn.orderId, isRefunded: { $ne: true } });
+    
+    let totalRefundAmount = 0;
+    for (const ret of pendingReturns) totalRefundAmount += (ret.refundAmount || 0);
+
+    await Return.updateMany(
+        { orderId: currentReturn.orderId },
+        { $set: { pickupStatus: "Picked Up", status: "Refunded", pickedUpAt: new Date(), isRefunded: true } }
+    );
+
+    const userId = currentReturn.userId._id;
+    let wallet = await Wallet.findOne({ userId });
+
+    if (!wallet) {
+        wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
+    }
+
+    if (totalRefundAmount > 0) {
+        wallet.balance += totalRefundAmount;
+        wallet.transactions.push({
+            transactionId: "REFUND_" + Date.now(),
+            orderId: currentReturn.orderId._id,
+            type: "credit",
+            amount: totalRefundAmount,
+            description: "Refund for returned product(s)",
+            date: new Date()
+        });
+        await wallet.save();
+    }
+
+    return { success: true };
+};

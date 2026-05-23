@@ -9,13 +9,10 @@ export const addAddressService = async (data, userId) => {
   return { success: true, address };
 };
 
-
 export const getAddressService = async (userId) => {
   const addresses = await Address.find({ userId });
-
   return { success: true, addresses };
 };
-
 
 export const deleteAddressService = async (userId, addressId) => {
   try {
@@ -31,7 +28,6 @@ export const deleteAddressService = async (userId, addressId) => {
 
 export const updateAddressService = async (userId, addressId, updateData) => {
   try {
-   
     const updatedAddress = await Address.findOneAndUpdate(
       { _id: addressId, userId: userId },
       { $set: updateData },
@@ -41,4 +37,8 @@ export const updateAddressService = async (userId, addressId, updateData) => {
   } catch (error) {
     throw new Error("Service Error: " + error.message);
   }
+};
+
+export const getAddressByIdService = async (userId, addressId) => {
+    return await Address.findOne({ _id: addressId, userId: userId });
 };

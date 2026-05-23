@@ -1,99 +1,32 @@
 import * as subService from "../../services/admin/subCategory.service.js";
-import Category from "../../models/admin/categoryModel.js";
-import SubCategory from "../../models/admin/subCategoryModel.js";
 
 export const loadSubCategoryPage = async (req, res) => {
   try {
-      const search=req.query.search || "";
-      const selectedCategory= req.query.category || "" ; 
-      const page=parseInt(req.query.page) || 1;
-      const limit=5;
-      const skip=(page-1)*limit;
+      const search = req.query.search || "";
+      const selectedCategory = req.query.category || ""; 
+      const page = parseInt(req.query.page) || 1;
+      const limit = 5;
 
-     let filter = {};
+      const data = await subService.getSubCategoryPageDataService(search, selectedCategory, page, limit);
 
-if (search) {
-  filter.name = { 
-    $regex: search.trim(), 
-    $options: "i" 
-  };
-}
-
-if (selectedCategory && selectedCategory !== "all") {
-  filter.category = selectedCategory;
-}
-
-const total = await SubCategory.countDocuments(filter);
-
-const subCategories = await SubCategory.find(filter)
-  .populate("category", "name")
-  .sort({ createdAt: -1 })
-  .skip(skip)
-  .limit(limit);
-
-  const categories = await Category.find({ isActive: true });
-
-
-const activeCount = await SubCategory.countDocuments({
-  ...filter,
-  isActive: true
-});
-
-const inactiveCount = await SubCategory.countDocuments({
-  ...filter,
-  isActive: false
-});
-
-      const totalPages=Math.ceil(total/limit);
-
-    res.render("admin/subcategories", {
-      categories,
-      subCategories,
-      search,
-      currentPage: page,
-      totalPages,
-      total,
-      selectedCategory,
-      totalSubCategory:total,
-      activeCount,inactiveCount
-    });
-
+      res.render("admin/subcategories", data);
   } catch (err) {
     console.error("SubCategory Controller Error:", err);
     res.render("admin/subcategories", {
-      categories: [],
-      subCategories: [],
-      search: "",
-      currentPage: 1,
-      totalPages: 0,
-      total: 0,
-      selectedCategory: "",
-      totalSubCategory: 0,
-      activeCount: 0,
-      inactiveCount: 0
+      categories: [], subCategories: [], search: "", currentPage: 1, totalPages: 0, total: 0, selectedCategory: "", totalSubCategory: 0, activeCount: 0, inactiveCount: 0
     });
   }
 };
 
-export const createSubCategory=async(req,res)=>{
-  const result= await subService.createSubCategoryService(req.body);
-
-  if(!result.success){
-    return res.status(400).json(result);
-  }
+export const createSubCategory = async (req, res) => {
+  const result = await subService.createSubCategoryService(req.body);
+  if (!result.success) return res.status(400).json(result);
   res.json(result);
-}
+};
 
 export const updateSubCategory = async (req, res) => {
-  const result = await subService.updateSubCategoryService(
-    req.params.id,
-    req.body
-  );
-
-  if (!result.success) {
-    return res.status(400).json(result);
-  }
-
+  const result = await subService.updateSubCategoryService(req.params.id, req.body);
+  if (!result.success) return res.status(400).json(result);
   res.json(result);
 };
 
@@ -109,9 +42,8 @@ export const toggleSubCategory = async (req, res) => {
 
 export const getSubCategoriesByCategory = async (req, res) => {
   try {
-    const { catId } = req.params;
-    const subcategories = await SubCategory.find({ category: catId, isActive: true });
-    res.json({ success: true, subcategories });
+    const result = await subService.getSubCategoriesByCategoryService(req.params.catId);
+    res.json(result);
   } catch (err) {
     console.error("Error fetching subcategories by category:", err);
     res.status(500).json({ success: false, message: "Internal Server Error" });
