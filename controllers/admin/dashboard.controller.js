@@ -90,6 +90,7 @@ export const loadSalesReport = async (req, res) => {
       currentPath: "/admin/sales-report",
       period,
       ...reportStats,
+      stats: reportStats.currentStats,
       startDate: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       endDate: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     });

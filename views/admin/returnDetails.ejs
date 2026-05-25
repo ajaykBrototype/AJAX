@@ -7,6 +7,8 @@
   <title>Return Details — AJAX Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     body { background: #ffffff; color: #111; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
 
@@ -75,6 +77,110 @@
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: translateY(20px); transition: all 0.3s ease;
     }
     .modal-backdrop.open .modal-card { transform: translateY(0); }
+
+    /* ── Flatpickr Premium Theme ── */
+    .flatpickr-calendar {
+      background: #1a2b22 !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      border-radius: 20px !important;
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.5) !important;
+      font-family: 'Inter', sans-serif !important;
+      padding: 12px !important;
+      width: clamp(280px, 320px, 100%) !important;
+    }
+    .flatpickr-months { padding: 4px 0 12px !important; }
+    .flatpickr-month { color: #fff !important; }
+    .flatpickr-current-month { font-size: 14px !important; font-weight: 800 !important; color: #fff !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+      background: transparent !important; color: #fff !important; font-weight: 800 !important;
+    }
+    .flatpickr-current-month input.cur-year { color: #fff !important; font-weight: 800 !important; }
+    .flatpickr-prev-month, .flatpickr-next-month { 
+      color: rgba(255,255,255,0.5) !important; fill: rgba(255,255,255,0.5) !important;
+    }
+    .flatpickr-prev-month:hover, .flatpickr-next-month:hover { 
+      color: #fff !important; fill: #fff !important;
+    }
+    .flatpickr-weekday { color: rgba(255,255,255,0.35) !important; font-weight: 700 !important; font-size: 10px !important; }
+    .flatpickr-day {
+      color: rgba(255,255,255,0.65) !important; border-radius: 10px !important;
+      font-weight: 600 !important; font-size: 12px !important; height: 34px !important; line-height: 34px !important;
+      margin: 2px !important;
+    }
+    .flatpickr-day:hover { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+    .flatpickr-day.today { border: 1.5px solid rgba(255,255,255,0.25) !important; color: #fff !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover {
+      background: #3d6b4a !important; border-color: #3d6b4a !important;
+      color: #fff !important; font-weight: 800 !important;
+    }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+      color: rgba(255,255,255,0.15) !important;
+    }
+    .flatpickr-innerContainer { border: none !important; }
+    .dayContainer { border: none !important; }
+
+    /* ── Field styling ── */
+    .fp-field {
+      width: 100%; padding: 14px 16px; background: #f8fafc;
+      border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px;
+      font-weight: 700; color: #1e293b; outline: none; cursor: pointer;
+      transition: all 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .fp-field:focus { border-color: #3d6b4a; box-shadow: 0 0 0 3px rgba(61,107,74,0.12); }
+
+    /* ── Custom Time Picker ── */
+    .time-picker-wrap { position: relative; }
+    .time-display {
+      width: 100%; padding: 14px 16px; background: #f8fafc;
+      border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px;
+      font-weight: 700; color: #1e293b; outline: none; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+      user-select: none;
+    }
+    .time-display:hover { border-color: #3d6b4a; }
+    .time-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+      background: #1a2b22; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.5); z-index: 100; padding: 16px;
+      flex-direction: column; gap: 12px;
+    }
+    .time-dropdown.open { display: flex; }
+    .time-cols { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 8px; }
+    .time-col-label {
+      text-align: center; color: rgba(255,255,255,0.35);
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .time-scroll { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; overscroll-behavior: contain; scroll-behavior: smooth; }
+    .time-scroll::-webkit-scrollbar { width: 4px; }
+    .time-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .time-scroll::-webkit-scrollbar-thumb { background: #3d6b4a; border-radius: 10px; }
+    .time-scroll::-webkit-scrollbar-thumb:hover { background: #4a8259; }
+    .time-num {
+      padding: 8px 0; text-align: center; border-radius: 10px;
+      font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.5);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .time-num:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .time-num.active {
+      background: #111827; color: #fff; font-weight: 900;
+      border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .ampm-btn {
+      padding: 14px 0; text-align: center; border-radius: 10px;
+      font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.4);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .ampm-btn.active {
+      background: #111827; color: #fff; font-weight: 900;
+      border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .time-confirm {
+      width: 100%; padding: 10px; background: #3d6b4a; border: none;
+      border-radius: 12px; color: #fff; font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;
+    }
+    .time-confirm:hover { background: #2f5239; }
   </style>
 </head>
 <%
@@ -238,8 +344,8 @@
         
         <!-- Inspection Gallery -->
         
-        <div class="card overflow-hidden border-none shadow-xl">
-          <div class="bg-[#2a4034] p-6 flex items-center gap-4">
+        <div class="card border-none shadow-xl">
+          <div class="bg-[#2a4034] p-6 flex items-center gap-4 rounded-t-[16px]">
             <div class="icon-box bg-white/10 text-white">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
@@ -269,46 +375,64 @@
 
   <div class="space-y-4">
 
+    <!-- Date Picker -->
     <div class="space-y-1.5">
-
-      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">
-        Pickup Date
-      </label>
-
-      <input
-        id="pickupDate"
-        type="date"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-green-100 transition-all"
-      >
-
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Pickup Date</label>
+      <input id="pickupDate" class="fp-field" placeholder="Select a date" readonly>
     </div>
 
-
-
+    <!-- Custom Time Picker -->
     <div class="space-y-1.5">
-
-      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">
-        Pickup Time
-      </label>
-
-      <input
-        id="pickupTime"
-        type="time"
-        class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-green-100 transition-all"
-      >
-
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Pickup Time</label>
+      <div class="time-picker-wrap">
+        <div class="time-display" id="timeDisplay" onclick="toggleTimePicker()">
+          <span id="timeDisplayText" class="text-slate-400 font-semibold">Select time</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="time-dropdown" id="timeDropdown">
+          <div class="time-cols">
+            <!-- Hour Column -->
+            <div>
+              <div class="time-col-label">Hour</div>
+              <div class="time-scroll" id="hourScroll">
+                <% for(let h = 1; h <= 12; h++) { %>
+                <div class="time-num" data-val="<%= h %>" onclick="selectHour(<%= h %>)"><%= String(h).padStart(2,'0') %></div>
+                <% } %>
+              </div>
+            </div>
+            <!-- Minute Column -->
+            <div>
+              <div class="time-col-label">Min</div>
+              <div class="time-scroll" id="minScroll">
+                <% for(let m = 0; m < 60; m++) { 
+                     let minStr = String(m).padStart(2, '0');
+                %>
+                <div class="time-num" data-val="<%= minStr %>" onclick="selectMin('<%= minStr %>')"><%= minStr %></div>
+                <% } %>
+              </div>
+            </div>
+            <!-- AM/PM Column -->
+            <div>
+              <div class="time-col-label">Period</div>
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="ampm-btn active" id="amBtn" onclick="selectAmPm('AM')">AM</div>
+                <div class="ampm-btn" id="pmBtn" onclick="selectAmPm('PM')">PM</div>
+              </div>
+            </div>
+          </div>
+          <button class="time-confirm" onclick="confirmTime()">Done</button>
+        </div>
+      </div>
+      <!-- Hidden actual value for submittal -->
+      <input type="hidden" id="pickupTime">
     </div>
-
-
 
     <button
       id="schedulePickupBtn"
       data-id="<%= returnItem._id %>"
       class="w-full py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all"
     >
-
       Schedule Pickup
-
     </button>
 
   </div>
@@ -477,61 +601,76 @@
       });
     }
 
-    // Disable past dates and limit to next 10 days for pickup
+    // ── Flatpickr Date Picker ──
+    const today = new Date();
+    const tenDaysLater = new Date();
+    tenDaysLater.setDate(today.getDate() + 10);
+
     const pickupInput = document.getElementById('pickupDate');
     if (pickupInput) {
-      const today = new Date();
-      const tenDaysLater = new Date();
-      tenDaysLater.setDate(today.getDate() + 10);
-      
-      const minDate = today.toISOString().split('T')[0];
-      const maxDate = tenDaysLater.toISOString().split('T')[0];
-      
-      pickupInput.setAttribute('min', minDate);
-      pickupInput.setAttribute('max', maxDate);
+      flatpickr(pickupInput, {
+        minDate: today,
+        maxDate: tenDaysLater,
+        dateFormat: 'd-m-Y',
+        disableMobile: true,
+        animate: true
+      });
+    }
+
+    // ── Custom Time Picker Logic ──
+    let selHour = null, selMin = null, selAmPm = 'AM';
+
+    function toggleTimePicker() {
+      document.getElementById('timeDropdown').classList.toggle('open');
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      const wrap = document.querySelector('.time-picker-wrap');
+      if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('timeDropdown').classList.remove('open');
+      }
+    });
+
+    function selectHour(h) {
+      selHour = h;
+      document.querySelectorAll('#hourScroll .time-num').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.val) === h);
+      });
+      updateTimeDisplay();
+    }
+
+    function selectMin(m) {
+      selMin = m;
+      document.querySelectorAll('#minScroll .time-num').forEach(el => {
+        el.classList.toggle('active', el.dataset.val === m);
+      });
+      updateTimeDisplay();
+    }
+
+    function selectAmPm(period) {
+      selAmPm = period;
+      document.getElementById('amBtn').classList.toggle('active', period === 'AM');
+      document.getElementById('pmBtn').classList.toggle('active', period === 'PM');
+      updateTimeDisplay();
+    }
+
+    function updateTimeDisplay() {
+      if (selHour !== null && selMin !== null) {
+        const formatted = String(selHour).padStart(2,'0') + ':' + selMin + ' ' + selAmPm;
+        document.getElementById('timeDisplayText').textContent = formatted;
+        document.getElementById('timeDisplayText').classList.remove('text-slate-400', 'font-semibold');
+        document.getElementById('timeDisplayText').classList.add('text-slate-800', 'font-bold');
+        // Set hidden input value for submission
+        document.getElementById('pickupTime').value = formatted;
+      }
+    }
+
+    function confirmTime() {
+      if (selHour === null || selMin === null) return;
+      document.getElementById('timeDropdown').classList.remove('open');
     }
   </script>
-  <style>
-    /* Premium Native Date/Time Input Styling */
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator {
-      background: transparent;
-      bottom: 0;
-      color: transparent;
-      cursor: pointer;
-      height: auto;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: auto;
-    }
-    
-    #pickupDate, #pickupTime {
-      position: relative;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: none;
-    }
-    
-    #pickupDate::after {
-      content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-    
-    #pickupTime::after {
-      content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>');
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-  </style>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/js/admin/returnDetails.js"></script>

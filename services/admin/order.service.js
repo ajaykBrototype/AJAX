@@ -5,7 +5,7 @@ import Wallet from "../../models/user/walletModel.js";
 
 export const getAdminOrdersService = async (searchQuery, currentStatus, page, limit) => {
     const skip = (page - 1) * limit;
-    let filter = {};
+    let filter = { status: { $ne: "Pending" } };
 
     if (searchQuery) {
         filter = {
@@ -38,8 +38,8 @@ export const getAdminOrdersService = async (searchQuery, currentStatus, page, li
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit),
-        Order.countDocuments(),
-        Order.countDocuments({ status: { $in: ["Pending", "Placed"] } }),
+        Order.countDocuments({ status: { $ne: "Pending" } }),
+        Order.countDocuments({ status: "Placed" }),
         Order.countDocuments({ status: "Delivered" }),
         Order.countDocuments(filter)
     ]);

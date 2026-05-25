@@ -110,16 +110,24 @@ try{
    ).value;
 
     if (!pickupDate || !pickupTime) {
-     ajaxToast("error","Date and time mandatory")
-      return;
+       Swal.fire({
+          icon: 'warning',
+          title: 'Missing Details',
+          text: 'Date and time are mandatory.',
+          confirmButtonColor: '#1C1C1C'
+       });
+       return;
     }
+
+    const [d, m, y] = pickupDate.split('-');
+    const parsedDate = `${y}-${m}-${d}`;
 
     await axios.patch(
       `/admin/returns/${
          schedulePickupBtn.dataset.id
       }/schedule-pickup`,
       {
-         pickupDate,
+         pickupDate: parsedDate,
          pickupTime
       }
     );
@@ -129,6 +137,12 @@ try{
 }catch(err){
 
    console.log(err);
+   Swal.fire({
+      icon: 'error',
+      title: 'Failed',
+      text: 'Could not schedule pickup details. Please try again.',
+      confirmButtonColor: '#1C1C1C'
+   });
 
 }
 

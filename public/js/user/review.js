@@ -744,6 +744,27 @@ document.addEventListener("DOMContentLoaded", () => {
                     totalReviewsCount.textContent = `Based on ${ratingSummary.totalReviews} ${ratingSummary.totalReviews === 1 ? 'Review' : 'Reviews'}`;
                 }
 
+                // Update Header Summary
+                const headerRatingContainer = document.getElementById("headerRatingContainer");
+                const headerStarsRow = document.getElementById("headerStarsRow");
+                const headerRatingText = document.getElementById("headerRatingText");
+
+                if (headerRatingContainer && headerStarsRow && headerRatingText) {
+                    if (ratingSummary.totalReviews > 0) {
+                        const rating = Math.round(Number(ratingSummary.averageRating || 0));
+                        headerStarsRow.innerHTML = [1, 2, 3, 4, 5].map(i => `
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="${i <= rating ? '#000000' : 'none'}" stroke="#000000" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        `).join('');
+                        headerRatingText.textContent = `${ratingSummary.averageRating} (${ratingSummary.totalReviews} ${ratingSummary.totalReviews === 1 ? 'Review' : 'Reviews'})`;
+                        headerRatingContainer.style.display = "flex";
+                        headerRatingContainer.style.opacity = "1";
+                    } else {
+                        headerRatingContainer.style.display = "none";
+                    }
+                }
+
                 // 4. Update Star Breakdown Container
                 if (starBreakdownContainer) {
                     const stars = [5, 4, 3, 2, 1];

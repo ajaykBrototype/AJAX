@@ -41,7 +41,7 @@ const getBestOffer = (activeOffers, prod, price) => {
 
 export const getOrdersListService = async (userId, search, sort) => {
     const user = await User.findById(userId);
-    let filter = { userId };
+    let filter = { userId, status: { $ne: "Pending" } };
     const now = new Date();
 
     if (sort === "30days") {

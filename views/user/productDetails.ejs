@@ -1200,15 +1200,9 @@
                 <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
                 <h1 class="product-title"><%= product.name %></h1>
                 
-                <div class="rating-summary">
-                    <div class="rating-stars">
-                        <i data-lucide="star" size="14" fill="#000"></i>
-                        <i data-lucide="star" size="14" fill="#000"></i>
-                        <i data-lucide="star" size="14" fill="#000"></i>
-                        <i data-lucide="star" size="14" fill="#000"></i>
-                        <i data-lucide="star" size="14" fill="none" stroke="#000"></i>
-                    </div>
-                    <span class="rating-text">4.8 (128 Reviews)</span>
+                <div class="rating-summary" id="headerRatingContainer" style="display: none; align-items: center; gap: 8px;">
+                    <div class="rating-stars" id="headerStarsRow" style="display: flex; gap: 4px;"></div>
+                    <span class="rating-text" id="headerRatingText"></span>
                 </div>
 
                 <div class="price-wrapper">
