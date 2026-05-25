@@ -3,6 +3,7 @@ import * as productService from "../../services/user/product.service.js";
 export const loadMenPage = async (req, res) => {
   try {
     const data = await productService.getMenPageDataService(req.query.sub, req.query.page || 1, req.session.userId);
+    if (!data.targetCategory) return res.redirect("/home");
     res.render("user/men-product-list", data);
   } catch (err) {
     console.log(err);
@@ -24,6 +25,7 @@ export const loadCategoryPage = async (req, res) => {
 export const loadWomenPage = async (req, res) => {
   try {
     const data = await productService.getWomenPageDataService(req.query.sub, req.query.page || 1, req.session.userId);
+    if (!data.targetCategory) return res.redirect("/home");
     res.render("user/women-product-list", data);
   } catch (err) {
     console.log(err);
@@ -34,7 +36,7 @@ export const loadWomenPage = async (req, res) => {
 export const loadProductDetails = async (req, res) => {
   try {
     const data = await productService.getProductDetailsService(req.params.id, req.session.userId);
-    if (!data) return res.redirect("/men-product-list");
+    if (!data) return res.redirect("/home");
     res.render("user/productDetails", data);
   } catch (err) {
     console.log("PRODUCT DETAILS ERROR:", err);

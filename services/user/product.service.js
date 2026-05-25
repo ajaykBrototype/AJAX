@@ -36,7 +36,7 @@ const getCategoryProductsHelper = async (categoryNameRegex, sub, page, userId) =
     const limit = 8;
     const skip = (page - 1) * limit;
 
-    const targetCategory = await Category.findOne({ name: { $regex: categoryNameRegex, $options: "i" } });
+    const targetCategory = await Category.findOne({ name: { $regex: categoryNameRegex, $options: "i" }, isActive: true });
     if (!targetCategory) return { products: [], subCategories: [], selectedSub: null, currentPage: 1, totalPages: 1, totalProducts: 0, targetCategory: null, wishlist: [] };
 
     const subCategories = await SubCategory.find({ category: targetCategory._id, isActive: true });
@@ -99,6 +99,8 @@ export const getProductDetailsService = async (productId, userId) => {
     if (!product || !product.isActive) return null;
 
     const category = await Category.findById(product.category).lean(); 
+    if (!category || !category.isActive) return null;
+
     const subCategory = await SubCategory.findById(product.subcategory).lean();
     const variants = await Variant.find({ productId, isActive: true }).lean();
     const defaultVariant = variants.find(v => v.isDefault) || variants[0];
@@ -155,7 +157,7 @@ export const getFilteredProductsService = async (query, userId) => {
     const max = Number(maxPrice) || 1000000;
     const targetCategoryName = mainCategory || 'men';
 
-    const targetCategory = await Category.findOne({ name: { $regex: new RegExp(`^${targetCategoryName}$`, "i") } });
+    const targetCategory = await Category.findOne({ name: { $regex: new RegExp(`^${targetCategoryName}$`, "i") }, isActive: true });
     if (!targetCategory) return { success: true, products: [], wishlist: [] };
 
     let filter = { isActive: true, category: targetCategory._id };
