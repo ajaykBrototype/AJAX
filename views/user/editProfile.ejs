@@ -6,6 +6,7 @@
   <title>Edit Profile — AJAX</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -106,6 +107,247 @@
     .primary-btn:active {
         transform: translateY(-1px);
     }
+
+    /* ── Flatpickr Calendar – Reference Image Match ── */
+    .flatpickr-calendar {
+        background: #fff;
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+        padding: 1rem 1.25rem 1.25rem;
+        font-family: 'Outfit', sans-serif;
+        width: 320px;
+    }
+    /* Collapse built-in top padding flatpickr adds */
+    .flatpickr-calendar.arrowTop:before,
+    .flatpickr-calendar.arrowTop:after { display: none; }
+    .flatpickr-months {
+        align-items: center;
+        margin-bottom: 0.5rem;
+        padding: 0;
+    }
+    .flatpickr-month {
+        height: auto;
+        padding: 0;
+    }
+    .flatpickr-current-month {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1C1C1C;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0;
+        justify-content: center;
+        position: static;
+        width: auto;
+    }
+    /* Native month select – styled to match design */
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1C1C1C;
+        background: transparent;
+        border: none;
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 0.15rem 1.4rem 0.15rem 0.45rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.18s;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%231C1C1C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.25rem center;
+        background-size: 11px;
+        outline: none;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+        background-color: #F1EDE8;
+    }
+    .flatpickr-current-month .numInputWrapper {
+        width: 3.8rem;
+    }
+    .flatpickr-current-month .numInputWrapper input.cur-year {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1C1C1C;
+        background: transparent;
+        border: none;
+        padding: 0;
+        box-shadow: none;
+    }
+    .flatpickr-current-month .numInputWrapper span {
+        display: none;
+    }
+    .flatpickr-prev-month,
+    .flatpickr-next-month {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.9rem;
+        height: 1.9rem;
+        border-radius: 50%;
+        transition: background 0.2s;
+        top: auto;
+        position: relative;
+        padding: 0;
+    }
+    .flatpickr-prev-month:hover,
+    .flatpickr-next-month:hover {
+        background: #F1EDE8;
+    }
+    .flatpickr-prev-month svg,
+    .flatpickr-next-month svg {
+        fill: #1C1C1C;
+        width: 9px;
+        height: 9px;
+    }
+    .flatpickr-weekdays {
+        margin-bottom: 0;
+        padding: 0;
+    }
+    .flatpickr-weekdaycontainer {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+    span.flatpickr-weekday {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #9B8E83;
+        text-align: center;
+        letter-spacing: 0.05em;
+        padding: 0.3rem 0 0.4rem;
+        border-bottom: 1px solid #F0EDE9;
+    }
+    .flatpickr-days {
+        width: 100%;
+    }
+    .flatpickr-rContainer {
+        width: 100%;
+    }
+    .dayContainer {
+        display: flex !important;
+        flex-wrap: wrap;
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        padding: 0;
+        gap: 0;
+    }
+    .flatpickr-day {
+        flex: 0 0 calc(100% / 7);
+        max-width: calc(100% / 7);
+        box-sizing: border-box;
+        height: 2.1rem;
+        border-radius: 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #1C1C1C;
+        border: none;
+        transition: background 0.15s, color 0.15s;
+        line-height: 1;
+    }
+    .flatpickr-day:hover {
+        background: #F1EDE8;
+        color: #1C1C1C;
+    }
+    .flatpickr-day.today {
+        font-weight: 700;
+        color: #1C1C1C;
+        background: transparent;
+        border: none;
+        position: relative;
+    }
+    .flatpickr-day.today::after {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 4px;
+        background: #9B8E83;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+        background: #1C1C1C;
+        color: #fff;
+        border-radius: 0.45rem;
+    }
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        color: #C8C1B9;
+    }
+    .flatpickr-day.flatpickr-disabled,
+    .flatpickr-day.flatpickr-disabled:hover {
+        color: #D9D3CD;
+    }
+    .flatpickr-innerContainer {
+        margin-top: 0.2rem;
+    }
+
+    /* ── Custom Month Label (replaces native select) ── */
+    .fp-month-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1C1C1C;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.45rem;
+        border-radius: 0.5rem;
+        transition: background 0.18s;
+    }
+    .fp-month-label:hover { background: #F1EDE8; }
+    .fp-month-label svg { flex-shrink: 0; }
+    /* Custom dropdown panel */
+    .fp-month-panel {
+        position: absolute;
+        z-index: 99999;
+        background: #fff;
+        border-radius: 0.9rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        padding: 0.4rem;
+        min-width: 130px;
+        display: none;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .fp-month-panel.open { display: flex; }
+    .fp-month-option {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #1C1C1C;
+        padding: 0.45rem 0.75rem;
+        border-radius: 0.55rem;
+        cursor: pointer;
+        transition: background 0.15s;
+        border: none;
+        background: transparent;
+        text-align: left;
+        width: 100%;
+    }
+    .fp-month-option:hover { background: #F1EDE8; }
+    .fp-month-option.active {
+        background: #1C1C1C;
+        color: #fff;
+    }
+    /* DOB trigger input */
+    .dob-trigger {
+        cursor: pointer;
+        caret-color: transparent;
+    }
+    .dob-trigger:focus {
+        outline: none;
+        background: #fff;
+        border-color: #1C1C1C;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    }
 </style>
 </head>
 
@@ -180,7 +422,10 @@
 
                         <div class="input-group">
                             <label class="input-label">Date of Birth</label>
-                            <input type="date" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" class="modern-input" />
+                            <!-- Hidden input carries the value name="dob" for form submission -->
+                            <input type="hidden" id="dobHidden" name="dob" value="<%= user.dob ? user.dob.toISOString().split('T')[0] : '' %>" />
+                            <!-- Visible Flatpickr trigger -->
+                            <input type="text" id="dobPicker" class="modern-input dob-trigger" placeholder="dd-mm-yyyy" readonly />
                         </div>
 
                         <div class="input-group">
@@ -215,9 +460,47 @@
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/utils/swal-helper.js"></script>
 <script src="/js/user/profile.js"></script>
+
+<script>
+    // ── Flatpickr DOB Picker ──
+    (function() {
+        const hiddenInput = document.getElementById('dobHidden');
+        const existingVal = hiddenInput.value;
+
+        flatpickr('#dobPicker', {
+            dateFormat: 'd-m-Y',
+            altInput: false,
+            allowInput: false,
+            disableMobile: true,
+            maxDate: 'today',
+            defaultDate: existingVal || null,
+            onChange: function(selectedDates) {
+                if (selectedDates.length) {
+                    const d    = selectedDates[0];
+                    const yyyy = d.getFullYear();
+                    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd   = String(d.getDate()).padStart(2, '0');
+                    hiddenInput.value = yyyy + '-' + mm + '-' + dd;
+                } else {
+                    hiddenInput.value = '';
+                }
+            }
+        });
+
+        // Pre-populate display if existing value
+        if (existingVal) {
+            const parts = existingVal.split('-');
+            if (parts.length === 3) {
+                document.getElementById('dobPicker').value =
+                    parts[2] + '-' + parts[1] + '-' + parts[0];
+            }
+        }
+    })();
+</script>
 
 <script>
     // Preview image locally before upload
