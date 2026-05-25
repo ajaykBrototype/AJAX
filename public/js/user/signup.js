@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     clearErrors();
+    const btn = document.getElementById("signupBtn");
+    const btnText = document.getElementById("btnText");
+    const btnSpinner = document.getElementById("btnSpinner");
 
     const data = Object.fromEntries(new FormData(form));
          let hasError = false;
@@ -27,6 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!data.confirmPassword) { showError("confirmPasswordError", "Confirm Password is required"); hasError = true; }
   
   if (hasError) return;
+
+  // Show loading UI
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-70", "cursor-not-allowed");
+    if (btnText) btnText.textContent = "Creating...";
+    if (btnSpinner) btnSpinner.classList.remove("hidden");
+  }
+
     try {
       const res = await axios.post("/signup", data);
 
@@ -36,6 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 1500);
 
     } catch (err) {
+      // Revert loading UI on error
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("opacity-70", "cursor-not-allowed");
+        if (btnText) btnText.textContent = "Create Account";
+        if (btnSpinner) btnSpinner.classList.add("hidden");
+      }
+
   const error = err.response?.data;
 
   // ✅ FIELD ERRORS (priority)

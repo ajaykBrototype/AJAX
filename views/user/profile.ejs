@@ -188,10 +188,17 @@
                             <i data-lucide="map-pin" size="18"></i>
                             Addresses
                         </a>
-                        <a href="/change-password" class="side-nav-item">
-                            <i data-lucide="lock" size="18"></i>
-                            Password
-                        </a>
+                        <% if(user.googleId) { %>
+                            <div class="side-nav-item opacity-50 cursor-not-allowed" title="Logged in with Google">
+                                <i data-lucide="lock" size="18"></i>
+                                Password
+                            </div>
+                        <% } else { %>
+                            <a href="/change-password" class="side-nav-item">
+                                <i data-lucide="lock" size="18"></i>
+                                Password
+                            </a>
+                        <% } %>
                         <div class="h-[1px] bg-black/5 my-4 mx-4"></div>
                         <button onclick="handleLogout()" class="side-nav-item w-full text-left">
                             <i data-lucide="log-out" size="18"></i>

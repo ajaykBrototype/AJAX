@@ -1437,6 +1437,92 @@
 <script src="/js/user/productDetail.js"></script>
 <script src="/js/user/wishlist.js"></script>
 
+<!-- SIZE GUIDE MODAL -->
+<div class="review-modal-overlay" id="sizeGuideModal">
+    <div class="review-modal-card" style="width: 480px; padding: 40px;">
+        <div class="modal-header" style="margin-bottom: 24px;">
+            <h3 class="modal-title" style="font-size: 20px; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; width: 100%;">Size Guide</h3>
+            <button type="button" class="modal-close-btn" id="sizeModalCloseBtn" style="position: absolute; right: 24px; top: 24px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-family: var(--font-main, sans-serif); font-size: 13px;">
+                <thead>
+                    <tr style="background: #F4F4F5; border-bottom: 1px solid #E4E4E7;">
+                        <th style="padding: 16px 12px; font-weight: 700; letter-spacing: 0.05em;">SIZE</th>
+                        <th style="padding: 16px 12px; font-weight: 700; letter-spacing: 0.05em;">LENGTH</th>
+                        <th style="padding: 16px 12px; font-weight: 700; letter-spacing: 0.05em;">WIDTH</th>
+                        <th style="padding: 16px 12px; font-weight: 700; letter-spacing: 0.05em;">SLEEVE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #E4E4E7;">
+                        <td style="padding: 16px 12px; font-weight: 600;">S</td>
+                        <td style="padding: 16px 12px; color: #52525B;">65</td>
+                        <td style="padding: 16px 12px; color: #52525B;">52</td>
+                        <td style="padding: 16px 12px; color: #52525B;">62</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E4E4E7;">
+                        <td style="padding: 16px 12px; font-weight: 600;">M</td>
+                        <td style="padding: 16px 12px; color: #52525B;">67</td>
+                        <td style="padding: 16px 12px; color: #52525B;">54</td>
+                        <td style="padding: 16px 12px; color: #52525B;">63</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E4E4E7;">
+                        <td style="padding: 16px 12px; font-weight: 600;">L</td>
+                        <td style="padding: 16px 12px; color: #52525B;">69</td>
+                        <td style="padding: 16px 12px; color: #52525B;">56</td>
+                        <td style="padding: 16px 12px; color: #52525B;">64</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E4E4E7;">
+                        <td style="padding: 16px 12px; font-weight: 600;">XL</td>
+                        <td style="padding: 16px 12px; color: #52525B;">72</td>
+                        <td style="padding: 16px 12px; color: #52525B;">58</td>
+                        <td style="padding: 16px 12px; color: #52525B;">65</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 16px 12px; font-weight: 600;">XXL</td>
+                        <td style="padding: 16px 12px; color: #52525B;">75</td>
+                        <td style="padding: 16px 12px; color: #52525B;">60</td>
+                        <td style="padding: 16px 12px; color: #52525B;">67</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="text-align: center; font-size: 11px; color: #A1A1AA; margin-top: 16px; letter-spacing: 0.05em;">Measurements are shown in centimeters (cm).</p>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const sizeGuideBtn = document.querySelector(".size-guide-link");
+        const sizeModal = document.getElementById("sizeGuideModal");
+        const sizeCloseBtn = document.getElementById("sizeModalCloseBtn");
+
+        if (sizeGuideBtn && sizeModal && sizeCloseBtn) {
+            sizeGuideBtn.addEventListener("click", () => {
+                sizeModal.classList.add("active");
+                document.body.style.overflow = "hidden";
+            });
+
+            sizeCloseBtn.addEventListener("click", () => {
+                sizeModal.classList.remove("active");
+                document.body.style.overflow = "";
+            });
+
+            sizeModal.addEventListener("click", (e) => {
+                if (e.target === sizeModal) {
+                    sizeModal.classList.remove("active");
+                    document.body.style.overflow = "";
+                }
+            });
+        }
+    });
+</script>
+
 <!-- REVIEW MODAL -->
 <div class="review-modal-overlay" id="reviewModal">
     <div class="review-modal-card">

@@ -116,12 +116,22 @@ function startTimer() {
 
 async function verifyOtp() {
   clearOtpError();
+  const btn = document.getElementById("verifyBtn");
+  const btnText = document.getElementById("verifyText");
+  const btnSpinner = document.getElementById("verifySpinner");
 
   const otp = getOtp();
 
   if (otp.length !== 6) {
     showOtpError("Enter complete OTP");
     return;
+  }
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-70", "cursor-not-allowed");
+    if (btnText) btnText.innerHTML = "VERIFYING...";
+    if (btnSpinner) btnSpinner.classList.remove("hidden");
   }
 
   try {
@@ -132,10 +142,16 @@ async function verifyOtp() {
         ajaxToast("success","Otp Verified");
         setTimeout(()=>{
            window.location.href = res.data.redirect;
-        })
+        }, 1500)
       }
 
   } catch (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-70", "cursor-not-allowed");
+      if (btnText) btnText.innerHTML = "VERIFY CODE &rarr;";
+      if (btnSpinner) btnSpinner.classList.add("hidden");
+    }
     const error = err.response?.data;
 
     if (error?.errors?.otp) {
