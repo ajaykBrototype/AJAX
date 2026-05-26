@@ -9,8 +9,6 @@
       <a href="/category/<%= cat.name %>" class="mob-link" style="text-transform: capitalize;"><%= cat.name %></a>
     <% }); %>
   <% } %>
-  <a href="#" class="mob-link">New Arrivals</a>
-  <a href="#" class="mob-link">Journal</a>
 </div>
 
 <!-- ══ NAVBAR ══ -->
@@ -31,7 +29,7 @@
       <button class="nav-icon" id="searchToggleBtn" title="Search">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </button>
-      <a href="/wishlist" class="nav-icon hidden md:flex relative" title="Wishlist">
+      <a href="/wishlist" class="nav-icon flex relative" title="Wishlist">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span id="wishlist-count-badge" class="absolute -top-1.5 -right-1.5 bg-[#B04040] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full <%= (locals.wishlistCount || 0) > 0 ? '' : 'hidden' %>">
           <%= locals.wishlistCount || 0 %>
@@ -43,7 +41,7 @@
           <%= locals.cartCount || 0 %>
         </span>
       </a>
-      <div class="relative hidden md:flex items-center">
+      <div class="relative flex items-center">
         <% if (locals.user) { %>
           <button id="accountBtn" class="nav-icon" title="Account">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>

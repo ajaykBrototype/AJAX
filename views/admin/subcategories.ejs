@@ -352,25 +352,6 @@
   <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden"></div>
 
   <script>
-    // Sidebar toggle for mobile
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    
-    if(sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-    }
-
-    if(sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            sidebarOverlay.classList.add('hidden');
-        });
-    }
-
     // Custom Dropdown Logic
     document.querySelectorAll('.custom-admin-dropdown').forEach(dropdown => {
         const trigger = dropdown.querySelector('.admin-dropdown-trigger');

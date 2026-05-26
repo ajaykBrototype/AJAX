@@ -83,6 +83,11 @@
         
         /* Removed old form styles, using tailwind utility classes for the new design */
 
+        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @media(max-width:1024px) {
+          #sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 1001; width: 280px; }
+          #sidebar.open { transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -95,9 +100,18 @@
         
         <!-- Header Section -->
         <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
+            <div class="flex items-center gap-4">
+              <button id="sidebarToggle" class="lg:hidden p-2 hover:bg-stone-100 rounded-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+              <div>
                 <h1 class="text-4xl font-serif font-bold tracking-tight mb-2">Coupons</h1>
                 <p class="text-stone-500 font-medium">Create and manage discount codes for your customers.</p>
+              </div>
             </div>
             
             <button onclick="openCouponModal()" class="bg-luxury-text text-white px-8 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold hover:bg-stone-800 transition-all shadow-[0_10px_20px_rgba(0,0,0,0.15)] active:scale-95">
@@ -466,4 +480,22 @@
 
 
 </body>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden"></div>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if(sidebarToggle) {
+          sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            if(sidebarOverlay) sidebarOverlay.classList.toggle('hidden');
+          });
+        }
+        if(sidebarOverlay) {
+          sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.add('hidden');
+          });
+        }
+    </script>
 </html>

@@ -1134,7 +1134,7 @@
 <body>
     <%- include('../partials/navbar') %>
 
-    <main>
+    <main class="!flex !flex-col lg:!grid lg:!grid-cols-[1.1fr_0.9fr] !gap-10 lg:!gap-[80px] !px-4 lg:!px-[40px] !pt-10 lg:!pt-[100px] !max-w-[1200px] !mx-auto !items-start">
 
 
       <%- include('../partials/breadcrumbs', { 
@@ -1145,13 +1145,21 @@
           ] 
       }) %>
 
+      <div class="product-title-wrapper !w-full lg:col-start-2 lg:row-start-2 reveal" style="transition-delay: 0.2s;">
+          <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
+          <h1 class="product-title"><%= product.name %></h1>
+          
+          <div class="rating-summary" id="headerRatingContainer" style="display: none; align-items: center; gap: 8px;">
+              <div class="rating-stars" id="headerStarsRow" style="display: flex; gap: 4px;"></div>
+              <span class="rating-text" id="headerRatingText"></span>
+          </div>
+      </div>
 
-
-        <section class="product-images">
-            <div class="thumbnail-strip">
+        <section class="product-images lg:col-start-1 lg:row-start-2 lg:row-span-2 !flex !flex-col-reverse lg:!grid lg:!grid-cols-[80px_1fr] !gap-4 lg:!gap-[20px] !items-start !w-full">
+            <div class="thumbnail-strip !flex !flex-row lg:!flex-col !gap-[12px] !overflow-x-auto !w-full lg:!w-[80px]">
                 <% if (variant && variant.images && variant.images.length > 0) { %>
                     <% variant.images.forEach((img, idx) => { %>
-                        <div class="thumbnail <%= idx === 0 ? 'active-thumb' : '' %>" onclick="switchImage('<%= img %>', this)">
+                        <div class="thumbnail <%= idx === 0 ? 'active-thumb' : '' %> !flex-shrink-0 !w-[70px] !h-[94px]" onclick="switchImage('<%= img %>', this)">
                             <img src="<%= img %>" alt="View <%= idx + 1 %>">
                         </div>
                     <% }) %>
@@ -1195,17 +1203,7 @@
             </div>
         </section>
 
-        <section class="product-details">
-            <div class="reveal" style="transition-delay: 0.2s;">
-                <p class="editorial-label"> <%= product.category.name || "NEW ARRIVAL" %></p>
-                <h1 class="product-title"><%= product.name %></h1>
-                
-                <div class="rating-summary" id="headerRatingContainer" style="display: none; align-items: center; gap: 8px;">
-                    <div class="rating-stars" id="headerStarsRow" style="display: flex; gap: 4px;"></div>
-                    <span class="rating-text" id="headerRatingText"></span>
-                </div>
-
-                <div class="price-wrapper">
+        <section class="product-details lg:col-start-2 lg:row-start-3 !static lg:!sticky !pt-0 lg:!pt-[10px] !w-full" style="top: 100px;">                <div class="price-wrapper">
                     <% if (bestOffer && (!bestOffer.minOrderValue || variant.price >= bestOffer.minOrderValue)) { 
                         let discountAmount = 0;
                         if (bestOffer.discountMode === 'percentage') {
