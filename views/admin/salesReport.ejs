@@ -137,7 +137,7 @@
               <span id="selectedPeriodText"><%= period.charAt(0).toUpperCase() + period.slice(1) %></span>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="ml-2 transition-transform duration-300" id="dropdownArrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
-            <div id="dropdownMenu" class="absolute right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
+            <div id="dropdownMenu" class="absolute left-0 md:left-auto md:right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
               <div class="px-5 py-2 text-[0.55rem] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border/50 mb-2">Analysis Period</div>
               <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=day'">Day</div>
               <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=week'">Week</div>
@@ -152,7 +152,7 @@
               Export
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-300" id="exportDropdownArrow"><path d="m6 9 6 6 6-6"/></svg>
             </button>
-            <div id="exportDropdownMenu" class="absolute right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
+            <div id="exportDropdownMenu" class="absolute left-0 md:left-auto md:right-0 mt-3 w-56 bg-white border border-brand-border rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] py-3 opacity-0 invisible translate-y-4 transition-all duration-300 z-[100] overflow-hidden backdrop-blur-xl bg-white/95">
               <div class="px-5 py-2 text-[0.55rem] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border/50 mb-2">Export Format</div>
               <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=<%= period %>&download=excel'">Excel (.xlsx)</div>
               <div class="dropdown-item px-6 py-3.5 text-[0.7rem] font-bold text-brand-dark hover:bg-brand-bg cursor-pointer transition-all" onclick="window.location.href='/admin/sales-report?period=<%= period %>&download=pdf'">PDF Document</div>

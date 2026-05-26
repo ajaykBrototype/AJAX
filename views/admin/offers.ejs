@@ -225,6 +225,70 @@
   padding-left: 4px;
 }
 
+/* Custom Admin Dropdown Styles (Curvy) */
+.custom-admin-dropdown { position: relative; min-width: 160px; }
+.admin-dropdown-trigger {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 9999px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.admin-dropdown-trigger:hover { background: #f9fafb; border-color: rgba(0,0,0,0.1); }
+
+.admin-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+  padding: 10px;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 200px;
+}
+.admin-dropdown-menu.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(6px);
+}
+.admin-dropdown-item {
+  padding: 12px 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b5563;
+  cursor: pointer;
+  border-radius: 18px;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-dropdown-item:last-child { margin-bottom: 0; }
+.admin-dropdown-item:hover { background: #f9fafb; color: #111827; }
+.admin-dropdown-item.active { background: #111827; color: #fff; }
+
 #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @media(max-width:1024px) {
   #sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 1001; width: 280px; }
@@ -261,7 +325,7 @@
     </header>
 
     <!-- Filters & Search Bar -->
-    <div class="bg-white rounded-3xl p-4 border border-[#F1F1F1] mb-8 flex flex-col md:flex-row items-center justify-between gap-4 animate-up shadow-sm" style="animation-delay: 0.2s;">
+    <div class="bg-white rounded-3xl p-4 border border-[#F1F1F1] mb-8 flex flex-col md:flex-row items-center justify-between gap-4 animate-up shadow-sm relative z-50" style="animation-delay: 0.2s;">
       <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
         <!-- Search -->
         <div class="relative w-full md:w-80">
@@ -271,16 +335,48 @@
 
         <!-- Filter Dropdowns -->
         <div class="flex items-center gap-3 w-full md:w-auto">
-          <select id="typeFilter" class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
-            <option value="all">All Types</option>
-            <option value="percentage">Percentage</option>
-            <option value="flat">Flat Discount</option>
-          </select>
-          <select id="statusFilter" class="px-5 py-3 custom-input rounded-2xl text-sm font-semibold outline-none cursor-pointer appearance-none pr-10 relative">
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-          </select>
+          <input type="hidden" id="typeFilter" value="all">
+          <div class="custom-admin-dropdown" id="typeDropdown">
+            <button type="button" class="admin-dropdown-trigger">
+              <span class="flex items-center gap-2">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15l-5-5-5 5"/><path d="M3 21h18"/></svg>
+                 <span id="typeFilterLabel">All Types</span>
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="admin-dropdown-menu">
+              <div class="admin-dropdown-item active" data-value="all" data-label="All Types">All Types</div>
+              <div class="admin-dropdown-item" data-value="percentage" data-label="Percentage">Percentage</div>
+              <div class="admin-dropdown-item" data-value="flat" data-label="Flat Discount">Flat Discount</div>
+            </div>
+          </div>
+
+          <input type="hidden" id="statusFilter" value="all">
+          <div class="custom-admin-dropdown" id="statusDropdown">
+            <button type="button" class="admin-dropdown-trigger">
+              <span class="flex items-center gap-2">
+                <span id="statusFilterIcon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                </span>
+                <span id="statusFilterLabel">All Status</span>
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="admin-dropdown-menu">
+              <div class="admin-dropdown-item active" data-value="all" data-label="All Status">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                All Status
+              </div>
+              <div class="admin-dropdown-item" data-value="active" data-label="Active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Active
+              </div>
+              <div class="admin-dropdown-item" data-value="expired" data-label="Expired">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Expired
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1154,6 +1250,54 @@
 
     typeFilter.addEventListener('change', filterOffers);
     statusFilter.addEventListener('change', filterOffers);
+
+    // Dropdown interactions
+    document.querySelectorAll('.custom-admin-dropdown').forEach(dropdown => {
+      const trigger = dropdown.querySelector('.admin-dropdown-trigger');
+      const menu = dropdown.querySelector('.admin-dropdown-menu');
+      const items = dropdown.querySelectorAll('.admin-dropdown-item');
+      const input = dropdown.previousElementSibling;
+      const labelSpan = dropdown.querySelector('span[id$="FilterLabel"]');
+      const iconSpan = dropdown.querySelector('span[id$="FilterIcon"]');
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.admin-dropdown-menu.show').forEach(m => {
+          if(m !== menu) m.classList.remove('show');
+        });
+        menu.classList.toggle('show');
+      });
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          // Update active style
+          items.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          
+          // Update hidden input value
+          input.value = item.dataset.value;
+          
+          // Update trigger label
+          if (labelSpan) {
+            labelSpan.textContent = item.dataset.label;
+          }
+          
+          // Update trigger icon for status filter
+          if (iconSpan && item.querySelector('svg')) {
+            iconSpan.innerHTML = item.querySelector('svg').outerHTML;
+          }
+
+          // Trigger change event to filter offers
+          input.dispatchEvent(new Event('change'));
+        });
+      });
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.admin-dropdown-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    });
 
 
 
