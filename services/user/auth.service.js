@@ -63,15 +63,42 @@ export const verifyOtpService = async (req) => {
       if (referrer.email === email) return { success: false, errors: { referralCode: ["You cannot use your own referral code"] } };
 
       referredBy = referrer._id;
+      
+      const newTransaction = {
+          transactionId: "REF-INC-" + Date.now(),
+          type: "credit",
+          amount: 200,
+          description: "Referral Bonus",
+          date: new Date()
+      };
+
       await Wallet.findOneAndUpdate(
         { userId: referrer._id },
-        { $inc: { balance: 200 } },
+        { 
+          $inc: { balance: 200 },
+          $push: { transactions: newTransaction }
+        },
         { upsert: true, new: true }
       );
     }
     
     const newUser = await User.create({ name, email, password, referralCode: generatedReferralCode, referredBy });
-    await Wallet.create({ userId: newUser._id, balance: referredBy ? 50 : 0 });
+    
+    if (referredBy) {
+      await Wallet.create({ 
+        userId: newUser._id, 
+        balance: 50,
+        transactions: [{
+          transactionId: "REF-WLC-" + Date.now(),
+          type: "credit",
+          amount: 50,
+          description: "Signup Referral Bonus",
+          date: new Date()
+        }]
+      });
+    } else {
+      await Wallet.create({ userId: newUser._id, balance: 0 });
+    }
   }
 
   if (record.type === "reset") return { success: true, redirect: "/reset-password" };

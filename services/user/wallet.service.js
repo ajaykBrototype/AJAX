@@ -5,7 +5,49 @@ import crypto from "crypto";
 
 export const getWalletPageDataService = async (userId) => {
     const user = await User.findById(userId);
-    const wallet = await Wallet.findOne({ userId });
+    let wallet = await Wallet.findOne({ userId });
+
+    if (wallet) {
+        let isModified = false;
+
+        // 1. Check for missing bonuses from people they referred
+        const referredUsers = await User.find({ referredBy: userId }).select('createdAt');
+        const existingRefTxCount = wallet.transactions.filter(t => t.description === "Referral Bonus").length;
+        
+        if (referredUsers.length > existingRefTxCount) {
+            for (let i = existingRefTxCount; i < referredUsers.length; i++) {
+                wallet.transactions.push({
+                    transactionId: "REF-INC-" + referredUsers[i].createdAt.getTime(),
+                    type: "credit",
+                    amount: 200,
+                    description: "Referral Bonus",
+                    date: referredUsers[i].createdAt
+                });
+                isModified = true;
+            }
+        }
+
+        // 2. Check for their own missing signup referral bonus (if they were referred)
+        if (user.referredBy) {
+            const hasSignupBonus = wallet.transactions.some(t => t.description === "Signup Referral Bonus");
+            if (!hasSignupBonus) {
+                wallet.transactions.push({
+                    transactionId: "REF-WLC-" + user.createdAt.getTime(),
+                    type: "credit",
+                    amount: 50,
+                    description: "Signup Referral Bonus",
+                    date: user.createdAt
+                });
+                isModified = true;
+            }
+        }
+
+        // Save implicitly backfills past transactions so they show up everywhere permanently
+        if (isModified) {
+            await wallet.save();
+        }
+    }
+
     return { user, wallet };
 };
 
