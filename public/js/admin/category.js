@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     };
 
+    window.clearCategoryError = function() {
+        const errorEl = document.getElementById('categoryNameError');
+        if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.classList.remove('flex');
+            document.getElementById('categoryName').classList.remove('border-red-500', 'bg-red-50');
+        }
+    };
+
     /* EXPOSED HELPERS */
     window.openModal = function () {
         document.getElementById('modalTitle').textContent = 'New Category';
@@ -32,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('categoryName').value = '';
         document.getElementById('categoryStatus').checked = true;
         document.getElementById('saveBtn').textContent = 'Create Entry';
+        clearCategoryError();
         showModal();
     };
      
@@ -50,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('categoryName').value = name;
         document.getElementById('categoryStatus').checked = (status === true || status === 'true');
         document.getElementById('saveBtn').textContent = 'Apply Updates';
+        clearCategoryError();
         showModal();
     };
 
@@ -60,7 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const isActive = document.getElementById('categoryStatus').checked;
 
         if (!name) {
-            ajaxToast('warning', 'Category name is required.');
+            const errorEl = document.getElementById('categoryNameError');
+            if (errorEl) {
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('categoryName').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                ajaxToast('warning', 'Category name is required.');
+            }
             return;
         }
 
@@ -78,8 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => location.reload(), 1000);
             }
         } catch (err) {
-            window.closeModal();
-            ajaxAlert('error', err.response?.data?.message || 'Failed to save category.');
+            const errorMessage = err.response?.data?.message || 'Failed to save category.';
+            const errorEl = document.getElementById('categoryNameError');
+            if (errorEl) {
+                errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${errorMessage}`;
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('categoryName').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                window.closeModal();
+                ajaxAlert('error', errorMessage);
+            }
         }
     };
 

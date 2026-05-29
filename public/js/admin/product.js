@@ -30,29 +30,62 @@ document.addEventListener("DOMContentLoaded", () => {
             const stock = productForm.querySelector('[name="stock"]');
             const size = document.getElementById('sizeInput');
 
-            let error = "";
+            // Generic inline error handler
+            function showInlineError(element, message) {
+                if (!element) return;
+                const container = element.parentElement;
+                
+                // Remove existing if any
+                const existing = container.querySelector('.inline-error-msg');
+                if (existing) existing.remove();
+                
+                element.classList.add('border-red-500', 'bg-red-50');
+                
+                const errorEl = document.createElement('p');
+                errorEl.className = 'inline-error-msg text-[10px] text-red-500 font-bold tracking-wide mt-1.5 flex items-center gap-1';
+                errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${message}`;
+                
+                container.appendChild(errorEl);
 
-            if (!name.value.trim()) error = "Product name is required";
-            else if (!category.value) error = "Please select a category";
-            else if (!subcategory.value) error = "Please select a subcategory";
-            else if (description.value.trim().length < 20) error = "Description must be at least 20 characters";
-            else if (!material.value.trim()) error = "Material composition is required";
-            else if (!careGuide.value.trim()) error = "Care guidelines are required";
+                // Auto-clear
+                const clearError = () => {
+                    errorEl.remove();
+                    element.classList.remove('border-red-500', 'bg-red-50');
+                    element.removeEventListener('input', clearError);
+                    element.removeEventListener('click', clearError);
+                };
+                element.addEventListener('input', clearError);
+                element.addEventListener('click', clearError);
+            }
+
+            // Clear previous errors
+            document.querySelectorAll('.inline-error-msg').forEach(e => e.remove());
+            document.querySelectorAll('.border-red-500').forEach(e => e.classList.remove('border-red-500', 'bg-red-50'));
+
+            let hasError = false;
+
+            const categoryTrigger = document.querySelector('#categoryDropdown .admin-dropdown-trigger');
+            const subcategoryTrigger = document.querySelector('#subcategoryDropdown .admin-dropdown-trigger');
+            const sizeContainer = document.querySelector('.size-btn')?.parentElement;
+            const imgTrigger = document.getElementById('uploadTrigger');
+
+            if (!name.value.trim()) { showInlineError(name, "Product name is required"); hasError = true; }
+            if (!category.value) { showInlineError(categoryTrigger, "Please select a category"); hasError = true; }
+            if (!subcategory.value) { showInlineError(subcategoryTrigger, "Please select a subcategory"); hasError = true; }
+            if (description.value.trim().length < 20) { showInlineError(description, "Description must be at least 20 characters"); hasError = true; }
+            if (!material.value.trim()) { showInlineError(material, "Material composition is required"); hasError = true; }
+            if (!careGuide.value.trim()) { showInlineError(careGuide, "Care guidelines are required"); hasError = true; }
             
-
-            if (!error && color) {
-                if (!color.value.trim()) error = "Primary color is required";
-                else if (!sku.value.trim()) error = "SKU is required";
-                else if (!price.value || price.value <= 0) error = "Valid price is required";
-                else if (stock.value === "" || stock.value < 0) error = "Valid stock is required";
-                else if (!size || !size.value) error = "Please select a size";
-                else if ((window.uploadedFiles || []).length < 3) error = "Minimum 3 images are required";
+            if (color) {
+                if (!color.value.trim()) { showInlineError(color, "Primary color is required"); hasError = true; }
+                if (!sku.value.trim()) { showInlineError(sku, "SKU is required"); hasError = true; }
+                if (!price.value || price.value <= 0) { showInlineError(price, "Valid price is required"); hasError = true; }
+                if (stock.value === "" || stock.value < 0) { showInlineError(stock, "Valid stock is required"); hasError = true; }
+                if (!size || !size.value) { showInlineError(sizeContainer, "Please select a size"); hasError = true; }
+                if ((window.uploadedFiles || []).length < 3) { showInlineError(imgTrigger, "Minimum 3 images are required"); hasError = true; }
             }
 
-            if (error) {
-                ajaxToast("error", error);
-                return;
-            }
+            if (hasError) return;
 
             try {
                 const submitBtn = productForm.querySelector('button[type="submit"]');

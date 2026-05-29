@@ -2,6 +2,7 @@ import Wishlist from "../../models/user/wishlistModel.js";
 import Variant from "../../models/admin/variantModel.js";
 import Cart from "../../models/user/cartModel.js";
 import Offer from "../../models/admin/offerModel.js";
+import Product from "../../models/admin/productModel.js";
 
 const getBestOffer = (activeOffers, prod, price) => {
   if (!activeOffers || activeOffers.length === 0) return null;
@@ -58,6 +59,16 @@ export const getWishlistPageDataService = async (userId) => {
 export const toggleWishlistService = async (userId, productId, variantId) => {
   if (!productId || !variantId) return { success: false, message: "Missing product or variant info", statusCode: 400 };
 
+  const product = await Product.findById(productId);
+  if (!product || !product.isActive) {
+      return { success: false, message: "The product is currently unavailable.", statusCode: 400 };
+  }
+  
+  const variant = await Variant.findById(variantId);
+  if (!variant || !variant.isActive) {
+      return { success: false, message: "The variant is currently unavailable.", statusCode: 400 };
+  }
+
   let wishlist = await Wishlist.findOne({ user: userId });
   let action = "added";
 
@@ -92,8 +103,10 @@ export const getWishlistCountService = async (userId) => {
 };
 
 export const addToBagFromWishlistService = async (userId, productId, variantId) => {
-  const variant = await Variant.findById(variantId);
-  if (!variant || !variant.isActive) return { success: false, message: "Variant not found ❌" };
+  const variant = await Variant.findById(variantId).populate("productId");
+  if (!variant || !variant.isActive || !variant.productId || !variant.productId.isActive) {
+      return { success: false, message: "The product is currently unavailable. ❌" };
+  }
   if (variant.stock <= 0) return { success: false, message: "Out of stock ❌" };
 
   let cart = await Cart.findOne({ user: userId });

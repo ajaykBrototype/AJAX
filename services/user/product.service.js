@@ -143,8 +143,10 @@ export const getProductDetailsService = async (productId, userId) => {
 };
 
 export const checkQuantityService = async (variantId, quantity) => {
-    const variant = await Variant.findById(variantId);
-    if (!variant) return { success: false, message: "Variant not found" };
+    const variant = await Variant.findById(variantId).populate("productId");
+    if (!variant || !variant.isActive || !variant.productId || !variant.productId.isActive) {
+        return { success: false, message: "The product is currently unavailable." };
+    }
     if (quantity > 5) return { success: false, message: "Maximum 5 items allowed" };
     if (quantity > variant.stock) return { success: false, message: `Only ${variant.stock} items available` };
     

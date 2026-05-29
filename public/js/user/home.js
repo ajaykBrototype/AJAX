@@ -29,3 +29,16 @@ async function confirmLogout() {
 function logout() {
   window.location.href = "/logout";
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("error") === "unavailable") {
+    setTimeout(() => {
+      if (typeof ajaxToast === 'function') {
+        ajaxToast("error", "This product is currently unavailable.");
+      }
+    }, 300);
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({path: newUrl}, '', newUrl);
+  }
+});

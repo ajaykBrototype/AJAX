@@ -25,6 +25,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     };
 
+    window.clearSubCategoryError = function(errorId, inputId) {
+        const errorEl = document.getElementById(errorId);
+        if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.classList.remove('flex');
+            document.getElementById(inputId).classList.remove('border-red-500', 'bg-red-50');
+        }
+    };
+
+    window.clearAllSubCategoryErrors = function() {
+        clearSubCategoryError('modalCategoryError', 'modalCategory');
+        clearSubCategoryError('subCategoryNameError', 'subCategoryName');
+    };
+
     /* EXPOSED HELPERS */
     window.openSubModal = function () {
         document.getElementById('subModalTitle').textContent = 'New Sub-tier';
@@ -33,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('subCategoryName').value = '';
         document.getElementById('subCategoryStatus').checked = true;
         document.getElementById('saveBtn').textContent = 'Save Node';
+        clearAllSubCategoryErrors();
         showSubModal();
     };
   
@@ -53,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('subCategoryName').value = name;
         document.getElementById('subCategoryStatus').checked = (status === true || status === 'true');
         document.getElementById('saveBtn').textContent = 'Apply Updates';
+        clearAllSubCategoryErrors();
         showSubModal();
     };
 
@@ -64,12 +80,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const isActive = document.getElementById('subCategoryStatus').checked;
 
         if (!categoryId) {
-            ajaxToast('warning', 'Please select a parent category.');
+            const errorEl = document.getElementById('modalCategoryError');
+            if (errorEl) {
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('modalCategory').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                ajaxToast('warning', 'Please select a parent category.');
+            }
             return;
         }
 
         if (!name) {
-            ajaxToast('warning', 'Subcategory name is required.');
+            const errorEl = document.getElementById('subCategoryNameError');
+            if (errorEl) {
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('subCategoryName').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                ajaxToast('warning', 'Subcategory name is required.');
+            }
             return;
         }
 
@@ -87,8 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => location.reload(), 1000);
             }
         } catch (err) {
-            window.closeSubModal();
-            ajaxAlert('error', err.response?.data?.message || 'Failed to save subcategory.');
+            const errorMessage = err.response?.data?.message || 'Failed to save subcategory.';
+            const errorEl = document.getElementById('subCategoryNameError');
+            if (errorEl) {
+                errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${errorMessage}`;
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('subCategoryName').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                window.closeSubModal();
+                ajaxAlert('error', errorMessage);
+            }
         }
     };
 

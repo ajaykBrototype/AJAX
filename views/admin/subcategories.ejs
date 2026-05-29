@@ -317,17 +317,25 @@
       <div class="space-y-6">
         <div class="space-y-2">
           <label class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Root Category</label>
-          <select id="modalCategory" class="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-black transition-all font-medium cursor-pointer">
+          <select id="modalCategory" onchange="clearSubCategoryError('modalCategoryError', 'modalCategory')" class="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-black transition-all font-medium cursor-pointer">
             <option value="">Choose parent root...</option>
             <% categories.forEach(cat => { %>
               <option value="<%= cat._id %>"><%= cat.name %></option>
             <% }) %>
           </select>
+          <p id="modalCategoryError" class="text-[0.65rem] text-red-500 font-bold tracking-wide mt-1 hidden items-center gap-1">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+             Please select a parent category
+          </p>
         </div>
 
         <div class="space-y-2">
           <label class="text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Node Identity</label>
-          <input id="subCategoryName" class="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-black transition-all font-medium" placeholder="E.g. Casual Shirts">
+          <input id="subCategoryName" oninput="clearSubCategoryError('subCategoryNameError', 'subCategoryName')" class="w-full bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-black transition-all font-medium" placeholder="E.g. Casual Shirts">
+          <p id="subCategoryNameError" class="text-[0.65rem] text-red-500 font-bold tracking-wide mt-1 hidden items-center gap-1">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+             Subcategory name is required
+          </p>
         </div>
 
         <div class="flex items-center justify-between p-4 bg-stone-50 rounded-xl border border-stone-100">

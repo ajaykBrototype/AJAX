@@ -38,11 +38,11 @@ export const loadWomenPage = async (req, res) => {
 export const loadProductDetails = async (req, res) => {
   try {
     const data = await productService.getProductDetailsService(req.params.id, req.session.userId);
-    if (!data) return res.redirect("/home");
+    if (!data) return res.redirect("/home?error=unavailable");
     res.render("user/productDetails", data);
   } catch (err) {
     console.log("PRODUCT DETAILS ERROR:", err);
-    res.redirect("/home");
+    res.redirect("/home?error=unavailable");
   }
 };
 

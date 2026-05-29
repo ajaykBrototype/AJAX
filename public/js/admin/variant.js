@@ -76,21 +76,56 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveVariantBtn = document.getElementById("saveVariantBtn");
   const updateVariantBtn = document.getElementById("updateVariantBtn");
 
+  function showInlineError(element, message) {
+      if (!element) return;
+      const container = element.parentElement;
+      
+      const existing = container.querySelector('.inline-error-msg');
+      if (existing) existing.remove();
+      
+      element.classList.add('border-red-500', 'bg-red-50');
+      
+      const errorEl = document.createElement('p');
+      errorEl.className = 'inline-error-msg text-[10px] text-red-500 font-bold tracking-wide mt-1.5 flex items-center gap-1';
+      errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${message}`;
+      
+      container.appendChild(errorEl);
+
+      const clearError = () => {
+          errorEl.remove();
+          element.classList.remove('border-red-500', 'bg-red-50');
+          element.removeEventListener('input', clearError);
+          element.removeEventListener('click', clearError);
+      };
+      element.addEventListener('input', clearError);
+      element.addEventListener('click', clearError);
+  }
+
   function validateVariant(form, sizeInput, newFiles = [], existingImages = []) {
-    const color = form.querySelector('[name="color"]').value.trim();
-    const sku = form.querySelector('[name="sku"]').value.trim();
-    const stock = form.querySelector('[name="stock"]').value;
-    const price = form.querySelector('[name="price"]').value;
+    const color = form.querySelector('[name="color"]');
+    const sku = form.querySelector('[name="sku"]');
+    const stock = form.querySelector('[name="stock"]');
+    const price = form.querySelector('[name="price"]');
     const totalImages = newFiles.length + existingImages.length;
+    
+    document.querySelectorAll('.inline-error-msg').forEach(e => e.remove());
+    document.querySelectorAll('.border-red-500').forEach(e => e.classList.remove('border-red-500', 'bg-red-50'));
 
-    if (!color) return "Color is required";
-    if (!sizeInput.value) return "Please select a size";
-    if (!sku) return "SKU is required";
-    if (stock === '' || stock < 0) return "Valid stock required";
-    if (price === '' || price <= 0) return "Valid price required";
-    if (totalImages < 3) return "Minimum 3 images required";
+    let hasError = false;
 
-    return null; // No errors
+    if (!color.value.trim()) { showInlineError(color, "Color is required"); hasError = true; }
+    
+    const sizeContainer = document.querySelector('.size-btn')?.parentElement;
+    if (!sizeInput.value) { showInlineError(sizeContainer, "Please select a size"); hasError = true; }
+    
+    if (!sku.value.trim()) { showInlineError(sku, "SKU is required"); hasError = true; }
+    if (stock.value === '' || stock.value < 0) { showInlineError(stock, "Valid stock required"); hasError = true; }
+    if (price.value === '' || price.value <= 0) { showInlineError(price, "Valid price required"); hasError = true; }
+    
+    const imgTrigger = document.getElementById('uploadTrigger');
+    if (totalImages < 3) { showInlineError(imgTrigger, "Minimum 3 images required"); hasError = true; }
+
+    return hasError;
   }
 
   // ✅ ADD VARIANT
@@ -99,10 +134,10 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const uploadedFiles = window.uploadedFiles || [];
-      const error = validateVariant(variantForm, sizeInput, uploadedFiles, []);
+      const hasError = validateVariant(variantForm, sizeInput, uploadedFiles, []);
 
-      if (error) {
-        return ajaxToast("error", error, "VALIDATION ERROR");
+      if (hasError) {
+        return;
       }
 
       // Submit using Axios
@@ -144,10 +179,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentNewFiles = window.newFiles || [];
       const currentExisting = window.existingImages || [];
 
-      const error = validateVariant(variantForm, sizeInput, currentNewFiles, currentExisting);
+      const hasError = validateVariant(variantForm, sizeInput, currentNewFiles, currentExisting);
 
-      if (error) {
-        return ajaxToast("error", error, "VALIDATION ERROR");
+      if (hasError) {
+        return;
       }
 
       const formData = new FormData(variantForm);

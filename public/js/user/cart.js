@@ -20,8 +20,7 @@
         function recalculate() {
             let subtotal = 0;
             const items = document.querySelectorAll('.bag-card:not(.item-exit)');
-            const checkoutBtn = document.querySelector('.btn-checkout');
-            let hasOutOfStock = false;
+            const checkoutBtn = document.getElementById('checkoutBtn');
             
             if (items.length === 0) {
                 const emptyState = document.querySelector('.empty-state-container');
@@ -31,23 +30,29 @@
                 return;
             }
 
-            items.forEach(card => {
-                if (card.classList.contains('grayscale')) {
-                    hasOutOfStock = true;
-                }
-            });
+            const hasUnavailable = Array.from(items).some(card => card.dataset.unavailable === 'true');
 
             if (checkoutBtn) {
-                if (hasOutOfStock) {
+                if (hasUnavailable) {
                     checkoutBtn.classList.add('disabled');
+                    checkoutBtn.setAttribute('title', 'Remove unavailable items to proceed');
                 } else {
                     checkoutBtn.classList.remove('disabled');
+                    checkoutBtn.removeAttribute('title');
                 }
             }
+        }
 
-            if (items.length === 0) {
-                window.location.reload();
+        async function proceedToCheckout() {
+            const unavailableCards = document.querySelectorAll('.bag-card[data-unavailable="true"]:not(.item-exit)');
+
+            if (unavailableCards.length > 0) {
+                // Block checkout and inform the user — do NOT auto-remove
+                ajaxToast("error", "Some products in your bag are currently unavailable. Please remove them before proceeding.");
+                return;
             }
+
+            window.location.href = "/checkout";
         }
 
         async function updateQty(itemId, delta) {

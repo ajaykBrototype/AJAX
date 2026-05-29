@@ -104,6 +104,7 @@ export const placeOrderService = async (userIdRaw, { addressId, paymentMethod, c
 
     for (const item of cart.items) {
         if (!item.variant || !item.variant.productId) throw new Error("Invalid cart item");
+        if (!item.variant.isActive || !item.variant.productId.isActive) throw new Error(`${item.variant.productId.name} is currently unavailable`);
         if (item.variant.stock < item.quantity) throw new Error(`${item.variant.productId.name} is out of stock`);
 
         if (normalizedPayment !== "RAZORPAY") {

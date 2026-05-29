@@ -40,8 +40,10 @@ const getBestOffer = (activeOffers, prod, price) => {
 };
 
 export const addToCartService = async (userId, variantId, quantity) => {
-  const variant = await Variant.findById(variantId);
-  if (!variant) return { success: false, message: "Variant not found" };
+  const variant = await Variant.findById(variantId).populate("productId");
+  if (!variant || !variant.isActive || !variant.productId || !variant.productId.isActive) {
+    return { success: false, message: "The product is currently unavailable." };
+  }
   if (quantity > variant.stock) return { success: false, message: "Out of stock" };
 
   let cart = await Cart.findOne({ user: userId });
@@ -73,10 +75,20 @@ export const getCartService = async (userId) => {
   const validItems = [];
 
   for (const item of cart.items) {
-    if (!item.variant || !item.variant.isActive || !item.variant.productId || !item.variant.productId.isActive) {
+    if (!item.variant) {
+      // Broken reference — remove entirely
       changed = true;
       continue;
     }
+
+    // Mark inactive/blocked products as unavailable but keep them visible
+    if (!item.variant.isActive || !item.variant.productId || !item.variant.productId.isActive) {
+      item._doc = item._doc || item;
+      item.isUnavailable = true;
+      validItems.push(item);
+      continue;
+    }
+
     if (item.quantity > 5) {
       item.quantity = 5;
       changed = true;
@@ -136,7 +148,10 @@ export const updateCartQtyService = async (userId, itemId, delta) => {
   const item = cart.items.id(itemId);
   if (!item) return { success: false };
 
-  const variant = await Variant.findById(item.variant);
+  const variant = await Variant.findById(item.variant).populate("productId");
+  if (!variant || !variant.isActive || !variant.productId || !variant.productId.isActive) {
+      return { success: false, message: "The product is currently unavailable." };
+  }
 
   let newQty = item.quantity + delta;
   if (newQty < 1) newQty = 1;

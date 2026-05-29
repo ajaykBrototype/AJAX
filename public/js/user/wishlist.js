@@ -55,6 +55,7 @@ async function toggleWishlist(productId, elementOrEvent, variantId = null) {
       return;
     }
 
-    ajaxToast("error", "Something went wrong");
+    const msg = err.response?.data?.message || "Something went wrong";
+    ajaxToast("error", msg);
   }
 }
