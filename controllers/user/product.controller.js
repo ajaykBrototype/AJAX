@@ -1,3 +1,5 @@
+
+
 import * as productService from "../../services/user/product.service.js";
 
 export const loadMenPage = async (req, res) => {
@@ -72,3 +74,7 @@ export const searchProducts = async (req, res) => {
     res.json({ success: false, results: [] });
   }
 };
+
+
+
+

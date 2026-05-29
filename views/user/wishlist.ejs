@@ -542,11 +542,37 @@
       confirmButtonText: 'Yes, clear all'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        // Since there is no specific backend endpoint for clear all,
-        // loop through all items and remove them.
-        const buttons = document.querySelectorAll('.remove-fav');
-        for (let btn of buttons) {
-          btn.click();
+        try {
+          const res = await axios.delete('/wishlist/clear');
+          if (res.data.success) {
+            ajaxToast("success", "All items removed from favorites");
+            
+            // Remove all cards from UI
+            const cards = document.querySelectorAll('.fav-card');
+            cards.forEach(card => {
+              card.style.opacity = '0';
+              card.style.transform = 'translateY(20px)';
+              setTimeout(() => card.remove(), 300);
+            });
+
+            // Update badge
+            const badge = document.getElementById('wishlist-count-badge');
+            const countSpan = document.querySelector('.item-count');
+            if (badge) {
+              badge.innerText = '0';
+              badge.classList.add('hidden');
+            }
+            if (countSpan) {
+              countSpan.innerText = '0 Items Saved';
+            }
+
+            // Show empty state
+            const emptyState = document.querySelector('.empty-wishlist');
+            if (emptyState) emptyState.classList.remove('hidden');
+          }
+        } catch (err) {
+          console.error(err);
+          ajaxToast("error", "Error clearing wishlist");
         }
       }
     })

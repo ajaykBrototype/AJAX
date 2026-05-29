@@ -74,6 +74,8 @@ export const toggleWishlistService = async (userId, productId, variantId) => {
     }
   }
 
+ 
+
   await wishlist.save();
   return { success: true, action, count: wishlist.items.length, statusCode: 200 };
 };

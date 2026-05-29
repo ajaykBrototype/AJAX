@@ -122,12 +122,12 @@ router.post("/wallet/verify-payment", isLoggedIn, verifyWalletPayment);
 
 router.get("/refer", isLoggedIn, loadreferral);
 
-// Review routes
 router.post("/reviews/:productId", isLoggedIn, upload.array("images", 3), addReview);
 router.get("/reviews/:productId", getProductReviews);
 router.patch("/reviews/:reviewId/helpful", isLoggedIn, markHelpful);
 router.put("/reviews/:reviewId", isLoggedIn, upload.array("images", 3), editReview);
 router.delete("/reviews/:reviewId", isLoggedIn, deleteReview);
+
 
 export default router;
 
