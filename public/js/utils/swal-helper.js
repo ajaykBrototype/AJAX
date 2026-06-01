@@ -73,7 +73,7 @@ if (!document.getElementById('ajax-toast-styles')) {
             padding: 0 !important;
             overflow: visible !important;
             width: auto !important;
-            max-width: none !important;
+            max-width: 90vw !important;
         }
         .modern-toast-container {
             display: flex;
@@ -81,15 +81,16 @@ if (!document.getElementById('ajax-toast-styles')) {
             gap: 1rem;
             padding: 0.8rem 1.8rem;
             background: #121212;
-            border-radius: 100px;
+            border-radius: 1.5rem;
             color: white;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
             position: relative;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             animation: toastPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            width: max-content;
-            max-width: 90vw;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
         }
         @keyframes toastPop {
             0% { transform: scale(0.8) translateY(-20px); opacity: 0; }
@@ -124,6 +125,8 @@ if (!document.getElementById('ajax-toast-styles')) {
             display: flex;
             flex-direction: column;
             gap: 1px;
+            text-align: left;
+            word-break: break-word;
         }
         .toast-label {
             font-size: 0.5rem;

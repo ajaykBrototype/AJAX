@@ -75,14 +75,22 @@ export const getDashboardStatsService = async () => {
       weekData.push({ label: d.toLocaleDateString('en-US', { weekday: 'short' }), value: match ? match.revenue : 0 });
     }
 
-    // 3. MONTH (Weeks of current month)
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
+    // 3. MONTH (Last 4 rolling weeks = last 28 days)
+    const twentyEightDaysAgo = new Date();
+    twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
+    twentyEightDaysAgo.setHours(0, 0, 0, 0);
     const monthRaw = await Order.aggregate([
-      { $match: { createdAt: { $gte: startOfMonth } } },
+      { $match: { createdAt: { $gte: twentyEightDaysAgo } } },
       { $unwind: "$items" },
       { $group: {
-          _id: { $ceil: { $divide: [{ $dayOfMonth: "$createdAt" }, 7] } },
+          _id: {
+            $ceil: {
+              $divide: [
+                { $divide: [{ $subtract: ["$createdAt", twentyEightDaysAgo] }, 86400000] },
+                7
+              ]
+            }
+          },
           revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }

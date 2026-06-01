@@ -18,21 +18,24 @@ export const loadSalesReport = async (req, res) => {
     const endDate = new Date();
 
     if (period === 'day') {
-      startDate.setHours(0, 0, 0, 0);
+      startDate.setUTCHours(0, 0, 0, 0);
       prevStartDate = new Date(startDate);
-      prevStartDate.setDate(startDate.getDate() - 1);
+      prevStartDate.setUTCDate(prevStartDate.getUTCDate() - 1);
     } else if (period === 'week') {
-      startDate.setDate(startDate.getDate() - 7);
+      startDate.setUTCDate(startDate.getUTCDate() - 7);
+      startDate.setUTCHours(0, 0, 0, 0);
       prevStartDate = new Date(startDate);
-      prevStartDate.setDate(startDate.getDate() - 7);
+      prevStartDate.setUTCDate(prevStartDate.getUTCDate() - 7);
     } else if (period === 'month') {
-      startDate.setMonth(startDate.getMonth() - 1);
+      startDate.setUTCDate(startDate.getUTCDate() - 30);
+      startDate.setUTCHours(0, 0, 0, 0);
       prevStartDate = new Date(startDate);
-      prevStartDate.setMonth(startDate.getMonth() - 1);
+      prevStartDate.setUTCDate(prevStartDate.getUTCDate() - 30);
     } else if (period === 'year') {
-      startDate.setFullYear(startDate.getFullYear() - 1);
+      startDate.setUTCFullYear(startDate.getUTCFullYear() - 1);
+      startDate.setUTCHours(0, 0, 0, 0);
       prevStartDate = new Date(startDate);
-      prevStartDate.setFullYear(startDate.getFullYear() - 1);
+      prevStartDate.setUTCFullYear(prevStartDate.getUTCFullYear() - 1);
     }
 
     if (req.query.download) {

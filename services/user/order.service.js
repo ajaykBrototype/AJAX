@@ -222,7 +222,8 @@ export const verifyOrderPaymentService = async (userId, { razorpay_order_id, raz
     }
 
     order.status = "Placed";
-    order.paymentStatus = "Paid"; 
+    order.paymentStatus = "Paid";
+    order.statusHistory.push({ status: "Placed", updatedAt: new Date() });
     await order.save();
 
     const cart = await Cart.findOne({ user: userId });
