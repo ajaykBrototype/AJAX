@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>404 Page Not Found — AJAX</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { 
+      extend: { 
+          fontFamily: { 
+              serif: ['Playfair Display', 'serif'], 
+              sans: ['Inter', 'sans-serif'] 
+          },
+          colors: {
+              luxury: {
+                  bg: '#F5F1EB',
+                  dark: '#1A1A1A',
+                  accent: '#B89D7A',
+                  secondary: '#EAE4DC',
+              }
+          }
+      } 
+  }
+}
+</script>
+<style>
+body {
+    background-color: #FFFFFF; /* Pure white background */
+    color: #1A1A1A;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.brand-logo {
+    text-align: center;
+    padding-top: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+.brand-logo .logo-leaf {
+    color: #B89D7A;
+    display: inline-block;
+    margin-right: 0.2rem;
+}
+.error-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+.bottle-icon {
+    width: 60px;
+    height: 80px;
+    margin-bottom: 3rem;
+    opacity: 0.7;
+}
+.error-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(6rem, 15vw, 10rem);
+    line-height: 1;
+    color: #2D2A26;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    gap: 1rem;
+}
+.error-zero {
+    width: clamp(5rem, 12vw, 8rem);
+    height: clamp(5rem, 12vw, 8rem);
+    border: 2px solid #E5E0D8;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.error-zero::after {
+    content: '';
+    position: absolute;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
+    border: 1px dotted #D0C9BE;
+    border-radius: 50%;
+    transform: rotate(15deg);
+}
+.dots {
+    display: flex;
+    gap: 4px;
+    position: absolute;
+    bottom: -30px;
+}
+.dot {
+    width: 4px;
+    height: 4px;
+    background-color: #D0C9BE;
+    border-radius: 50%;
+}
+.dot:nth-child(2) {
+    background-color: #A39B8E;
+}
+.error-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: #2D2A26;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+.error-text {
+    font-size: 0.9rem;
+    color: #8C877D;
+    line-height: 1.8;
+    max-width: 400px;
+    margin-bottom: 3rem;
+    font-weight: 300;
+}
+.button-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+.btn-dark {
+    background-color: #3B332A;
+    color: #FFFFFF;
+    border: 1px solid #3B332A;
+}
+.btn-dark:hover {
+    background-color: #2D2A26;
+}
+.btn-light {
+    background-color: transparent;
+    color: #3B332A;
+    border: 1px solid #D0C9BE;
+}
+.btn-light:hover {
+    background-color: white;
+    border-color: #3B332A;
+}
+.btn svg {
+    width: 14px;
+    height: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="brand-logo">
+    <span class="logo-leaf">❦</span> AJAX
+</div>
+
+<div class="error-container">
+    <!-- Stylized Bottle Icon -->
+    <svg class="bottle-icon" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M35 15 L35 5 L65 5 L65 15 M40 15 L40 25 C40 30 25 35 25 50 L25 100 C25 110 35 115 50 115 C65 115 75 110 75 100 L75 50 C75 35 60 30 60 25 L60 15 Z" stroke="#D0C9BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="transparent"/>
+        <!-- Droplet -->
+        <path d="M50 45 C50 45 42 60 42 65 C42 70 45 73 50 73 C55 73 58 70 58 65 C58 60 50 45 50 45 Z" stroke="#B89D7A" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <text x="50" y="90" fill="#D0C9BE" font-size="10" font-family="Inter" font-weight="300" letter-spacing="4" text-anchor="middle">AJAX</text>
+    </svg>
+
+    <!-- 404 Display -->
+    <div class="error-number">
+        <span>4</span>
+        <div class="error-zero">
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        <span>4</span>
+    </div>
+
+    <!-- Texts -->
+    <h1 class="error-title">Page Not Found</h1>
+    <p class="error-text">
+        The page you're looking for may have been moved or no<br>
+        longer exists.<br><br>
+        Let's get your ajax back on track.
+    </p>
+
+    <!-- Buttons -->
+    <div class="button-group">
+        <a href="/" class="btn btn-dark">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            BACK TO HOME
+        </a>
+        <a href="/men-product-list" class="btn btn-light">
+            <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            SHOP COLLECTIONS
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
