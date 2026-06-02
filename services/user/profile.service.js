@@ -25,6 +25,14 @@ export const getEditProfileDataService = async (userId) => {
 export const updateProfileService = async (userId, data, reqFile, req) => {
     const user = await User.findById(userId);
     const { name, email, phone, dob, gender, nationality } = data;
+    
+      const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+    if (!name || !nameRegex.test(name.trim())) {
+        return {
+            success: false,
+            message: "Name must contain only letters and single spaces"
+        };
+    }
 
     const phoneRegex = /^[0-9]{10}$/;
     if (phone && !phoneRegex.test(phone)) {

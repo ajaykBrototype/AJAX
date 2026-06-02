@@ -106,3 +106,4 @@ export const loadHome = async (req, res) => {
     res.render("user/home", { user: req.session.userId, products: [] });
   }
 };
+

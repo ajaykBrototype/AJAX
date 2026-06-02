@@ -6,6 +6,13 @@ export const createCategoryService = async (data) => {
 
   name = name.trim().toLowerCase();
 
+  if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+    return {
+      success: false,
+      message: "Category name must contain only letters and single spaces"
+    };
+  }
+
   const existing = await Category.findOne({
     name: { $regex: `^${name}$`, $options: "i" }
   });
@@ -31,7 +38,14 @@ export const getCategoriesService=async()=>{
 }
 
 export const updateCategoryService=async(id,data)=>{
-  const {name,isActive}=data;
+  let {name,isActive}=data;
+
+  if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+    return {
+      success: false,
+      message: "Category name must contain only letters and single spaces"
+    };
+  }
      name = name.trim().toLowerCase();
 
   const existing=await Category.findOne({

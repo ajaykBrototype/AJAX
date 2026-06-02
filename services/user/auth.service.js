@@ -183,3 +183,5 @@ export const getHomeProductsService = async () => {
     );
     return productsWithVariants;
 };
+
+

@@ -144,9 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Update UI
                 document.getElementById('discountRow').classList.remove('hidden');
-                document.getElementById('discountValue').innerText = `-₹ ${currentDiscount.toFixed(2)}`;
-                document.getElementById('totalPrice').innerText = `₹ ${newTotal.toFixed(2)}`;
-                document.getElementById('orderBtnText').innerText = `Complete Order — ₹${newTotal.toFixed(2)}`;
+                document.getElementById('discountValue').innerText = `-₹ ${Math.round(currentDiscount)}`;
+                document.getElementById('totalPrice').innerText = `₹ ${Math.round(newTotal)}`;
+                document.getElementById('orderBtnText').innerText = `Complete Order — ₹${Math.round(newTotal)}`;
                 
                 document.getElementById('applyCouponBtn').classList.add('hidden');
                 document.getElementById('removeCouponBtn').classList.remove('hidden');
@@ -167,8 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Update UI
         document.getElementById('discountRow').classList.add('hidden');
-        document.getElementById('totalPrice').innerText = `₹ ${originalTotal.toFixed(2)}`;
-        document.getElementById('orderBtnText').innerText = `Complete Order — ₹${originalTotal.toFixed(2)}`;
+        document.getElementById('totalPrice').innerText = `₹ ${Math.round(originalTotal)}`;
+        document.getElementById('orderBtnText').innerText = `Complete Order — ₹${Math.round(originalTotal)}`;
         
         document.getElementById('applyCouponBtn').classList.remove('hidden');
         document.getElementById('removeCouponBtn').classList.add('hidden');
