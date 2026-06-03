@@ -7,13 +7,13 @@
             const totalDisplays = document.querySelectorAll('.total-display');
 
             if (data.subtotal !== undefined) {
-                subtotalDisplays.forEach(el => el.innerText = `₹${data.subtotal.toFixed(2)}`);
+                subtotalDisplays.forEach(el => el.innerText = `₹${Math.round(data.subtotal)}`);
             }
             if (data.totalDiscount !== undefined) {
-                savingsDisplays.forEach(el => el.innerText = `- ₹${data.totalDiscount.toFixed(2)}`);
+                savingsDisplays.forEach(el => el.innerText = `- ₹${Math.round(data.totalDiscount)}`);
             }
             if (data.totalPrice !== undefined) {
-                totalDisplays.forEach(el => el.innerText = `₹${data.totalPrice.toFixed(2)}`);
+                totalDisplays.forEach(el => el.innerText = `₹${Math.round(data.totalPrice)}`);
             }
         }
 

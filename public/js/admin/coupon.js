@@ -87,6 +87,16 @@ async function createCoupon() {
         hasError = true;
     }
 
+    else if (!/^[A-Za-z0-9]+(\s[A-Za-z0-9]+)*$/.test(code)) {
+
+        showError(
+            "codeError",
+            "Only letters, numbers, and spaces are allowed (no leading/trailing spaces)"
+        );
+
+        hasError = true;
+    }
+
     if (!discountAmount || discountAmount <= 0) {
 
         showError(
@@ -112,11 +122,11 @@ async function createCoupon() {
         hasError = true;
     }
 
-    if (!minOrder || minOrder <= 0) {
+    if (!minOrder || Number(minOrder) <= 0) {
 
         showError(
             "minOrderError",
-            "Enter valid minimum order amount"
+            "Min order is required and must be greater than 0"
         );
 
         hasError = true;
@@ -124,6 +134,7 @@ async function createCoupon() {
 
 
     if (
+        discountType === "percentage" &&
         maxDiscount &&
         Number(maxDiscount) <= 0
     ) {
@@ -338,8 +349,9 @@ async function openEditCoupon(id) {
         document.getElementById("code").value =
             coupon.code || "";
 
-        document.getElementById("discountType").value =
-            coupon.discountType || "flat";
+        const loadedType = coupon.discountType || "flat";
+        document.getElementById("discountType").value = loadedType;
+        if (typeof setDiscountMode === 'function') setDiscountMode(loadedType);
 
         document.getElementById("discountAmount").value =
             coupon.discountAmount || "";
