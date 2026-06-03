@@ -130,13 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
     window.applyCoupon = async function () {
         const code = document.getElementById('couponCodeInput').value.trim();
         const subtotal = parseFloat(document.getElementById('checkoutSubtotal').value);
+        const couponEligibleSubtotal = parseFloat(document.getElementById('couponEligibleSubtotal').value);
 
         if (!code) {
             return ajaxToast("error", "Please enter a coupon code");
         }
 
         try {
-            const res = await axios.post('/checkout/apply-coupon', { code, subtotal });
+            const res = await axios.post('/checkout/apply-coupon', { code, subtotal, couponEligibleSubtotal });
 
             if (res.data.success) {
                 currentDiscount = res.data.discount;

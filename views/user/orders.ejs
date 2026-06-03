@@ -209,7 +209,7 @@ body {
                   </div>
                   <div>
                     <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-1">Total</p>
-                    <p class="text-xs font-bold text-brand-dark">₹<%= order.totalAmount %></p>
+                    <p class="text-xs font-bold text-brand-dark">₹<%= Math.round(order.totalAmount) %></p>
                   </div>
                   <div>
                     <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-1">Order #</p>

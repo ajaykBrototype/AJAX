@@ -285,7 +285,7 @@
                       </p>
                     </td>
                     <td class="px-6 py-5">
-                      <span class="text-sm font-bold text-[var(--admin-text-dark)]">₹<%= order.totalAmount.toFixed(2) %></span>
+                      <span class="text-sm font-bold text-[var(--admin-text-dark)]">₹<%= Math.round(order.totalAmount) %></span>
                     </td>
                     <td class="px-6 py-5">
                       <span class="text-xs font-medium text-[var(--admin-text-muted)] uppercase tracking-tighter"><%= order.paymentMethod %></span>

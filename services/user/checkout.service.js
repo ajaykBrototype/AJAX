@@ -151,7 +151,7 @@ export const getAvailableCouponsService = async (userId, subtotal) => {
   return { success: true, coupons: formattedCoupons };
 };
 
-export const applyCouponService = async (userId, code, subtotal) => {
+export const applyCouponService = async (userId, code, subtotal, couponEligibleSubtotal) => {
   const today = new Date();
   const coupon = await Coupon.findOne({
     code: code.toUpperCase(), status: "active", startDate: { $lte: today }, endDate: { $gte: today }
@@ -176,9 +176,10 @@ export const applyCouponService = async (userId, code, subtotal) => {
   if (coupon.discountType === "flat") {
     discount = coupon.discountAmount;
   } else {
-    discount = (subtotal * coupon.discountAmount) / 100;
+    discount = (couponEligibleSubtotal * coupon.discountAmount) / 100;
     if (coupon.maxDiscount > 0 && discount > coupon.maxDiscount) discount = coupon.maxDiscount;
   }
+  discount = Math.min(discount, couponEligibleSubtotal);
 
   return { success: true, message: "Coupon applied successfully", discount, code: coupon.code };
 };

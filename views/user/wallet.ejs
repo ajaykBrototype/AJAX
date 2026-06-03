@@ -114,7 +114,7 @@ body { background-color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; 
         <div class="lg:col-span-4 page-in d3">
           <div class="wallet-card">
             <div class="balance-label">Available Balance</div>
-            <div class="balance-amount">₹<%= wallet ? wallet.balance.toFixed(2) : '0.00' %></div>
+            <div class="balance-amount">₹<%= wallet ? Math.round(wallet.balance) : '0' %></div>
             
             <div style="margin-bottom: 2.5rem;">
               <div class="card-holder-label">Card Holder</div>
@@ -171,7 +171,7 @@ body { background-color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif; 
                         </span>
                       </td>
                       <td class="font-bold <%= trans.type === 'credit' ? 'text-green-600' : 'text-red-600' %>">
-                        <%= trans.type === 'credit' ? '+' : '-' %>₹<%= trans.amount.toFixed(2) %>
+                        <%= trans.type === 'credit' ? '+' : '-' %>₹<%= Math.round(trans.amount) %>
                       </td>
                     </tr>
                   <% }) %>

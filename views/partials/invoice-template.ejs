@@ -1,7 +1,7 @@
 
 <% 
   // Helper to safely format numbers
-  const fmtNum = (num) => (typeof num === 'number' ? num.toFixed(2) : '0.00');
+  const fmtNum = (num) => (typeof num === 'number' ? Math.round(num) : '0');
   
   // Determine primary status for the invoice
   let primaryStatus = order.status;
