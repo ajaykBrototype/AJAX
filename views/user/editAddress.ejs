@@ -249,18 +249,18 @@ tailwind.config = {
 
           <!-- Row 3: Full Address Line -->
           <div class="form-group" style="margin-bottom:2rem;">
-            <label for="addressLine" class="form-label">
+            <label for="area" class="form-label">
               House No., Building Name, Area, Street <span class="req">*</span>
             </label>
             <textarea
-              id="addressLine"
-              name="addressLine"
+              id="area"
+              name="area"
               class="form-input form-textarea"
               placeholder="e.g. Flat 4B, Sunrise Apartments, MG Road, Connaught Place..."
               autocomplete="street-address"
               maxlength="250"
             ><%= address.area %></textarea>
-            <span class="field-error" id="err-addressLine">Please enter your detailed address.</span>
+            <span class="field-error" id="err-area">Please enter your detailed address.</span>
           </div>
 
         </div><!-- /form-card -->
@@ -289,7 +289,7 @@ tailwind.config = {
 <script>
 
 const rules = {
-  fullName: { required:true, minLen:2, label:'full name' },
+  name: { required:true, minLen:2, pattern:/^[A-Za-z]+(?: [A-Za-z]+)*$/, label:'full name (letters and single spaces only)' },
 
   phone: { 
     required:true, 
@@ -297,8 +297,8 @@ const rules = {
     label:'mobile number (10 digits)' 
   },
 
-  street: { required:true, minLen:3, label:'street / road' },
-  area: { required:true, minLen:5, label:'house / area details' },
+  street: { required:true, minLen:3, mustStartAlpha:true, requireLetter:true, label:'street / road' },
+  area: { required:true, minLen:5, mustStartAlpha:true, requireLetter:true, label:'house / area details' },
 
 
   pincode: { 
@@ -329,16 +329,25 @@ function validateField(id) {
   const el = document.getElementById(id);
   if(!el) return true;
   
-  const val = el.value.trim();
-  if (rule.required && !val) {
+  const val = el.value;
+  const trimmed = val.trim();
+  if (rule.required && !trimmed) {
     showError(id, `Please enter your ${rule.label}.`);
     return false;
   }
-  if (val && rule.minLen && val.length < rule.minLen) {
-    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1)} is too short.`);
+  if (trimmed && rule.mustStartAlpha && !/^[a-zA-Z]/.test(val.charAt(0))) {
+    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1).replace(/\s*\(.*\)/, '')} must start with a letter.`);
     return false;
   }
-  if (val && rule.pattern && !rule.pattern.test(val)) {
+  if (trimmed && rule.requireLetter && !/[a-zA-Z]/.test(trimmed)) {
+    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1).replace(/\s*\(.*\)/, '')} must contain at least one letter.`);
+    return false;
+  }
+  if (trimmed && rule.minLen && trimmed.length < rule.minLen) {
+    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1).replace(/\s*\(.*\)/, '')} is too short.`);
+    return false;
+  }
+  if (trimmed && rule.pattern && !rule.pattern.test(trimmed)) {
     showError(id, `Enter a valid ${rule.label}.`);
     return false;
   }

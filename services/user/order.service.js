@@ -148,7 +148,7 @@ export const placeOrderService = async (userIdRaw, { addressId, paymentMethod, c
             code: couponCode.toUpperCase(), status: "active", startDate: { $lte: today }, endDate: { $gte: today }
         });
 
-        if (appliedCoupon && couponEligibleSubtotal >= appliedCoupon.minOrder) {
+        if (appliedCoupon && subtotal >= appliedCoupon.minOrder) {
             discount = appliedCoupon.discountType === "flat" ? appliedCoupon.discountAmount : (couponEligibleSubtotal * appliedCoupon.discountAmount) / 100;
             if (appliedCoupon.maxDiscount > 0 && discount > appliedCoupon.maxDiscount) discount = appliedCoupon.maxDiscount;
             discount = Math.round(Math.min(discount, couponEligibleSubtotal) * 100) / 100;
@@ -266,7 +266,7 @@ export const cancelOrderItemService = async (userId, orderId, itemId, { reason, 
         const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
         if (coupon) {
             const remainingEligibleSubtotal = activeItems.reduce((sum, i) => sum + ((i.originalPrice && i.originalPrice !== i.price) ? 0 : i.price * i.quantity), 0);
-            if (remainingEligibleSubtotal >= coupon.minOrder) {
+            if (newSubtotal >= coupon.minOrder) {
                 remainingDiscount = coupon.discountType === "flat" ? coupon.discountAmount : (remainingEligibleSubtotal * coupon.discountAmount) / 100;
                 if (coupon.maxDiscount > 0 && remainingDiscount > coupon.maxDiscount) remainingDiscount = coupon.maxDiscount;
                 remainingDiscount = Math.round(Math.min(remainingDiscount, remainingEligibleSubtotal) * 100) / 100;
@@ -341,7 +341,7 @@ export const submitReturnRequestService = async (userId, data, images) => {
             const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
             if (coupon) {
                 const eligibleBefore = activeBefore.reduce((sum, i) => sum + ((i.originalPrice && i.originalPrice !== i.price) ? 0 : i.price * i.quantity), 0);
-                if (eligibleBefore >= coupon.minOrder) {
+                if (subtotalBefore >= coupon.minOrder) {
                     discountBefore = coupon.discountType === "flat" ? coupon.discountAmount : (eligibleBefore * coupon.discountAmount) / 100;
                     if (coupon.maxDiscount > 0 && discountBefore > coupon.maxDiscount) discountBefore = coupon.maxDiscount;
                     discountBefore = Math.round(Math.min(discountBefore, eligibleBefore) * 100) / 100;
@@ -358,7 +358,7 @@ export const submitReturnRequestService = async (userId, data, images) => {
             const coupon = await Coupon.findOne({ code: order.couponCode.toUpperCase() });
             if (coupon) {
                 const eligibleAfter = activeAfter.reduce((sum, i) => sum + ((i.originalPrice && i.originalPrice !== i.price) ? 0 : i.price * i.quantity), 0);
-                if (eligibleAfter >= coupon.minOrder) {
+                if (subtotalAfter >= coupon.minOrder) {
                     discountAfter = coupon.discountType === "flat" ? coupon.discountAmount : (eligibleAfter * coupon.discountAmount) / 100;
                     if (coupon.maxDiscount > 0 && discountAfter > coupon.maxDiscount) discountAfter = coupon.maxDiscount;
                     discountAfter = Math.round(Math.min(discountAfter, eligibleAfter) * 100) / 100;

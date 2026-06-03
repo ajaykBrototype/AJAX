@@ -69,7 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const sizeContainer = document.querySelector('.size-btn')?.parentElement;
             const imgTrigger = document.getElementById('uploadTrigger');
 
-            if (!name.value.trim()) { showInlineError(name, "Product name is required"); hasError = true; }
+            const nameValue = name.value.trim();
+            if (!nameValue) { 
+                showInlineError(name, "Product name is required"); 
+                hasError = true; 
+            } else if (!/^[A-Za-z][A-Za-z\s]*$/.test(nameValue)) {
+                showInlineError(name, "Product name must start with a letter and contain only letters and spaces");
+                hasError = true;
+            }
             if (!category.value) { showInlineError(categoryTrigger, "Please select a category"); hasError = true; }
             if (!subcategory.value) { showInlineError(subcategoryTrigger, "Please select a subcategory"); hasError = true; }
             if (description.value.trim().length < 20) { showInlineError(description, "Description must be at least 20 characters"); hasError = true; }
@@ -77,7 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!careGuide.value.trim()) { showInlineError(careGuide, "Care guidelines are required"); hasError = true; }
             
             if (color) {
-                if (!color.value.trim()) { showInlineError(color, "Primary color is required"); hasError = true; }
+                const colorValue = color.value.trim();
+                if (!colorValue) { 
+                    showInlineError(color, "Primary color is required"); 
+                    hasError = true; 
+                } else if (!/^[A-Za-z\s\-]+$/.test(colorValue)) {
+                    showInlineError(color, "Must contain letters only");
+                    hasError = true;
+                }
                 if (!sku.value.trim()) { showInlineError(sku, "SKU is required"); hasError = true; }
                 if (!price.value || price.value <= 0) { showInlineError(price, "Valid price is required"); hasError = true; }
                 if (stock.value === "" || stock.value < 0) { showInlineError(stock, "Valid stock is required"); hasError = true; }

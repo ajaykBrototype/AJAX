@@ -35,7 +35,7 @@ export const getAvailableCoupons = async (req, res) => {
 
 export const applyCoupon = async (req, res) => {
     try {
-        const result = await checkoutService.applyCouponService(req.session.userId, req.body.code, req.body.subtotal);
+        const result = await checkoutService.applyCouponService(req.session.userId, req.body.code, req.body.subtotal, req.body.couponEligibleSubtotal);
         if (!result.success) return res.json(result);
         res.json(result);
     } catch (err) {

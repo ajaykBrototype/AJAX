@@ -24,14 +24,23 @@ export const getEditProfileDataService = async (userId) => {
 
 export const updateProfileService = async (userId, data, reqFile, req) => {
     const user = await User.findById(userId);
-    const { name, email, phone, dob, gender, nationality } = data;
+    const { name, email, phone, gender, nationality } = data;
+    
+      const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+    if (!name || !nameRegex.test(name.trim())) {
+        return {
+            success: false,
+            field: "name",
+            message: "Name must contain only letters and single spaces"
+        };
+    }
 
     const phoneRegex = /^[0-9]{10}$/;
     if (phone && !phoneRegex.test(phone)) {
-        return { success: false, message: "Phone number must be exactly 10 digits" };
+        return { success: false, field: "phone", message: "Phone number must be exactly 10 digits" };
     }
 
-    let updateData = { name, phone, dob, gender, nationality };
+    let updateData = { name, phone, gender, nationality };
 
     if (reqFile) updateData.profileImage = "/uploads/" + reqFile.filename;
 
@@ -42,7 +51,7 @@ export const updateProfileService = async (userId, data, reqFile, req) => {
 
     if (email !== user.email) {
         const existingUser = await User.findOne({ email, _id: { $ne: userId } });
-        if (existingUser) return { success: false, message: "Email already exists" };
+        if (existingUser) return { success: false, field: "email", message: "Email already exists" };
 
         const otp = generateOTP();
 

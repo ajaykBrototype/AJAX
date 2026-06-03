@@ -229,7 +229,7 @@ body {
       <div>
         <h1 class="editorial-title text-2xl md:text-3xl tracking-tight italic text-stone-300">Order <span class="text-brand-dark not-italic font-bold ml-2">#ORD-<%= order._id.toString().slice(-8).toUpperCase() %></span></h1>
         <p class="text-[0.7rem] tracking-[0.2em] font-bold text-stone-400 uppercase mt-4">
-          Placed on <span class="text-brand-dark"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }) %></span>
+          Placed on <span class="text-brand-dark"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></span>
         </p>
       </div>
       
@@ -410,14 +410,16 @@ body {
         <%= new Date(historyDate).toLocaleDateString('en-US', {
           month: 'short',
           day: '2-digit',
-          year: 'numeric'
+          year: 'numeric',
+          timeZone: 'Asia/Kolkata'
               }) %>
  
     —
        
          <%= new Date(historyDate).toLocaleTimeString([], {
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
+          timeZone: 'Asia/Kolkata'
           }) %>
  
          </span>
@@ -531,7 +533,7 @@ body {
                 <div class="flex-grow pt-1">
                   <div class="flex justify-between items-start mb-2">
                     <h4 class="text-[0.75rem] font-bold uppercase tracking-tight leading-tight max-w-[140px]"><%= item.name %></h4>
-                    <p class="text-[0.75rem] font-bold">₹<%= item.price %></p>
+                    <p class="text-[0.75rem] font-bold">₹<%= Math.round(item.price) %></p>
                   </div>
                   <p class="text-[0.65rem] font-bold text-[#B2B2B2] mb-6"><%= item.size || 'L' %></p>
                   <div class="flex justify-between items-center">
@@ -586,19 +588,19 @@ body {
 
             <div class="flex justify-between items-center">
               <span class="label-grey">Order Subtotal</span>
-              <span class="text-sm font-bold">₹<%= subtotal.toFixed(2) %></span>
+              <span class="text-sm font-bold">₹<%= Math.round(subtotal) %></span>
             </div>
 
             <% if (couponDiscount > 0) { %>
             <div class="flex justify-between items-center">
               <span class="label-grey text-green-600">Coupon Discount</span>
-              <span class="text-sm font-bold text-green-600">- ₹<%= couponDiscount.toFixed(2) %></span>
+              <span class="text-sm font-bold text-green-600">- ₹<%= Math.round(couponDiscount) %></span>
             </div>
             <% } %>
 
             <div class="flex justify-between items-center">
               <span class="label-grey">Shipping Fee</span>
-              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2) %></span>
+              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping === 0 ? 'FREE' : '₹' + Math.round(shipping) %></span>
             </div>
 
             <% 
@@ -619,7 +621,7 @@ body {
                   <span class="w-1 h-1 bg-orange-400 rounded-full"></span>
                   <span class="label-grey !text-orange-600 font-black">Refunded</span>
                 </div>
-                <span class="text-sm font-bold text-orange-600">- ₹<%= refundedTotal.toFixed(2) %></span>
+                <span class="text-sm font-bold text-orange-600">- ₹<%= Math.round(refundedTotal) %></span>
               </div>
             <% } %>
 
@@ -630,7 +632,7 @@ body {
               </div>
               <div class="flex items-baseline gap-1">
                 <span class="text-2xl font-serif">₹</span>
-                <span class="text-3xl font-serif tracking-tighter"><%= (order.totalAmount - refundedTotal).toFixed(2) %></span>
+                <span class="text-3xl font-serif tracking-tighter"><%= Math.round(order.totalAmount - refundedTotal) %></span>
               </div>
             </div>
       </div>

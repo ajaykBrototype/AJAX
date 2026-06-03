@@ -242,8 +242,8 @@
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <p class="text-xs font-bold"><%= new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
-                    <p class="text-[0.65rem] text-stone-400 uppercase tracking-tighter"><%= new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></p>
+                    <p class="text-xs font-bold"><%= new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></p>
+                    <p class="text-[0.65rem] text-stone-400 uppercase tracking-tighter"><%= new Date(user.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) %></p>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <button 

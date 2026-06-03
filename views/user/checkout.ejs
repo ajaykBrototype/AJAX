@@ -271,7 +271,7 @@
                     <div class="checkout-card p-12 text-center border-dashed border-2 border-brand-mist/50">
                         <i data-lucide="map-pin" size="32" class="mx-auto text-stone-200 mb-4"></i>
                         <p class="text-stone-400 mb-6 font-medium">No delivery address selected</p>
-                        <a href="/address" class="inline-block bg-brand-dark text-white px-8 py-3.5 rounded-2xl text-[0.6rem] font-black tracking-widest uppercase hover:bg-black transition-all">Add New Address</a>
+                        <button type="button" onclick="openAddressForm()" class="inline-block bg-brand-dark text-white px-8 py-3.5 rounded-2xl text-[0.6rem] font-black tracking-widest uppercase hover:bg-black transition-all">Add New Address</button>
                     </div>
                     <% } %>
                 </section>
@@ -293,7 +293,7 @@
                             </div>
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold">Wallet Balance</h4>
-                                <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">₹<%= wallet ? wallet.balance.toFixed(2) : '0.00' %> Available</p>
+                                <p class="text-[0.65rem] font-medium text-stone-300 mt-0.5">₹<%= wallet ? Math.round(wallet.balance) : '0' %> Available</p>
                             </div>
                             <% if (!wallet || wallet.balance < total) { %>
                                 <span class="px-3 py-1 bg-red-50 text-red-400 text-[0.5rem] font-black tracking-widest uppercase rounded">Insufficient</span>
@@ -387,7 +387,7 @@
           <div class="text-right">
             <% if (item.offer) { %>
               <p class="font-bold text-base">₹<%= Math.round(item.finalPrice) * item.quantity %></p>
-              <p class="text-[0.55rem] text-stone-300 line-through">₹<%= item.variant.price * item.quantity %></p>
+              <p class="text-[0.55rem] text-stone-300 line-through">₹<%= Math.round(item.variant.price * item.quantity) %></p>
             <% } else { %>
               <p class="font-bold text-base">₹<%= (item.variant?.price || 0) * item.quantity %></p>
             <% } %>
@@ -415,19 +415,19 @@
                     <div class="space-y-5 pt-10 border-t border-brand-mist/30 mb-12">
                         <div class="flex justify-between items-center text-[0.7rem] font-bold text-stone-400">
                             <span class="uppercase tracking-[0.2em]">Subtotal</span>
-                            <span class="text-dark">₹ <%= subtotal %></span>
+                            <span class="text-dark">₹ <%= Math.round(subtotal) %></span>
                         </div>
                         <div class="flex justify-between items-center text-[0.7rem] font-bold">
                             <span class="uppercase tracking-[0.2em] text-green-600">Offer Savings</span>
-                            <span class="text-green-600">-₹ <%= totalOfferDiscount.toFixed(2) %></span>
+                            <span class="text-green-600">-₹ <%= Math.round(totalOfferDiscount) %></span>
                         </div>
                         <div id="discountRow" class="hidden flex justify-between items-center text-[0.7rem] font-bold">
                             <span class="uppercase tracking-[0.2em] text-green-600">Coupon Discount</span>
-                            <span id="discountValue" class="text-green-600">-₹ 0.00</span>
+                            <span id="discountValue" class="text-green-600">-₹ 0</span>
                         </div>
                         <div class="flex justify-between items-center text-[0.7rem] font-bold text-stone-400">
                             <span class="uppercase tracking-[0.2em]">Shipping</span>
-                            <span class="text-green-600 font-black"><%= shipping === 0 ? "FREE" : `₹ ${shipping}` %></span>
+                            <span class="text-green-600 font-black"><%= shipping === 0 ? "FREE" : `₹ ${Math.round(shipping)}` %></span>
                         </div>
                     </div>
 
@@ -437,16 +437,17 @@
                             <p class="text-[0.55rem] text-stone-200 font-bold uppercase tracking-widest">INR</p>
                         </div>
                         <div class="text-right">
-                            <p id="totalPrice" class="text-5xl font-serif tracking-tighter">₹ <%= total %></p>
+                            <p id="totalPrice" class="text-5xl font-serif tracking-tighter">₹ <%= Math.round(total) %></p>
                         </div>
                     </div>
 
                     <!-- Action Button -->
                     <div class="space-y-4">
-                        <input type="hidden" id="checkoutSubtotal" value="<%= couponEligibleSubtotal %>">
+                        <input type="hidden" id="checkoutSubtotal" value="<%= subtotal %>">
+                        <input type="hidden" id="couponEligibleSubtotal" value="<%= couponEligibleSubtotal %>">
                         <input type="hidden" id="checkoutTotalRaw" value="<%= total %>">
                         <button id="completeOrderBtn" onclick="placeOrder()" class="w-full bg-white text-brand-dark border border-brand-dark/10 py-6 rounded-[2rem] text-[0.75rem] font-black tracking-[0.3em] uppercase hover:bg-brand-dark hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-4 shadow-xl shadow-brand-dark/5 relative overflow-hidden group">
-                            <span id="orderBtnText" class="relative z-10 btn-text">Complete Order — ₹<%= total %></span>
+                            <span id="orderBtnText" class="relative z-10 btn-text">Complete Order — ₹<%= Math.round(total) %></span>
                             
                             <!-- Truck Animation Wrapper -->
                             <div class="truck-wrapper">

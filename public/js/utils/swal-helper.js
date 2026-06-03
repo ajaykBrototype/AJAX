@@ -66,6 +66,7 @@ if (!document.getElementById('ajax-toast-styles')) {
     const style = document.createElement('style');
     style.id = 'ajax-toast-styles';
     style.innerHTML = `
+        .swal2-container { z-index: 99999 !important; }
         .swal2-container.modern-toast-wrapper { padding: 30px !important; }
         .modern-toast-popup {
             background: transparent !important;
@@ -83,10 +84,8 @@ if (!document.getElementById('ajax-toast-styles')) {
             background: #121212;
             border-radius: 1.5rem;
             color: white;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05);
             position: relative;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             animation: toastPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 100%;
             max-width: 400px;

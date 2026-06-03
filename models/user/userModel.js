@@ -24,9 +24,6 @@ const userSchema = new mongoose.Schema({
     default: ""
   },
 
-  dob: {
-    type: Date
-  },
 
   gender: {
     type: String,

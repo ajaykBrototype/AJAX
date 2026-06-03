@@ -1,11 +1,19 @@
 import Offer from "../../models/admin/offerModel.js";
 import Product from "../../models/admin/productModel.js";
 import Category from "../../models/admin/categoryModel.js";
+import Variant from "../../models/admin/variantModel.js";
 
 export const getOffersPageDataService = async () => {
     const offers = await Offer.find().populate("targetProduct").populate("targetCategory").sort({ createdAt: -1 });
-    const products = await Product.find({ isActive: true });
+    const rawProducts = await Product.find({ isActive: true }).lean();
     const categories = await Category.find({ isActive: true });
+
+    // Attach lowest variant price to each product for frontend validation
+    const products = await Promise.all(rawProducts.map(async (p) => {
+        const lowestVariant = await Variant.findOne({ productId: p._id }).sort({ price: 1 }).lean();
+        return { ...p, lowestPrice: lowestVariant ? lowestVariant.price : 0 };
+    }));
+
     return { offers, products, categories };
 };
 
@@ -22,6 +30,23 @@ export const createOfferService = async (data) => {
     if (discountValue <= 0) return { success: false, statusCode: 400, message: "Invalid discount" };
     if (!startDate || !endDate) return { success: false, statusCode: 400, message: "Please select dates" };
     if (new Date(startDate) > new Date(endDate)) return { success: false, statusCode: 400, message: "Invalid dates" };
+
+    if (discountMode === "flat") {
+        const flatDiscount = Number(discountValue);
+        if (applicableTo === "product") {
+            const lowestVariant = await Variant.findOne({ productId: targetProduct }).sort({ price: 1 });
+            if (lowestVariant && flatDiscount >= lowestVariant.price) {
+                return { success: false, statusCode: 400, message: `Flat discount (₹${flatDiscount}) cannot be equal to or more than the product price (₹${lowestVariant.price})` };
+            }
+        } else if (applicableTo === "category") {
+            const productsInCat = await Product.find({ category: targetCategory }).select("_id");
+            const productIds = productsInCat.map(p => p._id);
+            const lowestVariant = await Variant.findOne({ productId: { $in: productIds } }).sort({ price: 1 });
+            if (lowestVariant && flatDiscount >= lowestVariant.price) {
+                return { success: false, statusCode: 400, message: `Flat discount (₹${flatDiscount}) cannot be equal to or more than the lowest product price in this category (₹${lowestVariant.price})` };
+            }
+        }
+    }
 
     const newOffer = new Offer({
         offerLabel,
@@ -45,6 +70,23 @@ export const updateOfferService = async (data) => {
 
     const offer = await Offer.findById(offerId);
     if (!offer) return { success: false, statusCode: 404, message: "Offer not found" };
+
+    if (discountMode === "flat") {
+        const flatDiscount = Number(discountValue);
+        if (offer.applicableTo === "product" && offer.targetProduct) {
+            const lowestVariant = await Variant.findOne({ productId: offer.targetProduct }).sort({ price: 1 });
+            if (lowestVariant && flatDiscount >= lowestVariant.price) {
+                return { success: false, statusCode: 400, message: `Flat discount (₹${flatDiscount}) cannot be equal to or more than the product price (₹${lowestVariant.price})` };
+            }
+        } else if (offer.applicableTo === "category" && offer.targetCategory) {
+            const productsInCat = await Product.find({ category: offer.targetCategory }).select("_id");
+            const productIds = productsInCat.map(p => p._id);
+            const lowestVariant = await Variant.findOne({ productId: { $in: productIds } }).sort({ price: 1 });
+            if (lowestVariant && flatDiscount >= lowestVariant.price) {
+                return { success: false, statusCode: 400, message: `Flat discount (₹${flatDiscount}) cannot be equal to or more than the lowest product price in this category (₹${lowestVariant.price})` };
+            }
+        }
+    }
 
     offer.offerLabel = offerLabel;
     offer.discountMode = discountMode;

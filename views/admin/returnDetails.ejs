@@ -186,7 +186,7 @@
 <%
   var st = returnItem.status;
   var addr = returnItem.orderId?.address;
-  var fmt = d => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  var fmt = d => d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '—';
   
   // Totals for Invoice
   var order = returnItem.orderId;

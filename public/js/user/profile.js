@@ -30,12 +30,28 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
 
   const formData = new FormData(this);
 
+  // CLEAR PREVIOUS ERRORS
+  document.querySelectorAll('[id^="error-"]').forEach(el => {
+    el.classList.add('hidden');
+    el.innerText = '';
+  });
+
+  const showInlineError = (field, msg) => {
+    const el = document.getElementById('error-' + field);
+    if (el) {
+      el.innerText = msg;
+      el.classList.remove('hidden');
+    } else {
+      ajaxToast('error', msg); // Fallback
+    }
+  };
+
   // VALIDATION
   const phone = formData.get("phone");
   const phoneRegex = /^[0-9]{10}$/;
   
   if (phone && !phoneRegex.test(phone)) {
-    return ajaxToast("error", "Phone number must be exactly 10 digits");
+    return showInlineError("phone", "Phone number must be exactly 10 digits");
   }
 
   // LOADING UI
@@ -62,7 +78,10 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
 
     // ERROR
     if (!res.data.success) {
-      return ajaxToast("error", res.data.message || "Update failed");
+      if (res.data.field) {
+        return showInlineError(res.data.field, res.data.message);
+      }
+      return showInlineError('name', res.data.message || "Update failed"); // Default to an inline position or fallback
     }
 
     // SUCCESS

@@ -320,9 +320,9 @@
                       <td class="text-brand-muted text-[0.65rem]"><%= order.createdAt.toLocaleDateString() %></td>
                       <td class="text-brand-dark text-[0.65rem]"><%= order.address?.name || 'Unknown' %></td>
                       <td class="text-brand-dark text-[0.65rem] font-bold"><%= order.paymentMethod === 'COD' ? 'Cash' : (order.paymentMethod === 'RAZORPAY' ? 'Razorpay' : order.paymentMethod || 'Wallet') %></td>
-                      <td class="text-brand-dark">₹<%= (order.totalAmount + order.discount).toLocaleString() %></td>
+                      <td class="text-brand-dark">₹<%= Math.round(order.totalAmount + order.discount).toLocaleString() %></td>
                       <td class="text-rose-500 font-bold"><%= order.discount > 0 ? '- ₹'+order.discount : '—' %></td>
-                      <td class="text-right font-black text-brand-dark">₹<%= order.totalAmount.toLocaleString() %></td>
+                      <td class="text-right font-black text-brand-dark">₹<%= Math.round(order.totalAmount).toLocaleString() %></td>
                     </tr>
                   <% }) %>
                 <% } else { %>

@@ -4,7 +4,7 @@ import * as productService from "../../services/user/product.service.js";
 
 export const loadMenPage = async (req, res) => {
   try {
-    const data = await productService.getMenPageDataService(req.query.sub, req.query.page || 1, req.session.userId);
+    const data = await productService.getMenPageDataService(req.query.sub, req.query.page || 1, req.session.userId, req.query.search);
     if (!data.targetCategory) return res.redirect("/home");
     res.render("user/men-product-list", data);
   } catch (err) {
@@ -15,7 +15,7 @@ export const loadMenPage = async (req, res) => {
 
 export const loadCategoryPage = async (req, res) => {
   try {
-    const data = await productService.getCategoryPageDataService(req.params.name, req.query.sub, req.query.page || 1, req.session.userId);
+    const data = await productService.getCategoryPageDataService(req.params.name, req.query.sub, req.query.page || 1, req.session.userId, req.query.search);
     if (!data.targetCategory) return res.redirect("/home");
     res.render("user/categoryProductList", data);
   } catch (err) {
@@ -26,7 +26,7 @@ export const loadCategoryPage = async (req, res) => {
 
 export const loadWomenPage = async (req, res) => {
   try {
-    const data = await productService.getWomenPageDataService(req.query.sub, req.query.page || 1, req.session.userId);
+    const data = await productService.getWomenPageDataService(req.query.sub, req.query.page || 1, req.session.userId, req.query.search);
     if (!data.targetCategory) return res.redirect("/home");
     res.render("user/women-product-list", data);
   } catch (err) {

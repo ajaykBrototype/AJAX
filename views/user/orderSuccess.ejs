@@ -262,10 +262,10 @@
               </p>
                <div class="flex items-center gap-2">
                  <p class="text-sm font-black">
-                   ₹<%= item.price %>
+                   ₹<%= Math.round(item.price) %>
                  </p>
                  <% if (item.originalPrice && item.originalPrice > item.price) { %>
-                   <p class="text-[0.65rem] text-stone-300 line-through">₹<%= item.originalPrice %></p>
+                   <p class="text-[0.65rem] text-stone-300 line-through">₹<%= Math.round(item.originalPrice) %></p>
                  <% } %>
                </div>
               </div>
@@ -281,18 +281,18 @@
                     %>
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem]">Subtotal</span>
-                        <span class="font-bold">₹<%= originalSubtotal.toFixed(2) %></span>
+                        <span class="font-bold">₹<%= Math.round(originalSubtotal) %></span>
                     </div>
                     <% if (order.totalOfferDiscount > 0) { %>
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem] text-brand-success">Offer Savings</span>
-                        <span class="font-bold text-brand-success">-₹<%= order.totalOfferDiscount.toFixed(2) %></span>
+                        <span class="font-bold text-brand-success">-₹<%= Math.round(order.totalOfferDiscount) %></span>
                     </div>
                     <% } %>
                     <% if (order.discount > 0) { %>
                     <div class="flex justify-between items-center text-[0.75rem]">
                         <span class="text-stone-400 font-medium uppercase tracking-[0.15em] text-[0.6rem] text-brand-success">Coupon (<%= order.couponCode %>)</span>
-                        <span class="font-bold text-brand-success">-₹<%= order.discount.toFixed(2) %></span>
+                        <span class="font-bold text-brand-success">-₹<%= Math.round(order.discount) %></span>
                     </div>
                     <% } %>
                     <div class="flex justify-between items-center text-[0.75rem]">
@@ -304,7 +304,7 @@
                             <p class="text-[0.5rem] font-black tracking-[0.2em] text-stone-300 uppercase mb-0.5">Total Paid</p>
                             <p class="text-[0.4rem] font-bold text-stone-200 uppercase tracking-widest"><%= order.paymentMethod %></p>
                         </div>
-                        <p class="text-3xl font-serif tracking-tight">₹<%= order.totalAmount.toFixed(2) %></p>
+                        <p class="text-3xl font-serif tracking-tight">₹<%= Math.round(order.totalAmount) %></p>
                     </div>
                 </div>
             </div>
