@@ -405,11 +405,13 @@
                         <div class="input-group">
                             <label class="input-label">Full Name</label>
                             <input type="text" name="name" value="<%= user.name %>" class="modern-input" placeholder="Enter your full name" />
+                            <p id="error-name" class="text-red-500 text-xs mt-1 hidden"></p>
                         </div>
 
                         <div class="input-group">
                             <label class="input-label">Email Address</label>
                             <input type="email" name="email" value="<%= user.email %>" class="modern-input" <%= user.googleId ? "readonly disabled" : "" %> placeholder="yourname@example.com" />
+                            <p id="error-email" class="text-red-500 text-xs mt-1 hidden"></p>
                             <% if (user.googleId) { %>
                                 <p class="text-[0.6rem] text-stone-400 font-medium italic mt-1 ml-2">Email linked to Google Account</p>
                             <% } %>
@@ -418,6 +420,7 @@
                         <div class="input-group">
                             <label class="input-label">Phone Number</label>
                             <input type="text" name="phone" value="<%= user.phone || '' %>" class="modern-input" placeholder="+91 00000 00000" />
+                            <p id="error-phone" class="text-red-500 text-xs mt-1 hidden"></p>
                         </div>
 
                         <div class="input-group">
@@ -441,6 +444,7 @@
                         <div class="input-group">
                             <label class="input-label">Nationality</label>
                             <input type="text" name="nationality" value="<%= user.nationality || '' %>" class="modern-input" placeholder="e.g. Indian" />
+                            <p id="error-nationality" class="text-red-500 text-xs mt-1 hidden"></p>
                         </div>
                     </div>
 

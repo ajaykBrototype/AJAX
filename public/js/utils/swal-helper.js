@@ -83,10 +83,8 @@ if (!document.getElementById('ajax-toast-styles')) {
             background: #121212;
             border-radius: 100px;
             color: white;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05);
             position: relative;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             animation: toastPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: max-content;
             max-width: 90vw;
