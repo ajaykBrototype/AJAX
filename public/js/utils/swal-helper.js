@@ -66,6 +66,7 @@ if (!document.getElementById('ajax-toast-styles')) {
     const style = document.createElement('style');
     style.id = 'ajax-toast-styles';
     style.innerHTML = `
+        .swal2-container { z-index: 99999 !important; }
         .swal2-container.modern-toast-wrapper { padding: 30px !important; }
         .modern-toast-popup {
             background: transparent !important;

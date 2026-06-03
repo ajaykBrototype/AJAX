@@ -113,7 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let hasError = false;
 
-    if (!color.value.trim()) { showInlineError(color, "Color is required"); hasError = true; }
+    const colorValue = color.value.trim();
+    if (!colorValue) { 
+      showInlineError(color, "Color is required"); 
+      hasError = true; 
+    } else if (!/^[A-Za-z\s\-]+$/.test(colorValue)) {
+      showInlineError(color, "Color must contain only letters");
+      hasError = true;
+    }
     
     const sizeContainer = document.querySelector('.size-btn')?.parentElement;
     if (!sizeInput.value) { showInlineError(sizeContainer, "Please select a size"); hasError = true; }

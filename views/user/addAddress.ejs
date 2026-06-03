@@ -403,8 +403,8 @@ function validateField(id) {
     showError(id, `Please enter your ${rule.label}.`);
     return false;
   }
-  if (trimmed && rule.mustStartAlpha && !/^[a-zA-Z0-9]/.test(val.charAt(0))) {
-    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1).replace(/\s*\(.*\)/, '')} must start with a letter or number.`);
+  if (trimmed && rule.mustStartAlpha && !/^[a-zA-Z]/.test(val.charAt(0))) {
+    showError(id, `${rule.label.charAt(0).toUpperCase()+rule.label.slice(1).replace(/\s*\(.*\)/, '')} must start with a letter.`);
     return false;
   }
   if (trimmed && rule.requireLetter && !/[a-zA-Z]/.test(trimmed)) {

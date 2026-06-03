@@ -43,7 +43,7 @@
           </div>
           <div>
             <p class="text-[0.55rem] font-black text-stone-300 uppercase tracking-widest mb-0.5">Issue Date</p>
-            <p class="text-xs font-bold tracking-tight"><%= new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }) %></p>
+            <p class="text-xs font-bold tracking-tight"><%= new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></p>
           </div>
           <div class="px-3 py-1 rounded-full <%= statusColor %> text-[0.55rem] font-black uppercase tracking-[0.2em]">
             <%= statusBadge %>
@@ -79,7 +79,7 @@
           </div>
           <div>
             <p class="text-[0.5rem] font-black text-stone-300 uppercase tracking-widest mb-0.5">Order Date</p>
-            <p class="text-[0.65rem] font-bold tracking-tight"><%= new Date(order.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
+            <p class="text-[0.65rem] font-bold tracking-tight"><%= new Date(order.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></p>
           </div>
           <div>
             <p class="text-[0.5rem] font-black text-stone-300 uppercase tracking-widest mb-0.5">Shipment</p>
@@ -133,7 +133,7 @@
             <div class="relative flex flex-col gap-1">
               <div class="absolute -left-[26px] top-1.5 w-2 h-2 bg-stone-200 rounded-full border-2 border-white shadow-sm"></div>
               <p class="text-[0.6rem] font-black uppercase tracking-widest leading-none"><%= h.status %></p>
-              <p class="text-[0.5rem] font-bold text-stone-400 leading-none"><%= new Date(h.updatedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }) %></p>
+              <p class="text-[0.5rem] font-bold text-stone-400 leading-none"><%= new Date(h.updatedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', timeZone: 'Asia/Kolkata' }) %></p>
             </div>
           <% }) %>
         </div>

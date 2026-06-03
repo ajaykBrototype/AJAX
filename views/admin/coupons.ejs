@@ -301,8 +301,8 @@
                                 </div>
                             </td>
                             <td class="py-6 px-4">
-                                <span class="text-sm font-bold text-stone-700"><%= new Date(coupon.startDate).toLocaleDateString('en-GB') %>—
-                                                                              <%= new Date(coupon.endDate).toLocaleDateString('en-GB') %></span>
+                                <span class="text-sm font-bold text-stone-700"><%= new Date(coupon.startDate).toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }) %>—
+                                                                              <%= new Date(coupon.endDate).toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }) %></span>
                             </td>
                             <td class="py-6 px-4 text-center">
                                 <div class="flex flex-col items-center gap-2">

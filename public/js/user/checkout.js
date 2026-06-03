@@ -294,13 +294,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fields.forEach(clearError);
 
-        if (form.name.value.trim().length < 3) {
-            showError(form.name, "Name must be at least 3 characters");
+        if (form.name.value.trim().length < 3 || !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(form.name.value.trim())) {
+            showError(form.name, "Enter a valid name (letters and single spaces only)");
             isValid = false;
         }
 
-        if (form.street.value.trim().length < 5) {
-            showError(form.street, "Enter valid street");
+        if (form.street.value.trim().length < 5 || !/^[a-zA-Z]/.test(form.street.value.trim())) {
+            showError(form.street, "Enter a valid street (must start with a letter)");
             isValid = false;
         }
 
@@ -314,8 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
             isValid = false;
         }
 
-        if (form.area.value.trim().length < 3) {
-            showError(form.area, "Enter valid area");
+        if (form.area.value.trim().length < 3 || !/^[a-zA-Z]/.test(form.area.value.trim())) {
+            showError(form.area, "Enter a valid area (must start with a letter)");
             isValid = false;
         }
 
@@ -330,7 +330,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isValid) {
-            form.submit();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const isEdit = !!data.addressId;
+            const url = isEdit ? `/edit-address/${data.addressId}` : '/address/add';
+            const method = isEdit ? 'put' : 'post';
+            
+            const btn = document.querySelector('button[form="addressForm"]');
+            const origText = btn.innerHTML;
+            btn.innerHTML = 'Saving...';
+            btn.disabled = true;
+
+            axios[method](url, data).then(res => {
+                if(res.data.success || res.status===200) {
+                    toggleAddressFormModal(false);
+                    ajaxToast('success', 'Address saved successfully');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    ajaxToast('error', res.data.message || 'Error saving address');
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                }
+            }).catch(err => {
+                console.error(err);
+                ajaxToast('error', err.response?.data?.message || 'Something went wrong');
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            });
         }
     });
 

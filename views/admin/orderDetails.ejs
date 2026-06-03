@@ -114,9 +114,9 @@
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-stone-400">
               <span class="text-stone-600">#<%= order._id.toString().toUpperCase().slice(-10) %></span>
               <span class="w-1 h-1 bg-stone-200 rounded-full"></span>
-              <span><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) %></span>
+              <span><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></span>
               <span class="w-1 h-1 bg-stone-200 rounded-full"></span>
-              <span><%= new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
+              <span><%= new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) %></span>
             </div>
           </div>
           
@@ -159,7 +159,7 @@
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-stone-50">
                   <span class="text-xs text-[var(--admin-text-muted)]">Placed On</span>
-                  <span class="text-sm font-bold"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }) %></span>
+                  <span class="text-sm font-bold"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></span>
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-stone-50">
                   <span class="text-xs text-[var(--admin-text-muted)]">Total Items</span>
