@@ -20,8 +20,9 @@ function extractMainCategory(path) {
   return 'men';
 }
 
+const urlSearchParamsData = new URLSearchParams(window.location.search);
 window.filters = {
-  search: "",
+  search: urlSearchParamsData.get('search') || "",
   sort: "",
   category: "",
   minPrice: 0,
@@ -76,6 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("sidebarSearch");
   const debouncedApply = debounce(() => applyFilters(), 500);
 
+  if (searchInput && window.filters.search) {
+    searchInput.value = window.filters.search;
+  }
+
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       window.filters.search = e.target.value;
@@ -85,6 +90,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔍 SEARCH (toolbar)
   const toolbarSearch = document.getElementById("toolbarSearch");
+  if (toolbarSearch && window.filters.search) {
+    toolbarSearch.value = window.filters.search;
+  }
   if (toolbarSearch) {
     toolbarSearch.addEventListener("input", (e) => {
       window.filters.search = e.target.value;

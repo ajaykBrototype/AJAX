@@ -123,6 +123,19 @@ form.addEventListener(
         isValid = false;
     }
 
+    // FLAT DISCOUNT LIMIT (product only – category validated server-side)
+    if (discountMode === "flat") {
+        const selectedOption = targetSelect.options[targetSelect.selectedIndex];
+        const productPrice = selectedOption ? Number(selectedOption.dataset.price) : 0;
+        if (productPrice > 0 && discount >= productPrice) {
+            showError(
+                discountValue,
+                `Discount must be less than product price (₹${productPrice})`
+            );
+            isValid = false;
+        }
+    }
+
     // MAX CAP
     if (
         maxDiscountCap.value &&
@@ -258,10 +271,12 @@ form.addEventListener(
             ||
             "Something went wrong";
 
-        ajaxToast(
-            "error",
-            message
-        );
+        if (error?.response?.status === 400) {
+            const discountValue = document.querySelector('[name="discountValue"]');
+            showError(discountValue, message);
+        } else {
+            ajaxToast("error", message);
+        }
 
     } finally {
 
@@ -448,6 +463,12 @@ function openEditOfferModal(offer) {
         "editEndDate"
     ).value =
         offer.endDate.split("T")[0];
+
+    // Store product price for frontend flat-discount validation
+    document.getElementById("editOfferForm").dataset.productPrice =
+        (offer.discountMode === "flat" && offer.targetProduct?.price)
+        ? offer.targetProduct.price
+        : "";
 }
 
 
@@ -597,6 +618,19 @@ document
         isValid = false;
     }
 
+    // FLAT DISCOUNT LIMIT
+    if (discountMode === "flat") {
+        const editForm = document.getElementById("editOfferForm");
+        const productPrice = Number(editForm.dataset.productPrice);
+        if (productPrice > 0 && discount >= productPrice) {
+            showError(
+                discountValue,
+                `Discount must be less than product price (₹${productPrice})`
+            );
+            isValid = false;
+        }
+    }
+
     if (
         maxDiscountCap.value &&
         Number(
@@ -717,12 +751,17 @@ document
 
     } catch (error) {
 
-        ajaxToast(
-            "error",
+        const message =
             error?.response?.data?.message
             ||
-            "Something went wrong"
-        );
+            "Something went wrong";
+
+        if (error?.response?.status === 400) {
+            const discountValue = document.querySelector('#editOfferForm [name="discountValue"]');
+            showError(discountValue, message);
+        } else {
+            ajaxToast("error", message);
+        }
 
     } finally {
 

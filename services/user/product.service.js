@@ -32,7 +32,7 @@ const getBestOffer = (activeOffers, prod, price) => {
   return best;
 };
 
-const getCategoryProductsHelper = async (categoryNameRegex, sub, page, userId) => {
+const getCategoryProductsHelper = async (categoryNameRegex, sub, page, userId, searchKeyword) => {
     const limit = 8;
     const skip = (page - 1) * limit;
 
@@ -47,6 +47,10 @@ const getCategoryProductsHelper = async (categoryNameRegex, sub, page, userId) =
       filter.subcategory = sub;
     } else {
       filter.subcategory = { $in: subCategories.map(s => s._id) };
+    }
+
+    if (searchKeyword) {
+      filter.name = { $regex: searchKeyword, $options: "i" };
     }
 
     const wishlist = userId ? await Wishlist.findOne({ user: userId }) : null;
@@ -82,16 +86,16 @@ const getCategoryProductsHelper = async (categoryNameRegex, sub, page, userId) =
     };
 };
 
-export const getMenPageDataService = async (sub, page, userId) => {
-    return await getCategoryProductsHelper("^men$", sub, page, userId);
+export const getMenPageDataService = async (sub, page, userId, search) => {
+    return await getCategoryProductsHelper("^men$", sub, page, userId, search);
 };
 
-export const getWomenPageDataService = async (sub, page, userId) => {
-    return await getCategoryProductsHelper("^women$", sub, page, userId);
+export const getWomenPageDataService = async (sub, page, userId, search) => {
+    return await getCategoryProductsHelper("^women$", sub, page, userId, search);
 };
 
-export const getCategoryPageDataService = async (name, sub, page, userId) => {
-    return await getCategoryProductsHelper(`^${name}$`, sub, page, userId);
+export const getCategoryPageDataService = async (name, sub, page, userId, search) => {
+    return await getCategoryProductsHelper(`^${name}$`, sub, page, userId, search);
 };
 
 export const getProductDetailsService = async (productId, userId) => {

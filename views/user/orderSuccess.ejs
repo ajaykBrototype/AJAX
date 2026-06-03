@@ -262,10 +262,10 @@
               </p>
                <div class="flex items-center gap-2">
                  <p class="text-sm font-black">
-                   ₹<%= item.price %>
+                   ₹<%= Math.round(item.price) %>
                  </p>
                  <% if (item.originalPrice && item.originalPrice > item.price) { %>
-                   <p class="text-[0.65rem] text-stone-300 line-through">₹<%= item.originalPrice %></p>
+                   <p class="text-[0.65rem] text-stone-300 line-through">₹<%= Math.round(item.originalPrice) %></p>
                  <% } %>
                </div>
               </div>
