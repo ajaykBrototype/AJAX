@@ -9,15 +9,20 @@ mongoose.connect(process.env.MONGO_URI);
 
 const createAdmin = async () => {
   try {
-    const hashedPassword = await bcrypt.hash("Admin@123", 10);
+
+    const hashedPassword = await bcrypt.hash(
+      process.env.ADMIN_PASSWORD,
+      10
+    );
 
     const admin = await Admin.create({
-      email: "admin@gmail.com",
+      email: process.env.ADMIN_EMAIL,
       password: hashedPassword
     });
 
-    console.log("✅ Admin created:", admin);
+    console.log("✅ Admin created");
     process.exit();
+
   } catch (err) {
     console.error(err);
     process.exit(1);
