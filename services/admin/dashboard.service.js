@@ -75,7 +75,7 @@ export const getDashboardStatsService = async () => {
       weekData.push({ label: d.toLocaleDateString('en-US', { weekday: 'short' }), value: match ? match.revenue : 0 });
     }
 
-    // 3. MONTH (Last 4 rolling weeks = last 28 days)
+    // 3. MONTH (Last 4 rolling weeks = last 28 days, grouped in JS)
     const twentyEightDaysAgo = new Date();
     twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
     twentyEightDaysAgo.setHours(0, 0, 0, 0);
@@ -83,22 +83,19 @@ export const getDashboardStatsService = async () => {
       { $match: { createdAt: { $gte: twentyEightDaysAgo } } },
       { $unwind: "$items" },
       { $group: {
-          _id: {
-            $ceil: {
-              $divide: [
-                { $divide: [{ $subtract: ["$createdAt", twentyEightDaysAgo] }, 86400000] },
-                7
-              ]
-            }
-          },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
       }},
       { $sort: { "_id": 1 } }
     ]);
-    const monthData = Array.from({length: 4}, (_, i) => {
-      const match = monthRaw.find(r => r._id === i + 1);
-      return { label: `Week ${i + 1}`, value: match ? match.revenue : 0 };
+    const weekBuckets = [0, 0, 0, 0];
+    monthRaw.forEach(entry => {
+      const entryDate = new Date(entry._id);
+      const diffDays = Math.floor((entryDate - twentyEightDaysAgo) / 86400000);
+      const weekIndex = Math.min(Math.floor(diffDays / 7), 3);
+      weekBuckets[weekIndex] += entry.revenue;
     });
+    const monthData = weekBuckets.map((revenue, i) => ({ label: `Week ${i + 1}`, value: revenue }));
 
     // 4. YEAR (Months of current year)
     const startOfYear = new Date();
