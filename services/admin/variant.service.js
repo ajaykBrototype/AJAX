@@ -45,6 +45,17 @@ export const addVariantService = async (data, imagePaths) => {
         return { success: false, statusCode: 400, message: "A minimum of 3 images are required for a variant." };
     }
 
+    // Check for duplicate color + size combination within this product
+    const duplicateVariant = await Variant.findOne({
+        productId,
+        color: { $regex: new RegExp(`^${color.trim()}$`, "i") },
+        size: size
+    });
+
+    if (duplicateVariant) {
+        return { success: false, statusCode: 409, message: `A variant with color "${color}" and size "${size}" already exists for this product.` };
+    }
+
     const existingVariantsCount = await Variant.countDocuments({ productId });
 
     await Variant.create({

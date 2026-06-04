@@ -131,6 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!price.value || price.value <= 0) { 
                     showInlineError(price, "Valid price is required"); 
                     hasError = true; 
+                } else if (!Number.isInteger(Number(price.value))) {
+                    showInlineError(price, "Price cannot contain decimal point values");
+                    hasError = true;
                 } else if (price.value > 100000) {
                     showInlineError(price, "Price cannot exceed 100,000");
                     hasError = true;
@@ -139,6 +142,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (stock.value === "" || stock.value < 0) { 
                     showInlineError(stock, "Valid stock is required"); 
                     hasError = true; 
+                } else if (!Number.isInteger(Number(stock.value))) {
+                    showInlineError(stock, "Stock cannot contain decimal point values");
+                    hasError = true;
                 } else if (stock.value > 10000) {
                     showInlineError(stock, "Stock cannot exceed 10,000");
                     hasError = true;

@@ -137,6 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (stock.value === '' || stock.value < 0) { 
       showInlineError(stock, "Valid stock required"); 
       hasError = true; 
+    } else if (!Number.isInteger(Number(stock.value))) {
+      showInlineError(stock, "Stock cannot contain decimal point values");
+      hasError = true;
     } else if (stock.value > 10000) {
       showInlineError(stock, "Stock cannot exceed 10,000");
       hasError = true;
@@ -145,6 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (price.value === '' || price.value <= 0) { 
       showInlineError(price, "Valid price required"); 
       hasError = true; 
+    } else if (!Number.isInteger(Number(price.value))) {
+      showInlineError(price, "Price cannot contain decimal point values");
+      hasError = true;
     } else if (price.value > 100000) {
       showInlineError(price, "Price cannot exceed 100,000");
       hasError = true;
@@ -189,10 +195,27 @@ document.addEventListener("DOMContentLoaded", () => {
               window.location.href = res.data.redirectUrl;
           },2000)
         } else {
-            ajaxToast("error", res.data.message);
+          // Show as inline error on the most relevant field
+          const msg = res.data.message || "Failed to save variant";
+          const colorField = variantForm.querySelector('[name="color"]');
+          const skuField = variantForm.querySelector('[name="sku"]');
+          if (msg.toLowerCase().includes('color') || msg.toLowerCase().includes('size')) {
+            showInlineError(colorField, msg);
+          } else if (msg.toLowerCase().includes('sku') || msg.toLowerCase().includes('duplicate')) {
+            showInlineError(skuField, msg);
+          } else {
+            showInlineError(colorField, msg);
+          }
         }
       } catch (err) {
-          ajaxToast("error", err.response?.data?.message || "Server error");
+          const errMsg = err.response?.data?.message || "Server error";
+          const colorField = variantForm.querySelector('[name="color"]');
+          const skuField = variantForm.querySelector('[name="sku"]');
+          if (errMsg.toLowerCase().includes('sku') || errMsg.toLowerCase().includes('duplicate')) {
+            showInlineError(skuField, "This SKU already exists. Please use a unique SKU.");
+          } else {
+            showInlineError(colorField, errMsg);
+          }
       } finally {
         saveVariantBtn.disabled = false;
       }
@@ -233,10 +256,26 @@ document.addEventListener("DOMContentLoaded", () => {
              window.location.href = res.data.redirectUrl;
            },2000)
         } else {
-          ajaxToast("error", res.data.message);
+          const msg = res.data.message || "Failed to update variant";
+          const colorField = variantForm.querySelector('[name="color"]');
+          const skuField = variantForm.querySelector('[name="sku"]');
+          if (msg.toLowerCase().includes('color') || msg.toLowerCase().includes('size')) {
+            showInlineError(colorField, msg);
+          } else if (msg.toLowerCase().includes('sku') || msg.toLowerCase().includes('duplicate')) {
+            showInlineError(skuField, msg);
+          } else {
+            showInlineError(colorField, msg);
+          }
         }
       } catch (err) {
-        ajaxToast("error", err.response?.data?.message || "Server error");
+        const errMsg = err.response?.data?.message || "Server error";
+        const colorField = variantForm.querySelector('[name="color"]');
+        const skuField = variantForm.querySelector('[name="sku"]');
+        if (errMsg.toLowerCase().includes('sku') || errMsg.toLowerCase().includes('duplicate')) {
+          showInlineError(skuField, "This SKU already exists. Please use a unique SKU.");
+        } else {
+          showInlineError(colorField, errMsg);
+        }
       } finally {
         updateVariantBtn.disabled = false;
       }
