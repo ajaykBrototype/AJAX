@@ -327,21 +327,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function updateSubmitState() {
-
+        const titleVal = reviewTitle.value.trim();
         const isRatingValid = selectedRating >= 1;
-
-        const isBodyValid = reviewBody.value.length >= 10;
-
-
+        const isBodyValid = reviewBody.value.length >= 10 && /^[A-Za-z]/.test(reviewBody.value.trim());
+        const isTitleValid = !titleVal || (titleVal.length >= 3 && /^[A-Za-z]/.test(titleVal));
 
         submitReviewBtn.disabled = !(
-
             isRatingValid &&
-
-            isBodyValid
-
+            isBodyValid &&
+            isTitleValid
         );
-
     }
 
 
@@ -563,9 +558,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
-
-
         if (submitReviewBtn.disabled) return;
+
+        // -- Inline title validation --
+        const titleVal = reviewTitle.value.trim();
+        const titleError = document.getElementById('reviewTitleError');
+        if (titleError) titleError.remove();
+        reviewTitle.classList.remove('border-red-500');
+
+        if (titleVal && titleVal.length < 3) {
+            const err = document.createElement('p');
+            err.id = 'reviewTitleError';
+            err.className = 'text-red-500 text-xs mt-1';
+            err.textContent = 'Review title must be at least 3 characters.';
+            reviewTitle.insertAdjacentElement('afterend', err);
+            reviewTitle.classList.add('border-red-500');
+            return;
+        } else if (titleVal && !/^[A-Za-z]/.test(titleVal)) {
+            const err = document.createElement('p');
+            err.id = 'reviewTitleError';
+            err.className = 'text-red-500 text-xs mt-1';
+            err.textContent = 'Review title must start with a letter.';
+            reviewTitle.insertAdjacentElement('afterend', err);
+            reviewTitle.classList.add('border-red-500');
+            return;
+        }
+
+        // -- Inline body validation --
+        const bodyVal = reviewBody.value.trim();
+        const bodyError = document.getElementById('reviewBodyError');
+        if (bodyError) bodyError.remove();
+        reviewBody.classList.remove('border-red-500');
+
+        if (bodyVal.length < 10) {
+            const err = document.createElement('p');
+            err.id = 'reviewBodyError';
+            err.className = 'text-red-500 text-xs mt-1';
+            err.textContent = 'Review description must be at least 10 characters.';
+            reviewBody.insertAdjacentElement('afterend', err);
+            reviewBody.classList.add('border-red-500');
+            return;
+        } else if (!/^[A-Za-z]/.test(bodyVal)) {
+            const err = document.createElement('p');
+            err.id = 'reviewBodyError';
+            err.className = 'text-red-500 text-xs mt-1';
+            err.textContent = 'Review description must start with a letter.';
+            reviewBody.insertAdjacentElement('afterend', err);
+            reviewBody.classList.add('border-red-500');
+            return;
+        }
 
 
 

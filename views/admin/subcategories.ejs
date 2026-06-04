@@ -233,7 +233,7 @@
                 <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">#</th>
                 <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Sub-Title</th>
                 <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Parent Root</th>
-                <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">Inventory</th>
+
                 <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400">State</th>
                 <th class="px-8 py-4 text-[0.6rem] uppercase tracking-widest font-bold text-stone-400 text-center">Settings</th>
               </tr>
@@ -249,7 +249,7 @@
                   <td class="px-8 py-5">
                     <span class="text-xs font-medium px-2 py-1 bg-stone-100 rounded text-stone-600"><%= sub.category?.name %></span>
                   </td>
-                  <td class="px-8 py-5 text-xs font-medium">-- Items</td>
+
                   <td class="px-8 py-5">
                     <span class="status-pill <%= sub.isActive ? 'status-active' : 'status-inactive' %>">
                       <%= sub.isActive ? 'LIVE' : 'IDLE' %>
@@ -275,7 +275,7 @@
                 </tr>
               <% }) %>
               <% if(subCategories.length === 0) { %>
-                <tr><td colspan="6" class="py-20 text-center text-sm text-stone-400 font-medium italic">No sub-tiers found in registry.</td></tr>
+                <tr><td colspan="5" class="py-20 text-center text-sm text-stone-400 font-medium italic">No sub-tiers found in registry.</td></tr>
               <% } %>
             </tbody>
           </table>
