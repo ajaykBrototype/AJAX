@@ -1,369 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Order Tracking — AJAX</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script>
-tailwind.config = {
-  theme: { 
-    extend: { 
-      fontFamily: { 
-        serif: ['Playfair Display', 'serif'], 
-        sans: ['Outfit', 'sans-serif'] 
-      },
-      colors: {
-        brand: {
-          dark: '#1C1C1C',
-          cream: '#F5F0E8',
-          warm: '#F5F2EA',
-          stone: '#9B8E83',
-          mist: '#EAE5DC',
-          success: '#5C8C6A'
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracking — AJAX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Outfit', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              dark: '#1C1C1C',
+              cream: '#F5F0E8',
+              warm: '#F5F2EA',
+              stone: '#9B8E83',
+              mist: '#EAE5DC',
+              success: '#5C8C6A'
+            }
+          }
         }
       }
-    } 
-  }
-}
-</script>
-<%- include('../partials/navbar-styles') %>
-<%- include('../partials/footer-styles') %>
-<style>
-:root {
-  --brand-dark: #1C1C1C;
-  --brand-cream: #F5F0E8;
-  --brand-warm: #FAFAF8;
-  --brand-stone: #9B8E83;
-  --brand-mist: #EAE5DC;
-}
+    }
+  </script>
+  <%- include('../partials/navbar-styles') %>
+    <%- include('../partials/footer-styles') %>
+      <style>
+        :root {
+          --brand-dark: #1C1C1C;
+          --brand-cream: #F5F0E8;
+          --brand-warm: #FAFAF8;
+          --brand-stone: #9B8E83;
+          --brand-mist: #EAE5DC;
+        }
 
-body {
-  background-color: var(--brand-warm);
-  font-family: 'Outfit', sans-serif;
-  color: var(--brand-dark);
-  -webkit-font-smoothing: antialiased;
-}
+        body {
+          background-color: var(--brand-warm);
+          font-family: 'Outfit', sans-serif;
+          color: var(--brand-dark);
+          -webkit-font-smoothing: antialiased;
+        }
 
-.editorial-title {
-  font-family: 'Playfair Display', serif;
-}
+        .editorial-title {
+          font-family: 'Playfair Display', serif;
+        }
 
-/* Timeline */
-.timeline-container {
-  position: relative;
-  padding-left: 2rem;
-}
+        /* Timeline */
+        .timeline-container {
+          position: relative;
+          padding-left: 2rem;
+        }
 
-.timeline-line {
-  position: absolute;
-  left: 11.5px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--brand-mist);
-}
+        .timeline-line {
+          position: absolute;
+          left: 11.5px;
+          top: 0;
+          bottom: 0;
+          width: 1px;
+          background: var(--brand-mist);
+        }
 
-.timeline-node {
-  width: 24px;
-  height: 24px;
-  background: #fff;
-  border: 1px solid var(--brand-mist);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 10;
-  margin-left: -12px;
-}
+        .timeline-node {
+          width: 24px;
+          height: 24px;
+          background: #fff;
+          border: 1px solid var(--brand-mist);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          z-index: 10;
+          margin-left: -12px;
+        }
 
-.timeline-node.active {
-  color: #1C1C1C;
-}
+        .timeline-node.active {
+          color: #1C1C1C;
+        }
 
-.timeline-node.current {
-  box-shadow: 0 0 0 10px rgba(28,28,28,0.03);
-  animation: timelineBlink 2s infinite ease-in-out;
-}
+        .timeline-node.current {
+          box-shadow: 0 0 0 10px rgba(28, 28, 28, 0.03);
+          animation: timelineBlink 2s infinite ease-in-out;
+        }
 
-@keyframes timelineBlink {
-  0% { box-shadow: 0 0 0 0 rgba(28, 28, 28, 0.2); transform: scale(1); }
-  50% { box-shadow: 0 0 0 10px rgba(28, 28, 28, 0); transform: scale(1.1); }
-  100% { box-shadow: 0 0 0 0 rgba(28, 28, 28, 0.2); transform: scale(1); }
-}
+        @keyframes timelineBlink {
+          0% {
+            box-shadow: 0 0 0 0 rgba(28, 28, 28, 0.2);
+            transform: scale(1);
+          }
 
-.timeline-node.current .dot {
-  width: 8px;
-  height: 8px;
-  background: #1C1C1C;
-  border-radius: 50%;
-}
+          50% {
+            box-shadow: 0 0 0 10px rgba(28, 28, 28, 0);
+            transform: scale(1.1);
+          }
 
-.timeline-node.current.cancelled {
-  border-color: #EF4444;
-  animation: timelineBlinkCancelled 2s infinite ease-in-out;
-}
+          100% {
+            box-shadow: 0 0 0 0 rgba(28, 28, 28, 0.2);
+            transform: scale(1);
+          }
+        }
 
-@keyframes timelineBlinkCancelled {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); transform: scale(1); }
-  50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); transform: scale(1.1); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); transform: scale(1); }
-}
+        .timeline-node.current .dot {
+          width: 8px;
+          height: 8px;
+          background: #1C1C1C;
+          border-radius: 50%;
+        }
 
-.timeline-node.current.cancelled .dot {
-  background: #EF4444;
-}
+        .timeline-node.current.cancelled {
+          border-color: #EF4444;
+          animation: timelineBlinkCancelled 2s infinite ease-in-out;
+        }
 
-.timeline-step.cancelled h3 {
-  color: #EF4444;
-}
+        @keyframes timelineBlinkCancelled {
+          0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+            transform: scale(1);
+          }
 
-.timeline-node.future {
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
-  background: var(--brand-mist);
-}
+          50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            transform: scale(1.1);
+          }
 
-.timeline-step {
-  transition: opacity 0.5s ease;
-}
+          100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+            transform: scale(1);
+          }
+        }
 
-.timeline-step.future {
-  opacity: 0.15;
-}
+        .timeline-node.current.cancelled .dot {
+          background: #EF4444;
+        }
 
-/* Summary Card */
-.summary-card {
-  background: #fff;
-  border-radius: 3rem;
-  box-shadow: 0 4px 60px rgba(0,0,0,0.03);
-}
+        .timeline-step.cancelled h3 {
+          color: #EF4444;
+        }
 
-.product-row {
-  padding-bottom: 2rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #f2f2f2;
-}
-.product-row:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
+        .timeline-node.future {
+          width: 8px;
+          height: 8px;
+          margin-left: -4px;
+          background: var(--brand-mist);
+        }
 
-.label-grey {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #B2B2B2;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
+        .timeline-step {
+          transition: opacity 0.5s ease;
+        }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-in { animation: fadeIn 0.6s ease-out both; }
+        .timeline-step.future {
+          opacity: 0.15;
+        }
 
-/* Cancellation Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-overlay.active {
-  display: flex;
-}
-.modal-content {
-  background: white;
-  width: 90%;
-  max-width: 500px;
-  border-radius: 2rem;
-  padding: 3rem;
-  position: relative;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-}
-.reason-btn {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #F0EEE9;
-  border-radius: 2rem;
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: #1C1C1C;
-  transition: all 0.2s ease;
-}
-.reason-btn.active {
-  background: #1C1C1C;
-  color: white;
-  border-color: #1C1C1C;
-}
-</style>
+        /* Summary Card */
+        .summary-card {
+          background: #fff;
+          border-radius: 3rem;
+          box-shadow: 0 4px 60px rgba(0, 0, 0, 0.03);
+        }
+
+        .product-row {
+          padding-bottom: 2rem;
+          margin-bottom: 2rem;
+          border-bottom: 1px solid #f2f2f2;
+        }
+
+        .product-row:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+        }
+
+        .label-grey {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #B2B2B2;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .fade-in {
+          animation: fadeIn 0.6s ease-out both;
+        }
+
+        /* Cancellation Modal */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          display: none;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .modal-overlay.active {
+          display: flex;
+        }
+
+        .modal-content {
+          background: white;
+          width: 90%;
+          max-width: 500px;
+          border-radius: 2rem;
+          padding: 3rem;
+          position: relative;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .reason-btn {
+          padding: 0.6rem 1.2rem;
+          border: 1px solid #F0EEE9;
+          border-radius: 2rem;
+          font-size: 0.7rem;
+          font-weight: 500;
+          color: #1C1C1C;
+          transition: all 0.2s ease;
+        }
+
+        .reason-btn.active {
+          background: #1C1C1C;
+          color: white;
+          border-color: #1C1C1C;
+        }
+      </style>
 </head>
+
 <body>
 
-<%- include('../partials/navbar', { hasSidebarToggle: true }) %>
+  <%- include('../partials/navbar', { hasSidebarToggle: true }) %>
 
 
 
 
-<div id="orderDetailsView" style="padding-top:80px; min-height:100vh;">
-  <div style="max-width:1440px; margin:0 auto;" class="px-8 md:px-16 py-12">
-    <%- include('../partials/breadcrumbs', { 
-           breadcrumbs: [
-               { name: "Order History", url: "/orders" },
-               { name: "Order Details" }
-           ] 
-       }) %>
-    
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 fade-in">
-      <div>
-        <h1 class="editorial-title text-2xl md:text-3xl tracking-tight italic text-stone-300">Order <span class="text-brand-dark not-italic font-bold ml-2">#ORD-<%= order._id.toString().slice(-8).toUpperCase() %></span></h1>
-        <p class="text-[0.7rem] tracking-[0.2em] font-bold text-stone-400 uppercase mt-4">
-          Placed on <span class="text-brand-dark"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' }) %></span>
-        </p>
-      </div>
-      
-      <div class="flex items-center gap-4">
-        <% if (order.status === 'Pending' && order.paymentMethod === 'RAZORPAY') { %>
-          <% 
-            const createdAt = new Date(order.createdAt);
-            const now = new Date();
-            const diff = Math.floor((now - createdAt) / 1000);
-            const initialTimeLeft = Math.max(0, 300 - diff);
-          %>
-          <div id="retryTimer" class="flex items-center gap-3 px-6 py-4 bg-red-50 text-red-500 rounded-2xl border border-red-100 shadow-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span class="text-[0.7rem] font-black uppercase tracking-widest" id="countdownDisplay">05:00</span>
+    <div id="orderDetailsView" style="padding-top:80px; min-height:100vh;">
+      <div style="max-width:1440px; margin:0 auto;" class="px-8 md:px-16 py-12">
+        <%- include('../partials/breadcrumbs', { breadcrumbs: [ { name: "Order History" , url: "/orders" }, {
+          name: "Order Details" } ] }) %>
+
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 fade-in">
+            <div>
+              <h1 class="editorial-title text-2xl md:text-3xl tracking-tight italic text-stone-300">Order <span
+                  class="text-brand-dark not-italic font-bold ml-2">#ORD-<%=
+                    order._id.toString().slice(-8).toUpperCase() %></span></h1>
+              <p class="text-[0.7rem] tracking-[0.2em] font-bold text-stone-400 uppercase mt-4">
+                Placed on <span class="text-brand-dark">
+                  <%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long' , day: '2-digit' ,
+                    year: 'numeric' , timeZone: 'Asia/Kolkata' }) %>
+                </span>
+              </p>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <% if (order.status==='Pending' && order.paymentMethod==='RAZORPAY' ) { %>
+                <% const createdAt=new Date(order.createdAt); const now=new Date(); const diff=Math.floor((now -
+                  createdAt) / 1000); const initialTimeLeft=Math.max(0, 300 - diff); %>
+                  <div id="retryTimer"
+                    class="flex items-center gap-3 px-6 py-4 bg-red-50 text-red-500 rounded-2xl border border-red-100 shadow-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span class="text-[0.7rem] font-black uppercase tracking-widest" id="countdownDisplay">05:00</span>
+                  </div>
+
+                  <button id="retryPaymentBtn"
+                    onclick="initiateRetryPayment('<%= order._id %>', '<%= order.totalAmount %>')" <%=initialTimeLeft
+                    <=0 ? 'disabled' : '' %>
+                    class="group flex items-center gap-3 px-8 py-4 bg-brand-dark text-white rounded-full text-[0.7rem]
+                    font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg disabled:bg-stone-200
+                    disabled:cursor-not-allowed">
+                    Retry Payment
+                  </button>
+                  <% } %>
+
+                    <% if (order.status !=='Pending' ) { %>
+                      <button id="download-invoice-btn" onclick="downloadInvoice('<%= order._id %>')"
+                        class="group flex items-center gap-3 px-8 py-4 bg-white border border-brand-dark/10 rounded-full text-[0.7rem] font-black text-brand-dark uppercase tracking-widest hover:bg-brand-dark hover:text-white transition-all shadow-sm">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" class="group-hover:translate-y-0.5 transition-transform">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Download Invoice
+                      </button>
+                      <% } %>
+            </div>
           </div>
-          
-          <button 
-            id="retryPaymentBtn"
-            onclick="initiateRetryPayment('<%= order._id %>', '<%= order.totalAmount %>')"
-            <%= initialTimeLeft <= 0 ? 'disabled' : '' %>
-            class="group flex items-center gap-3 px-8 py-4 bg-brand-dark text-white rounded-full text-[0.7rem] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg disabled:bg-stone-200 disabled:cursor-not-allowed">
-            Retry Payment
-          </button>
-        <% } %>
 
-        <% if (order.status !== 'Pending') { %>
-        <button 
-          id="download-invoice-btn"
-          onclick="downloadInvoice('<%= order._id %>')"
-          class="group flex items-center gap-3 px-8 py-4 bg-white border border-brand-dark/10 rounded-full text-[0.7rem] font-black text-brand-dark uppercase tracking-widest hover:bg-brand-dark hover:text-white transition-all shadow-sm">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:translate-y-0.5 transition-transform">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download Invoice
-        </button>
-        <% } %>
-      </div>
-    </div>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-      
-      <!-- Left Column: Timeline & Address -->
-      <div class="lg:col-span-8 space-y-12">
-        
-        <!-- Journey Timeline -->
-        <section class="fade-in">
-          <h2 class="editorial-title text-3xl mb-6 tracking-tight">Journey Timeline</h2>
-          
-          <div class="timeline-container space-y-6">
-            <div class="timeline-line"></div>
-                        <% 
-              const baseStatuses = ['Pending', 'Placed', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
-              let statuses = [...baseStatuses];
-              
-              const statusTitles = {
-                'Pending': 'Awaiting Payment',
-                'Placed': 'Order Received',
-                'Confirmed': 'Confirmed',
-                'Processing': 'Processing',
-                'Shipped': 'Shipped',
-                'Out for Delivery': 'Out for Delivery',
-                'Delivered': 'Delivered',
-                'Cancelled': 'Order Cancelled',
-                'Requested': 'Return Requested',
-                'Approved': 'Return Approved',
-                'Rejected': 'Return Rejected',
-                'Pickup Scheduled': 'Pickup Scheduled',
-                'Picked Up': 'Item Picked Up',
-                'Refund Processed': 'Refund Processed'
-              };
-              
-              const statusDescriptions = {
-                'Pending': 'Payment is currently being processed or awaiting re-attempt.',
-                'Placed': 'Ajax has received your order details and is currently processing them.',
-                'Confirmed': 'Your luxury items are being carefully prepared and packaged.',
-                'Processing': 'Our artisans are meticulously finalizing the details of your selection.',
-                'Shipped': 'Your package has been dispatched from our central facility.',
-                'Out for Delivery': 'Your package is on its way to your final destination.',
-                'Delivered': 'Your order has been arrived at your doorstep safely.',
-                'Cancelled': 'This order has been cancelled.',
-                'Requested': 'Your return request has been submitted and is pending approval.',
-                'Approved': 'Your return request has been approved. We are preparing for pickup.',
-                'Rejected': (typeof returns !== 'undefined' && returns && returns.find(r => r.status === 'Rejected')?.rejectionReason) 
-                           ? `Return Rejected: ${returns.find(r => r.status === 'Rejected').rejectionReason}`
-                           : 'Your return request has been rejected. Please contact support.',
-                'Pickup Scheduled': 'A pickup has been scheduled for your returned item.',
-                'Picked Up': 'The item has been successfully picked up.',
-                'Refund Processed': 'The refund has been processed and credited to your wallet.'
-              };
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
 
-              // Find most advanced return status if any
-              let returnStatus = null;
-              if (typeof returns !== 'undefined' && returns && returns.length > 0) {
-                  const priority = { 'Requested': 1, 'Approved': 2, 'Pickup Scheduled': 3, 'Picked Up': 4, 'Refund Processed': 5, 'Rejected': 1.5 };
-                  let maxP = 0;
-                  returns.forEach(r => {
-                      if (priority[r.status] > maxP) {
-                          maxP = priority[r.status];
-                          returnStatus = r.status;
-                      }
-                  });
-              }
+            <!-- Left Column: Timeline & Address -->
+            <div class="lg:col-span-8 space-y-12">
 
-              // If order is cancelled, adjust the timeline
-              if (order.status === 'Cancelled') {
-                const lastValidStatus = order.statusHistory.length > 1 ? order.statusHistory[order.statusHistory.length - 2].status : 'Placed';
-                const lastIndex = baseStatuses.indexOf(lastValidStatus);
-                statuses = baseStatuses.slice(0, lastIndex + 1);
-                statuses.push('Cancelled');
-              } else if (returnStatus) {
-                const returnJourney = ['Requested', 'Approved', 'Pickup Scheduled', 'Picked Up', 'Refund Processed'];
-                if (returnStatus === 'Rejected') {
+              <!-- Journey Timeline -->
+              <section class="fade-in">
+                <h2 class="editorial-title text-3xl mb-6 tracking-tight">Journey Timeline</h2>
+
+                <div class="timeline-container space-y-6">
+                  <div class="timeline-line"></div>
+                  <% const baseStatuses=['Pending', 'Placed' , 'Confirmed' , 'Processing' , 'Shipped'
+                    , 'Out for Delivery' , 'Delivered' ]; let statuses=[...baseStatuses]; const statusTitles={ 'Pending'
+                    : 'Awaiting Payment' , 'Placed' : 'Order Received' , 'Confirmed' : 'Confirmed' , 'Processing'
+                    : 'Processing' , 'Shipped' : 'Shipped' , 'Out for Delivery' : 'Out for Delivery' , 'Delivered'
+                    : 'Delivered' , 'Cancelled' : 'Order Cancelled' , 'Requested' : 'Return Requested' , 'Approved'
+                    : 'Return Approved' , 'Rejected' : 'Return Rejected' , 'Pickup Scheduled' : 'Pickup Scheduled'
+                    , 'Picked Up' : 'Item Picked Up' , 'Refund Processed' : 'Refund Processed' }; const
+                    statusDescriptions={ 'Pending' : 'Payment is currently being processed or awaiting re-attempt.'
+                    , 'Placed' : 'Ajax has received your order details and is currently processing them.' , 'Confirmed'
+                    : 'Your luxury items are being carefully prepared and packaged.' , 'Processing'
+                    : 'Our artisans are meticulously finalizing the details of your selection.' , 'Shipped'
+                    : 'Your package has been dispatched from our central facility.' , 'Out for Delivery'
+                    : 'Your package is on its way to your final destination.' , 'Delivered'
+                    : 'Your order has been arrived at your doorstep safely.' , 'Cancelled'
+                    : 'This order has been cancelled.' , 'Requested'
+                    : 'Your return request has been submitted and is pending approval.' , 'Approved'
+                    : 'Your return request has been approved. We are preparing for pickup.' , 'Rejected' : (typeof
+                    returns !=='undefined' && returns && returns.find(r=> r.status === 'Rejected')?.rejectionReason)
+                    ? `Return Rejected: ${returns.find(r => r.status === 'Rejected').rejectionReason}`
+                    : 'Your return request has been rejected. Please contact support.',
+                    'Pickup Scheduled': (typeof returns !== 'undefined' && returns && returns.find(r => r.pickupDate && r.pickupTime))
+                                      ? `A pickup has been scheduled on ${new Date(returns.find(r => r.pickupDate).pickupDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Asia/Kolkata' })} at ${returns.find(r => r.pickupTime).pickupTime}.`
+                                      : 'A pickup has been scheduled for your returned item.',
+                    'Picked Up': 'The item has been successfully picked up.',
+                    'Refund Processed': 'The refund has been processed and credited to your wallet.'
+                    };
+
+                    // Find most advanced return status if any
+                    let returnStatus = null;
+                    if (typeof returns !== 'undefined' && returns && returns.length > 0) {
+                    const priority = { 'Requested': 1, 'Approved': 2, 'Pickup Scheduled': 3, 'Picked Up': 4, 'Refund Processed': 5, 'Rejected': 1.5 };
+                    let maxP = 0;
+                    returns.forEach(r => {
+                    if (priority[r.status] > maxP) {
+                    maxP = priority[r.status];
+                    returnStatus = r.status;
+                    }
+                    });
+                    }
+
+                    // If order is cancelled, adjust the timeline
+                    if (order.status === 'Cancelled') {
+                    const lastValidStatus = order.statusHistory.length > 1 ?
+                    order.statusHistory[order.statusHistory.length - 2].status : 'Placed';
+                    const lastIndex = baseStatuses.indexOf(lastValidStatus);
+                    statuses = baseStatuses.slice(0, lastIndex + 1);
+                    statuses.push('Cancelled');
+                    } else if (returnStatus) {
+                    const returnJourney = ['Requested', 'Approved', 'Pickup Scheduled', 'Picked Up', 'Refund Processed'];
+                    if (returnStatus === 'Rejected') {
                     statuses.push('Rejected');
-                } else {
+                    } else {
                     const limit = returnJourney.indexOf(returnStatus) + 1;
                     statuses.push(...returnJourney.slice(0, limit));
-                }
-              }
-              
-              const createdAt = new Date(order.createdAt);
-              const now = new Date();
-              const diff = Math.floor((now - createdAt) / 1000);
-              const isPendingExpired = (order.status === 'Pending' && diff >= 300);
+                    }
+                    }
 
-              const displayStatus = isPendingExpired ? 'Cancelled' : (returnStatus || order.status || 'Placed');
-              const currentIndex = statuses.indexOf(displayStatus);
+                    const createdAt = new Date(order.createdAt);
+                    const now = new Date();
+                    const diff = Math.floor((now - createdAt) / 1000);
+                    const isPendingExpired = (order.status === 'Pending' && diff >= 300);
 
-              const getStatusDate = (status, order, returns) => {
-                const historyItem = order.statusHistory.find(h => h.status === status);
-                if (historyItem) return historyItem.updatedAt;
-                
-                if (typeof returns !== 'undefined' && returns && returns.length > 0) {
+                    const displayStatus = isPendingExpired ? 'Cancelled' : (returnStatus || order.status || 'Placed');
+                    const currentIndex = statuses.indexOf(displayStatus);
+
+                    const getStatusDate = (status, order, returns) => {
+                    const historyItem = order.statusHistory.find(h => h.status === status);
+                    if (historyItem) return historyItem.updatedAt;
+
+                    if (typeof returns !== 'undefined' && returns && returns.length > 0) {
                     const r = returns[0];
                     if (status === 'Requested') return r.requestedAt || r.createdAt;
                     if (status === 'Approved') return r.approvedAt;
@@ -371,427 +402,481 @@ body {
                     if (status === 'Pickup Scheduled') return r.updatedAt;
                     if (status === 'Picked Up') return r.pickedUpAt;
                     if (status === 'Refund Processed') return r.refundedAt || r.updatedAt;
-                }
-                return null;
-              };
-            %>
+                    }
+                    return null;
+                    };
+                    %>
 
 
-            <% statuses.forEach((status, index) => { %>
-              <div class="timeline-step relative flex items-start gap-8 <%= index > currentIndex ? 'future' : '' %>">
-                
-                <% if (index < currentIndex) { %>
-                  <!-- Past Step -->
-                  <div class="timeline-node active">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-                  </div>
-                <% } else if (index === currentIndex) { %>
-                  <!-- Current Step -->
-                  <div class="timeline-node current <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
-                    <div class="dot"></div>
-                  </div>
-                <% } else { %>
-                  <!-- Future Step -->
-                  <div class="timeline-node future"></div>
-                <% } %>
+                    <% statuses.forEach((status, index)=> { %>
+                      <div
+                        class="timeline-step relative flex items-start gap-8 <%= index > currentIndex ? 'future' : '' %>">
 
-                <div class="flex-grow pt-1 <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
-                  <div class="flex justify-between items-start mb-2">
-                    <h3 class="editorial-title text-xl font-normal leading-none"><%= statusTitles[status] %></h3>
-                    <% if (index <= currentIndex) { %>
-                      <%
-            const historyDate = getStatusDate(status, order, returns);
-             %>
+                        <% if (index < currentIndex) { %>
+                          <!-- Past Step -->
+                          <div class="timeline-node active">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2.5">
+                              <rect x="3" y="3" width="18" height="18" rx="2" />
+                              <path d="M3 9h18" />
+                            </svg>
+                          </div>
+                          <% } else if (index===currentIndex) { %>
+                            <!-- Current Step -->
+                            <div
+                              class="timeline-node current <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
+                              <div class="dot"></div>
+                            </div>
+                            <% } else { %>
+                              <!-- Future Step -->
+                              <div class="timeline-node future"></div>
+                              <% } %>
 
-      <% if(historyDate) { %>
- 
-        <span class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
- 
-        <%= new Date(historyDate).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-          timeZone: 'Asia/Kolkata'
-              }) %>
- 
-    —
-       
-         <%= new Date(historyDate).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZone: 'Asia/Kolkata'
-          }) %>
- 
-         </span>
- 
-           <% } %>
-                    <% } %>
-                  </div>
-                  <% if (index <= currentIndex) { %>
-                    <p class="text-[0.8rem] text-[#B2B2B2] font-light leading-relaxed max-w-lg"><%= statusDescriptions[status] %></p>
-                  <% } %>
+                                <div
+                                  class="flex-grow pt-1 <%= (status === 'Cancelled' || status === 'Rejected') ? 'cancelled' : '' %>">
+                                  <div class="flex justify-between items-start mb-2">
+                                    <h3 class="editorial-title text-xl font-normal leading-none">
+                                      <%= statusTitles[status] %>
+                                    </h3>
+                                    <% if (index <=currentIndex) { %>
+                                      <% const historyDate=getStatusDate(status, order, returns); %>
+
+                                        <% if(historyDate) { %>
+
+                                          <span
+                                            class="text-[0.65rem] font-bold text-[#B2B2B2] uppercase tracking-wider">
+
+                                            <%= new Date(historyDate).toLocaleDateString('en-US', { month: 'short' ,
+                                              day: '2-digit' , year: 'numeric' , timeZone: 'Asia/Kolkata' }) %>
+
+                                              —
+
+                                              <%= new Date(historyDate).toLocaleTimeString([], { hour: '2-digit' ,
+                                                minute: '2-digit' , timeZone: 'Asia/Kolkata' }) %>
+
+                                          </span>
+
+                                          <% } %>
+                                            <% } %>
+                                  </div>
+                                  <% if (index <=currentIndex) { %>
+                                    <p class="text-[0.8rem] text-[#B2B2B2] font-light leading-relaxed max-w-lg">
+                                      <%= statusDescriptions[status] %>
+                                    </p>
+                                    <% } %>
+                                </div>
+                      </div>
+                      <% }) %>
+
                 </div>
-              </div>
-            <% }) %>
+              </section>
 
-          </div>
-        </section>
+              <!-- Shipping Destination -->
+              <section class="fade-in" style="animation-delay: 0.2s;">
+                <h2 class="editorial-title text-3xl mb-4 tracking-tight">Shipping Destination</h2>
 
-        <!-- Shipping Destination -->
-        <section class="fade-in" style="animation-delay: 0.2s;">
-          <h2 class="editorial-title text-3xl mb-4 tracking-tight">Shipping Destination</h2>
-          
-          <div class="summary-card p-8 max-w-sm">
-            <div class="flex items-start gap-8">
-              <div class="w-12 h-12 rounded-full bg-white border border-[#F0EEE9] flex items-center justify-center flex-shrink-0 shadow-sm">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D1CFCA" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <div class="flex-grow pt-1">
-                <div class="flex items-center gap-3 mb-4">
-                  <h4 class="text-lg font-bold"><%= order.address.name %></h4>
-                  <span class="text-[0.5rem] font-black px-3 py-1 border border-[#F0EEE9] rounded-full text-[#B2B2B2] uppercase tracking-widest">Delivery</span>
-                </div>
-                <div class="text-[0.8rem] text-[#B2B2B2] leading-relaxed space-y-1 mb-6">
-                  <p><%= order.address.street %></p>
-                  <p><%= order.address.area %></p>
-                  <p><%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %></p>
-                  <p><%= order.address.country %></p>
-                </div>
-                <div class="flex items-center gap-3 text-[0.8rem] font-bold">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1CFCA" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  <%= order.address.phone %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- Right Column: Summary -->
-      <div class="lg:col-span-4 space-y-8 fade-in" style="animation-delay: 0.3s;">
-        
-        <div class="summary-card p-12">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-bold tracking-tight">Order Summary</h3>
-            <span class="text-[0.65rem] font-bold px-3 py-1 bg-[#F5F2EA] rounded-full text-[#B2B2B2] uppercase tracking-widest"><%= order.items.length %> Items</span>
-          </div>
-
-          <% 
-            let deliveredDate = null;
-            const deliveredHistory = order.statusHistory.find(h => h.status === 'Delivered');
-            if (deliveredHistory) {
-              deliveredDate = new Date(deliveredHistory.updatedAt);
-            }
-            
-            let isReturnExpired = false;
-            if (deliveredDate) {
-              const now = new Date();
-              const diffTime = now - deliveredDate;
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              if (diffDays >= 7) {
-                isReturnExpired = true;
-              }
-            }
-
-            const returnableItems = order.items.filter(i => 
-              i.status !== 'Cancelled' && 
-              i.status !== 'Return Requested' && 
-              i.status !== 'Returned'
-            );
-          %>
-          <% if (order.status !== 'Pending' && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.items.length > 1) { %>
-            <div class="mb-10">
-              <button 
-                onclick='cancelAllItems("<%= order._id %>", <%= JSON.stringify(order.items.filter(i => i.status !== "Cancelled").map(i => i._id)) %>, this)'
-                class="w-full py-4 bg-white border border-red-100 text-red-400 hover:bg-red-50 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
-                Cancel Entire Order
-              </button>
-            </div>
-          <% } else if (order.status === 'Delivered' && returnableItems.length > 0 && order.items.length > 1) { %>
-            <div class="mb-10">
-              <% if (isReturnExpired) { %>
-                <button disabled class="w-full py-4 bg-slate-50 border border-slate-100 text-slate-300 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl cursor-not-allowed">
-                  Due to 7 day return policy
-                </button>
-              <% } else { %>
-                <a 
-                  href="/orders/<%= order._id %>/return"
-                  class="w-full inline-block text-center py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
-                  Return Entire Order
-                </a>
-              <% } %>
-            </div>
-          <% } %>
-
-          <div class="space-y-10 mb-12">
-            <% order.items.forEach(item => { %>
-              <div class="flex gap-6">
-                <div class="w-20 h-24 bg-[#F5F2EA] rounded-2xl overflow-hidden flex-shrink-0">
-                  <img src="<%= item.image || '/images/default-product.png' %>" class="w-full h-full object-cover">
-                </div>
-                <div class="flex-grow pt-1">
-                  <div class="flex justify-between items-start mb-2">
-                    <h4 class="text-[0.75rem] font-bold uppercase tracking-tight leading-tight max-w-[140px]"><%= item.name %></h4>
-                    <p class="text-[0.75rem] font-bold">₹<%= Math.round(item.price) %></p>
-                  </div>
-                  <p class="text-[0.65rem] font-bold text-[#B2B2B2] mb-6"><%= item.size || 'L' %></p>
-                  <div class="flex justify-between items-center">
-                    <p class="text-[0.65rem] font-black text-[#B2B2B2] uppercase tracking-widest">QTY: <%= item.quantity %></p>
-                    <div class="flex items-center gap-2">
-                      <% if(item.status === "Cancelled" || item.status === "Returned" || item.status === "Return Requested") { %>
-                        <button disabled class="px-4 py-2 bg-red-50 rounded-full text-[0.55rem] font-black text-red-500 uppercase tracking-widest opacity-60 cursor-not-allowed">
-                          <%= item.status %>
-                        </button>
-                      <% } else if (order.status !== 'Pending') { %>
-                        <% if(order.status === 'Delivered') { %>
-                          <% if (isReturnExpired) { %>
-                            <span class="text-[0.55rem] font-black text-slate-300 uppercase tracking-widest">Policy Expired</span>
-                          <% } else { %>
-                            <a
-                              href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
-                              class="px-4 py-2 bg-white border border-brand-dark/10 rounded-full text-[0.55rem] font-black text-brand-dark hover:bg-brand-warm uppercase tracking-widest transition-all">
-                              Return Item
-                            </a>
-                          <% } %>
-                        <% } else { %>
-                          <button
-                            id="btn-cancel-<%= item._id %>"
-                            onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
-                            class="px-4 py-2 bg-white border border-red-50 rounded-full text-[0.55rem] font-black text-red-400 hover:text-red-600 hover:bg-red-50 uppercase tracking-widest transition-all">
-                            Cancel Item
-                          </button>
-                        <% } %>
-                      <% } %>
+                <div class="summary-card p-8 max-w-sm">
+                  <div class="flex items-start gap-8">
+                    <div
+                      class="w-12 h-12 rounded-full bg-white border border-[#F0EEE9] flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D1CFCA" stroke-width="2">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                    </div>
+                    <div class="flex-grow pt-1">
+                      <div class="flex items-center gap-3 mb-4">
+                        <h4 class="text-lg font-bold">
+                          <%= order.address.name %>
+                        </h4>
+                        <span
+                          class="text-[0.5rem] font-black px-3 py-1 border border-[#F0EEE9] rounded-full text-[#B2B2B2] uppercase tracking-widest">Delivery</span>
+                      </div>
+                      <div class="text-[0.8rem] text-[#B2B2B2] leading-relaxed space-y-1 mb-6">
+                        <p>
+                          <%= order.address.street %>
+                        </p>
+                        <p>
+                          <%= order.address.area %>
+                        </p>
+                        <p>
+                          <%= order.address.city %>, <%= order.address.state %>
+                              <%= order.address.pincode %>
+                        </p>
+                        <p>
+                          <%= order.address.country %>
+                        </p>
+                      </div>
+                      <div class="flex items-center gap-3 text-[0.8rem] font-bold">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D1CFCA" stroke-width="2.5">
+                          <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        <%= order.address.phone %>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            <% }) %>
-          </div>
+              </section>
 
-          <div class="pt-10 border-t border-[#f2f2f2] space-y-6">
-                   <%
-          var activeItems = order.items.filter(
-            item => item.status !== "Cancelled"
-          );
-
-          var subtotal = activeItems.reduce(
-            (sum, item) => sum + (item.price * item.quantity), 0);
-
-          var shipping = subtotal > 1000 || subtotal === 0 ? 0 : 100;
-          
-          // Use the stored discount from the order
-          var couponDiscount = order.discount || 0;
-          var finalTotal = order.totalAmount;
-          %>
-
-            <div class="flex justify-between items-center">
-              <span class="label-grey">Order Subtotal</span>
-              <span class="text-sm font-bold">₹<%= Math.round(subtotal) %></span>
             </div>
 
-            <% if (couponDiscount > 0) { %>
-            <div class="flex justify-between items-center">
-              <span class="label-grey text-green-600">Coupon Discount</span>
-              <span class="text-sm font-bold text-green-600">- ₹<%= Math.round(couponDiscount) %></span>
-            </div>
-            <% } %>
+            <!-- Right Column: Summary -->
+            <div class="lg:col-span-4 space-y-8 fade-in" style="animation-delay: 0.3s;">
 
-            <div class="flex justify-between items-center">
-              <span class="label-grey">Shipping Fee</span>
-              <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest"><%= shipping === 0 ? 'FREE' : '₹' + Math.round(shipping) %></span>
-            </div>
-
-            <% 
-              let refundedTotal = 0;
-              if (typeof returns !== 'undefined' && returns) {
-                refundedTotal = returns.reduce((sum, r) => {
-                  if (r.status !== 'Requested' && r.status !== 'Rejected') {
-                    return sum + (r.refundAmount || 0);
-                  }
-                  return sum;
-                }, 0);
-              }
-            %>
-
-            <% if (refundedTotal > 0) { %>
-              <div class="flex justify-between items-center p-4 bg-orange-50/50 rounded-2xl border border-orange-100/30">
-                <div class="flex items-center gap-2">
-                  <span class="w-1 h-1 bg-orange-400 rounded-full"></span>
-                  <span class="label-grey !text-orange-600 font-black">Refunded</span>
+              <div class="summary-card p-12">
+                <div class="flex items-center justify-between mb-8">
+                  <h3 class="text-xl font-bold tracking-tight">Order Summary</h3>
+                  <span
+                    class="text-[0.65rem] font-bold px-3 py-1 bg-[#F5F2EA] rounded-full text-[#B2B2B2] uppercase tracking-widest">
+                    <%= order.items.length %> Items
+                  </span>
                 </div>
-                <span class="text-sm font-bold text-orange-600">- ₹<%= Math.round(refundedTotal) %></span>
-              </div>
-            <% } %>
 
-            <div class="flex justify-between items-end pt-4">
-              <div>
-                <p class="label-grey mb-1">Total Settlement</p>
-                <p class="text-[0.55rem] font-bold text-[#D1CFCA] uppercase tracking-widest"><%= order.paymentMethod %></p>
+                <% let deliveredDate=null; const deliveredHistory=order.statusHistory.find(h=> h.status ===
+                  'Delivered');
+                  if (deliveredHistory) {
+                  deliveredDate = new Date(deliveredHistory.updatedAt);
+                  }
+
+                  let isReturnExpired = false;
+                  if (deliveredDate) {
+                  const now = new Date();
+                  const diffTime = now - deliveredDate;
+                  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                  if (diffDays >= 7) {
+                  isReturnExpired = true;
+                  }
+                  }
+
+                  const returnableItems = order.items.filter(i =>
+                  i.status !== 'Cancelled' &&
+                  i.status !== 'Return Requested' &&
+                  i.status !== 'Returned'
+                  );
+                  %>
+                  <% if (order.status !=='Pending' && order.status !=='Cancelled' && order.status !=='Delivered' &&
+                    order.items.length> 1) { %>
+                    <div class="mb-10">
+                      <button
+                        onclick='cancelAllItems("<%= order._id %>", <%= JSON.stringify(order.items.filter(i => i.status !== "Cancelled").map(i => i._id)) %>, this)'
+                        class="w-full py-4 bg-white border border-red-100 text-red-400 hover:bg-red-50 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
+                        Cancel Entire Order
+                      </button>
+                    </div>
+                    <% } else if (order.status==='Delivered' && returnableItems.length> 0 && order.items.length > 1) {
+                      %>
+                      <div class="mb-10">
+                        <% if (isReturnExpired) { %>
+                          <button disabled
+                            class="w-full py-4 bg-slate-50 border border-slate-100 text-slate-300 text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl cursor-not-allowed">
+                            Due to 7 day return policy
+                          </button>
+                          <% } else { %>
+                            <a href="/orders/<%= order._id %>/return"
+                              class="w-full inline-block text-center py-4 bg-brand-dark text-white hover:bg-black text-[0.65rem] font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-300">
+                              Return Entire Order
+                            </a>
+                            <% } %>
+                      </div>
+                      <% } %>
+
+                        <div class="space-y-10 mb-12">
+                          <% order.items.forEach(item=> { %>
+                            <div class="flex gap-6">
+                              <div class="w-20 h-24 bg-[#F5F2EA] rounded-2xl overflow-hidden flex-shrink-0">
+                                <img src="<%= item.image || '/images/default-product.png' %>"
+                                  class="w-full h-full object-cover">
+                              </div>
+                              <div class="flex-grow pt-1">
+                                <div class="flex justify-between items-start mb-2">
+                                  <h4
+                                    class="text-[0.75rem] font-bold uppercase tracking-tight leading-tight max-w-[140px]">
+                                    <%= item.name %>
+                                  </h4>
+                                  <p class="text-[0.75rem] font-bold">₹<%= Math.round(item.price) %>
+                                  </p>
+                                </div>
+                                <p class="text-[0.65rem] font-bold text-[#B2B2B2] mb-6">
+                                  <%= item.size || 'L' %>
+                                </p>
+                                <div class="flex justify-between items-center">
+                                  <p class="text-[0.65rem] font-black text-[#B2B2B2] uppercase tracking-widest">QTY: <%=
+                                      item.quantity %>
+                                  </p>
+                                  <div class="flex items-center gap-2">
+                                    <% if(item.status==="Cancelled" || item.status==="Returned" ||
+                                      item.status==="Return Requested" ) { %>
+                                      <button disabled
+                                        class="px-4 py-2 bg-red-50 rounded-full text-[0.55rem] font-black text-red-500 uppercase tracking-widest opacity-60 cursor-not-allowed">
+                                        <%= item.status %>
+                                      </button>
+                                      <% } else if (order.status !=='Pending' ) { %>
+                                        <% if(order.status==='Delivered' ) { %>
+                                          <% if (isReturnExpired) { %>
+                                            <span
+                                              class="text-[0.55rem] font-black text-slate-300 uppercase tracking-widest">Policy
+                                              Expired</span>
+                                            <% } else { %>
+                                              <a href="/orders/<%= order._id %>/return?itemId=<%= item._id %>"
+                                                class="px-4 py-2 bg-white border border-brand-dark/10 rounded-full text-[0.55rem] font-black text-brand-dark hover:bg-brand-warm uppercase tracking-widest transition-all">
+                                                Return Item
+                                              </a>
+                                              <% } %>
+                                                <% } else { %>
+                                                  <button id="btn-cancel-<%= item._id %>"
+                                                    onclick="cancelItem('<%= order._id %>', '<%= item._id %>')"
+                                                    class="px-4 py-2 bg-white border border-red-50 rounded-full text-[0.55rem] font-black text-red-400 hover:text-red-600 hover:bg-red-50 uppercase tracking-widest transition-all">
+                                                    Cancel Item
+                                                  </button>
+                                                  <% } %>
+                                                    <% } %>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <% }) %>
+                        </div>
+
+                        <div class="pt-10 border-t border-[#f2f2f2] space-y-6">
+                          <% var activeItems=order.items.filter( item=> item.status !== "Cancelled"
+                            );
+
+                            var subtotal = activeItems.reduce(
+                            (sum, item) => sum + (item.price * item.quantity), 0);
+
+                            var shipping = subtotal > 1000 || subtotal === 0 ? 0 : 100;
+
+                            // Use the stored discount from the order
+                            var couponDiscount = order.discount || 0;
+                            var finalTotal = order.totalAmount;
+                            %>
+
+                            <div class="flex justify-between items-center">
+                              <span class="label-grey">Order Subtotal</span>
+                              <span class="text-sm font-bold">₹<%= Math.round(subtotal) %></span>
+                            </div>
+
+                            <% if (couponDiscount> 0) { %>
+                              <div class="flex justify-between items-center">
+                                <span class="label-grey text-green-600">Coupon Discount</span>
+                                <span class="text-sm font-bold text-green-600">- ₹<%= Math.round(couponDiscount) %>
+                                    </span>
+                              </div>
+                              <% } %>
+
+                                <div class="flex justify-between items-center">
+                                  <span class="label-grey">Shipping Fee</span>
+                                  <span class="text-[0.65rem] font-black text-[#5C8C6A] uppercase tracking-widest">
+                                    <%= shipping===0 ? 'FREE' : '₹' + Math.round(shipping) %>
+                                  </span>
+                                </div>
+
+                                <% let refundedTotal=0; if (typeof returns !=='undefined' && returns) {
+                                  refundedTotal=returns.reduce((sum, r)=> {
+                                  if (r.status !== 'Requested' && r.status !== 'Rejected') {
+                                  return sum + (r.refundAmount || 0);
+                                  }
+                                  return sum;
+                                  }, 0);
+                                  }
+                                  %>
+
+                                  <% if (refundedTotal> 0) { %>
+                                    <div
+                                      class="flex justify-between items-center p-4 bg-orange-50/50 rounded-2xl border border-orange-100/30">
+                                      <div class="flex items-center gap-2">
+                                        <span class="w-1 h-1 bg-orange-400 rounded-full"></span>
+                                        <span class="label-grey !text-orange-600 font-black">Refunded</span>
+                                      </div>
+                                      <span class="text-sm font-bold text-orange-600">- ₹<%= Math.round(refundedTotal)
+                                          %></span>
+                                    </div>
+                                    <% } %>
+
+                                      <div class="flex justify-between items-end pt-4">
+                                        <div>
+                                          <p class="label-grey mb-1">Total Settlement</p>
+                                          <p class="text-[0.55rem] font-bold text-[#D1CFCA] uppercase tracking-widest">
+                                            <%= order.paymentMethod %>
+                                          </p>
+                                        </div>
+                                        <div class="flex items-baseline gap-1">
+                                          <span class="text-2xl font-serif">₹</span>
+                                          <span class="text-3xl font-serif tracking-tighter">
+                                            <%= Math.round(order.totalAmount - refundedTotal) %>
+                                          </span>
+                                        </div>
+                                      </div>
+                        </div>
               </div>
-              <div class="flex items-baseline gap-1">
-                <span class="text-2xl font-serif">₹</span>
-                <span class="text-3xl font-serif tracking-tighter"><%= Math.round(order.totalAmount - refundedTotal) %></span>
+
+              <!-- Returns Card -->
+              <div class="summary-card p-10 flex items-start gap-6">
+                <div class="w-12 h-12 rounded-2xl bg-[#F5F2EA] flex items-center justify-center flex-shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B2B2B2" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-[0.75rem] font-bold uppercase tracking-widest mb-2">7-Day Easy Returns</h4>
+                  <p class="text-[0.65rem] text-[#B2B2B2] leading-relaxed">If your selection does not meet your
+                    expectations, return it within 7 days for a seamless refund.</p>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+      </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+      <!-- Cancellation Modal -->
+      <div id="cancelModal" class="modal-overlay">
+        <div class="modal-content fade-in">
+          <button onclick="closeCancelModal()" class="absolute top-6 right-6 text-stone-300 hover:text-stone-600">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+
+          <h3 class="editorial-title text-3xl mb-4">Cancel Order</h3>
+          <p class="text-stone-400 text-[0.85rem] leading-relaxed mb-8">
+            Are you sure you want to cancel <span id="cancelTargetName">the entire order</span>? This action cannot be
+            undone.
+          </p>
+
+          <div class="space-y-6">
+            <div>
+              <label class="text-[0.65rem] font-black uppercase tracking-widest text-stone-300 mb-4 block">Reason for
+                Cancellation</label>
+              <div class="flex flex-wrap gap-3" id="reasonContainer">
+                <button type="button" class="reason-btn" onclick="selectReason(this)">Changed my mind</button>
+                <button type="button" class="reason-btn" onclick="selectReason(this)">Ordered by mistake</button>
+                <button type="button" class="reason-btn" onclick="selectReason(this)">Better price</button>
+                <button type="button" class="reason-btn" onclick="selectReason(this)">Slow delivery</button>
+                <button type="button" class="reason-btn" onclick="selectReason(this)">Wrong item</button>
               </div>
             </div>
-      </div>
+
+            <div>
+              <textarea id="cancelNote" placeholder="Add a note (optional)..."
+                class="w-full bg-[#F9F9F7] border-none rounded-2xl p-6 text-[0.85rem] outline-none min-h-[120px] focus:ring-1 focus:ring-brand-dark/10 transition-all"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-4">
+              <button onclick="closeCancelModal()"
+                class="py-4 bg-[#F9F9F7] text-[#1C1C1C] rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-[#F0EEE9] transition-all">
+                Keep Order
+              </button>
+              <button id="confirmCancelBtn"
+                class="py-4 bg-[#1C1C1C] text-white rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-black transition-all">
+                Confirm
+              </button>
+            </div>
           </div>
-
-        <!-- Returns Card -->
-        <div class="summary-card p-10 flex items-start gap-6">
-          <div class="w-12 h-12 rounded-2xl bg-[#F5F2EA] flex items-center justify-center flex-shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B2B2B2" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          </div>
-          <div>
-            <h4 class="text-[0.75rem] font-bold uppercase tracking-widest mb-2">7-Day Easy Returns</h4>
-            <p class="text-[0.65rem] text-[#B2B2B2] leading-relaxed">If your selection does not meet your expectations, return it within 7 days for a seamless refund.</p>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<%- include('../partials/footer') %>
-
-<!-- Cancellation Modal -->
-<div id="cancelModal" class="modal-overlay">
-  <div class="modal-content fade-in">
-    <button onclick="closeCancelModal()" class="absolute top-6 right-6 text-stone-300 hover:text-stone-600">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    
-    <h3 class="editorial-title text-3xl mb-4">Cancel Order</h3>
-    <p class="text-stone-400 text-[0.85rem] leading-relaxed mb-8">
-      Are you sure you want to cancel <span id="cancelTargetName">the entire order</span>? This action cannot be undone.
-    </p>
-
-    <div class="space-y-6">
-      <div>
-        <label class="text-[0.65rem] font-black uppercase tracking-widest text-stone-300 mb-4 block">Reason for Cancellation</label>
-        <div class="flex flex-wrap gap-3" id="reasonContainer">
-          <button type="button" class="reason-btn" onclick="selectReason(this)">Changed my mind</button>
-          <button type="button" class="reason-btn" onclick="selectReason(this)">Ordered by mistake</button>
-          <button type="button" class="reason-btn" onclick="selectReason(this)">Better price</button>
-          <button type="button" class="reason-btn" onclick="selectReason(this)">Slow delivery</button>
-          <button type="button" class="reason-btn" onclick="selectReason(this)">Wrong item</button>
         </div>
       </div>
 
-      <div>
-        <textarea id="cancelNote" placeholder="Add a note (optional)..." class="w-full bg-[#F9F9F7] border-none rounded-2xl p-6 text-[0.85rem] outline-none min-h-[120px] focus:ring-1 focus:ring-brand-dark/10 transition-all"></textarea>
-      </div>
 
-      <div class="grid grid-cols-2 gap-4 pt-4">
-        <button onclick="closeCancelModal()" class="py-4 bg-[#F9F9F7] text-[#1C1C1C] rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-[#F0EEE9] transition-all">
-          Keep Order
-        </button>
-        <button id="confirmCancelBtn" class="py-4 bg-[#1C1C1C] text-white rounded-xl text-[0.65rem] font-black uppercase tracking-widest hover:bg-black transition-all">
-          Confirm
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+      <script src="/js/utils/invoice.js"></script>
+      <script src="/js/utils/swal-helper.js"></script>
+      <script src="/js/user/order.js"></script>
 
+      <script>
+          // Timer Logic for Order Details
+          <% if (order.status === 'Pending' && order.paymentMethod === 'RAZORPAY') { %>
+            (function () {
+              const createdAt = new Date('<%= order.createdAt %>');
+              const countdownDisplay = document.getElementById('countdownDisplay');
+              const retryBtn = document.getElementById('retryPaymentBtn');
+              const retryTimer = document.getElementById('retryTimer');
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="/js/utils/invoice.js"></script>
-<script src="/js/utils/swal-helper.js"></script>
-<script src="/js/user/order.js"></script>
+              function updateCountdown() {
+                const now = new Date();
+                const diff = Math.floor((now - createdAt) / 1000);
+                let timeLeft = Math.max(0, 300 - diff);
 
-<script>
-  // Timer Logic for Order Details
-  <% if (order.status === 'Pending' && order.paymentMethod === 'RAZORPAY') { %>
-    (function() {
-      const createdAt = new Date('<%= order.createdAt %>');
-      const countdownDisplay = document.getElementById('countdownDisplay');
-      const retryBtn = document.getElementById('retryPaymentBtn');
-      const retryTimer = document.getElementById('retryTimer');
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
 
-      function updateCountdown() {
-        const now = new Date();
-        const diff = Math.floor((now - createdAt) / 1000);
-        let timeLeft = Math.max(0, 300 - diff);
+                if (countdownDisplay) countdownDisplay.innerHTML = `${minutes}:${seconds}`;
 
-        const minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft % 60;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        if (countdownDisplay) countdownDisplay.innerHTML = `${minutes}:${seconds}`;
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          if (retryBtn) retryBtn.disabled = true;
-          if (retryTimer) retryTimer.style.opacity = '0.5';
-          if (countdownDisplay) countdownDisplay.innerHTML = 'EXPIRED';
-        }
-      }
-
-      const timerInterval = setInterval(updateCountdown, 1000);
-      updateCountdown();
-    })();
-
-    async function initiateRetryPayment(orderId, amount) {
-      try {
-        // Create new Razorpay order for retry
-        const res = await axios.post('/wallet/create-order', { amount }); // Reusing existing create-order logic if suitable, or create a specific one
-        // Wait, order already exists in our DB, we just need a new RZP ID or reuse the old one if it's still valid.
-        // Actually, for simplicity and ensuring success, let's create a new Razorpay session.
-        
-        const options = {
-          key: "rzp_test_SoheRfzN69tfvZ",
-          amount: amount * 100,
-          currency: "INR",
-          name: "AJAX Luxury",
-          description: "Order Payment Retry",
-          order_id: res.data.order.id, // This is the Razorpay order ID
-          handler: async function (response) {
-            try {
-              const verifyRes = await axios.post('/order/verify-payment', {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                orderId: orderId // Our internal order ID
-              });
-
-              if (verifyRes.data.success) {
-                window.location.href = `/order-success/${orderId}`;
-              } else {
-                window.location.href = `/payment-failure?orderId=${orderId}&message=${verifyRes.data.message || 'Verification failed'}`;
+                if (timeLeft <= 0) {
+                  clearInterval(timerInterval);
+                  if (retryBtn) retryBtn.disabled = true;
+                  if (retryTimer) retryTimer.style.opacity = '0.5';
+                  if (countdownDisplay) countdownDisplay.innerHTML = 'EXPIRED';
+                }
               }
-            } catch (err) {
-              console.error(err);
-              window.location.href = `/payment-failure?orderId=${orderId}&message=Verification Error`;
+
+              const timerInterval = setInterval(updateCountdown, 1000);
+              updateCountdown();
+            })();
+
+            async function initiateRetryPayment(orderId, amount) {
+              try {
+                // Create new Razorpay order for retry
+                const res = await axios.post('/wallet/create-order', { amount }); // Reusing existing create-order logic if suitable, or create a specific one
+                // Wait, order already exists in our DB, we just need a new RZP ID or reuse the old one if it's still valid.
+                // Actually, for simplicity and ensuring success, let's create a new Razorpay session.
+
+                const options = {
+                  key: "rzp_test_SoheRfzN69tfvZ",
+                  amount: amount * 100,
+                  currency: "INR",
+                  name: "AJAX Luxury",
+                  description: "Order Payment Retry",
+                  order_id: res.data.order.id, // This is the Razorpay order ID
+                  handler: async function (response) {
+                    try {
+                      const verifyRes = await axios.post('/order/verify-payment', {
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        orderId: orderId // Our internal order ID
+                      });
+
+                      if (verifyRes.data.success) {
+                        window.location.href = `/order-success/${orderId}`;
+                      } else {
+                        window.location.href = `/payment-failure?orderId=${orderId}&message=${verifyRes.data.message || 'Verification failed'}`;
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      window.location.href = `/payment-failure?orderId=${orderId}&message=Verification Error`;
+                    }
+                  },
+                  prefill: {
+                    name: "<%= order.address.name %>",
+                    contact: "<%= order.address.phone %>"
+                  },
+                  theme: { color: "#1C1C1C" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+              } catch (err) {
+                console.error(err);
+                Swal.fire('Error', 'Could not initiate payment. Please try again.', 'error');
+              }
             }
-          },
-          prefill: {
-            name: "<%= order.address.name %>",
-            contact: "<%= order.address.phone %>"
-          },
-          theme: { color: "#1C1C1C" }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        console.error(err);
-        Swal.fire('Error', 'Could not initiate payment. Please try again.', 'error');
-      }
-    }
   <% } %>
-</script>
+      </script>
 
-<!-- INVOICE TEMPLATE (HIDDEN) -->
-<div style="position: absolute; left: -9999px; top: -9999px;">
-  <%- include('../partials/invoice-template', { order, subtotal, shipping, finalTotal, returns }) %>
-</div>
+      <!-- INVOICE TEMPLATE (HIDDEN) -->
+      <div style="position: absolute; left: -9999px; top: -9999px;">
+        <%- include('../partials/invoice-template', { order, subtotal, shipping, finalTotal, returns }) %>
+      </div>
 
 </body>
+
 </html>
