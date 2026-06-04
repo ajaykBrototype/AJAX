@@ -150,3 +150,19 @@ referralToggle.addEventListener("click", () => {
   }
 
 });
+
+// Auto-populate referral code from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = urlParams.get('ref');
+
+if (refCode) {
+  const referralInput = document.querySelector('input[name="referralCode"]');
+  if (referralInput) {
+    referralInput.value = refCode;
+    
+    // Trigger the toggle to show the referral input field if it's not already enabled
+    if (typeof referralEnabled !== 'undefined' && !referralEnabled) {
+      if (referralToggle) referralToggle.click();
+    }
+  }
+}
