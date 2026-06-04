@@ -25,7 +25,7 @@ export const saveAddress = async (req, res) => {
 
 export const getAvailableCoupons = async (req, res) => {
     try {
-        const result = await checkoutService.getAvailableCouponsService(req.session.userId, Number(req.query.subtotal));
+        const result = await checkoutService.getAvailableCouponsService(req.session.userId, Number(req.query.subtotal), Number(req.query.couponEligibleSubtotal));
         res.json(result);
     } catch (err) {
         console.log(err);

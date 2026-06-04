@@ -77,13 +77,18 @@ async function createCoupon() {
         hasError = true;
     }
 
-    else if (code.length < 4) {
-
+    else if (code.length < 3) {
         showError(
             "codeError",
-            "Minimum 4 characters required"
+            "Minimum 3 characters required"
         );
-
+        hasError = true;
+    }
+    else if (!/^[A-Za-z]/.test(code)) {
+        showError(
+            "codeError",
+            "Coupon code must start with a letter"
+        );
         hasError = true;
     }
 
@@ -123,12 +128,22 @@ async function createCoupon() {
     }
 
     if (!minOrder || Number(minOrder) <= 0) {
-
         showError(
             "minOrderError",
             "Min order is required and must be greater than 0"
         );
+        hasError = true;
+    }
 
+    if (
+        discountType === "flat" &&
+        minOrder &&
+        Number(discountAmount) >= Number(minOrder)
+    ) {
+        showError(
+            "discountAmountError",
+            "Flat discount must be strictly less than the minimum order"
+        );
         hasError = true;
     }
 

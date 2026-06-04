@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Fetch Coupons
             try {
                 const subtotal = document.getElementById('checkoutSubtotal').value;
+                const couponEligibleSubtotal = document.getElementById('couponEligibleSubtotal') ? document.getElementById('couponEligibleSubtotal').value : subtotal;
                 container.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-20 text-stone-300">
                         <div class="w-8 h-8 border-2 border-dark/10 border-t-dark rounded-full animate-spin mb-4"></div>
@@ -67,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 `;
 
-                const res = await axios.get(`/coupons/available?subtotal=${subtotal}`);
+                const res = await axios.get(`/coupons/available?subtotal=${subtotal}&couponEligibleSubtotal=${couponEligibleSubtotal}`);
                 
                 if (res.data.success && res.data.coupons.length > 0) {
                     container.innerHTML = res.data.coupons.map(coupon => `
@@ -452,23 +453,15 @@ async function placeOrder() {
 async function loadCoupons() {
 
     try {
+        const subtotal = Number(document.getElementById("checkoutSubtotal").value);
+        const couponEligibleSubtotalEl = document.getElementById("couponEligibleSubtotal");
+        const couponEligibleSubtotal = couponEligibleSubtotalEl ? Number(couponEligibleSubtotalEl.value) : subtotal;
 
-        const subtotal =
-            Number(
-                document
-                .getElementById(
-                    "checkoutSubtotal"
-                ).value
-            );
-
-        const response =
-            await axios.get(
-
-            `/coupons/available?subtotal=${subtotal}`
+        const response = await axios.get(
+            `/coupons/available?subtotal=${subtotal}&couponEligibleSubtotal=${couponEligibleSubtotal}`
         );
 
-        const coupons =
-            response.data.coupons;
+        const coupons = response.data.coupons;
 
         const container =
             document.getElementById(

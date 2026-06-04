@@ -225,7 +225,7 @@
                              data-unavailable="<%= item.isUnavailable ? 'true' : 'false' %>">
                             
                             <!-- Image Container -->
-                            <div class="w-full sm:w-40 aspect-square bg-[#fff] rounded-xl overflow-hidden flex-shrink-0 relative">
+                            <a href="/product/<%= item.variant.productId._id %>" class="w-full sm:w-40 aspect-square bg-[#fff] rounded-xl overflow-hidden flex-shrink-0 relative block transition-opacity hover:opacity-90">
                                 <img src="<%= item.variant.images[0] %>" alt="<%= item.variant.productId.name %>" class="w-full h-full object-cover">
                                 <% if (item.isUnavailable) { %>
                                     <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -236,13 +236,15 @@
                                         <span class="text-[0.6rem] font-black tracking-widest text-white uppercase bg-red-600 px-3 py-1">OUT OF STOCK</span>
                                     </div>
                                 <% } %>
-                            </div>
+                            </a>
 
                             <!-- Content -->
                             <div class="flex-grow flex flex-col justify-between py-2">
                                 <div class="flex justify-between items-start gap-4">
                                     <div>
-                                        <h3 class="text-lg font-medium tracking-tight mb-1"><%= item.variant.productId.name %></h3>
+                                        <a href="/product/<%= item.variant.productId._id %>" class="hover:underline transition-all">
+                                            <h3 class="text-lg font-medium tracking-tight mb-1"><%= item.variant.productId.name %></h3>
+                                        </a>
                                         <p class="text-[0.65rem] tracking-[0.1em] font-bold text-stone-400 uppercase"><%= item.variant.size %></p>
                                         <% if (item.isUnavailable) { %>
                                             <p class="text-[0.6rem] font-bold text-stone-500 uppercase mt-2">⚠ This product is unavailable — will be removed at checkout</p>

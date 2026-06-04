@@ -70,18 +70,45 @@ document.addEventListener("DOMContentLoaded", () => {
             const imgTrigger = document.getElementById('uploadTrigger');
 
             const nameValue = name.value.trim();
-            if (!nameValue) { 
-                showInlineError(name, "Product name is required"); 
+            if (nameValue.length < 3) { 
+                showInlineError(name, "Product name must contain at least 3 characters"); 
                 hasError = true; 
+            } else if (!/^[A-Za-z]/.test(nameValue)) {
+                showInlineError(name, "Product name must start with a letter");
+                hasError = true;
             } else if (!/^[A-Za-z][A-Za-z\s]*$/.test(nameValue)) {
-                showInlineError(name, "Product name must start with a letter and contain only letters and spaces");
+                showInlineError(name, "Product name must contain only letters and spaces");
                 hasError = true;
             }
             if (!category.value) { showInlineError(categoryTrigger, "Please select a category"); hasError = true; }
             if (!subcategory.value) { showInlineError(subcategoryTrigger, "Please select a subcategory"); hasError = true; }
-            if (description.value.trim().length < 20) { showInlineError(description, "Description must be at least 20 characters"); hasError = true; }
-            if (!material.value.trim()) { showInlineError(material, "Material composition is required"); hasError = true; }
-            if (!careGuide.value.trim()) { showInlineError(careGuide, "Care guidelines are required"); hasError = true; }
+            
+            const descValue = description.value.trim();
+            if (descValue.length < 20) { 
+                showInlineError(description, "Description must be at least 20 characters"); 
+                hasError = true; 
+            } else if (!/^[A-Za-z]/.test(descValue)) {
+                showInlineError(description, "Description must start with a letter (A-Z, a-z)");
+                hasError = true;
+            }
+            
+            const materialValue = material.value.trim();
+            if (!materialValue) { 
+                showInlineError(material, "Material composition is required"); 
+                hasError = true; 
+            } else if (!/^[A-Za-z]/.test(materialValue)) {
+                showInlineError(material, "Material composition must start with a letter (A-Z, a-z)");
+                hasError = true;
+            }
+            
+            const careGuideValue = careGuide.value.trim();
+            if (!careGuideValue) { 
+                showInlineError(careGuide, "Care guidelines are required"); 
+                hasError = true; 
+            } else if (!/^[A-Za-z]/.test(careGuideValue)) {
+                showInlineError(careGuide, "Care guidelines must start with a letter (A-Z, a-z)");
+                hasError = true;
+            }
             
             if (color) {
                 const colorValue = color.value.trim();
@@ -92,9 +119,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     showInlineError(color, "Must contain letters only");
                     hasError = true;
                 }
-                if (!sku.value.trim()) { showInlineError(sku, "SKU is required"); hasError = true; }
-                if (!price.value || price.value <= 0) { showInlineError(price, "Valid price is required"); hasError = true; }
-                if (stock.value === "" || stock.value < 0) { showInlineError(stock, "Valid stock is required"); hasError = true; }
+                const skuValue = sku.value.trim();
+                if (!skuValue) { 
+                    showInlineError(sku, "SKU is required"); 
+                    hasError = true; 
+                } else if (!/^[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+$/.test(skuValue)) {
+                    showInlineError(sku, "SKU must follow the format X-X-X (e.g. AJAX-OXFORD-BLK)");
+                    hasError = true;
+                }
+
+                if (!price.value || price.value <= 0) { 
+                    showInlineError(price, "Valid price is required"); 
+                    hasError = true; 
+                } else if (price.value > 100000) {
+                    showInlineError(price, "Price cannot exceed 100,000");
+                    hasError = true;
+                }
+
+                if (stock.value === "" || stock.value < 0) { 
+                    showInlineError(stock, "Valid stock is required"); 
+                    hasError = true; 
+                } else if (stock.value > 10000) {
+                    showInlineError(stock, "Stock cannot exceed 10,000");
+                    hasError = true;
+                }
+                
                 if (!size || !size.value) { showInlineError(sizeContainer, "Please select a size"); hasError = true; }
                 if ((window.uploadedFiles || []).length < 3) { showInlineError(imgTrigger, "Minimum 3 images are required"); hasError = true; }
             }

@@ -91,14 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!name) {
+        if (name.length < 2) {
             const errorEl = document.getElementById('subCategoryNameError');
             if (errorEl) {
+                errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Subcategory name must be at least 2 characters.`;
                 errorEl.classList.remove('hidden');
                 errorEl.classList.add('flex');
                 document.getElementById('subCategoryName').classList.add('border-red-500', 'bg-red-50');
             } else {
-                ajaxToast('warning', 'Subcategory name is required.');
+                ajaxToast('warning', 'Subcategory name must be at least 2 characters.');
+            }
+            return;
+        } else if (!/^[A-Za-z][A-Za-z\s]*$/.test(name)) {
+            const errorEl = document.getElementById('subCategoryNameError');
+            if (errorEl) {
+                errorEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Subcategory name must start with a letter and contain only letters.`;
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('flex');
+                document.getElementById('subCategoryName').classList.add('border-red-500', 'bg-red-50');
+            } else {
+                ajaxToast('warning', 'Subcategory name must start with a letter and contain only letters.');
             }
             return;
         }

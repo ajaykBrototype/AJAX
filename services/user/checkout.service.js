@@ -112,7 +112,7 @@ export const saveAddressService = async (userId, addressData) => {
   return { success: true };
 };
 
-export const getAvailableCouponsService = async (userId, subtotal) => {
+export const getAvailableCouponsService = async (userId, subtotal, couponEligibleSubtotal) => {
   const today = new Date();
   const startOfToday = new Date(today.setHours(0, 0, 0, 0));
 
@@ -129,9 +129,12 @@ export const getAvailableCouponsService = async (userId, subtotal) => {
       let eligible = true;
       let reason = "Eligible";
 
-      if (subtotal < coupon.minOrder) {
+      if (couponEligibleSubtotal <= 0) {
         eligible = false;
-        reason = `Min ₹${coupon.minOrder} required`;
+        reason = "Not applicable on offer products";
+      } else if (couponEligibleSubtotal < coupon.minOrder) {
+        eligible = false;
+        reason = `Min ₹${coupon.minOrder} eligible amount required`;
       } else if (coupon.userLimit && userUsage >= coupon.userLimit) {
         eligible = false;
         reason = "Already Used";
@@ -168,8 +171,12 @@ export const applyCouponService = async (userId, code, subtotal, couponEligibleS
     return { success: false, message: "You have already redeemed this coupon" };
   }
 
-  if (subtotal < coupon.minOrder) {
-    return { success: false, message: `Minimum purchase of ₹${coupon.minOrder} required for this coupon` };
+  if (couponEligibleSubtotal <= 0) {
+    return { success: false, message: "Coupons cannot be applied to offer products" };
+  }
+
+  if (couponEligibleSubtotal < coupon.minOrder) {
+    return { success: false, message: `Minimum eligible purchase of ₹${coupon.minOrder} required for this coupon` };
   }
 
   let discount = 0;

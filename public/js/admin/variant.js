@@ -125,9 +125,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const sizeContainer = document.querySelector('.size-btn')?.parentElement;
     if (!sizeInput.value) { showInlineError(sizeContainer, "Please select a size"); hasError = true; }
     
-    if (!sku.value.trim()) { showInlineError(sku, "SKU is required"); hasError = true; }
-    if (stock.value === '' || stock.value < 0) { showInlineError(stock, "Valid stock required"); hasError = true; }
-    if (price.value === '' || price.value <= 0) { showInlineError(price, "Valid price required"); hasError = true; }
+    const skuValue = sku.value.trim();
+    if (!skuValue) { 
+      showInlineError(sku, "SKU is required"); 
+      hasError = true; 
+    } else if (!/^[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+$/.test(skuValue)) {
+      showInlineError(sku, "SKU must follow the format X-X-X (e.g. AJAX-OXFORD-BLK)");
+      hasError = true;
+    }
+
+    if (stock.value === '' || stock.value < 0) { 
+      showInlineError(stock, "Valid stock required"); 
+      hasError = true; 
+    } else if (stock.value > 10000) {
+      showInlineError(stock, "Stock cannot exceed 10,000");
+      hasError = true;
+    }
+
+    if (price.value === '' || price.value <= 0) { 
+      showInlineError(price, "Valid price required"); 
+      hasError = true; 
+    } else if (price.value > 100000) {
+      showInlineError(price, "Price cannot exceed 100,000");
+      hasError = true;
+    }
     
     const imgTrigger = document.getElementById('uploadTrigger');
     if (totalImages < 3) { showInlineError(imgTrigger, "Minimum 3 images required"); hasError = true; }
