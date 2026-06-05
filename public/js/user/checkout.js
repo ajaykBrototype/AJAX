@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 
                                 <div class="pt-4 border-t border-dashed border-brand-mist/30 flex justify-between items-center">
                                     <p class="text-[0.55rem] font-black text-stone-200 uppercase tracking-widest font-sans">Min. Purchase: ₹${coupon.minOrder}</p>
-                                    ${!coupon.eligible ? `<span class="text-[0.5rem] font-black text-red-300 uppercase tracking-widest font-sans">Minimum not met</span>` : ''}
+                                    ${!coupon.eligible ? `<span class="text-[0.5rem] font-black text-red-300 uppercase tracking-widest font-sans">conditions not met</span>` : ''}
                                 </div>
                             </div>
                         </div>
