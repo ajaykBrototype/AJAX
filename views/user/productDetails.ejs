@@ -179,6 +179,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
+             margin-top: -40px;
             margin-bottom: 32px;
         }
 
@@ -1203,7 +1204,8 @@
             </div>
         </section>
 
-        <section class="product-details lg:col-start-2 lg:row-start-3 !static lg:!sticky !pt-0 lg:!pt-[10px] !w-full" style="top: 100px;">                <div class="price-wrapper">
+        <section class="product-details lg:col-start-2 lg:row-start-3 !static lg:!sticky !pt-0 lg:!pt-[10px] !w-full" style="top: 100px;">             
+               <div class="price-wrapper -mt-20">
                     <% if (bestOffer && (!bestOffer.minOrderValue || variant.price >= bestOffer.minOrderValue)) { 
                         let discountAmount = 0;
                         if (bestOffer.discountMode === 'percentage') {

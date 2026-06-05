@@ -2,11 +2,29 @@ import Review from "../../models/user/reviewModel.js";
 import Product from "../../models/admin/productModel.js";
 import mongoose from "mongoose";
 
+import Variant from "../../models/admin/variantModel.js";
+
 export const getPendingReviewsService = async () => {
-    return await Review.find()
-        .populate("userId", "name email profileImage")
-        .populate("productId", "name")
-        .sort({ createdAt: -1 });
+  const reviews = await Review.find()
+    .populate("userId", "name email profileImage")
+    .populate("productId")
+    .sort({ createdAt: -1 });
+
+  const reviewsWithVariant = await Promise.all(
+    reviews.map(async (review) => {
+      const variant = await Variant.findOne({
+        productId: review.productId._id,
+        isDefault: true
+      });
+
+      return {
+        ...review.toObject(),
+        variant
+      };
+    })
+  );
+
+  return reviewsWithVariant;
 };
 
 export const approveReviewService = async (reviewId) => {
