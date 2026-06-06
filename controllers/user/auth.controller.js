@@ -1,3 +1,5 @@
+
+import wishlistModel from "../../models/user/wishlistModel.js";
 import {
   registerService,
   verifyOtpService,
@@ -106,4 +108,23 @@ export const loadHome = async (req, res) => {
     res.render("user/home", { user: req.session.userId, products: [] });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+export const reviewTest=async (req,res)=>{
+
+  const wishlist = await wishlistModel.find({
+    userId:req.session.userId
+  }).populate("items.product")
+  res.send(wishlist);
+}
 

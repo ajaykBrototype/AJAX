@@ -106,6 +106,7 @@
                     setTimeout(() => {
                         card.remove();
                         recalculate();
+                        window.location.reload();
                        
                     }, 1000);
                 } else {

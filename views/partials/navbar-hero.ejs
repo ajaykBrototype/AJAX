@@ -162,7 +162,7 @@
         + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0bbb5" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>'
         + '</a>';
     }).join('');
-    var viewAll = showViewAll ? '<a href="/men-product-list?search=' + encodeURIComponent(q) + '" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 18px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#1C1C1C;text-decoration:none;background:#faf9f7;" onmouseover="this.style.background=\'#f2f0ec\'" onmouseout="this.style.background=\'#faf9f7\'">View All Results <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></a>' : '';
+    var viewAll = showViewAll ? '<a href="/search?search=' + encodeURIComponent(q) + '" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 18px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#1C1C1C;text-decoration:none;background:#faf9f7;" onmouseover="this.style.background=\'#f2f0ec\'" onmouseout="this.style.background=\'#faf9f7\'">View All Results <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></a>' : '';
     resultsBox.innerHTML = rows + viewAll;
     resultsBox.style.display = 'block';
   }

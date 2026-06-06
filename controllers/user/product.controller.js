@@ -78,3 +78,22 @@ export const searchProducts = async (req, res) => {
 
 
 
+
+export const loadSearchPage = async (req, res) => {
+  try {
+    const data = await productService.getSearchPageDataService(
+      req.query.search,
+      req.query.page || 1,
+      req.session.userId
+    );
+
+    res.render("user/searchResults", data);
+  } catch (err) {
+    console.log(err);
+    res.redirect("/home");
+  }
+};
+
+
+
+

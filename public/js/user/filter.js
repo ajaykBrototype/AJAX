@@ -17,7 +17,7 @@ function extractMainCategory(path) {
   if (path.toLowerCase().includes('/category/')) {
     return path.split('/category/')[1].split(/[/?#]/)[0];
   }
-  return 'men';
+  return '';
 }
 
 const urlSearchParamsData = new URLSearchParams(window.location.search);

@@ -9,7 +9,7 @@ import * as addressController from "../controllers/user/address.controller.js";
 import { isLoggedIn, isLoggedOut, checkBlocked } from "../middleware/userAuth.js";
 import { upload } from "../middleware/upload.js";
 import { noCache } from "../middleware/noCache.js";
-import { loadMenPage,loadWomenPage,loadCategoryPage,loadProductDetails,checkQuantity,loadFilteredProducts,searchProducts } from "../controllers/user/product.controller.js";
+import { loadMenPage,loadWomenPage,loadCategoryPage,loadProductDetails,checkQuantity,loadFilteredProducts,searchProducts,loadSearchPage } from "../controllers/user/product.controller.js";
 import {loadCartPage,addToCart,updateCartQty,removeCartItem  } from "../controllers/user/cart.controller.js";
 import {loadWishlistPage,toggleWishlist,clearAllWishlist,getWishlistCount,addToBagFromWishlist  } from "../controllers/user/wishlist.controller.js";
 import {loadCheckoutPage,saveAddress,getAvailableCoupons,applyCoupon } from "../controllers/user/checkout.controller.js";
@@ -83,6 +83,7 @@ router.get("/women-product-list", loadWomenPage);
 router.get("/category/:name", loadCategoryPage);
 router.get("/api/products", loadFilteredProducts);
 router.get("/api/search", searchProducts);
+router.get("/search", loadSearchPage);
 
 router.get("/product/:id", loadProductDetails);
 router.post("/check-quantity", checkQuantity);
@@ -128,6 +129,7 @@ router.patch("/reviews/:reviewId/helpful", isLoggedIn, markHelpful);
 router.put("/reviews/:reviewId", isLoggedIn, upload.array("images", 3), editReview);
 router.delete("/reviews/:reviewId", isLoggedIn, deleteReview);
 
+router.get("/test",authController.reviewTest)
 
 export default router;
 

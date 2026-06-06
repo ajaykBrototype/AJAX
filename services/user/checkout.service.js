@@ -30,6 +30,7 @@ const getBestOffer = (activeOffers, prod, price) => {
     let d = o.discountMode === 'percentage' ? (price * o.discountValue) / 100 : o.discountValue;
     if (o.maxDiscountCap) d = Math.min(d, o.maxDiscountCap);
 
+    
     if (d > maxD) {
       maxD = d;
       best = o;

@@ -159,59 +159,179 @@ export const checkQuantityService = async (variantId, quantity) => {
 
 export const getFilteredProductsService = async (query, userId) => {
     const { search, sort, category, minPrice, maxPrice, mainCategory } = query;
+
     const min = Number(minPrice) || 0;
     const max = Number(maxPrice) || 1000000;
-    const targetCategoryName = mainCategory || 'men';
 
-    const targetCategory = await Category.findOne({ name: { $regex: new RegExp(`^${targetCategoryName}$`, "i") }, isActive: true });
-    if (!targetCategory) return { success: true, products: [], wishlist: [] };
+    let filter = {
+        isActive: true
+    };
 
-    let filter = { isActive: true, category: targetCategory._id };
+    // Search
+    if (search) {
+        filter.name = {
+            $regex: search,
+            $options: "i"
+        };
+    }
 
-    if (search) filter.name = { $regex: search, $options: "i" };
+    let targetCategory = null;
 
-    if (category) {
+    // Only apply category restriction if mainCategory exists
+    if (mainCategory) {
+
+        targetCategory = await Category.findOne({
+            name: {
+                $regex: new RegExp(`^${mainCategory}$`, "i")
+            },
+            isActive: true
+        });
+
+        if (!targetCategory) {
+            return {
+                success: true,
+                products: [],
+                wishlist: []
+            };
+        }
+
+        filter.category = targetCategory._id;
+
+        if (category) {
+
+            filter.subcategory = category;
+
+        } else {
+
+            const subs = await SubCategory.find({
+                category: targetCategory._id,
+                isActive: true
+            });
+
+            filter.subcategory = {
+                $in: subs.map(s => s._id)
+            };
+        }
+    }
+
+    // For Search Page (no mainCategory)
+    if (!mainCategory && category) {
         filter.subcategory = category;
-    } else {
-        const subs = await SubCategory.find({ category: targetCategory._id, isActive: true });
-        filter.subcategory = { $in: subs.map(s => s._id) };
     }
 
     let products = await Product.find(filter).lean();
+
     const today = new Date();
-    const activeOffers = await Offer.find({ isActive: true, startDate: { $lte: today }, endDate: { $gte: today } }).lean();
+
+    const activeOffers = await Offer.find({
+        isActive: true,
+        startDate: { $lte: today },
+        endDate: { $gte: today }
+    }).lean();
 
     let productData = await Promise.all(
         products.map(async (p) => {
-            const variants = await Variant.find({ productId: p._id, isActive: true, price: { $gte: min, $lte: max } }).lean();
+
+            const variants = await Variant.find({
+                productId: p._id,
+                isActive: true,
+                price: {
+                    $gte: min,
+                    $lte: max
+                }
+            }).lean();
+
             if (!variants.length) return null;
 
             const v = variants[0];
-            const offer = v ? getBestOffer(activeOffers, p, v.price) : null;
-            let finalPrice = v?.price || null;
-            
-            if (offer && v) {
-                let d = offer.discountMode === 'percentage' ? (v.price * offer.discountValue) / 100 : offer.discountValue;
-                if (offer.maxDiscountCap) d = Math.min(d, offer.maxDiscountCap);
-                finalPrice = v.price - d;
+
+            const offer = getBestOffer(
+                activeOffers,
+                p,
+                v.price
+            );
+
+            let finalPrice = v.price;
+
+            if (offer) {
+
+                let discount =
+                    offer.discountMode === "percentage"
+                        ? (v.price * offer.discountValue) / 100
+                        : offer.discountValue;
+
+                if (offer.maxDiscountCap) {
+                    discount = Math.min(
+                        discount,
+                        offer.maxDiscountCap
+                    );
+                }
+
+                finalPrice = v.price - discount;
             }
-            return { ...p, variants, finalPrice, offer };
+
+            return {
+                ...p,
+                variants,
+                finalPrice,
+                offer
+            };
         })
     );
 
     productData = productData.filter(Boolean);
 
-    const getPrice = (p) => p.variants?.[0]?.price || 0;
-    if (sort === "price-low") productData.sort((a, b) => getPrice(a) - getPrice(b));
-    if (sort === "price-high") productData.sort((a, b) => getPrice(b) - getPrice(a));
-    if (sort === "name-az") productData.sort((a, b) => a.name.localeCompare(b.name));
-    if (sort === "name-za") productData.sort((a, b) => b.name.localeCompare(a.name));
-    if (sort === "newest") productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const getPrice = p =>
+        p.variants?.[0]?.price || 0;
 
-    const wishlistDoc = userId ? await Wishlist.findOne({ user: userId }) : null;
-    const wishlist = wishlistDoc?.items.map(i => i.product.toString()) || [];
+    if (sort === "price-low") {
+        productData.sort(
+            (a, b) => getPrice(a) - getPrice(b)
+        );
+    }
 
-    return { success: true, products: productData, wishlist };
+    if (sort === "price-high") {
+        productData.sort(
+            (a, b) => getPrice(b) - getPrice(a)
+        );
+    }
+
+    if (sort === "name-az") {
+        productData.sort(
+            (a, b) => a.name.localeCompare(b.name)
+        );
+    }
+
+    if (sort === "name-za") {
+        productData.sort(
+            (a, b) => b.name.localeCompare(a.name)
+        );
+    }
+
+    if (sort === "newest") {
+        productData.sort(
+            (a, b) =>
+                new Date(b.createdAt) -
+                new Date(a.createdAt)
+        );
+    }
+
+    const wishlistDoc = userId
+        ? await Wishlist.findOne({
+              user: userId
+          })
+        : null;
+
+    const wishlist =
+        wishlistDoc?.items.map(
+            i => i.product.toString()
+        ) || [];
+
+    return {
+        success: true,
+        products: productData,
+        wishlist
+    };
 };
 
 export const searchProductsService = async (queryStr) => {
@@ -248,4 +368,133 @@ export const searchProductsService = async (queryStr) => {
     }));
 
     return { success: true, results: results.filter(Boolean) };
+};
+
+
+
+
+
+
+
+
+
+
+export const getSearchPageDataService = async (
+  search,
+  page = 1,
+  userId
+) => {
+
+  const limit = 8;
+  const currentPage = Number(page) || 1;
+  const skip = (currentPage - 1) * limit;
+
+  const filter = {
+    isActive: true
+  };
+
+  if (search) {
+    filter.name = {
+      $regex: search,
+      $options: "i"
+    };
+  }
+
+  const totalProducts = await Product.countDocuments(filter);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalProducts / limit)
+  );
+
+  const products = await Product.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+  const wishlist = userId
+    ? await Wishlist.findOne({ user: userId })
+    : null;
+
+  // Load all active subcategories
+  const subCategories = await SubCategory.find({
+    isActive: true
+  }).lean();
+
+  const today = new Date();
+
+  const activeOffers = await Offer.find({
+    isActive: true,
+    startDate: { $lte: today },
+    endDate: { $gte: today }
+  }).lean();
+
+  const productData = await Promise.all(
+    products.map(async (product) => {
+
+      const variants = await Variant.find({
+        productId: product._id,
+        isActive: true
+      }).lean();
+
+      const v = variants[0];
+
+      const offer = v
+        ? getBestOffer(
+            activeOffers,
+            product,
+            v.price
+          )
+        : null;
+
+      let finalPrice = v?.price || null;
+
+      if (offer && v) {
+
+        let discount =
+          offer.discountMode === "percentage"
+            ? (v.price * offer.discountValue) / 100
+            : offer.discountValue;
+
+        if (offer.maxDiscountCap) {
+          discount = Math.min(
+            discount,
+            offer.maxDiscountCap
+          );
+        }
+
+        finalPrice = v.price - discount;
+      }
+
+      return {
+        ...product,
+        variants,
+        finalPrice,
+        offer
+      };
+    })
+  );
+
+  return {
+    products: productData,
+
+    currentPage,
+    totalPages,
+    totalProducts,
+
+    search,
+
+    wishlist:
+      wishlist?.items?.map(
+        item => item.product.toString()
+      ) || [],
+
+    selectedSub: null,
+    subCategories,
+
+    targetCategory: {
+         name: "Search Results"
+    }
+  };
 };
