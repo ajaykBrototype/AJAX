@@ -24,14 +24,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = Object.fromEntries(new FormData(form));
          let hasError = false;
-  if (!data.name.trim()) { showError("nameError", "Name is required"); hasError = true; }
-  if (!data.email.trim()) { showError("emailError", "Email is required"); hasError = true; }
-  if (!data.password) { showError("passwordError", "Password is required"); hasError = true; }
-  if (!data.confirmPassword) { showError("confirmPasswordError", "Confirm Password is required"); hasError = true; }
+
+if (!data.name.trim()) {
+  showError("nameError", "Name is required");
+  hasError = true;
+} else if (!/^[A-Za-z ]+$/.test(data.name.trim())) {
+  showError(
+    "nameError",
+    "Name should contain only letters"
+  );
+  hasError = true;
+} else if (data.name.trim().length < 3) {
+  showError(
+    "nameError",
+    "Name must be at least 3 characters"
+  );
+  hasError = true;
+}
+
+if (!data.email.trim()) {
+  showError("emailError", "Email is required");
+  hasError = true;
+} else if (
+  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
+) {
+  showError(
+    "emailError",
+    "Enter a valid email address"
+  );
+  hasError = true;
+}
+  if (!data.password) {
+  showError("passwordError", "Password is required");
+  hasError = true;
+} else {
+
+  if (data.password.length < 6) {
+    showError(
+      "passwordError",
+      "Password must be at least 6 characters"
+    );
+    hasError = true;
+  }
+
+  if (!/[A-Z]/.test(data.password)) {
+    showError(
+      "passwordError",
+      "Password must contain at least one uppercase letter"
+    );
+    hasError = true;
+  }
+
+  if (!/[a-z]/.test(data.password)) {
+    showError(
+      "passwordError",
+      "Password must contain at least one lowercase letter"
+    );
+    hasError = true;
+  }
+
+  if (!/[0-9]/.test(data.password)) {
+    showError(
+      "passwordError",
+      "Password must contain at least one number"
+    );
+    hasError = true;
+  }
+
+  if (!/[^A-Za-z0-9]/.test(data.password)) {
+    showError(
+      "passwordError",
+      "Password must contain at least one special character"
+    );
+    hasError = true;
+  }
+}
+
+if (!data.confirmPassword) {
+  showError(
+    "confirmPasswordError",
+    "Confirm Password is required"
+  );
+  hasError = true;
+}
+
+if (
+  data.password &&
+  data.confirmPassword &&
+  data.password !== data.confirmPassword
+) {
+  showError(
+    "confirmPasswordError",
+    "Passwords do not match"
+  );
+  hasError = true;
+}
   
   if (hasError) return;
 
-  // Show loading UI
   if (btn) {
     btn.disabled = true;
     btn.classList.add("opacity-70", "cursor-not-allowed");
@@ -48,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 1500);
 
     } catch (err) {
-      // Revert loading UI on error
+  
       if (btn) {
         btn.disabled = false;
         btn.classList.remove("opacity-70", "cursor-not-allowed");
@@ -58,12 +148,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const error = err.response?.data;
 
-  // ✅ FIELD ERRORS (priority)
+
   if (error?.errors) {
     for (let key in error.errors) {
       showError(key + "Error", error.errors[key][0]);
     }
-    return; // 🚨 stop here (no Swal)
+    return; // 
   }
 
 
@@ -165,4 +255,4 @@ if (refCode) {
       if (referralToggle) referralToggle.click();
     }
   }
-}
+}

@@ -37,13 +37,32 @@ const showError = (key, msg) => {
   const strengthBar = document.getElementById("strength-bar");
   const strengthLbl = document.getElementById("strength-label");
   const reqList = document.getElementById("req-list");
+const checks = {
+  length: {
+    el: document.getElementById("req-length"),
+    test: v => v.length >= 6
+  },
 
-  const checks = {
-    length: { el: document.getElementById("req-length"), test: v => v.length >= 8 },
-    upper: { el: document.getElementById("req-upper"), test: v => /[A-Z]/.test(v) },
-    number: { el: document.getElementById("req-number"), test: v => /[0-9]/.test(v) },
-    special: { el: document.getElementById("req-special"), test: v => /[^A-Za-z0-9]/.test(v) },
-  };
+  upper: {
+    el: document.getElementById("req-upper"),
+    test: v => /[A-Z]/.test(v)
+  },
+
+  lower: {
+    el: document.getElementById("req-lower"),
+    test: v => /[a-z]/.test(v)
+  },
+
+  number: {
+    el: document.getElementById("req-number"),
+    test: v => /[0-9]/.test(v)
+  },
+
+  special: {
+    el: document.getElementById("req-special"),
+    test: v => /[^A-Za-z0-9]/.test(v)
+  }
+};
 
   newPass.addEventListener("input", () => {
     clearError("new");
@@ -114,17 +133,58 @@ const showError = (key, msg) => {
     clearError("confirm");
 
   
-    if (!newPass.value) {
-      return showError("new", "Enter a new password");
-    }
+if (!newPass.value) {
+  return showError("new", "Enter a new password");
+}
 
-    if (newPass.value.length < 6) {
-      return showError("new", "Minimum 6 characters required");
-    }
+if (newPass.value.length < 6) {
+  return showError(
+    "new",
+    "Password must be at least 6 characters"
+  );
+}
 
-    if (newPass.value !== confirmPass.value) {
-      return showError("confirm", "Passwords do not match");
-    }
+if (!/[A-Z]/.test(newPass.value)) {
+  return showError(
+    "new",
+    "Password must contain at least one uppercase letter"
+  );
+}
+
+if (!/[a-z]/.test(newPass.value)) {
+  return showError(
+    "new",
+    "Password must contain at least one lowercase letter"
+  );
+}
+
+if (!/[0-9]/.test(newPass.value)) {
+  return showError(
+    "new",
+    "Password must contain at least one number"
+  );
+}
+
+if (!/[^A-Za-z0-9]/.test(newPass.value)) {
+  return showError(
+    "new",
+    "Password must contain at least one special character"
+  );
+}
+
+if (!confirmPass.value) {
+  return showError(
+    "confirm",
+    "Please confirm your password"
+  );
+}
+
+if (newPass.value !== confirmPass.value) {
+  return showError(
+    "confirm",
+    "Passwords do not match"
+  );
+}
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = "Processing...";
