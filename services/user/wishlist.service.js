@@ -108,9 +108,9 @@ export const getWishlistCountService = async (userId) => {
 export const addToBagFromWishlistService = async (userId, productId, variantId) => {
   const variant = await Variant.findById(variantId).populate("productId");
   if (!variant || !variant.isActive || !variant.productId || !variant.productId.isActive) {
-      return { success: false, message: "The product is currently unavailable. ❌" };
+      return { success: false, message: "The product is currently unavailable. " };
   }
-  if (variant.stock <= 0) return { success: false, message: "Out of stock ❌" };
+  if (variant.stock <= 0) return { success: false, message: "Out of stock " };
 
   let cart = await Cart.findOne({ user: userId });
   if (!cart) cart = new Cart({ user: userId, items: [] });

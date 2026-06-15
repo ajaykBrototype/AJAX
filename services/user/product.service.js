@@ -177,7 +177,6 @@ export const getFilteredProductsService = async (query, userId) => {
 
     let targetCategory = null;
 
-    // Only apply category restriction if mainCategory exists
     if (mainCategory) {
 
         targetCategory = await Category.findOne({
@@ -214,7 +213,6 @@ export const getFilteredProductsService = async (query, userId) => {
         }
     }
 
-    // For Search Page (no mainCategory)
     if (!mainCategory && category) {
         filter.subcategory = category;
     }
@@ -417,7 +415,6 @@ export const getSearchPageDataService = async (
     ? await Wishlist.findOne({ user: userId })
     : null;
 
-  // Load all active subcategories
   const subCategories = await SubCategory.find({
     isActive: true
   }).lean();

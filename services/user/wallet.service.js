@@ -10,7 +10,6 @@ export const getWalletPageDataService = async (userId) => {
     if (wallet) {
         let isModified = false;
 
-        // 1. Check for missing bonuses from people they referred
         const referredUsers = await User.find({ referredBy: userId }).select('createdAt');
         const existingRefTxCount = wallet.transactions.filter(t => t.description === "Referral Bonus").length;
         
@@ -27,7 +26,6 @@ export const getWalletPageDataService = async (userId) => {
             }
         }
 
-        // 2. Check for their own missing signup referral bonus (if they were referred)
         if (user.referredBy) {
             const hasSignupBonus = wallet.transactions.some(t => t.description === "Signup Referral Bonus");
             if (!hasSignupBonus) {
@@ -42,7 +40,7 @@ export const getWalletPageDataService = async (userId) => {
             }
         }
 
-        // Save implicitly backfills past transactions so they show up everywhere permanently
+
         if (isModified) {
             await wallet.save();
         }

@@ -45,12 +45,12 @@ export const createSubCategoryService = async (data) => {
     let { name, categoryId, isActive } = data;
     name = name.trim();
 
-     if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
-    return {
-      success: false,
-      message: "Subcategory name must contain only letters and single spaces"
-    };
-  }
+    if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+        return {
+            success: false,
+            message: "Subcategory name must contain only letters and single spaces"
+        };
+    }
 
     if (!categoryId) return { success: false, message: "Category is required" };
 
@@ -64,12 +64,12 @@ export const createSubCategoryService = async (data) => {
 export const updateSubCategoryService = async (id, data) => {
     let { name, categoryId, isActive } = data;
     name = name.trim();
-     if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
-    return {
-      success: false,
-      message: "Subcategory name must contain only letters and single spaces"
-    };
-  }
+    if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(name)) {
+        return {
+            success: false,
+            message: "Subcategory name must contain only letters and single spaces"
+        };
+    }
 
     const existing = await SubCategory.findOne({ name: { $regex: `^${name}$`, $options: "i" }, category: categoryId, _id: { $ne: id } });
     if (existing) return { success: false, message: "SubCategory already exists" };

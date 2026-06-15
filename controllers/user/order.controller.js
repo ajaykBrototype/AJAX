@@ -1,5 +1,5 @@
 import * as orderService from "../../services/user/order.service.js";
-import Order from "../../models/user/orderModel.js"; // Kept for loadOrderPage findById which is a tiny uncomplex query
+import Order from "../../models/user/orderModel.js"; 
 
 export const loadOrderPage = async (req, res) => {
     try {

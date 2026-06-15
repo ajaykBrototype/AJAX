@@ -150,6 +150,24 @@
             <%= shipping === 0 ? 'FREE' : '₹' + fmtNum(shipping) %>
           </span>
         </div>
+
+        <% const offerDiscount = order.totalOfferDiscount || 0; %>
+        <% if (offerDiscount > 0) { %>
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-green-600 uppercase tracking-widest">Offer Discount</span>
+            <span class="font-bold text-green-600">- ₹<%= fmtNum(offerDiscount) %></span>
+          </div>
+        <% } %>
+
+        <% const cpnDiscount = (typeof couponDiscount !== 'undefined' ? couponDiscount : 0) || (order.discount || 0); %>
+        <% if (cpnDiscount > 0) { %>
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-green-600 uppercase tracking-widest">
+              Coupon<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %>
+            </span>
+            <span class="font-bold text-green-600">- ₹<%= fmtNum(cpnDiscount) %></span>
+          </div>
+        <% } %>
         
         <% 
           let refundedTotal = 0;
