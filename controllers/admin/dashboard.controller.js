@@ -15,7 +15,7 @@ export const loadSalesReport = async (req, res) => {
     const period = req.query.period || 'month';
     let startDate = new Date();
     let prevStartDate = new Date();
-    const endDate = new Date();
+    let endDate = new Date();
 
     if (period === 'day') {
       startDate.setUTCHours(0, 0, 0, 0);
@@ -36,6 +36,14 @@ export const loadSalesReport = async (req, res) => {
       startDate.setUTCHours(0, 0, 0, 0);
       prevStartDate = new Date(startDate);
       prevStartDate.setUTCFullYear(prevStartDate.getUTCFullYear() - 1);
+    } else if (period === 'custom' && req.query.from && req.query.to) {
+      startDate = new Date(req.query.from);
+      startDate.setUTCHours(0, 0, 0, 0);
+      endDate = new Date(req.query.to);
+      endDate.setUTCHours(23, 59, 59, 999);
+      const rangeDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+      prevStartDate = new Date(startDate);
+      prevStartDate.setUTCDate(prevStartDate.getUTCDate() - rangeDays);
     }
 
     if (req.query.download) {
@@ -94,6 +102,8 @@ export const loadSalesReport = async (req, res) => {
       period,
       ...reportStats,
       stats: reportStats.currentStats,
+      fromDate: req.query.from || '',
+      toDate: req.query.to || '',
       startDate: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       endDate: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     });
